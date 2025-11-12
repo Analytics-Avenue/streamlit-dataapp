@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Marketing Analytics", layout="wide")
 
-st.title("📊 Marketing Analytics Dashboard")
+st.title("Marketing Analytics")
 st.write("Marketing analytics helps brands understand which campaigns actually drive results. Upload your campaign data to analyze spend trends and performance patterns.")
 
 # Default column names (your data dictionary)
@@ -15,7 +15,7 @@ default_columns = {
     "Region": "Geographical or segmentation field"
 }
 
-st.sidebar.header("🧭 Data Dictionary (Default Columns)")
+st.sidebar.header("Data Dictionary")
 for key, desc in default_columns.items():
     st.sidebar.write(f"**{key}** → {desc}")
 
@@ -24,7 +24,7 @@ uploaded_file = st.file_uploader("Upload your CSV dataset", type=["csv"])
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    st.subheader("📁 Uploaded Data Preview")
+    st.subheader("Uploaded Data Preview")
     st.dataframe(df.head())
 
     # Column mapping
@@ -47,7 +47,7 @@ if uploaded_file:
             st.subheader("📋 Mapped Data Preview")
             st.dataframe(df_renamed.head())
 
-            st.subheader("📈 Generated Visuals")
+            st.subheader("Generated Visuals")
 
             # 1️⃣ Spend by Campaign
             if "Campaign" in df_renamed.columns and "Amount Spent (INR)" in df_renamed.columns:
