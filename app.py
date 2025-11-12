@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("My First Streamlit App")
+st.title("My Streamlit App")
 
 st.write("Upload a CSV file and I’ll show what’s inside:")
 
