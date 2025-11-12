@@ -14,10 +14,10 @@ st.set_page_config(
 # -------------------------------
 # Sidebar Navigation
 # -------------------------------
-st.sidebar.title("📊 Campaign Analytics Dashboard")
+st.sidebar.title("Marketing Analytics")
 page = st.sidebar.radio(
     "Go to",
-    ["🏠 Case Study Overview", "📈 Campaign Overview", "👥 Audience Insights", "📢 Ad Performance", "🎥 Video Metrics"]
+    ["Case Study Overview", "Campaign Overview", "Audience Insights", "Ad Performance", "Video Metrics"]
 )
 
 # -------------------------------
@@ -28,9 +28,9 @@ uploaded_file = st.sidebar.file_uploader("Upload your Facebook Ads CSV", type=["
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    st.sidebar.success("✅ File uploaded successfully!")
+    st.sidebar.success("File uploaded successfully!")
 
-    # Basic cleanup
+    # Clean column names
     df.columns = df.columns.str.strip()
     df['Reporting starts'] = pd.to_datetime(df['Reporting starts'], errors='coerce')
     df['Reporting ends'] = pd.to_datetime(df['Reporting ends'], errors='coerce')
@@ -38,7 +38,7 @@ if uploaded_file:
     # -------------------------------
     # Filters (Slicers)
     # -------------------------------
-    st.sidebar.subheader("🎚️ Filters")
+    st.sidebar.subheader("Filters")
     campaign_filter = st.sidebar.multiselect("Campaign Name", options=df['Campaign name'].unique())
     city_filter = st.sidebar.multiselect("City", options=df['City'].dropna().unique())
     age_filter = st.sidebar.multiselect("Age", options=df['Age'].dropna().unique())
@@ -47,7 +47,6 @@ if uploaded_file:
     end_date = st.sidebar.date_input("End Date", df['Reporting ends'].max().date() if not df.empty else None)
 
     filtered_df = df.copy()
-
     if campaign_filter:
         filtered_df = filtered_df[filtered_df['Campaign name'].isin(campaign_filter)]
     if city_filter:
@@ -69,30 +68,32 @@ else:
 # -------------------------------
 # PAGE 1: Case Study Overview
 # -------------------------------
-if page == "🏠 Case Study Overview":
-    st.title("📚 Marketing Campaign Case Study")
+if page == "Case Study Overview":
+    st.title("Marketing Campaign Case Study")
     st.markdown("""
-    This dashboard helps visualize **Meta Ads performance** across campaigns, age groups, genders, and cities.  
-    Get actionable insights into how each campaign performs, which demographics respond best, and which creatives actually drive conversions.
+    This dashboard helps visualize **Meta Ads performance** across campaigns, demographics, and cities.
+    Gain insights into what drives engagement and where your ad budget performs best.
 
     **Use Case:**  
-    Performance monitoring, budget allocation, creative testing, and engagement optimization.
+    - Monitor campaign effectiveness  
+    - Optimize audience targeting  
+    - Evaluate creative performance
 
-    **Built with:** Streamlit | Plotly | Pandas | Python  
+    **Built with:** Streamlit | Plotly | Pandas | Python
     """)
-
-    st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")  # Replace with your case study video link
+    st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")
 
     if df is not None:
-        st.success("✅ Dataset uploaded. Explore tabs on the left to view interactive dashboards.")
+        st.success("Dataset uploaded. Explore tabs on the left to view interactive dashboards.")
     else:
-        st.info("👈 Upload your campaign data from the sidebar to start exploring.")
+        st.info("Upload your campaign data from the sidebar to start exploring.")
+
 
 # -------------------------------
 # PAGE 2: Campaign Overview
 # -------------------------------
-elif page == "📈 Campaign Overview" and df is not None:
-    st.title("📈 Campaign Overview")
+elif page == "Campaign Overview" and df is not None:
+    st.title("Campaign Overview")
 
     total_spent = filtered_df['Amount spent (INR)'].sum()
     total_impressions = filtered_df['Impressions'].sum()
@@ -108,91 +109,87 @@ elif page == "📈 Campaign Overview" and df is not None:
 
     col4, col5, col6 = st.columns(3)
     col4.metric("Total Clicks", f"{total_clicks:,.0f}")
-    col5.metric("Average CTR", f"{avg_ctr:.2f}%")
-    col6.metric("Average CPM", f"₹{avg_cpm:.2f}")
+    col5.metric("Avg CTR", f"{avg_ctr:.2f}%")
+    col6.metric("Avg CPM", f"₹{avg_cpm:.2f}")
 
-    st.markdown("### Campaign Spend vs Results")
-    fig = px.scatter(filtered_df, x="Amount spent (INR)", y="Results", color="Campaign name",
-                     size="Impressions", hover_data=["Result type"])
+    st.markdown("### Spend Trend Over Time")
+    spend_over_time = filtered_df.groupby('Reporting starts', as_index=False)['Amount spent (INR)'].sum()
+    fig = px.line(spend_over_time, x='Reporting starts', y='Amount spent (INR)', markers=True,
+                  title="Campaign Spend Over Time", color_discrete_sequence=['#1f77b4'])
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### Impressions by Campaign")
-    fig = px.bar(filtered_df, x="Campaign name", y="Impressions", color="Campaign name", title="Impressions by Campaign")
+    st.markdown("### Top 10 Campaigns by Spend")
+    top_campaigns = filtered_df.groupby("Campaign name", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
+    fig = px.bar(top_campaigns, x="Amount spent (INR)", y="Campaign name", orientation='h', color="Amount spent (INR)",
+                 title="Top Campaigns by Spend", color_continuous_scale="Blues")
     st.plotly_chart(fig, use_container_width=True)
 
 
 # -------------------------------
 # PAGE 3: Audience Insights
 # -------------------------------
-elif page == "👥 Audience Insights" and df is not None:
-    st.title("👥 Audience Insights")
+elif page == "Audience Insights" and df is not None:
+    st.title("Audience Insights")
 
-    st.markdown("### Performance by Age & Gender")
+    st.markdown("### Clicks by Age & Gender")
     if "Age" in filtered_df.columns and "Gender" in filtered_df.columns:
         agg = filtered_df.groupby(["Age", "Gender"], as_index=False).agg({
-            "Amount spent (INR)": "sum",
-            "Link clicks": "sum",
-            "Impressions": "sum",
-            "CTR (all)": "mean"
+            "Link clicks": "sum"
         })
         fig = px.bar(agg, x="Age", y="Link clicks", color="Gender", barmode="group",
-                     title="Clicks by Age & Gender")
+                     title="Clicks Distribution by Age and Gender", color_discrete_sequence=px.colors.qualitative.Pastel)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### City-Wise Performance")
-    if "City" in filtered_df.columns:
-        city_perf = filtered_df.groupby("City", as_index=False).agg({
-            "Amount spent (INR)": "sum",
-            "Link clicks": "sum",
-            "CTR (all)": "mean"
-        }).sort_values(by="Amount spent (INR)", ascending=False).head(10)
-        fig = px.bar(city_perf, x="City", y="Amount spent (INR)", color="CTR (all)",
-                     title="Top 10 Cities by Spend and CTR")
-        st.plotly_chart(fig, use_container_width=True)
+    st.markdown("### Top 10 Cities by Spend")
+    city_perf = filtered_df.groupby("City", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
+    fig = px.bar(city_perf, x="City", y="Amount spent (INR)", color="City",
+                 title="Top 10 Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # -------------------------------
 # PAGE 4: Ad Performance
 # -------------------------------
-elif page == "📢 Ad Performance" and df is not None:
-    st.title("📢 Ad-Level Performance")
+elif page == "Ad Performance" and df is not None:
+    st.title("Ad Performance")
 
-    st.markdown("### Top Performing Ads")
     ad_perf = filtered_df.groupby("Ad name", as_index=False).agg({
         "Link clicks": "sum",
         "Impressions": "sum",
         "Amount spent (INR)": "sum",
         "CTR (all)": "mean",
         "CPC (cost per link click)": "mean"
-    }).sort_values(by="Link clicks", ascending=False).head(10)
+    }).nlargest(10, 'Link clicks')
 
-    fig = px.bar(ad_perf, x="Ad name", y="Link clicks", color="CTR (all)", title="Top 10 Ads by Clicks")
+    st.markdown("### Top 10 Ads by Clicks")
+    fig = px.bar(ad_perf, x="Link clicks", y="Ad name", orientation='h',
+                 color="CTR (all)", title="Top Performing Ads",
+                 color_continuous_scale="Agsunset")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### Cost Efficiency")
+    st.markdown("### CPC vs CTR Performance")
     fig = px.scatter(ad_perf, x="CPC (cost per link click)", y="CTR (all)",
-                     size="Link clicks", color="Amount spent (INR)",
-                     hover_name="Ad name", title="Cost per Click vs CTR")
+                     color="Amount spent (INR)", size="Link clicks",
+                     hover_name="Ad name", title="CPC vs CTR Efficiency")
     st.plotly_chart(fig, use_container_width=True)
 
 
 # -------------------------------
 # PAGE 5: Video Metrics
 # -------------------------------
-elif page == "🎥 Video Metrics" and df is not None:
-    st.title("🎥 Video Performance Metrics")
+elif page == "Video Metrics" and df is not None:
+    st.title("Video Metrics")
 
-    st.markdown("### Video Completion Rates")
     video_cols = ["Video plays at 25%", "Video plays at 50%", "Video plays at 75%", "Video plays at 95%", "Video plays at 100%"]
     melted = filtered_df.melt(id_vars=["Ad name"], value_vars=video_cols, var_name="Play Stage", value_name="Plays")
 
+    st.markdown("### Video Completion Funnel")
     fig = px.bar(melted, x="Play Stage", y="Plays", color="Play Stage",
-                 title="Video Completion Progress Across Ads")
+                 title="Audience Retention at Each Stage", color_discrete_sequence=px.colors.qualitative.Safe)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### ThruPlay Efficiency")
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
-        fig = px.scatter(filtered_df, x="ThruPlays", y="Cost per ThruPlay",
-                         color="Campaign name", hover_name="Ad name",
-                         size="Impressions", title="ThruPlays vs Cost per ThruPlay")
+        st.markdown("### ThruPlay Performance")
+        fig = px.line(filtered_df, x="ThruPlays", y="Cost per ThruPlay", color="Campaign name",
+                      title="ThruPlays vs Cost per ThruPlay Trend", markers=True)
         st.plotly_chart(fig, use_container_width=True)
