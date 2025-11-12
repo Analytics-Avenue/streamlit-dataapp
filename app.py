@@ -9,9 +9,9 @@ st.write("Upload your dataset, map columns to your data dictionary, and auto-gen
 
 # Default column names (your data dictionary)
 default_columns = {
-    "Date": "Date of transaction or record",
-    "Sales": "Numerical column for revenue or quantity",
-    "Category": "Categorical column for grouping",
+    "Date": "Date when ad performance data was recorded",
+    "Amount Spent (INR)": "Total spend for the campaign/ad",
+    "Campaign": "Marketing campaign name on social platforms",
     "Region": "Geographical or segmentation field"
 }
 
