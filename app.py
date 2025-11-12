@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Data Visualizer", layout="wide")
 
-st.title("📊 Smart Data Visualizer")
-st.write("Upload your dataset, map columns to your data dictionary, and auto-generate visuals.")
+st.title("Marketing Analytics")
+st.write("Marketing analytics is basically how brands use data to figure out what’s working and what’s not in their marketing. Every time you see an ad on Instagram, YouTube, or Google — that ad is being tracked, measured, and analyzed somewhere")
 
 # Default column names (your data dictionary)
 default_columns = {
