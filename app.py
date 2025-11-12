@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Data Visualizer", layout="wide")
+st.set_page_config(page_title="Marketing Analytics", layout="wide")
 
-st.title("Marketing Analytics")
-st.write("Marketing analytics is basically how brands use data to figure out what’s working and what’s not in their marketing. Every time you see an ad on Instagram, YouTube, or Google — that ad is being tracked, measured, and analyzed somewhere")
+st.title("📊 Marketing Analytics Dashboard")
+st.write("Marketing analytics helps brands understand which campaigns actually drive results. Upload your campaign data to analyze spend trends and performance patterns.")
 
 # Default column names (your data dictionary)
 default_columns = {
@@ -41,6 +41,7 @@ if uploaded_file:
 
     if st.button("Generate Visuals"):
         try:
+            # Rename columns based on mapping
             df_renamed = df.rename(columns={v: k for k, v in column_mapping.items()})
             st.success("✅ Columns mapped successfully!")
             st.subheader("📋 Mapped Data Preview")
@@ -48,30 +49,30 @@ if uploaded_file:
 
             st.subheader("📈 Generated Visuals")
 
-            # 1️⃣ Sales by Category
-            if "Category" in df_renamed.columns and "Sales" in df_renamed.columns:
-                st.write("**Sales by Category**")
-                cat_sales = df_renamed.groupby("Category")["Sales"].sum()
-                st.bar_chart(cat_sales)
+            # 1️⃣ Spend by Campaign
+            if "Campaign" in df_renamed.columns and "Amount Spent (INR)" in df_renamed.columns:
+                st.write("**Amount Spent by Campaign**")
+                campaign_spend = df_renamed.groupby("Campaign")["Amount Spent (INR)"].sum().sort_values(ascending=False)
+                st.bar_chart(campaign_spend)
             else:
-                st.warning("Missing either 'Category' or 'Sales' columns.")
+                st.warning("Missing either 'Campaign' or 'Amount Spent (INR)' columns.")
 
-            # 2️⃣ Sales over Time
-            if "Date" in df_renamed.columns and "Sales" in df_renamed.columns:
-                st.write("**Sales over Time**")
+            # 2️⃣ Spend over Time
+            if "Date" in df_renamed.columns and "Amount Spent (INR)" in df_renamed.columns:
+                st.write("**Amount Spent over Time**")
                 df_renamed["Date"] = pd.to_datetime(df_renamed["Date"], errors="coerce")
-                date_sales = df_renamed.groupby("Date")["Sales"].sum().sort_index()
-                st.line_chart(date_sales)
+                date_spend = df_renamed.groupby("Date")["Amount Spent (INR)"].sum().sort_index()
+                st.line_chart(date_spend)
             else:
-                st.warning("Missing either 'Date' or 'Sales' columns.")
+                st.warning("Missing either 'Date' or 'Amount Spent (INR)' columns.")
 
-            # 3️⃣ Sales by Region (optional)
-            if "Region" in df_renamed.columns and "Sales" in df_renamed.columns:
-                st.write("**Sales by Region**")
-                region_sales = df_renamed.groupby("Region")["Sales"].sum()
-                st.bar_chart(region_sales)
+            # 3️⃣ Spend by Region
+            if "Region" in df_renamed.columns and "Amount Spent (INR)" in df_renamed.columns:
+                st.write("**Amount Spent by Region**")
+                region_spend = df_renamed.groupby("Region")["Amount Spent (INR)"].sum().sort_values(ascending=False)
+                st.bar_chart(region_spend)
             else:
-                st.info("Add a 'Region' column mapping to enable regional chart.")
+                st.info("Add a 'Region' column mapping to enable regional spend chart.")
 
         except Exception as e:
             st.error(f"⚠️ Error generating visuals: {e}")
