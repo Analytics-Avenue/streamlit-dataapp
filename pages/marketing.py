@@ -190,7 +190,8 @@ elif page == "Campaign Overview" and filtered_df is not None:
         spend_over_time = filtered_df.groupby('start', as_index=False)['spent'].sum()
         fig = px.line(spend_over_time, x='start', y='spent', markers=True,
                       text=spend_over_time['spent'].apply(lambda x: f"₹{x:,.0f}"),
-                      title="Campaign Spend Over Time", color_discrete_sequence=['#2E86C1'])
+                      title="Campaign Spend Over Time", color_discrete_sequence=['#2E86C1'],
+                      hover_data={'start': True, 'spent': True})
         fig.update_traces(textposition='top right')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -214,7 +215,7 @@ elif page == "Campaign Overview" and filtered_df is not None:
         top_campaigns = filtered_df.groupby('campaign', as_index=False)['spent'].sum().nlargest(10,'spent')
         fig = px.bar(top_campaigns, x='spent', y='campaign', orientation='h',
                      text=top_campaigns['spent'].apply(lambda x: f"₹{x:,.0f}"), color='spent', color_continuous_scale="Blues",
-                     title="Top Campaigns by Spend")
+                     title="Top Campaigns by Spend", hover_data={'campaign': True, 'spent': True})
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -240,7 +241,8 @@ elif page == "Audience Insights" and filtered_df is not None:
     # Clicks by Age & Gender
     if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
         agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
-        fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender")
+        fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender",
+                     hover_data={'age': True, 'gender': True, 'clicks': True})
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -262,7 +264,8 @@ elif page == "Audience Insights" and filtered_df is not None:
     if filtered_df['city'] is not None and filtered_df['spent'] is not None:
         city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
         fig = px.bar(city_perf, x='city', y='spent', text=city_perf['spent'].apply(lambda x: f"₹{x:,.0f}"), color='city',
-                     title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis)
+                     title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis,
+                     hover_data={'city': True, 'spent': True})
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -289,7 +292,8 @@ elif page == "Ad Performance" and filtered_df is not None:
         ad_perf = filtered_df.groupby('ad_name', as_index=False).agg({
             'clicks':'sum', 'impressions':'sum', 'spent':'sum', 'ctr':'mean', 'cpc':'mean'
         }).nlargest(10,'clicks')
-        fig = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks", color_continuous_scale="Agsunset")
+        fig = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks", color_continuous_scale="Agsunset",
+                     hover_data={'ad_name': True, 'clicks': True, 'ctr': True})
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -310,7 +314,7 @@ elif page == "Ad Performance" and filtered_df is not None:
         # CPC vs CTR
         if 'cpc' in ad_perf.columns and 'ctr' in ad_perf.columns:
             fig = px.scatter(ad_perf, x='cpc', y='ctr', color='spent', text=ad_perf['spent'].apply(lambda x: f"₹{x:,.0f}"),
-                             hover_name='ad_name', title="CPC vs CTR")
+                             hover_name='ad_name', title="CPC vs CTR", hover_data={'cpc': True, 'ctr': True, 'spent': True})
             fig.update_traces(marker=dict(size=10), textposition='top center')
             fig = style_axes(fig)
             st.plotly_chart(fig, use_container_width=True)
@@ -337,7 +341,8 @@ elif page == "Video Metrics" and filtered_df is not None:
     if all(filtered_df[col] is not None for col in video_cols) and filtered_df['ad_name'] is not None:
         melted = filtered_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
         melted['Plays'] = melted['Plays'].fillna(0).astype(int)
-        fig = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe)
+        fig = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe,
+                     hover_data={'Stage': True, 'Plays': True, 'ad_name': True})
         fig.update_traces(texttemplate='%{text}', textposition='inside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
@@ -362,7 +367,7 @@ elif page == "Video Metrics" and filtered_df is not None:
         filtered_df['impressions'] = filtered_df['impressions'].fillna(0).astype(int)
         fig = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='impressions', color='campaign',
                          hover_name='ad_name', size_max=40, text=filtered_df['cost_per_thruplay'].apply(lambda x: f"₹{x:,}"),
-                         title="ThruPlays vs Cost per ThruPlay")
+                         title="ThruPlays vs Cost per ThruPlay", hover_data={'thruplays': True, 'cost_per_thruplay': True, 'impressions': True})
         fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(filtered_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
