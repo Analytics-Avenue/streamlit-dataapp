@@ -14,7 +14,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 use_cases = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_preview.jpg"),
     "Healthcare Analytics": os.path.join(ASSETS_DIR, "healthcare_preview.jpg"),
-    "Retail Analytics": os.path.join(ASSETS_DIR, "retail_preview.jpg")
+    "Retail Analytics": os.path.join(ASSETS_DIR, "real_estate_preview.jpg")
 }
 
 # --- Layout: 3 columns ---
