@@ -81,7 +81,7 @@ if "show_modal" in st.session_state:
     if use_case == "marketing":
         st.markdown("---")
         st.subheader("#1 Marketing Analytics")
-        st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")
+        st.video("https://youtu.be/53M8YgVlMrE")
         st.markdown(f"**Author:** Vibin  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
         st.markdown("""
         **Project Summary:**  
@@ -94,7 +94,7 @@ if "show_modal" in st.session_state:
     elif use_case == "healthcare":
         st.markdown("---")
         st.subheader("#2 Healthcare Analytics")
-        st.video("https://www.youtube.com/watch?v=x8tYGIvK32Q")
+        st.video("https://youtu.be/53M8YgVlMrE")
         st.markdown(f"**Author:** Vibin — Senior Business Analyst  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
         st.markdown("""
         **Project Summary:**  
