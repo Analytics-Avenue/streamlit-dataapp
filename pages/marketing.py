@@ -143,10 +143,10 @@ elif page == "Campaign Overview" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Observe daily/weekly spend trends to check if budget allocation is consistent.")
-    st.markdown("- Spikes may indicate periods of high engagement or increased bids in Meta Ads.")
-    st.markdown("- Compare spend vs. results to optimize future campaigns.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Visualizes how campaign spending changes over time.")
+    st.markdown("- Helps understand daily/weekly allocation trends and timing effects on performance.")
+    st.markdown("- Useful to identify periods of high activity or budget spikes.")
 
     st.subheader("Top 10 Campaigns by Spend")
     top_campaigns = filtered_df.groupby("Campaign name", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
@@ -160,9 +160,9 @@ elif page == "Campaign Overview" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- High-spend campaigns may require efficiency checks on CTR and conversions.")
-    st.markdown("- Low-spend but high-performing campaigns can be scaled for better ROI.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Highlights which campaigns are receiving the most budget allocation.")
+    st.markdown("- Useful for prioritizing campaigns and evaluating budget distribution.")
 
 # ----------------------------------------
 # PAGE 3: Audience Insights
@@ -182,10 +182,9 @@ elif page == "Audience Insights" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Identify which age and gender segments are most engaged.")
-    st.markdown("- Adjust targeting for campaigns to focus on high-performing groups.")
-    st.markdown("- Low engagement segments may require creative changes.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Shows which age and gender segments are engaging most with ads.")
+    st.markdown("- Helps optimize targeting and creative strategy for different audience segments.")
 
     st.subheader("Top 10 Cities by Ad Spend")
     city_perf = filtered_df.groupby("City", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
@@ -199,9 +198,9 @@ elif page == "Audience Insights" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Determine which cities are generating the most ad spend.")
-    st.markdown("- Compare city spend vs. actual conversions to optimize local targeting.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Visualizes which cities have the highest ad spend.")
+    st.markdown("- Helps understand geographic distribution of budget and potential ROI by region.")
 
 # ----------------------------------------
 # PAGE 4: Ad Performance
@@ -228,9 +227,9 @@ elif page == "Ad Performance" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Ads with highest clicks are engaging; check if CPC is efficient.")
-    st.markdown("- Low CTR ads may require creative or copy refresh.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Identifies top-performing ads in terms of clicks.")
+    st.markdown("- Helps prioritize creatives that are resonating with the audience.")
 
     st.subheader("CPC vs CTR Performance")
     fig = px.scatter(
@@ -246,9 +245,9 @@ elif page == "Ad Performance" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Evaluate which ads provide high CTR at low cost.")
-    st.markdown("- Ads with high CPC but low CTR may need pausing or creative change.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Compares cost efficiency versus ad engagement.")
+    st.markdown("- Helps evaluate which ads give better CTR for lower spend.")
 
 # ----------------------------------------
 # PAGE 5: Video Metrics
@@ -271,24 +270,16 @@ elif page == "Video Metrics" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("**Insights:**")
-    st.markdown("- Compare drop-off rates between stages; high drop-offs indicate weak engagement.")
-    st.markdown("- Ads with consistent retention can be scaled.")
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Shows how viewers progress through different stages of video ads.")
+    st.markdown("- Helps identify where viewers drop off and optimize creative or messaging.")
 
-    # ThruPlay Efficiency Bubble Chart
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
-        st.subheader("ThruPlay Efficiency")
+        st.subheader("ThruPlay Efficiency Bubble Chart")
 
         filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
         filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
         filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
-
-        filtered_df['hover_text'] = filtered_df.apply(
-            lambda row: f"Ad: {row['Ad name']}<br>"
-                        f"ThruPlays: {row['ThruPlays']}<br>"
-                        f"Cost per ThruPlay: ₹{row['Cost per ThruPlay']:,}<br>"
-                        f"Impressions: {row['Impressions']:,}", axis=1
-        )
 
         fig = px.scatter(
             filtered_df,
@@ -302,7 +293,6 @@ elif page == "Video Metrics" and df is not None:
             size_max=40,
             title="ThruPlays vs Cost per ThruPlay"
         )
-
         fig.update_traces(
             textposition='top center',
             marker=dict(sizemode='area',
@@ -312,14 +302,7 @@ elif page == "Video Metrics" and df is not None:
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
 
-        # Insights
-        st.markdown("**Insights from ThruPlay Efficiency:**")
-        high_efficiency = filtered_df[(filtered_df['ThruPlays'] >= filtered_df['ThruPlays'].median()) &
-                                      (filtered_df['Cost per ThruPlay'] <= filtered_df['Cost per ThruPlay'].median())]
-        low_efficiency = filtered_df[(filtered_df['ThruPlays'] < filtered_df['ThruPlays'].median()) &
-                                     (filtered_df['Cost per ThruPlay'] > filtered_df['Cost per ThruPlay'].median())]
-
-        st.markdown(f"- **High Efficiency Ads:** {len(high_efficiency)} ads delivering more engagement at lower cost. Consider scaling these campaigns.")
-        st.markdown(f"- **Low Efficiency Ads:** {len(low_efficiency)} ads with low engagement and high cost. Review targeting or creative for improvement.")
-        st.markdown(f"- **Largest Bubbles:** Indicate ads with most impressions. Check if they are cost-effective.")
-        st.markdown(f"- **Purpose:** Helps marketers allocate budget wisely, identify top-performing creatives, and optimize underperforming ads.")
+        st.markdown("**Purpose of this Chart:**")
+        st.markdown("- Shows which ads are achieving video completions at the lowest cost.")
+        st.markdown("- Bubble size indicates impressions, giving context of scale and reach.")
+        st.markdown("- Helps marketers allocate budget efficiently and identify cost-effective video creatives.")
