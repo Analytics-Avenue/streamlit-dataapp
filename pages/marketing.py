@@ -186,17 +186,26 @@ elif page=="Audience Insights" and filtered_df is not None:
         with st.expander("Quick Tips"):
             st.markdown("- Filter by campaign/city/adset for segment-level insights")
 
-    # Top Cities by Spend
-    if all(x in filtered_df.columns for x in ['city','spent']):
-        city_perf = filtered_df.groupby('city',as_index=False)['spent'].sum().nlargest(10,'spent')
-        fig = px.bar(city_perf,x='city',y='spent',color='city',text='spent',
-                     color_discrete_sequence=px.colors.sequential.Viridis)
-        fig.update_traces(texttemplate='%{text:.0f}',textposition='outside')
+        # Top Cities by Spend
+    if 'city' in filtered_df.columns and 'spent' in filtered_df.columns:
+        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10, 'spent')
+        fig = px.bar(
+            city_perf,
+            x='city',
+            y='spent',
+            color='city',
+            text='spent',
+            title="Top Cities by Ad Spend",  # Explicitly set title
+            color_discrete_sequence=px.colors.sequential.Viridis
+        )
+        fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
         fig = style_axes(fig)
-        st.plotly_chart(fig,use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
         st.markdown("**Purpose:**\n- Identify high-spend regions\n- Allocate budget efficiently\n- Recognize top engagement markets")
         with st.expander("Quick Tips"):
             st.markdown("- Hover on bars to see exact spend")
+
+
 
 # ------------------------
 # Ad Performance
