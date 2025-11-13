@@ -158,14 +158,14 @@ if page == "About Marketing Analytics":
 
     st.subheader("Marketing Analytics Architecture")
     try:
-        arch_img = Image.open("images/marketing_analytics_architecture.png")
+        arch_img = Image.open("pages/images/marketing_analytics_architecture.jpg")
         st.image(arch_img, caption="End-to-End Marketing Analytics Architecture", use_column_width=True)
     except:
         st.warning("Architecture image not found!")
 
     st.subheader("Marketing Funnel Overview")
     try:
-        funnel_img = Image.open("images/marketing_funnel.png")
+        funnel_img = Image.open("pages/images/marketing_funnel.jpg)
         st.image(funnel_img, caption="Marketing Funnel Stages: Awareness → Consideration → Conversion", use_column_width=True)
     except:
         st.warning("Funnel image not found!")
