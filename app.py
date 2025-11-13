@@ -37,7 +37,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.image("assets/marketing_preview.jpg", use_column_width=True)
-    st.markdown("### Use Case 1: Marketing Analytics")
+    st.markdown("### #1: Marketing Analytics")
     st.markdown("Understand Meta Ads performance, audience insights, and campaign impact.")
     if st.button("Preview Marketing Analytics"):
         st.session_state["show_modal"] = "marketing"
@@ -47,7 +47,7 @@ with col1:
 with col2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.image("assets/healthcare_preview.jpg", use_column_width=True)
-    st.markdown("### Use Case 2: Healthcare Analytics")
+    st.markdown("### #2: Healthcare Analytics")
     st.markdown("Analyze patient data and treatment effectiveness using dashboards.")
     if st.button("Preview Healthcare Analytics"):
         st.session_state["show_modal"] = "healthcare"
@@ -57,7 +57,7 @@ with col2:
 with col3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.image("assets/real_estate_preview.jpg", use_column_width=True)
-    st.markdown("### Use Case 3: Retail Conversion Analytics")
+    st.markdown("### #3: Retail Conversion Analytics")
     st.markdown("Measure footfall-to-sales conversion rates across stores.")
     if st.button("Preview Retail Analytics"):
         st.session_state["show_modal"] = "retail"
