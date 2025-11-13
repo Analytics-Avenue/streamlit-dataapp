@@ -245,40 +245,59 @@ elif page == "Video Metrics" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    # ThruPlay Efficiency as bubble chart
+    # ----------------------------------------
+    # ThruPlay Efficiency Bubble Chart
+    # ----------------------------------------
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
         st.subheader("ThruPlay Efficiency")
 
-    # Ensure numeric
-    filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
-    filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
-    filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
+        filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
+        filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
+        filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
 
-    # Create hover text for tooltip
-    filtered_df['hover_text'] = filtered_df.apply(
-        lambda row: f"Ad: {row['Ad name']}<br>"
-                    f"ThruPlays: {row['ThruPlays']}<br>"
-                    f"Cost per ThruPlay: ₹{row['Cost per ThruPlay']:,}<br>"
-                    f"Impressions: {row['Impressions']:,}", axis=1
-    )
+        # Create hover text
+        filtered_df['hover_text'] = filtered_df.apply(
+            lambda row: f"Ad: {row['Ad name']}<br>"
+                        f"ThruPlays: {row['ThruPlays']}<br>"
+                        f"Cost per ThruPlay: ₹{row['Cost per ThruPlay']:,}<br>"
+                        f"Impressions: {row['Impressions']:,}", axis=1
+        )
 
-    fig = px.scatter(
-        filtered_df,
-        x="ThruPlays",
-        y="Cost per ThruPlay",
-        size="Impressions",
-        color="Campaign name",
-        hover_name="Ad name",
-        hover_data={'ThruPlays': True, 'Cost per ThruPlay': True, 'Impressions': True},
-        text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}"),
-        size_max=40,
-        title="ThruPlays vs Cost per ThruPlay"
-    )
+        fig = px.scatter(
+            filtered_df,
+            x="ThruPlays",
+            y="Cost per ThruPlay",
+            size="Impressions",
+            color="Campaign name",
+            hover_name="Ad name",
+            hover_data={'ThruPlays': True, 'Cost per ThruPlay': True, 'Impressions': True},
+            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}"),
+            size_max=40,
+            title="ThruPlays vs Cost per ThruPlay"
+        )
 
-    fig.update_traces(
-        textposition='top center',
-        marker=dict(sizemode='area', sizeref=2.*max(filtered_df['Impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey'))
-    )
+        fig.update_traces(
+            textposition='top center',
+            marker=dict(sizemode='area',
+                        sizeref=2.*max(filtered_df['Impressions'])/(40.**2),
+                        line=dict(width=1, color='DarkSlateGrey'))
+        )
+        fig = style_axes(fig)
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig = style_axes(fig)
-    st.plotly_chart(fig, use_container_width=True)
+        # ----------------------------------------
+        # ThruPlay Insights Section
+        # ----------------------------------------
+        st.markdown("---")
+        st.subheader("Insights from ThruPlay Efficiency")
+        
+        high_efficiency = filtered_df[(filtered_df['ThruPlays'] >= filtered_df['ThruPlays'].median()) &
+                                      (filtered_df['Cost per ThruPlay'] <= filtered_df['Cost per ThruPlay'].median())]
+        
+        low_efficiency = filtered_df[(filtered_df['ThruPlays'] < filtered_df['ThruPlays'].median()) &
+                                     (filtered_df['Cost per ThruPlay'] > filtered_df['Cost per ThruPlay'].median())]
+
+        st.markdown(f"- **High Efficiency Ads:** {len(high_efficiency)} ads delivering more engagement at lower cost. Consider scaling these campaigns.")
+        st.markdown(f"- **Low Efficiency Ads:** {len(low_efficiency)} ads with low engagement and high cost. Review targeting or creative for improvement.")
+        st.markdown(f"- **Largest Bubbles:** Indicate ads with most impressions. Check if they are cost-effective.")
+        st.markdown(f"- **Purpose:** Helps marketers allocate budget wisely, identify top-performing creatives, and optimize underperforming ads.")
