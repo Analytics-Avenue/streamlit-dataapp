@@ -191,30 +191,30 @@ elif page == "Campaign Overview" and filtered_df is not None:
 # ------------------------
 # AUDIENCE INSIGHTS
 # ------------------------
-elif page == "Audience Insights" and filtered_df is not None:
-    st.title("Audience Insights")
-    
-    # Clicks by Age & Gender
-    if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
-        agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
-        # Define custom color mapping
-        gender_colors = {'Female': 'pink', 'Male': 'blue'}
-        fig = px.bar(
-            agg,
-            x='age',
-            y='clicks',
-            color='gender',
-            color_discrete_map=gender_colors,
-            barmode='group',
-            text='clicks',
-            title="Clicks by Age & Gender",
-            hover_data={'age': True, 'gender': True, 'clicks': True}
-        )
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+# Standardize gender column first
+filtered_df['gender_std'] = filtered_df['gender'].str.strip().str.title()  # Converts 'female' -> 'Female'
 
-        st.markdown("**Purpose:**")
+agg = filtered_df.groupby(['age','gender_std'], as_index=False)['clicks'].sum()
+
+# Define custom color mapping
+gender_colors = {'Female': 'pink', 'Male': 'blue'}
+
+fig = px.bar(
+    agg,
+    x='age',
+    y='clicks',
+    color='gender_std',
+    color_discrete_map=gender_colors,
+    barmode='group',
+    text='clicks',
+    title="Clicks by Age & Gender",
+    hover_data={'age': True, 'gender_std': True, 'clicks': True}
+)
+fig.update_traces(textposition='outside')
+fig = style_axes(fig)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("**Purpose:**")
         st.markdown("""
         - Understand which age and gender segments engage most
         - Identify audience for targeted campaigns
