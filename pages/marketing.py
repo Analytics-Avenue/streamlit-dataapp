@@ -3,15 +3,14 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 from PIL import Image
+import os
 
 # ------------------------
-# App Configuration
+# App Config
 # ------------------------
-st.set_page_config(
-    page_title="Marketing Campaign Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Marketing Campaign Dashboard",
+                   layout="wide",
+                   initial_sidebar_state="expanded")
 
 # ------------------------
 # Default Columns
@@ -95,8 +94,8 @@ if uploaded_file:
     if mapped_df['start'] is not None and mapped_df['end'] is not None:
         start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
         end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
-        filtered_df = filtered_df[(filtered_df['start'] >= pd.to_datetime(start_date)) & (filtered_df['end'] <= pd.to_datetime(end_date))]
-
+        filtered_df = filtered_df[(filtered_df['start'] >= pd.to_datetime(start_date)) &
+                                  (filtered_df['end'] <= pd.to_datetime(end_date))]
 else:
     st.warning("Upload your CSV to begin analysis.")
 
@@ -112,7 +111,7 @@ def style_axes(fig):
     return fig
 
 # ------------------------
-# Pages in Navigation
+# Pages
 # ------------------------
 pages = [
     "About Marketing Analytics",
@@ -122,10 +121,6 @@ pages = [
     "Ad Performance",
     "Video Metrics"
 ]
-
-# ------------------------
-# Sidebar Navigation
-# ------------------------
 st.sidebar.title("Dashboard Pages")
 page = st.sidebar.radio("Navigate to", pages)
 
@@ -138,32 +133,21 @@ if page == "About Marketing Analytics":
     Marketing Analytics is the science of measuring, managing, and analyzing marketing performance.  
     It enables brands to **understand what works, optimize campaigns, and maximize ROI**.
 
-    Every time a user sees an ad on platforms like Instagram, YouTube, or Google, interactions are tracked:  
-    - Users **see** your ad → some **click**, some **ignore**, some **convert**.  
-    - Marketing analytics explains **why** each action happens.
-
-    **Key Questions Answered:**
-    - How many people saw my ad? (**Reach**)  
-    - How many clicked on it? (**CTR / Click-Through Rate**)  
-    - How much did each click cost? (**CPC / Cost Per Click**)  
-    - How much did I spend to acquire a customer? (**CAC / Cost Per Acquisition**)  
-    - Did video ads keep people watching? (**ThruPlays / Watch Time**)  
-
-    **Applications for Marketers:**
+    **Applications:**
     - Target the right audience (age, city, interests)  
     - Design better creatives and messaging  
     - Spend efficiently to maximize returns  
-    - Prove the campaign’s effectiveness to stakeholders
+    - Prove campaign effectiveness to stakeholders
     """)
 
-    st.subheader("Marketing Analytics Architecture")
+    # Architecture Image
     try:
         arch_img = Image.open("images/marketing_analytics_architecture.jpg")
         st.image(arch_img, caption="End-to-End Marketing Analytics Architecture", use_column_width=True)
     except:
         st.warning("Architecture image not found!")
 
-    st.subheader("Marketing Funnel Overview")
+    # Funnel Image
     try:
         funnel_img = Image.open("images/marketing_funnel.jpg")
         st.image(funnel_img, caption="Marketing Funnel Stages: Awareness → Consideration → Conversion", use_column_width=True)
@@ -186,7 +170,6 @@ elif page == "Case Study Overview":
     """)
     with st.expander("Watch Case Study Preview"):
         st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")
-    st.markdown("---")
     st.caption("Created by Vibin | " + datetime.now().strftime("%d %B %Y"))
 
 # ------------------------
@@ -194,8 +177,7 @@ elif page == "Case Study Overview":
 # ------------------------
 elif page == "Campaign Overview" and filtered_df is not None:
     st.title("Campaign Overview")
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-
+    cols = st.columns(6)
     metrics_map = {
         'Total Spent (INR)': 'spent',
         'Total Impressions': 'impressions',
@@ -208,13 +190,10 @@ elif page == "Campaign Overview" and filtered_df is not None:
     for idx, (label, col) in enumerate(metrics_map.items()):
         if filtered_df[col] is not None:
             value = filtered_df[col].sum() if 'Total' in label else filtered_df[col].mean()
-            if 'INR' in label:
-                value = f"₹{value:,.0f}" if 'Total' in label else f"₹{value:,.2f}"
-            else:
-                value = f"{value:,.0f}" if 'Total' in label else f"{value:.2f}%"
-            [col1, col2, col3, col4, col5, col6][idx].metric(label, value)
+            value = f"₹{value:,.0f}" if 'INR' in label else (f"{value:.2f}%" if 'Avg' in label else f"{value:,.0f}")
+            cols[idx].metric(label, value)
         else:
-            [col1, col2, col3, col4, col5, col6][idx].info("Missing column")
+            cols[idx].info("Missing column")
 
     st.markdown("---")
     # Spend Trend
@@ -222,11 +201,42 @@ elif page == "Campaign Overview" and filtered_df is not None:
         spend_over_time = filtered_df.groupby('start', as_index=False)['spent'].sum()
         fig = px.line(spend_over_time, x='start', y='spent', markers=True,
                       text=spend_over_time['spent'].apply(lambda x: f"₹{x:,.0f}"),
-                      title="Campaign Spend Over Time", color_discrete_sequence=['#2E86C1'],
-                      hover_data={'start': True, 'spent': True})
+                      title="Campaign Spend Over Time", color_discrete_sequence=['#2E86C1'])
         fig.update_traces(textposition='top right')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Track daily/weekly campaign spend patterns
+        - Identify overspending or underspending periods
+        - Pinpoint trends to optimize future budget allocation
+        - Spot anomalies in spend quickly
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("""
+            - Hover on points to see exact spend
+            - Use filters to focus on specific campaigns or dates
+            - Compare trends across multiple campaigns
+            """)
+
+    # Top Cities by Spend
+    if filtered_df['city'] is not None and filtered_df['spent'] is not None:
+        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10, 'spent')
+        fig = px.bar(city_perf, x='city', y='spent', color='city', text='spent',
+                     title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis)
+        fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+        fig = style_axes(fig)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Identify high-spend regions
+        - Allocate budget efficiently across cities
+        - Recognize markets with maximum engagement
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Hover on bars to see exact spend per city")
 
 # ------------------------
 # PAGE 4: Audience Insights
@@ -244,12 +254,21 @@ elif page == "Audience Insights" and filtered_df is not None:
         color_discrete_map=gender_colors,
         barmode='group',
         text='clicks',
-        title="Clicks by Age & Gender",
-        hover_data={'age': True, 'gender_std': True, 'clicks': True}
+        title="Clicks by Age & Gender"
     )
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("**Purpose:**")
+    st.markdown("""
+    - Identify which age and gender segments engage most
+    - Guide audience targeting for campaigns
+    - Compare male vs female engagement visually
+    - Optimize creative messaging per segment
+    """)
+    with st.expander("Quick Tips"):
+        st.markdown("- Use filters to drill down by campaign, city, adset, or date")
 
 # ------------------------
 # PAGE 5: Ad Performance
@@ -261,17 +280,35 @@ elif page == "Ad Performance" and filtered_df is not None:
     }).nlargest(10,'clicks')
 
     # Top Ads by Clicks
-    fig1 = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks",
-                  color_continuous_scale="Agsunset")
+    fig1 = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks',
+                  title="Top Ads by Clicks", color_continuous_scale="Agsunset")
     fig1.update_traces(textposition='outside')
     fig1 = style_axes(fig1)
     st.plotly_chart(fig1, use_container_width=True)
+
+    st.markdown("**Purpose:**")
+    st.markdown("""
+    - Identify top-performing ads
+    - Compare CTR to optimize creatives
+    - Compare CPC to control ad cost
+    """)
+    with st.expander("Quick Tips"):
+        st.markdown("- Focus on high clicks but low CPC ads for better ROI")
 
     # CPC vs CTR Bubble Chart
     fig2 = px.scatter(ad_perf, x='cpc', y='ctr', size='clicks', color='spent', hover_name='ad_name',
                       title="CPC vs CTR Efficiency", color_continuous_scale='Blues')
     fig2 = style_axes(fig2)
     st.plotly_chart(fig2, use_container_width=True)
+
+    st.markdown("**Purpose:**")
+    st.markdown("""
+    - Compare cost vs efficiency of each ad
+    - Larger bubbles indicate ads with more clicks
+    - Identify ads delivering clicks at lower cost
+    """)
+    with st.expander("Quick Tips"):
+        st.markdown("- Hover to see exact CPC, CTR, and click count")
 
 # ------------------------
 # PAGE 6: Video Metrics
@@ -281,14 +318,33 @@ elif page == "Video Metrics" and filtered_df is not None:
     video_cols = ['video_25','video_50','video_75','video_95','video_100']
     melted = filtered_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
     melted['Plays'] = melted['Plays'].fillna(0).astype(int)
-    fig1 = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel",
-                  color_discrete_sequence=px.colors.qualitative.Safe)
+    fig1 = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays',
+                  title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe)
     fig1.update_traces(texttemplate='%{text}', textposition='inside')
     fig1 = style_axes(fig1)
     st.plotly_chart(fig1, use_container_width=True)
 
+    st.markdown("**Purpose:**")
+    st.markdown("""
+    - Measure engagement at different video stages
+    - Identify drop-off points
+    - Optimize video content length and messaging
+    """)
+    with st.expander("Quick Tips"):
+        st.markdown("- Filter by ad or campaign to see segment-level engagement")
+
+    # ThruPlay Efficiency Bubble Chart
     if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None:
         fig2 = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='thruplays', color='spent',
                           hover_name='ad_name', title="ThruPlay Efficiency Bubble Chart", color_continuous_scale='Blues')
         fig2 = style_axes(fig2)
         st.plotly_chart(fig2, use_container_width=True)
+
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Evaluate cost efficiency of ThruPlays
+        - Larger bubbles indicate more ThruPlays
+        - Compare campaigns/adsets on efficiency vs volume
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Hover to see exact cost per ThruPlay and ThruPlays count")
