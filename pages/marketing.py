@@ -246,18 +246,24 @@ elif page == "Video Metrics" and df is not None:
     st.plotly_chart(fig, use_container_width=True)
 
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
-        st.subheader("ThruPlay Efficiency")
-        filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
+    st.subheader("ThruPlay Efficiency")
 
-        fig = px.scatter(
-            filtered_df,
-            x="ThruPlays",
-            y="Cost per ThruPlay",
-            color="Campaign name",
-            hover_name="Ad name",
-            title="ThruPlays vs Cost per ThruPlay",
-            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}")
-        )
-        fig.update_traces(textposition='top center', marker=dict(size=10))
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+    # Ensure numeric
+    filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
+    filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
+    filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
+
+    fig = px.scatter(
+        filtered_df,
+        x="ThruPlays",
+        y="Cost per ThruPlay",
+        size="Impressions",  # bubble size
+        color="Campaign name",
+        hover_name="Ad name",
+        title="ThruPlays vs Cost per ThruPlay",
+        text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}"),
+        size_max=40  # maximum bubble size to avoid huge bubbles
+    )
+    fig.update_traces(textposition='top center')
+    fig = style_axes(fig)
+    st.plotly_chart(fig, use_container_width=True)
