@@ -81,7 +81,7 @@ if "show_modal" in st.session_state:
         Built with **Streamlit, Plotly, and Pandas**.
         """)
         if st.button("Go to Project"):
-            st.switch_page("pages/Usecase1_Marketing.py")
+            st.switch_page("pages/usecase1_marketing.py")
 
     elif use_case == "healthcare":
         st.markdown("---")
