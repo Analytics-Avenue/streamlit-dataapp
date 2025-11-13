@@ -193,6 +193,8 @@ elif page == "Campaign Overview" and filtered_df is not None:
 # ------------------------
 elif page == "Audience Insights" and filtered_df is not None:
     st.title("Audience Insights")
+    
+    # Clicks by Age & Gender
     if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
         agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
         fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender",
@@ -209,6 +211,23 @@ elif page == "Audience Insights" and filtered_df is not None:
         with st.expander("Quick Tips"):
             st.markdown("- Use filters to drill down by city, campaign, or ad set")
 
+    # Top Cities by Spend
+    if filtered_df['city'] is not None and filtered_df['spent'] is not None:
+        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
+        fig = px.bar(city_perf, x='city', y='spent', color='city', text='spent', title="Top Cities by Ad Spend",
+                     color_discrete_sequence=px.colors.sequential.Viridis)
+        fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
+        fig = style_axes(fig)
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Identify high-spend regions
+        - Allocate budget efficiently across cities
+        - Recognize markets with maximum engagement
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Hover on bars to see exact spend")
+
 # ------------------------
 # AD PERFORMANCE
 # ------------------------
@@ -218,11 +237,12 @@ elif page == "Ad Performance" and filtered_df is not None:
         ad_perf = filtered_df.groupby('ad_name', as_index=False).agg({
             'clicks':'sum', 'impressions':'sum', 'spent':'sum', 'ctr':'mean', 'cpc':'mean'
         }).nlargest(10,'clicks')
-        fig = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks", color_continuous_scale="Agsunset",
-                     hover_data={'ad_name': True, 'clicks': True, 'ctr': True})
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        # Top Ads by Clicks
+        fig1 = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks",
+                      color_continuous_scale="Agsunset", hover_data={'ad_name': True, 'clicks': True, 'ctr': True})
+        fig1.update_traces(textposition='outside')
+        fig1 = style_axes(fig1)
+        st.plotly_chart(fig1, use_container_width=True)
         st.markdown("**Purpose:**")
         st.markdown("""
         - Identify top-performing ads
@@ -231,6 +251,20 @@ elif page == "Ad Performance" and filtered_df is not None:
         """)
         with st.expander("Quick Tips"):
             st.markdown("- Focus on ads with high clicks but low CPC for better ROI")
+        
+        # CPC vs CTR Bubble Chart
+        fig2 = px.scatter(ad_perf, x='cpc', y='ctr', size='clicks', color='spent', hover_name='ad_name',
+                          title="CPC vs CTR Efficiency", color_continuous_scale='Blues')
+        fig2 = style_axes(fig2)
+        st.plotly_chart(fig2, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Compare cost vs efficiency of each ad
+        - Identify ads that deliver clicks at lower cost
+        - Size indicates popularity by clicks
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Larger bubbles indicate ads with more clicks")
 
 # ------------------------
 # VIDEO METRICS
@@ -239,18 +273,35 @@ elif page == "Video Metrics" and filtered_df is not None:
     st.title("Video Metrics")
     video_cols = ['video_25','video_50','video_75','video_95','video_100']
     if all(filtered_df[col] is not None for col in video_cols) and filtered_df['ad_name'] is not None:
+        # Video Completion Funnel
         melted = filtered_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
         melted['Plays'] = melted['Plays'].fillna(0).astype(int)
-        fig = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe,
-                     hover_data={'Stage': True, 'Plays': True, 'ad_name': True})
-        fig.update_traces(texttemplate='%{text}', textposition='inside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        fig1 = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel",
+                      color_discrete_sequence=px.colors.qualitative.Safe,
+                      hover_data={'Stage': True, 'Plays': True, 'ad_name': True})
+        fig1.update_traces(texttemplate='%{text}', textposition='inside')
+        fig1 = style_axes(fig1)
+        st.plotly_chart(fig1, use_container_width=True)
         st.markdown("**Purpose:**")
         st.markdown("""
         - Measure engagement at different video stages
-        - Identify drop-off points in video viewership
+        - Identify drop-off points
         - Optimize video content length and messaging
         """)
         with st.expander("Quick Tips"):
             st.markdown("- Filter by ad or campaign to see segment-level engagement")
+
+    # ThruPlay Efficiency Bubble Chart
+    if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None:
+        fig2 = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='thruplays', color='spent',
+                          hover_name='ad_name', title="ThruPlay Efficiency Bubble Chart", color_continuous_scale='Blues')
+        fig2 = style_axes(fig2)
+        st.plotly_chart(fig2, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Evaluate cost efficiency of ThruPlays
+        - Larger bubbles indicate more ThruPlays
+        - Compare campaigns/adsets on efficiency vs volume
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Hover to see exact cost per ThruPlay and ThruPlays count")
