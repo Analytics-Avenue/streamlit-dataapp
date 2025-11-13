@@ -197,19 +197,33 @@ elif page == "Audience Insights" and filtered_df is not None:
     # Clicks by Age & Gender
     if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
         agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
-        fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender",
-                     hover_data={'age': True, 'gender': True, 'clicks': True})
+        # Define custom color mapping
+        gender_colors = {'Female': 'pink', 'Male': 'blue'}
+        fig = px.bar(
+            agg,
+            x='age',
+            y='clicks',
+            color='gender',
+            color_discrete_map=gender_colors,
+            barmode='group',
+            text='clicks',
+            title="Clicks by Age & Gender",
+            hover_data={'age': True, 'gender': True, 'clicks': True}
+        )
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+
         st.markdown("**Purpose:**")
         st.markdown("""
         - Understand which age and gender segments engage most
         - Identify audience for targeted campaigns
         - Optimize creative and messaging per audience
+        - Quickly compare male vs female engagement visually
         """)
         with st.expander("Quick Tips"):
             st.markdown("- Use filters to drill down by city, campaign, or ad set")
+
 
     # Top Cities by Spend
     if filtered_df['city'] is not None and filtered_df['spent'] is not None:
