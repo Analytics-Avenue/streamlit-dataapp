@@ -40,7 +40,6 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.sidebar.success("File uploaded successfully!")
 
-    # Clean & prep data
     df.columns = df.columns.str.strip()
     df['Reporting starts'] = pd.to_datetime(df['Reporting starts'], errors='coerce')
     df['Reporting ends'] = pd.to_datetime(df['Reporting ends'], errors='coerce')
@@ -70,6 +69,17 @@ if uploaded_file:
 else:
     df = None
     st.warning("Please upload your dataset from the sidebar to begin analysis.")
+
+# ----------------------------------------
+# Helper function for axes styling
+# ----------------------------------------
+def style_axes(fig):
+    fig.update_layout(
+        xaxis=dict(title_font=dict(size=14, color='black', family='Arial', bold=True)),
+        yaxis=dict(title_font=dict(size=14, color='black', family='Arial', bold=True)),
+        title_font=dict(size=16, color='black', family='Arial', bold=True)
+    )
+    return fig
 
 # ----------------------------------------
 # PAGE 1: Case Study Overview
@@ -126,9 +136,11 @@ elif page == "Campaign Overview" and df is not None:
     fig = px.line(
         spend_over_time, x='Reporting starts', y='Amount spent (INR)',
         markers=True, title="Campaign Spend Over Time",
-        color_discrete_sequence=['#2E86C1']
+        color_discrete_sequence=['#2E86C1'],
+        text=spend_over_time['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
     )
-    fig.update_traces(text=spend_over_time['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}"), textposition='top right')
+    fig.update_traces(textposition='top right')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Top 10 Campaigns by Spend")
@@ -136,9 +148,11 @@ elif page == "Campaign Overview" and df is not None:
     fig = px.bar(
         top_campaigns, x="Amount spent (INR)", y="Campaign name", orientation='h',
         color="Amount spent (INR)", color_continuous_scale="Blues",
-        title="Top Campaigns by Spend", text=top_campaigns['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
+        title="Top Campaigns by Spend",
+        text=top_campaigns['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
     )
     fig.update_traces(textposition='outside')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
 # ----------------------------------------
@@ -156,6 +170,7 @@ elif page == "Audience Insights" and df is not None:
         text='Link clicks'
     )
     fig.update_traces(textposition='outside')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Top 10 Cities by Ad Spend")
@@ -167,8 +182,10 @@ elif page == "Audience Insights" and df is not None:
         text=city_perf['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
     )
     fig.update_traces(textposition='outside')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    # ----------------------------------------
+
+# ----------------------------------------
 # PAGE 4: Ad Performance
 # ----------------------------------------
 elif page == "Ad Performance" and df is not None:
@@ -190,18 +207,22 @@ elif page == "Ad Performance" and df is not None:
         text='Link clicks'
     )
     fig.update_traces(textposition='outside')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("CPC vs CTR Performance")
     fig = px.scatter(
-        ad_perf, x="CPC (cost per link click)", y="CTR (all)",
-        color="Amount spent (INR)", size="Link clicks",
-        hover_name="Ad name", title="CPC vs CTR Efficiency",
+        ad_perf,
+        x="CPC (cost per link click)",
+        y="CTR (all)",
+        color="Amount spent (INR)",
+        hover_name="Ad name",
+        title="CPC vs CTR Efficiency",
         text=ad_perf['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
     )
-    fig.update_traces(textposition='top center')
+    fig.update_traces(textposition='top center', marker=dict(size=10))
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-
 
 # ----------------------------------------
 # PAGE 5: Video Metrics
@@ -212,22 +233,31 @@ elif page == "Video Metrics" and df is not None:
     st.subheader("Video Completion Funnel")
     video_cols = ["Video plays at 25%", "Video plays at 50%", "Video plays at 75%", "Video plays at 95%", "Video plays at 100%"]
     melted = filtered_df.melt(id_vars=["Ad name"], value_vars=video_cols, var_name="Play Stage", value_name="Plays")
+    melted['Plays'] = melted['Plays'].fillna(0).astype(int)
+
     fig = px.bar(
         melted, x="Play Stage", y="Plays", color="Play Stage",
-        title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe,
+        title="Video Completion Funnel",
+        color_discrete_sequence=px.colors.qualitative.Safe,
         text='Plays'
     )
-    fig.update_traces(textposition='outside')
+    fig.update_traces(texttemplate='%{text}', textposition='inside')
+    fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
         st.subheader("ThruPlay Efficiency")
-        fig = px.scatter(
-            filtered_df, x="ThruPlays", y="Cost per ThruPlay",
-            color="Campaign name", hover_name="Ad name", size="Impressions",
-            title="ThruPlays vs Cost per ThruPlay",
-            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,.0f}")
-        )
-        fig.update_traces(textposition='top center')
-        st.plotly_chart(fig, use_container_width=True)
+        filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
 
+        fig = px.scatter(
+            filtered_df,
+            x="ThruPlays",
+            y="Cost per ThruPlay",
+            color="Campaign name",
+            hover_name="Ad name",
+            title="ThruPlays vs Cost per ThruPlay",
+            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}")
+        )
+        fig.update_traces(textposition='top center', marker=dict(size=10))
+        fig = style_axes(fig)
+        st.plotly_chart(fig, use_container_width=True)
