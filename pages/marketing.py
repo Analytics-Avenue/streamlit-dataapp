@@ -83,40 +83,56 @@ if uploaded_file:
             mapped_df[date_col] = pd.to_datetime(mapped_df[date_col], errors='coerce')
 
     # ------------------------
-    # Filters / Slicers
-    # ------------------------
-    filtered_df = mapped_df.copy()
 
-    st.sidebar.subheader("Filters")
-    # Campaign filter
-    if mapped_df['campaign'] is not None:
-        campaign_filter = st.sidebar.multiselect("Campaign Name", options=mapped_df['campaign'].dropna().unique())
-        if campaign_filter:
-            filtered_df = filtered_df[filtered_df['campaign'].isin(campaign_filter)]
-    # City filter
-    if mapped_df['city'] is not None:
-        city_filter = st.sidebar.multiselect("City", options=mapped_df['city'].dropna().unique())
-        if city_filter:
-            filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
-    # Age filter
-    if mapped_df['age'] is not None:
-        age_filter = st.sidebar.multiselect("Age Group", options=mapped_df['age'].dropna().unique())
-        if age_filter:
-            filtered_df = filtered_df[filtered_df['age'].isin(age_filter)]
-    # Gender filter
-    if mapped_df['gender'] is not None:
-        gender_filter = st.sidebar.multiselect("Gender", options=mapped_df['gender'].dropna().unique())
-        if gender_filter:
-            filtered_df = filtered_df[filtered_df['gender'].isin(gender_filter)]
-    # Date filter
-    if mapped_df['start'] is not None and mapped_df['end'] is not None:
-        start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
-        end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
-        filtered_df = filtered_df[
-            (filtered_df['start'] >= pd.to_datetime(start_date)) &
-            (filtered_df['end'] <= pd.to_datetime(end_date))
-        ]
+# Filters / Slicers
+# ------------------------
+filtered_df = mapped_df.copy()
 
+st.sidebar.subheader("Filters")
+# Campaign filter
+if mapped_df['campaign'] is not None:
+    campaign_filter = st.sidebar.multiselect("Campaign Name", options=mapped_df['campaign'].dropna().unique())
+    if campaign_filter:
+        filtered_df = filtered_df[filtered_df['campaign'].isin(campaign_filter)]
+
+# City filter
+if mapped_df['city'] is not None:
+    city_filter = st.sidebar.multiselect("City", options=mapped_df['city'].dropna().unique())
+    if city_filter:
+        filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
+
+# Age filter
+if mapped_df['age'] is not None:
+    age_filter = st.sidebar.multiselect("Age Group", options=mapped_df['age'].dropna().unique())
+    if age_filter:
+        filtered_df = filtered_df[filtered_df['age'].isin(age_filter)]
+
+# Gender filter
+if mapped_df['gender'] is not None:
+    gender_filter = st.sidebar.multiselect("Gender", options=mapped_df['gender'].dropna().unique())
+    if gender_filter:
+        filtered_df = filtered_df[filtered_df['gender'].isin(gender_filter)]
+
+# Ad Set filter
+if mapped_df.get('adset_name') is not None:
+    adset_filter = st.sidebar.multiselect("Ad Set Name", options=mapped_df['adset_name'].dropna().unique())
+    if adset_filter:
+        filtered_df = filtered_df[filtered_df['adset_name'].isin(adset_filter)]
+
+# Ad Name filter
+if mapped_df.get('ad_name') is not None:
+    ad_filter = st.sidebar.multiselect("Ad Name", options=mapped_df['ad_name'].dropna().unique())
+    if ad_filter:
+        filtered_df = filtered_df[filtered_df['ad_name'].isin(ad_filter)]
+
+# Date filter
+if mapped_df['start'] is not None and mapped_df['end'] is not None:
+    start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
+    end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
+    filtered_df = filtered_df[
+        (filtered_df['start'] >= pd.to_datetime(start_date)) &
+        (filtered_df['end'] <= pd.to_datetime(end_date))
+    ]
 else:
     st.warning("Upload your CSV to begin.")
 
