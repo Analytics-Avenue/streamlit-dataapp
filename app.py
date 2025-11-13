@@ -3,7 +3,7 @@ import os
 
 # --- Streamlit setup ---
 st.set_page_config(page_title="Data Analytics Hub", layout="wide")
-st.title("Marketing Analytics Case Studies")
+st.title("Data Analytics Case Studies")
 st.markdown("Welcome! Choose a project to explore its dashboard.")
 
 # --- Paths ---
@@ -24,7 +24,7 @@ cols = st.columns(3)
 for i, (name, image) in enumerate(use_cases.items()):
     with cols[i % 3]:
         if os.path.exists(image):
-            st.image(image, use_column_width=True)
+            st.image(image, use_container_width=True)
         else:
             st.warning(f"Preview not found for {name}")
 
