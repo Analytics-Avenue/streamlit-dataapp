@@ -16,7 +16,7 @@ st.set_page_config(
 # Sidebar Navigation
 # ----------------------------------------
 st.sidebar.title("Campaign Analytics Dashboard")
-st.sidebar.markdown("Built with by **Data Experts**")
+st.sidebar.markdown("Built by **Data Experts**")
 st.sidebar.markdown(f"Created on: {datetime.now().strftime('%d %b %Y')}")
 
 page = st.sidebar.radio(
@@ -143,6 +143,11 @@ elif page == "Campaign Overview" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("**Insights:**")
+    st.markdown("- Observe daily/weekly spend trends to check if budget allocation is consistent.")
+    st.markdown("- Spikes may indicate periods of high engagement or increased bids in Meta Ads.")
+    st.markdown("- Compare spend vs. results to optimize future campaigns.")
+
     st.subheader("Top 10 Campaigns by Spend")
     top_campaigns = filtered_df.groupby("Campaign name", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
     fig = px.bar(
@@ -154,6 +159,10 @@ elif page == "Campaign Overview" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("**Insights:**")
+    st.markdown("- High-spend campaigns may require efficiency checks on CTR and conversions.")
+    st.markdown("- Low-spend but high-performing campaigns can be scaled for better ROI.")
 
 # ----------------------------------------
 # PAGE 3: Audience Insights
@@ -173,6 +182,11 @@ elif page == "Audience Insights" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("**Insights:**")
+    st.markdown("- Identify which age and gender segments are most engaged.")
+    st.markdown("- Adjust targeting for campaigns to focus on high-performing groups.")
+    st.markdown("- Low engagement segments may require creative changes.")
+
     st.subheader("Top 10 Cities by Ad Spend")
     city_perf = filtered_df.groupby("City", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
     fig = px.bar(
@@ -184,6 +198,10 @@ elif page == "Audience Insights" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("**Insights:**")
+    st.markdown("- Determine which cities are generating the most ad spend.")
+    st.markdown("- Compare city spend vs. actual conversions to optimize local targeting.")
 
 # ----------------------------------------
 # PAGE 4: Ad Performance
@@ -210,6 +228,10 @@ elif page == "Ad Performance" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("**Insights:**")
+    st.markdown("- Ads with highest clicks are engaging; check if CPC is efficient.")
+    st.markdown("- Low CTR ads may require creative or copy refresh.")
+
     st.subheader("CPC vs CTR Performance")
     fig = px.scatter(
         ad_perf,
@@ -223,6 +245,10 @@ elif page == "Ad Performance" and df is not None:
     fig.update_traces(textposition='top center', marker=dict(size=10))
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("**Insights:**")
+    st.markdown("- Evaluate which ads provide high CTR at low cost.")
+    st.markdown("- Ads with high CPC but low CTR may need pausing or creative change.")
 
 # ----------------------------------------
 # PAGE 5: Video Metrics
@@ -245,9 +271,11 @@ elif page == "Video Metrics" and df is not None:
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    # ----------------------------------------
+    st.markdown("**Insights:**")
+    st.markdown("- Compare drop-off rates between stages; high drop-offs indicate weak engagement.")
+    st.markdown("- Ads with consistent retention can be scaled.")
+
     # ThruPlay Efficiency Bubble Chart
-    # ----------------------------------------
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
         st.subheader("ThruPlay Efficiency")
 
@@ -255,7 +283,6 @@ elif page == "Video Metrics" and df is not None:
         filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
         filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
 
-        # Create hover text
         filtered_df['hover_text'] = filtered_df.apply(
             lambda row: f"Ad: {row['Ad name']}<br>"
                         f"ThruPlays: {row['ThruPlays']}<br>"
@@ -285,15 +312,10 @@ elif page == "Video Metrics" and df is not None:
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
 
-        # ----------------------------------------
-        # ThruPlay Insights Section
-        # ----------------------------------------
-        st.markdown("---")
-        st.subheader("Insights from ThruPlay Efficiency")
-        
+        # Insights
+        st.markdown("**Insights from ThruPlay Efficiency:**")
         high_efficiency = filtered_df[(filtered_df['ThruPlays'] >= filtered_df['ThruPlays'].median()) &
                                       (filtered_df['Cost per ThruPlay'] <= filtered_df['Cost per ThruPlay'].median())]
-        
         low_efficiency = filtered_df[(filtered_df['ThruPlays'] < filtered_df['ThruPlays'].median()) &
                                      (filtered_df['Cost per ThruPlay'] > filtered_df['Cost per ThruPlay'].median())]
 
