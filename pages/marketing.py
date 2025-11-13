@@ -247,7 +247,7 @@ elif page == "Video Metrics" and df is not None:
 
     # ThruPlay Efficiency as bubble chart
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
-    st.subheader("ThruPlay Efficiency")
+        st.subheader("ThruPlay Efficiency")
 
     # Ensure numeric
     filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
