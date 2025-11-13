@@ -55,26 +55,18 @@ if uploaded_file:
     df.columns = df.columns.str.strip()
     st.sidebar.success("File uploaded!")
 
-    # ------------------------
     # Column Mapping
-    # ------------------------
     user_columns = {}
     if upload_option == "Upload & Map Columns":
         st.sidebar.subheader("Map your columns")
         for key, default_name in DEFAULT_COLUMNS.items():
-            col = st.sidebar.selectbox(
-                f"Map '{default_name}'",
-                options=[None] + list(df.columns),
-                index=0
-            )
+            col = st.sidebar.selectbox(f"Map '{default_name}'", options=[None] + list(df.columns), index=0)
             user_columns[key] = col
     else:
         for key, default_name in DEFAULT_COLUMNS.items():
             user_columns[key] = default_name if default_name in df.columns else None
 
-    # ------------------------
     # Create mapped dataframe
-    # ------------------------
     mapped_df = pd.DataFrame()
     for key, col in user_columns.items():
         if col in df.columns:
@@ -87,13 +79,9 @@ if uploaded_file:
         if mapped_df[date_col] is not None:
             mapped_df[date_col] = pd.to_datetime(mapped_df[date_col], errors='coerce')
 
-    # ------------------------
     # Filters / Slicers
-    # ------------------------
     filtered_df = mapped_df.copy()
     st.sidebar.subheader("Filters")
-
-    # Multi-select filters
     filter_columns = ['campaign', 'city', 'age', 'gender', 'adset_name', 'ad_name']
     for col in filter_columns:
         if mapped_df.get(col) is not None:
@@ -106,10 +94,7 @@ if uploaded_file:
     if mapped_df['start'] is not None and mapped_df['end'] is not None:
         start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
         end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
-        filtered_df = filtered_df[
-            (filtered_df['start'] >= pd.to_datetime(start_date)) &
-            (filtered_df['end'] <= pd.to_datetime(end_date))
-        ]
+        filtered_df = filtered_df[(filtered_df['start'] >= pd.to_datetime(start_date)) & (filtered_df['end'] <= pd.to_datetime(end_date))]
 
 else:
     st.warning("Upload your CSV to begin.")
@@ -215,6 +200,14 @@ elif page == "Audience Insights" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Understand which age and gender segments engage most
+        - Identify audience for targeted campaigns
+        - Optimize creative and messaging per audience
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Use filters to drill down by city, campaign, or ad set")
 
 # ------------------------
 # AD PERFORMANCE
@@ -230,6 +223,14 @@ elif page == "Ad Performance" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Identify top-performing ads
+        - Analyze CTR to optimize ad creatives
+        - Compare CPC to control ad cost
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Focus on ads with high clicks but low CPC for better ROI")
 
 # ------------------------
 # VIDEO METRICS
@@ -245,3 +246,11 @@ elif page == "Video Metrics" and filtered_df is not None:
         fig.update_traces(texttemplate='%{text}', textposition='inside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Measure engagement at different video stages
+        - Identify drop-off points in video viewership
+        - Optimize video content length and messaging
+        """)
+        with st.expander("Quick Tips"):
+            st.markdown("- Filter by ad or campaign to see segment-level engagement")
