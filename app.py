@@ -3,7 +3,7 @@ from datetime import date
 
 st.set_page_config(page_title="Analytics Use Case Hub", layout="wide")
 
-st.title("💼 Analytics Use Case Portfolio")
+st.title("Analytics Avenue")
 st.markdown("Explore real-world data analytics case studies built by **Vibin — Senior Business Analyst**.")
 
 # --- Style ---
@@ -72,7 +72,7 @@ if "show_modal" in st.session_state:
 
     if use_case == "marketing":
         st.markdown("---")
-        st.subheader("📊 Use Case 1: Marketing Analytics")
+        st.subheader("#1 Marketing Analytics")
         st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")
         st.markdown(f"**Author:** Vibin — Senior Business Analyst  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
         st.markdown("""
@@ -80,12 +80,12 @@ if "show_modal" in st.session_state:
         Visualizes Meta Ad campaign performance with insights on reach, engagement, audience, and cost efficiency.  
         Built with **Streamlit, Plotly, and Pandas**.
         """)
-        if st.button("🚀 Go to Project"):
+        if st.button("Go to Project"):
             st.switch_page("usecase1_marketing.py")
 
     elif use_case == "healthcare":
         st.markdown("---")
-        st.subheader("🏥 Use Case 2: Healthcare Analytics")
+        st.subheader("#2 Healthcare Analytics")
         st.video("https://www.youtube.com/watch?v=x8tYGIvK32Q")
         st.markdown(f"**Author:** Vibin — Senior Business Analyst  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
         st.markdown("""
@@ -93,7 +93,7 @@ if "show_modal" in st.session_state:
         Analyzing patient treatment outcomes using interactive data dashboards.  
         Built with Streamlit, Plotly, and advanced statistical analytics.
         """)
-        if st.button("🚀 Go to Project"):
+        if st.button("Go to Project"):
             st.switch_page("usecase2_healthcare.py")
 
     else:
