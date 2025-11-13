@@ -247,23 +247,38 @@ elif page == "Video Metrics" and df is not None:
 
     # ThruPlay Efficiency as bubble chart
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
-        st.subheader("ThruPlay Efficiency")
+    st.subheader("ThruPlay Efficiency")
 
-        filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
-        filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
-        filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
+    # Ensure numeric
+    filtered_df['Cost per ThruPlay'] = filtered_df['Cost per ThruPlay'].fillna(0).astype(int)
+    filtered_df['ThruPlays'] = filtered_df['ThruPlays'].fillna(0).astype(int)
+    filtered_df['Impressions'] = filtered_df['Impressions'].fillna(0).astype(int)
 
-        fig = px.scatter(
-            filtered_df,
-            x="ThruPlays",
-            y="Cost per ThruPlay",
-            size="Impressions",
-            color="Campaign name",
-            hover_name="Ad name",
-            title="ThruPlays vs Cost per ThruPlay",
-            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}"),
-            size_max=40
-        )
-        fig.update_traces(textposition='top center')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+    # Create hover text for tooltip
+    filtered_df['hover_text'] = filtered_df.apply(
+        lambda row: f"Ad: {row['Ad name']}<br>"
+                    f"ThruPlays: {row['ThruPlays']}<br>"
+                    f"Cost per ThruPlay: ₹{row['Cost per ThruPlay']:,}<br>"
+                    f"Impressions: {row['Impressions']:,}", axis=1
+    )
+
+    fig = px.scatter(
+        filtered_df,
+        x="ThruPlays",
+        y="Cost per ThruPlay",
+        size="Impressions",
+        color="Campaign name",
+        hover_name="Ad name",
+        hover_data={'ThruPlays': True, 'Cost per ThruPlay': True, 'Impressions': True},
+        text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,}"),
+        size_max=40,
+        title="ThruPlays vs Cost per ThruPlay"
+    )
+
+    fig.update_traces(
+        textposition='top center',
+        marker=dict(sizemode='area', sizeref=2.*max(filtered_df['Impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey'))
+    )
+
+    fig = style_axes(fig)
+    st.plotly_chart(fig, use_container_width=True)
