@@ -165,7 +165,7 @@ if page == "About Marketing Analytics":
 
     st.subheader("Marketing Funnel Overview")
     try:
-        funnel_img = Image.open("images/marketing_funnel.jpg)
+        funnel_img = Image.open("images/marketing_funnel.jpg")
         st.image(funnel_img, caption="Marketing Funnel Stages: Awareness → Consideration → Conversion", use_column_width=True)
     except:
         st.warning("Funnel image not found!")
