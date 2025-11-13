@@ -56,7 +56,7 @@ with col2:
 # Use Case 3 Placeholder
 with col3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.image("assets/retail_preview.jpg", use_column_width=True)
+    st.image("assets/real_estate_preview.jpg", use_column_width=True)
     st.markdown("### Use Case 3: Retail Conversion Analytics")
     st.markdown("Measure footfall-to-sales conversion rates across stores.")
     if st.button("Preview Retail Analytics"):
