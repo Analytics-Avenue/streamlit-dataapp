@@ -1,10 +1,10 @@
 import streamlit as st
 from datetime import date
 
-
-
+# --- Page Config ---
 st.set_page_config(page_title="Analytics Use Case Hub", layout="wide")
 
+# --- Header ---
 st.title("Analytics Avenue")
 st.markdown("Explore real-world data analytics case studies built by **the team of Data Experts**.")
 
@@ -33,42 +33,48 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- Layout ---
 col1, col2, col3 = st.columns(3)
 
-# Use Case 1: Marketing Analytics
+# ---------------------------
+# CARD 1 – Marketing Analytics
+# ---------------------------
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.image("assets/marketing_preview.jpg", use_column_width=True)
+    st.image("assets/marketing_preview.jpg", use_container_width=True)
     st.markdown("### #1: Marketing Analytics")
     st.markdown("Understand Meta Ads performance, audience insights, and campaign impact.")
     if st.button("Preview Marketing Analytics"):
         st.session_state["show_modal"] = "marketing"
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Use Case 2: Healthcare Analytics (future)
+# ---------------------------
+# CARD 2 – Healthcare Analytics
+# ---------------------------
 with col2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.image("assets/healthcare_preview.jpg", use_column_width=True)
+    st.image("assets/healthcare_preview.jpg", use_container_width=True)
     st.markdown("### #2: Healthcare Analytics")
     st.markdown("Analyze patient data and treatment effectiveness using dashboards.")
     if st.button("Preview Healthcare Analytics"):
         st.session_state["show_modal"] = "healthcare"
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Use Case 3 Placeholder
+# ---------------------------
+# CARD 3 – Real Estate Analytics
+# ---------------------------
 with col3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.image("assets/real_estate_preview.jpg", use_column_width=True)
+    st.image("assets/real_estate_preview.jpg", use_container_width=True)
     st.markdown("### #3: Real Estate Conversion Analytics")
     st.markdown("Measure footfall-to-sales conversion rates across stores.")
     if st.button("Preview Retail Analytics"):
         st.session_state["show_modal"] = "retail"
     st.markdown('</div>', unsafe_allow_html=True)
 
-
-# ------------------------------
-# POPUP MODAL (Custom Popup Simulation)
-# ------------------------------
+# ---------------------------
+# POPUP SIMULATION (Modal Replacement)
+# ---------------------------
 if "show_modal" in st.session_state:
     use_case = st.session_state["show_modal"]
 
@@ -83,7 +89,7 @@ if "show_modal" in st.session_state:
         Built with **Streamlit, Plotly, and Pandas**.
         """)
         if st.button("Go to Project"):
-            st.switch_page("pages/1_Usecase1_Marketing")
+            st.switch_page("pages/1_Usecase1_Marketing.py")
 
     elif use_case == "healthcare":
         st.markdown("---")
@@ -95,8 +101,11 @@ if "show_modal" in st.session_state:
         Analyzing patient treatment outcomes using interactive data dashboards.  
         Built with Streamlit, Plotly, and advanced statistical analytics.
         """)
-        if st.button("Go to Project"):
-            st.warning("🚧 This project is still under development.")
+        st.warning("🚧 This project is still under development.")
 
+    elif use_case == "retail":
+        st.markdown("---")
+        st.subheader("#3 Real Estate Conversion Analytics")
+        st.markdown("🚧 Coming soon: Conversion optimization for retail & real estate.")
     else:
         st.warning("🚧 Use Case under development.")
