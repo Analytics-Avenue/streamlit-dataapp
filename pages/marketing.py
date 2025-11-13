@@ -142,7 +142,12 @@ elif page == "Campaign Overview" and df is not None:
     fig.update_traces(textposition='top right')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: This chart shows how your campaign budget is being spent over time. Use it to see patterns, peaks, and trends in spending.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Shows how campaign spending changes over time.")
+    st.markdown("- Helps identify periods of high activity or budget spikes.")
+
+    st.info("**Quick Tip:** Look at trends, not individual numbers. Rising trends indicate focus periods, dips indicate pause or budget limits.")
 
     st.subheader("Top 10 Campaigns by Spend")
     top_campaigns = filtered_df.groupby("Campaign name", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
@@ -155,7 +160,11 @@ elif page == "Campaign Overview" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: Identify which campaigns are taking most of your budget and assess if spending aligns with strategy.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Highlights which campaigns are receiving the most budget allocation.")
+
+    st.info("**Quick Tip:** This chart helps quickly identify high-priority campaigns for analysis or optimization.")
 
 # ----------------------------------------
 # PAGE 3: Audience Insights
@@ -174,7 +183,11 @@ elif page == "Audience Insights" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: See which age and gender groups interact most with ads. Helps refine targeting strategies.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Shows which age and gender segments are engaging most with ads.")
+
+    st.info("**Quick Tip:** Use this to understand your audience mix and plan targeted messaging.")
 
     st.subheader("Top 10 Cities by Ad Spend")
     city_perf = filtered_df.groupby("City", as_index=False)['Amount spent (INR)'].sum().nlargest(10, 'Amount spent (INR)')
@@ -187,7 +200,11 @@ elif page == "Audience Insights" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: Highlights cities with highest spend. Useful for geographic focus and allocation of resources.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Visualizes which cities have the highest ad spend.")
+
+    st.info("**Quick Tip:** Focus on cities with high spend for ROI evaluation and expansion planning.")
 
 # ----------------------------------------
 # PAGE 4: Ad Performance
@@ -213,7 +230,11 @@ elif page == "Ad Performance" and df is not None:
     fig.update_traces(textposition='outside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: Identify top-performing ads by clicks. Helps decide which creatives to scale or optimize.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Identifies top-performing ads in terms of clicks.")
+
+    st.info("**Quick Tip:** Focus on high CTR and high clicks for scaling successful creatives.")
 
     st.subheader("CPC vs CTR Performance")
     fig = px.scatter(
@@ -228,7 +249,11 @@ elif page == "Ad Performance" and df is not None:
     fig.update_traces(textposition='top center', marker=dict(size=10))
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: Compare cost per click with engagement rate. Useful to identify most cost-efficient ads.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Compares cost efficiency versus ad engagement.")
+
+    st.info("**Quick Tip:** Ads with low CPC and high CTR are most cost-effective for scaling campaigns.")
 
 # ----------------------------------------
 # PAGE 5: Video Metrics
@@ -250,7 +275,11 @@ elif page == "Video Metrics" and df is not None:
     fig.update_traces(texttemplate='%{text}', textposition='inside')
     fig = style_axes(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Quick Insight: Track drop-off points in video ads. Helps improve creative flow and messaging.")
+
+    st.markdown("**Purpose of this Chart:**")
+    st.markdown("- Shows how viewers progress through different stages of video ads.")
+
+    st.info("**Quick Tip:** Identify drop-off points to optimize creative content for better engagement.")
 
     if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
         st.subheader("ThruPlay Efficiency Bubble Chart")
@@ -279,4 +308,9 @@ elif page == "Video Metrics" and df is not None:
         )
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.info("Quick Insight: Evaluates video ad efficiency. Large bubbles = high impressions, position shows cost vs completed plays. Helps optimize budget and creative performance.")
+
+        st.markdown("**Purpose of this Chart:**")
+        st.markdown("- Shows which ads are achieving video completions at the lowest cost.")
+        st.markdown("- Bubble size indicates impressions, giving context of scale and reach.")
+
+        st.info("**Quick Tip:** Focus on low Cost per ThruPlay with high ThruPlays and large bubble size for most efficient video ad performance.")
