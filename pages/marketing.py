@@ -194,6 +194,7 @@ elif page == "Campaign Overview" and filtered_df is not None:
         fig.update_traces(textposition='top right')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
+
         st.markdown("**Purpose:**")
         st.markdown("""
         - Track daily/weekly campaign spend patterns
@@ -201,7 +202,12 @@ elif page == "Campaign Overview" and filtered_df is not None:
         - Pinpoint trends to optimize future budget allocation
         - Quickly spot anomalies or spikes in ad spend
         """)
-        st.info("**Quick Tip:** Identify peaks/drops to evaluate budget allocation.")
+        with st.expander("Quick Tips"):
+            st.markdown("""
+            - Hover on points to see exact spend
+            - Use filters to focus on specific campaigns or dates
+            - Compare trends over multiple campaigns
+            """)
 
     # Top Campaigns
     if filtered_df['campaign'] is not None and filtered_df['spent'] is not None:
@@ -219,116 +225,9 @@ elif page == "Campaign Overview" and filtered_df is not None:
         - Compare spend vs ROI for top campaigns
         - Identify underperforming campaigns despite high spend
         """)
-        st.info("**Quick Tip:** Focus analysis on top-spend campaigns.")
-
-# ------------------------
-# AUDIENCE INSIGHTS
-# ------------------------
-elif page == "Audience Insights" and filtered_df is not None:
-    st.title("Audience Insights")
-    # Clicks by Age & Gender
-    if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
-        agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
-        fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender")
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Identify which audience segments engage most with ads
-        - Optimize targeting to high-performing segments
-        - Compare engagement across demographics
-        - Detect underperforming audience groups to adjust strategy
-        """)
-
-    # Top Cities by Spend
-    if filtered_df['city'] is not None and filtered_df['spent'] is not None:
-        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
-        fig = px.bar(city_perf, x='city', y='spent', text=city_perf['spent'].apply(lambda x: f"₹{x:,.0f}"), color='city',
-                     title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis)
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Highlight cities with maximum ad expenditure
-        - Focus analytics on regions generating most activity
-        - Evaluate city-wise spend efficiency vs performance
-        - Plan location-targeted campaigns or promotions
-        """)
-
-# ------------------------
-# AD PERFORMANCE
-# ------------------------
-elif page == "Ad Performance" and filtered_df is not None:
-    st.title("Ad Performance")
-    if filtered_df['ad_name'] is not None and filtered_df['clicks'] is not None:
-        ad_perf = filtered_df.groupby('ad_name', as_index=False).agg({
-            'clicks':'sum', 'impressions':'sum', 'spent':'sum', 'ctr':'mean', 'cpc':'mean'
-        }).nlargest(10,'clicks')
-        fig = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks", color_continuous_scale="Agsunset")
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Identify ads generating the highest clicks
-        - Compare CTR and CPC to understand efficiency
-        - Spot underperforming ads despite high spend
-        - Make data-driven creative optimization decisions
-        """)
-
-        # CPC vs CTR
-        if 'cpc' in ad_perf.columns and 'ctr' in ad_perf.columns:
-            fig = px.scatter(ad_perf, x='cpc', y='ctr', color='spent', text=ad_perf['spent'].apply(lambda x: f"₹{x:,.0f}"),
-                             hover_name='ad_name', title="CPC vs CTR")
-            fig.update_traces(marker=dict(size=10), textposition='top center')
-            fig = style_axes(fig)
-            st.plotly_chart(fig, use_container_width=True)
-            st.markdown("**Purpose:**")
+        with st.expander("Quick Tips"):
             st.markdown("""
-            - Visualize cost efficiency vs engagement for ads
-            - Identify ads with low CPC and high CTR (best performers)
-            - Compare ads’ cost per click vs conversion potential
-            - Detect ads that need budget adjustments or tweaks
+            - Focus analysis on top-spend campaigns first
+            - Adjust budgets based on ROI, not just spend
+            - Check for seasonal spikes in spending
             """)
-
-# ------------------------
-# VIDEO METRICS
-# ------------------------
-elif page == "Video Metrics" and filtered_df is not None:
-    st.title("Video Metrics")
-    video_cols = ['video_25','video_50','video_75','video_95','video_100']
-    if all(filtered_df[col] is not None for col in video_cols) and filtered_df['ad_name'] is not None:
-        melted = filtered_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
-        melted['Plays'] = melted['Plays'].fillna(0).astype(int)
-        fig = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe)
-        fig.update_traces(texttemplate='%{text}', textposition='inside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Track viewer drop-off at each stage of the video
-        - Identify where audience loses interest
-        - Optimize video content to improve retention
-        - Measure engagement quality beyond just views
-        """)
-
-    # ThruPlay Efficiency Bubble Chart
-    if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None and filtered_df['impressions'] is not None:
-        filtered_df['thruplays'] = filtered_df['thruplays'].fillna(0).astype(int)
-        filtered_df['cost_per_thruplay'] = filtered_df['cost_per_thruplay'].fillna(0).astype(int)
-        filtered_df['impressions'] = filtered_df['impressions'].fillna(0).astype(int)
-        fig = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='impressions', color='campaign',
-                         hover_name='ad_name', size_max=40, text=filtered_df['cost_per_thruplay'].apply(lambda x: f"₹{x:,}"),
-                         title="ThruPlays vs Cost per ThruPlay")
-        fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(filtered_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Evaluate cost efficiency of full video plays
-        - Bubble size = impressions (reach), larger bubbles = more reach
-        - Identify campaigns with high ThruPlays at low cost
-        - Decide which videos to scale based on performance vs cost
-        """)
