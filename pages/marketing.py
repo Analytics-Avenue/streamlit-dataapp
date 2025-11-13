@@ -75,9 +75,9 @@ else:
 # ----------------------------------------
 def style_axes(fig):
     fig.update_layout(
-        xaxis=dict(title_font=dict(size=14, color='black', family='Arial', bold=True)),
-        yaxis=dict(title_font=dict(size=14, color='black', family='Arial', bold=True)),
-        title_font=dict(size=16, color='black', family='Arial', bold=True)
+        xaxis=dict(title_font=dict(size=14, color='black', family='Arial Black')),
+        yaxis=dict(title_font=dict(size=14, color='black', family='Arial Black')),
+        title_font=dict(size=16, color='black', family='Arial Black')
     )
     return fig
 
