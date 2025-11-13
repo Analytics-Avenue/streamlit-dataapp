@@ -4,7 +4,7 @@ from datetime import date
 st.set_page_config(page_title="Analytics Use Case Hub", layout="wide")
 
 st.title("Analytics Avenue")
-st.markdown("Explore real-world data analytics case studies built by **Vibin — Senior Business Analyst**.")
+st.markdown("Explore real-world data analytics case studies built by **the team of Data Experts**.")
 
 # --- Style ---
 st.markdown("""
@@ -74,7 +74,7 @@ if "show_modal" in st.session_state:
         st.markdown("---")
         st.subheader("#1 Marketing Analytics")
         st.video("https://www.youtube.com/watch?v=0d6oY8G5e5c")
-        st.markdown(f"**Author:** Vibin — Senior Business Analyst  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
+        st.markdown(f"**Author:** Vibin  \n**Created on:** {date.today().strftime('%B %d, %Y')}")
         st.markdown("""
         **Project Summary:**  
         Visualizes Meta Ad campaign performance with insights on reach, engagement, audience, and cost efficiency.  
