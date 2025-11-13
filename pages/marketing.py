@@ -168,3 +168,66 @@ elif page == "Audience Insights" and df is not None:
     )
     fig.update_traces(textposition='outside')
     st.plotly_chart(fig, use_container_width=True)
+    # ----------------------------------------
+# PAGE 4: Ad Performance
+# ----------------------------------------
+elif page == "Ad Performance" and df is not None:
+    st.title("Ad-Level Performance")
+
+    ad_perf = filtered_df.groupby("Ad name", as_index=False).agg({
+        "Link clicks": "sum",
+        "Impressions": "sum",
+        "Amount spent (INR)": "sum",
+        "CTR (all)": "mean",
+        "CPC (cost per link click)": "mean"
+    }).nlargest(10, 'Link clicks')
+
+    st.subheader("Top 10 Ads by Clicks")
+    fig = px.bar(
+        ad_perf, x="Link clicks", y="Ad name", orientation='h',
+        color="CTR (all)", color_continuous_scale="Agsunset",
+        title="Top Performing Ads",
+        text='Link clicks'
+    )
+    fig.update_traces(textposition='outside')
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("CPC vs CTR Performance")
+    fig = px.scatter(
+        ad_perf, x="CPC (cost per link click)", y="CTR (all)",
+        color="Amount spent (INR)", size="Link clicks",
+        hover_name="Ad name", title="CPC vs CTR Efficiency",
+        text=ad_perf['Amount spent (INR)'].apply(lambda x: f"₹{x:,.0f}")
+    )
+    fig.update_traces(textposition='top center')
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# ----------------------------------------
+# PAGE 5: Video Metrics
+# ----------------------------------------
+elif page == "Video Metrics" and df is not None:
+    st.title("Video Metrics")
+
+    st.subheader("Video Completion Funnel")
+    video_cols = ["Video plays at 25%", "Video plays at 50%", "Video plays at 75%", "Video plays at 95%", "Video plays at 100%"]
+    melted = filtered_df.melt(id_vars=["Ad name"], value_vars=video_cols, var_name="Play Stage", value_name="Plays")
+    fig = px.bar(
+        melted, x="Play Stage", y="Plays", color="Play Stage",
+        title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe,
+        text='Plays'
+    )
+    fig.update_traces(textposition='outside')
+    st.plotly_chart(fig, use_container_width=True)
+
+    if "ThruPlays" in filtered_df.columns and "Cost per ThruPlay" in filtered_df.columns:
+        st.subheader("ThruPlay Efficiency")
+        fig = px.scatter(
+            filtered_df, x="ThruPlays", y="Cost per ThruPlay",
+            color="Campaign name", hover_name="Ad name", size="Impressions",
+            title="ThruPlays vs Cost per ThruPlay",
+            text=filtered_df['Cost per ThruPlay'].apply(lambda x: f"₹{x:,.0f}")
+        )
+        fig.update_traces(textposition='top center')
+        st.plotly_chart(fig, use_container_width=True)
+
