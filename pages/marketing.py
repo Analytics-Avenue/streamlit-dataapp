@@ -47,6 +47,7 @@ upload_option = st.sidebar.radio("Choose how to provide data:", ["Direct Upload"
 uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"])
 
 mapped_df = None
+filtered_df = None
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
@@ -55,7 +56,6 @@ if uploaded_file:
 
     if upload_option == "Upload & Map Columns":
         st.sidebar.subheader("Map your columns")
-        # Dropdown for each default column
         user_columns = {}
         for key, default_name in DEFAULT_COLUMNS.items():
             col = st.sidebar.selectbox(
@@ -65,7 +65,6 @@ if uploaded_file:
             )
             user_columns[key] = col
     else:
-        # Direct upload assumes default columns
         user_columns = {}
         for key, default_name in DEFAULT_COLUMNS.items():
             user_columns[key] = default_name if default_name in df.columns else None
@@ -76,12 +75,47 @@ if uploaded_file:
         if col in df.columns:
             mapped_df[key] = df[col]
         else:
-            mapped_df[key] = None  # leave blank if column missing
+            mapped_df[key] = None
 
-    # Convert dates if available
+    # Convert dates
     for date_col in ['start', 'end']:
         if mapped_df[date_col] is not None:
             mapped_df[date_col] = pd.to_datetime(mapped_df[date_col], errors='coerce')
+
+    # ------------------------
+    # Filters / Slicers
+    # ------------------------
+    filtered_df = mapped_df.copy()
+
+    st.sidebar.subheader("Filters")
+    # Campaign filter
+    if mapped_df['campaign'] is not None:
+        campaign_filter = st.sidebar.multiselect("Campaign Name", options=mapped_df['campaign'].dropna().unique())
+        if campaign_filter:
+            filtered_df = filtered_df[filtered_df['campaign'].isin(campaign_filter)]
+    # City filter
+    if mapped_df['city'] is not None:
+        city_filter = st.sidebar.multiselect("City", options=mapped_df['city'].dropna().unique())
+        if city_filter:
+            filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
+    # Age filter
+    if mapped_df['age'] is not None:
+        age_filter = st.sidebar.multiselect("Age Group", options=mapped_df['age'].dropna().unique())
+        if age_filter:
+            filtered_df = filtered_df[filtered_df['age'].isin(age_filter)]
+    # Gender filter
+    if mapped_df['gender'] is not None:
+        gender_filter = st.sidebar.multiselect("Gender", options=mapped_df['gender'].dropna().unique())
+        if gender_filter:
+            filtered_df = filtered_df[filtered_df['gender'].isin(gender_filter)]
+    # Date filter
+    if mapped_df['start'] is not None and mapped_df['end'] is not None:
+        start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
+        end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
+        filtered_df = filtered_df[
+            (filtered_df['start'] >= pd.to_datetime(start_date)) &
+            (filtered_df['end'] <= pd.to_datetime(end_date))
+        ]
 
 else:
     st.warning("Upload your CSV to begin.")
@@ -125,50 +159,35 @@ if page == "Case Study Overview":
 # ------------------------
 # CAMPAIGN OVERVIEW
 # ------------------------
-elif page == "Campaign Overview" and mapped_df is not None:
+elif page == "Campaign Overview" and filtered_df is not None:
     st.title("Campaign Overview")
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    # Total Spent
-    if mapped_df['spent'] is not None:
-        col1.metric("Total Spent (INR)", f"₹{mapped_df['spent'].sum():,.0f}")
-    else:
-        col1.info("Missing column")
+    # Metrics
+    metrics_map = {
+        'Total Spent (INR)': 'spent',
+        'Total Impressions': 'impressions',
+        'Total Reach': 'reach',
+        'Total Clicks': 'clicks',
+        'Avg CTR': 'ctr',
+        'Avg CPM (₹)': 'cpm'
+    }
 
-    # Total Impressions
-    if mapped_df['impressions'] is not None:
-        col2.metric("Total Impressions", f"{mapped_df['impressions'].sum():,.0f}")
-    else:
-        col2.info("Missing column")
-
-    # Total Reach
-    if mapped_df['reach'] is not None:
-        col3.metric("Total Reach", f"{mapped_df['reach'].sum():,.0f}")
-    else:
-        col3.info("Missing column")
-
-    # Total Clicks
-    if mapped_df['clicks'] is not None:
-        col4.metric("Total Clicks", f"{mapped_df['clicks'].sum():,.0f}")
-    else:
-        col4.info("Missing column")
-
-    # Avg CTR
-    if mapped_df['ctr'] is not None:
-        col5.metric("Avg CTR", f"{mapped_df['ctr'].mean():.2f}%")
-    else:
-        col5.info("Missing column")
-
-    # Avg CPM
-    if mapped_df['cpm'] is not None:
-        col6.metric("Avg CPM (₹)", f"₹{mapped_df['cpm'].mean():,.2f}")
-    else:
-        col6.info("Missing column")
+    for idx, (label, col) in enumerate(metrics_map.items()):
+        if filtered_df[col] is not None:
+            value = filtered_df[col].sum() if 'Total' in label else filtered_df[col].mean()
+            if 'INR' in label:
+                value = f"₹{value:,.0f}" if 'Total' in label else f"₹{value:,.2f}"
+            else:
+                value = f"{value:,.0f}" if 'Total' in label else f"{value:.2f}%"
+            [col1, col2, col3, col4, col5, col6][idx].metric(label, value)
+        else:
+            [col1, col2, col3, col4, col5, col6][idx].info("Missing column")
 
     st.markdown("---")
     # Spend Trend
-    if mapped_df['start'] is not None and mapped_df['spent'] is not None:
-        spend_over_time = mapped_df.groupby('start', as_index=False)['spent'].sum()
+    if filtered_df['start'] is not None and filtered_df['spent'] is not None:
+        spend_over_time = filtered_df.groupby('start', as_index=False)['spent'].sum()
         fig = px.line(spend_over_time, x='start', y='spent', markers=True,
                       text=spend_over_time['spent'].apply(lambda x: f"₹{x:,.0f}"),
                       title="Campaign Spend Over Time", color_discrete_sequence=['#2E86C1'])
@@ -179,8 +198,8 @@ elif page == "Campaign Overview" and mapped_df is not None:
         st.info("**Quick Tip:** Identify peaks/drops to evaluate budget allocation.")
 
     # Top Campaigns
-    if mapped_df['campaign'] is not None and mapped_df['spent'] is not None:
-        top_campaigns = mapped_df.groupby('campaign', as_index=False)['spent'].sum().nlargest(10,'spent')
+    if filtered_df['campaign'] is not None and filtered_df['spent'] is not None:
+        top_campaigns = filtered_df.groupby('campaign', as_index=False)['spent'].sum().nlargest(10,'spent')
         fig = px.bar(top_campaigns, x='spent', y='campaign', orientation='h',
                      text=top_campaigns['spent'].apply(lambda x: f"₹{x:,.0f}"), color='spent', color_continuous_scale="Blues",
                      title="Top Campaigns by Spend")
@@ -193,11 +212,11 @@ elif page == "Campaign Overview" and mapped_df is not None:
 # ------------------------
 # AUDIENCE INSIGHTS
 # ------------------------
-elif page == "Audience Insights" and mapped_df is not None:
+elif page == "Audience Insights" and filtered_df is not None:
     st.title("Audience Insights")
     # Clicks by Age & Gender
-    if mapped_df['age'] is not None and mapped_df['gender'] is not None and mapped_df['clicks'] is not None:
-        agg = mapped_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
+    if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
+        agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
         fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender")
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
@@ -206,8 +225,8 @@ elif page == "Audience Insights" and mapped_df is not None:
         st.info("**Quick Tip:** Use for targeted campaigns.")
 
     # Top Cities by Spend
-    if mapped_df['city'] is not None and mapped_df['spent'] is not None:
-        city_perf = mapped_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
+    if filtered_df['city'] is not None and filtered_df['spent'] is not None:
+        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
         fig = px.bar(city_perf, x='city', y='spent', text=city_perf['spent'].apply(lambda x: f"₹{x:,.0f}"), color='city',
                      title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis)
         fig.update_traces(textposition='outside')
@@ -219,10 +238,10 @@ elif page == "Audience Insights" and mapped_df is not None:
 # ------------------------
 # AD PERFORMANCE
 # ------------------------
-elif page == "Ad Performance" and mapped_df is not None:
+elif page == "Ad Performance" and filtered_df is not None:
     st.title("Ad Performance")
-    if mapped_df['ad_name'] is not None and mapped_df['clicks'] is not None:
-        ad_perf = mapped_df.groupby('ad_name', as_index=False).agg({
+    if filtered_df['ad_name'] is not None and filtered_df['clicks'] is not None:
+        ad_perf = filtered_df.groupby('ad_name', as_index=False).agg({
             'clicks':'sum', 'impressions':'sum', 'spent':'sum', 'ctr':'mean', 'cpc':'mean'
         }).nlargest(10,'clicks')
         fig = px.bar(ad_perf, x='clicks', y='ad_name', orientation='h', color='ctr', text='clicks', title="Top Ads by Clicks", color_continuous_scale="Agsunset")
@@ -245,11 +264,11 @@ elif page == "Ad Performance" and mapped_df is not None:
 # ------------------------
 # VIDEO METRICS
 # ------------------------
-elif page == "Video Metrics" and mapped_df is not None:
+elif page == "Video Metrics" and filtered_df is not None:
     st.title("Video Metrics")
     video_cols = ['video_25','video_50','video_75','video_95','video_100']
-    if all(mapped_df[col] is not None for col in video_cols) and mapped_df['ad_name'] is not None:
-        melted = mapped_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
+    if all(filtered_df[col] is not None for col in video_cols) and filtered_df['ad_name'] is not None:
+        melted = filtered_df.melt(id_vars=['ad_name'], value_vars=video_cols, var_name='Stage', value_name='Plays')
         melted['Plays'] = melted['Plays'].fillna(0).astype(int)
         fig = px.bar(melted, x='Stage', y='Plays', color='Stage', text='Plays', title="Video Completion Funnel", color_discrete_sequence=px.colors.qualitative.Safe)
         fig.update_traces(texttemplate='%{text}', textposition='inside')
@@ -259,16 +278,15 @@ elif page == "Video Metrics" and mapped_df is not None:
         st.info("**Quick Tip:** Identify stages with highest drop-off to optimize content.")
 
     # ThruPlay Efficiency Bubble Chart
-    if mapped_df['thruplays'] is not None and mapped_df['cost_per_thruplay'] is not None and mapped_df['impressions'] is not None:
-        mapped_df['thruplays'] = mapped_df['thruplays'].fillna(0).astype(int)
-        mapped_df['cost_per_thruplay'] = mapped_df['cost_per_thruplay'].fillna(0).astype(int)
-        mapped_df['impressions'] = mapped_df['impressions'].fillna(0).astype(int)
-        fig = px.scatter(mapped_df, x='thruplays', y='cost_per_thruplay', size='impressions', color='campaign',
-                         hover_name='ad_name', size_max=40, text=mapped_df['cost_per_thruplay'].apply(lambda x: f"₹{x:,}"),
+    if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None and filtered_df['impressions'] is not None:
+        filtered_df['thruplays'] = filtered_df['thruplays'].fillna(0).astype(int)
+        filtered_df['cost_per_thruplay'] = filtered_df['cost_per_thruplay'].fillna(0).astype(int)
+        filtered_df['impressions'] = filtered_df['impressions'].fillna(0).astype(int)
+        fig = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='impressions', color='campaign',
+                         hover_name='ad_name', size_max=40, text=filtered_df['cost_per_thruplay'].apply(lambda x: f"₹{x:,}"),
                          title="ThruPlays vs Cost per ThruPlay")
-        fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(mapped_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
+        fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(filtered_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
         st.markdown("**Purpose:** Shows cost-efficiency of video completions, bubble size = impressions.")
         st.info("**Quick Tip:** Focus on low Cost per ThruPlay with high ThruPlays and impressions.")
-
