@@ -12,19 +12,28 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
 # --- Use cases and preview images ---
 use_cases = {
-    "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_preview.jpg"),
-    "Healthcare Analytics": os.path.join(ASSETS_DIR, "healthcare_preview.jpg"),
-    "Retail Analytics": os.path.join(ASSETS_DIR, "real_estate_preview.jpg")
+    "Marketing Analytics": {
+        "image": os.path.join(ASSETS_DIR, "marketing_preview.jpg"),
+        "page": "marketing.py"
+    },
+    "Healthcare Analytics": {
+        "image": os.path.join(ASSETS_DIR, "healthcare_preview.jpg"),
+        "page": "healthcare.py"
+    },
+    "Retail Analytics": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "retail.py"
+    }
 }
 
 # --- Layout: 3 columns ---
 cols = st.columns(3)
 
 # --- Display each card ---
-for i, (name, image) in enumerate(use_cases.items()):
+for i, (name, info) in enumerate(use_cases.items()):
     with cols[i % 3]:
-        if os.path.exists(image):
-            st.image(image, use_container_width=True)
+        if os.path.exists(info["image"]):
+            st.image(info["image"], use_container_width=True)
         else:
             st.warning(f"Preview not found for {name}")
 
@@ -32,7 +41,7 @@ for i, (name, image) in enumerate(use_cases.items()):
         st.write("Dive into the data, uncover insights, and visualize trends.")
 
         # --- Button navigation ---
-        page_path = f"pages/{i+1}_{name.replace(' ', '_')}.py"
+        page_path = f"pages/{info['page']}"
         if st.button(f"Go to {name}", key=name):
             try:
                 st.switch_page(page_path)
