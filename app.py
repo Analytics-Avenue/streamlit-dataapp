@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import date
-import os
-st.write(os.listdir("pages"))
+
 
 
 st.set_page_config(page_title="Analytics Use Case Hub", layout="wide")
