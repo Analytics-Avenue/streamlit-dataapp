@@ -194,7 +194,13 @@ elif page == "Campaign Overview" and filtered_df is not None:
         fig.update_traces(textposition='top right')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Visualize spend trends over time.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Track daily/weekly campaign spend patterns
+        - Identify overspending or underspending periods
+        - Pinpoint trends to optimize future budget allocation
+        - Quickly spot anomalies or spikes in ad spend
+        """)
         st.info("**Quick Tip:** Identify peaks/drops to evaluate budget allocation.")
 
     # Top Campaigns
@@ -206,7 +212,13 @@ elif page == "Campaign Overview" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Highlights campaigns with highest spend.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - See which campaigns consume the most budget
+        - Prioritize analysis on high-investment campaigns
+        - Compare spend vs ROI for top campaigns
+        - Identify underperforming campaigns despite high spend
+        """)
         st.info("**Quick Tip:** Focus analysis on top-spend campaigns.")
 
 # ------------------------
@@ -221,8 +233,13 @@ elif page == "Audience Insights" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Shows which audience segments engage most.")
-        st.info("**Quick Tip:** Use for targeted campaigns.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Identify which audience segments engage most with ads
+        - Optimize targeting to high-performing segments
+        - Compare engagement across demographics
+        - Detect underperforming audience groups to adjust strategy
+        """)
 
     # Top Cities by Spend
     if filtered_df['city'] is not None and filtered_df['spent'] is not None:
@@ -232,8 +249,13 @@ elif page == "Audience Insights" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Highlights cities with highest spend.")
-        st.info("**Quick Tip:** Prioritize high-spend cities for analysis.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Highlight cities with maximum ad expenditure
+        - Focus analytics on regions generating most activity
+        - Evaluate city-wise spend efficiency vs performance
+        - Plan location-targeted campaigns or promotions
+        """)
 
 # ------------------------
 # AD PERFORMANCE
@@ -248,8 +270,13 @@ elif page == "Ad Performance" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Highlights high-engagement ads.")
-        st.info("**Quick Tip:** Focus on high CTR & click ads.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Identify ads generating the highest clicks
+        - Compare CTR and CPC to understand efficiency
+        - Spot underperforming ads despite high spend
+        - Make data-driven creative optimization decisions
+        """)
 
         # CPC vs CTR
         if 'cpc' in ad_perf.columns and 'ctr' in ad_perf.columns:
@@ -258,8 +285,13 @@ elif page == "Ad Performance" and filtered_df is not None:
             fig.update_traces(marker=dict(size=10), textposition='top center')
             fig = style_axes(fig)
             st.plotly_chart(fig, use_container_width=True)
-            st.markdown("**Purpose:** Compare cost efficiency vs engagement.")
-            st.info("**Quick Tip:** Low CPC + high CTR = best-performing ads.")
+            st.markdown("**Purpose:**")
+            st.markdown("""
+            - Visualize cost efficiency vs engagement for ads
+            - Identify ads with low CPC and high CTR (best performers)
+            - Compare ads’ cost per click vs conversion potential
+            - Detect ads that need budget adjustments or tweaks
+            """)
 
 # ------------------------
 # VIDEO METRICS
@@ -274,8 +306,13 @@ elif page == "Video Metrics" and filtered_df is not None:
         fig.update_traces(texttemplate='%{text}', textposition='inside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Shows viewer drop-off through video stages.")
-        st.info("**Quick Tip:** Identify stages with highest drop-off to optimize content.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Track viewer drop-off at each stage of the video
+        - Identify where audience loses interest
+        - Optimize video content to improve retention
+        - Measure engagement quality beyond just views
+        """)
 
     # ThruPlay Efficiency Bubble Chart
     if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None and filtered_df['impressions'] is not None:
@@ -288,5 +325,10 @@ elif page == "Video Metrics" and filtered_df is not None:
         fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(filtered_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:** Shows cost-efficiency of video completions, bubble size = impressions.")
-        st.info("**Quick Tip:** Focus on low Cost per ThruPlay with high ThruPlays and impressions.")
+        st.markdown("**Purpose:**")
+        st.markdown("""
+        - Evaluate cost efficiency of full video plays
+        - Bubble size = impressions (reach), larger bubbles = more reach
+        - Identify campaigns with high ThruPlays at low cost
+        - Decide which videos to scale based on performance vs cost
+        """)
