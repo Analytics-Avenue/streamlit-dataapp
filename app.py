@@ -22,7 +22,7 @@ use_cases = {
     },
     "Retail Analytics": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "retail.py"
+        "page": "realestate.py"
     }
 }
 
