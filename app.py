@@ -59,7 +59,7 @@ with col2:
 with col3:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.image("assets/real_estate_preview.jpg", use_column_width=True)
-    st.markdown("### #3: Retail Conversion Analytics")
+    st.markdown("### #3: Real Estate Conversion Analytics")
     st.markdown("Measure footfall-to-sales conversion rates across stores.")
     if st.button("Preview Retail Analytics"):
         st.session_state["show_modal"] = "retail"
