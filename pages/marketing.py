@@ -20,6 +20,8 @@ DEFAULT_COLUMNS = {
     'city': 'City',
     'age': 'Age',
     'gender': 'Gender',
+    'adset_name': 'Ad set name',
+    'ad_name': 'Ad name',
     'start': 'Reporting starts',
     'end': 'Reporting ends',
     'spent': 'Amount spent (INR)',
@@ -28,7 +30,7 @@ DEFAULT_COLUMNS = {
     'clicks': 'Link clicks',
     'ctr': 'CTR (all)',
     'cpm': 'CPM (cost per 1,000 impressions)',
-    'ad_name': 'Ad name',
+    'cpc': 'CPC (cost per link click)',
     'thruplays': 'ThruPlays',
     'cost_per_thruplay': 'Cost per ThruPlay',
     'video_25': 'Video plays at 25%',
@@ -36,7 +38,6 @@ DEFAULT_COLUMNS = {
     'video_75': 'Video plays at 75%',
     'video_95': 'Video plays at 95%',
     'video_100': 'Video plays at 100%',
-    'cpc': 'CPC (cost per link click)'
 }
 
 # ------------------------
@@ -54,9 +55,12 @@ if uploaded_file:
     df.columns = df.columns.str.strip()
     st.sidebar.success("File uploaded!")
 
+    # ------------------------
+    # Column Mapping
+    # ------------------------
+    user_columns = {}
     if upload_option == "Upload & Map Columns":
         st.sidebar.subheader("Map your columns")
-        user_columns = {}
         for key, default_name in DEFAULT_COLUMNS.items():
             col = st.sidebar.selectbox(
                 f"Map '{default_name}'",
@@ -65,11 +69,12 @@ if uploaded_file:
             )
             user_columns[key] = col
     else:
-        user_columns = {}
         for key, default_name in DEFAULT_COLUMNS.items():
             user_columns[key] = default_name if default_name in df.columns else None
 
+    # ------------------------
     # Create mapped dataframe
+    # ------------------------
     mapped_df = pd.DataFrame()
     for key, col in user_columns.items():
         if col in df.columns:
@@ -77,62 +82,35 @@ if uploaded_file:
         else:
             mapped_df[key] = None
 
-    # Convert dates
+    # Convert date columns
     for date_col in ['start', 'end']:
         if mapped_df[date_col] is not None:
             mapped_df[date_col] = pd.to_datetime(mapped_df[date_col], errors='coerce')
 
     # ------------------------
+    # Filters / Slicers
+    # ------------------------
+    filtered_df = mapped_df.copy()
+    st.sidebar.subheader("Filters")
 
-# Filters / Slicers
-# ------------------------
-filtered_df = mapped_df.copy()
+    # Multi-select filters
+    filter_columns = ['campaign', 'city', 'age', 'gender', 'adset_name', 'ad_name']
+    for col in filter_columns:
+        if mapped_df.get(col) is not None:
+            vals = mapped_df[col].dropna().unique()
+            selected = st.sidebar.multiselect(f"{DEFAULT_COLUMNS.get(col, col).title()}", options=vals)
+            if selected:
+                filtered_df = filtered_df[filtered_df[col].isin(selected)]
 
-st.sidebar.subheader("Filters")
-# Campaign filter
-if mapped_df['campaign'] is not None:
-    campaign_filter = st.sidebar.multiselect("Campaign Name", options=mapped_df['campaign'].dropna().unique())
-    if campaign_filter:
-        filtered_df = filtered_df[filtered_df['campaign'].isin(campaign_filter)]
+    # Date filter
+    if mapped_df['start'] is not None and mapped_df['end'] is not None:
+        start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
+        end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
+        filtered_df = filtered_df[
+            (filtered_df['start'] >= pd.to_datetime(start_date)) &
+            (filtered_df['end'] <= pd.to_datetime(end_date))
+        ]
 
-# City filter
-if mapped_df['city'] is not None:
-    city_filter = st.sidebar.multiselect("City", options=mapped_df['city'].dropna().unique())
-    if city_filter:
-        filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
-
-# Age filter
-if mapped_df['age'] is not None:
-    age_filter = st.sidebar.multiselect("Age Group", options=mapped_df['age'].dropna().unique())
-    if age_filter:
-        filtered_df = filtered_df[filtered_df['age'].isin(age_filter)]
-
-# Gender filter
-if mapped_df['gender'] is not None:
-    gender_filter = st.sidebar.multiselect("Gender", options=mapped_df['gender'].dropna().unique())
-    if gender_filter:
-        filtered_df = filtered_df[filtered_df['gender'].isin(gender_filter)]
-
-# Ad Set filter
-if mapped_df.get('adset_name') is not None:
-    adset_filter = st.sidebar.multiselect("Ad Set Name", options=mapped_df['adset_name'].dropna().unique())
-    if adset_filter:
-        filtered_df = filtered_df[filtered_df['adset_name'].isin(adset_filter)]
-
-# Ad Name filter
-if mapped_df.get('ad_name') is not None:
-    ad_filter = st.sidebar.multiselect("Ad Name", options=mapped_df['ad_name'].dropna().unique())
-    if ad_filter:
-        filtered_df = filtered_df[filtered_df['ad_name'].isin(ad_filter)]
-
-# Date filter
-if mapped_df['start'] is not None and mapped_df['end'] is not None:
-    start_date = st.sidebar.date_input("Start Date", mapped_df['start'].min().date())
-    end_date = st.sidebar.date_input("End Date", mapped_df['end'].max().date())
-    filtered_df = filtered_df[
-        (filtered_df['start'] >= pd.to_datetime(start_date)) &
-        (filtered_df['end'] <= pd.to_datetime(end_date))
-    ]
 else:
     st.warning("Upload your CSV to begin.")
 
@@ -179,7 +157,6 @@ elif page == "Campaign Overview" and filtered_df is not None:
     st.title("Campaign Overview")
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    # Metrics
     metrics_map = {
         'Total Spent (INR)': 'spent',
         'Total Impressions': 'impressions',
@@ -226,35 +203,11 @@ elif page == "Campaign Overview" and filtered_df is not None:
             - Compare trends over multiple campaigns
             """)
 
-    # Top Campaigns
-    if filtered_df['campaign'] is not None and filtered_df['spent'] is not None:
-        top_campaigns = filtered_df.groupby('campaign', as_index=False)['spent'].sum().nlargest(10,'spent')
-        fig = px.bar(top_campaigns, x='spent', y='campaign', orientation='h',
-                     text=top_campaigns['spent'].apply(lambda x: f"₹{x:,.0f}"), color='spent', color_continuous_scale="Blues",
-                     title="Top Campaigns by Spend", hover_data={'campaign': True, 'spent': True})
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - See which campaigns consume the most budget
-        - Prioritize analysis on high-investment campaigns
-        - Compare spend vs ROI for top campaigns
-        - Identify underperforming campaigns despite high spend
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Focus analysis on top-spend campaigns first
-            - Adjust budgets based on ROI, not just spend
-            - Check for seasonal spikes in spending
-            """)
-
 # ------------------------
 # AUDIENCE INSIGHTS
 # ------------------------
 elif page == "Audience Insights" and filtered_df is not None:
     st.title("Audience Insights")
-    # Clicks by Age & Gender
     if filtered_df['age'] is not None and filtered_df['gender'] is not None and filtered_df['clicks'] is not None:
         agg = filtered_df.groupby(['age','gender'], as_index=False)['clicks'].sum()
         fig = px.bar(agg, x='age', y='clicks', color='gender', barmode='group', text='clicks', title="Clicks by Age & Gender",
@@ -262,42 +215,6 @@ elif page == "Audience Insights" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Identify which audience segments engage most with ads
-        - Optimize targeting to high-performing segments
-        - Compare engagement across demographics
-        - Detect underperforming audience groups to adjust strategy
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Use filters to focus on city, campaign, or age
-            - Hover to check exact clicks per segment
-            - Adjust ad creatives for low-performing groups
-            """)
-
-    # Top Cities by Spend
-    if filtered_df['city'] is not None and filtered_df['spent'] is not None:
-        city_perf = filtered_df.groupby('city', as_index=False)['spent'].sum().nlargest(10,'spent')
-        fig = px.bar(city_perf, x='city', y='spent', text=city_perf['spent'].apply(lambda x: f"₹{x:,.0f}"), color='city',
-                     title="Top Cities by Ad Spend", color_discrete_sequence=px.colors.sequential.Viridis,
-                     hover_data={'city': True, 'spent': True})
-        fig.update_traces(textposition='outside')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Highlight cities with maximum ad expenditure
-        - Focus analytics on regions generating most activity
-        - Evaluate city-wise spend efficiency vs performance
-        - Plan location-targeted campaigns or promotions
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Compare city spend vs CTR for ROI insights
-            - Check trends over time with filters
-            - Identify cities needing higher/lower budgets
-            """)
 
 # ------------------------
 # AD PERFORMANCE
@@ -313,40 +230,6 @@ elif page == "Ad Performance" and filtered_df is not None:
         fig.update_traces(textposition='outside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Identify ads generating the highest clicks
-        - Compare CTR and CPC to understand efficiency
-        - Spot underperforming ads despite high spend
-        - Make data-driven creative optimization decisions
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Hover for exact clicks and CTR
-            - Focus on top-performing ad creatives
-            - Cross-check with spend for ROI
-            """)
-
-        # CPC vs CTR
-        if 'cpc' in ad_perf.columns and 'ctr' in ad_perf.columns:
-            fig = px.scatter(ad_perf, x='cpc', y='ctr', color='spent', text=ad_perf['spent'].apply(lambda x: f"₹{x:,.0f}"),
-                             hover_name='ad_name', title="CPC vs CTR", hover_data={'cpc': True, 'ctr': True, 'spent': True})
-            fig.update_traces(marker=dict(size=10), textposition='top center')
-            fig = style_axes(fig)
-            st.plotly_chart(fig, use_container_width=True)
-            st.markdown("**Purpose:**")
-            st.markdown("""
-            - Visualize cost efficiency vs engagement for ads
-            - Identify ads with low CPC and high CTR (best performers)
-            - Compare ads’ cost per click vs conversion potential
-            - Detect ads that need budget adjustments or tweaks
-            """)
-            with st.expander("Quick Tips"):
-                st.markdown("""
-                - Hover for CPC, CTR, and spend
-                - Focus on ads in top-left quadrant (low CPC, high CTR)
-                - Adjust budget allocation accordingly
-                """)
 
 # ------------------------
 # VIDEO METRICS
@@ -362,41 +245,3 @@ elif page == "Video Metrics" and filtered_df is not None:
         fig.update_traces(texttemplate='%{text}', textposition='inside')
         fig = style_axes(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Track viewer drop-off at each stage of the video
-        - Identify where audience loses interest
-        - Optimize video content to improve retention
-        - Measure engagement quality beyond just views
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Check which stage has max drop-off
-            - Adjust content length or hooks at drop-off points
-            - Compare across campaigns
-            """)
-
-    # ThruPlay Efficiency Bubble Chart
-    if filtered_df['thruplays'] is not None and filtered_df['cost_per_thruplay'] is not None and filtered_df['impressions'] is not None:
-        filtered_df['thruplays'] = filtered_df['thruplays'].fillna(0).astype(int)
-        filtered_df['cost_per_thruplay'] = filtered_df['cost_per_thruplay'].fillna(0).astype(int)
-        filtered_df['impressions'] = filtered_df['impressions'].fillna(0).astype(int)
-        fig = px.scatter(filtered_df, x='thruplays', y='cost_per_thruplay', size='impressions', color='campaign',
-                         hover_name='ad_name', size_max=40, text=filtered_df['cost_per_thruplay'].apply(lambda x: f"₹{x:,}"),
-                         title="ThruPlays vs Cost per ThruPlay", hover_data={'thruplays': True, 'cost_per_thruplay': True, 'impressions': True})
-        fig.update_traces(marker=dict(sizemode='area', sizeref=2.*max(filtered_df['impressions'])/(40.**2), line=dict(width=1, color='DarkSlateGrey')), textposition='top center')
-        fig = style_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("**Purpose:**")
-        st.markdown("""
-        - Evaluate cost efficiency of full video plays
-        - Bubble size = impressions (reach), larger bubbles = more reach
-        - Identify campaigns with high ThruPlays at low cost
-        - Decide which videos to scale based on performance vs cost
-        """)
-        with st.expander("Quick Tips"):
-            st.markdown("""
-            - Hover bubbles to see exact ThruPlays, cost, and impressions
-            - Focus on large bubbles with low cost per ThruPlay
-            - Compare performance across campaigns
-            """)
