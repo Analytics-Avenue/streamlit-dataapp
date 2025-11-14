@@ -22,7 +22,7 @@ page = st.sidebar.selectbox("Navigate", PAGES)
 # -----------------------------------------------------------
 # GITHUB DEFAULT DATA
 # -----------------------------------------------------------
-DEFAULT_DATA_URL = "https://raw.githubusercontent.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO>/main/data/default_marketing_data.csv"
+DEFAULT_DATA_URL = "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/datasets/Marketing_Analytics.csv"
 
 def load_default():
     try:
