@@ -2,16 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-from PIL import Image
-import os
-import io
 
 # -------------------------------------------------------------
 # APP CONFIG
 # -------------------------------------------------------------
-st.set_page_config(page_title="Real Estate Analytics Dashboard",
-                   layout="wide",
-                   initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Real Estate Market Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # -------------------------------------------------------------
 # PAGE NAVIGATION STATE
@@ -21,24 +20,22 @@ if "page_index" not in st.session_state:
 
 PAGES = [
     "Home",
-    "About Real Estate Analytics",
-    "Inventory Overview",
-    "Lead Funnel Analysis",
-    "Sales Performance",
-    "Project-Level Metrics",
-    "Market Insights"
+    "Market Overview",
+    "Price Trends",
+    "Demand & Ratings",
+    "Property Mix",
+    "Location Insights"
 ]
 
 PAGE_MAP = {
-    "Overview": ["Home", "About Real Estate Analytics"],
-    "Operations": ["Inventory Overview", "Lead Funnel Analysis"],
-    "Sales": ["Sales Performance"],
-    "Projects": ["Project-Level Metrics"],
-    "Market": ["Market Insights"]
+    "Overview": ["Home", "Market Overview"],
+    "Market": ["Price Trends", "Demand & Ratings"],
+    "Inventory": ["Property Mix"],
+    "Location": ["Location Insights"]
 }
 
 # -------------------------------------------------------------
-# PAGE SWITCH HANDLERS
+# NAV FUNCTIONS
 # -------------------------------------------------------------
 def go_prev():
     if st.session_state.page_index > 0:
@@ -55,16 +52,14 @@ def go_to_page(page):
     st.session_state.page_index = PAGES.index(page)
 
 # -------------------------------------------------------------
-# NAVIGATION UI
+# SIDEBAR NAVIGATION
 # -------------------------------------------------------------
 st.sidebar.title("Navigation")
 
-# Dropdown (hierarchical)
-category = st.sidebar.selectbox("Select Section", list(PAGE_MAP.keys()))
-page_choice = st.sidebar.selectbox("Select Page", PAGE_MAP[category])
+category = st.sidebar.selectbox("Section", list(PAGE_MAP.keys()))
+page_choice = st.sidebar.selectbox("Page", PAGE_MAP[category])
 go_to_page(page_choice)
 
-# Buttons
 colA, colB, colC = st.sidebar.columns(3)
 colA.button("⟵ Prev", on_click=go_prev)
 colB.button("🏠 Home", on_click=go_home)
@@ -73,166 +68,129 @@ colC.button("Next ⟶", on_click=go_next)
 current_page = PAGES[st.session_state.page_index]
 
 # -------------------------------------------------------------
-# SAMPLE CSV TEMPLATE
+# SIDEBAR DATA UPLOAD
 # -------------------------------------------------------------
-DEFAULT_COLUMNS = {
-    "project": "Project Name",
-    "city": "City",
-    "unit_type": "Unit Type",
-    "inventory": "Available Inventory",
-    "leads": "Total Leads",
-    "qualified": "Qualified Leads",
-    "site_visits": "Site Visits",
-    "bookings": "Bookings",
-    "revenue": "Revenue (INR)",
-    "launch_date": "Launch Date",
-}
+st.sidebar.markdown("### Upload Dataset")
 
-def make_sample_csv():
-    df = pd.DataFrame(columns=list(DEFAULT_COLUMNS.values()))
-    buf = io.StringIO()
-    df.to_csv(buf, index=False)
-    return buf.getvalue().encode("utf-8")
+use_sample = st.sidebar.radio("Choose Data Source", ["Use sample dataset", "Upload CSV"])
 
-# -------------------------------------------------------------
-# SIDEBAR DATA INPUT
-# -------------------------------------------------------------
-st.sidebar.markdown("### Upload Real Estate Dataset")
-data_source_selector = st.sidebar.radio(
-    "Choose Data Source",
-    ["Use sample dataset", "Upload CSV"]
-)
+df = None
 
-df_raw = None
-
-if data_source_selector == "Use sample dataset":
-    # Empty dataset template
-    st.sidebar.download_button(
-        "Download sample CSV (headers only)",
-        data=make_sample_csv(),
-        file_name="real_estate_sample_template.csv",
-        mime="text/csv"
-    )
-    st.sidebar.info("Upload your dataset to see realistic dashboards.")
-
+if use_sample == "Use sample dataset":
+    sample_data = {
+        "Date": ["2022-01-01","2022-01-02","2022-01-03","2022-01-04"],
+        "Property_Type": ["Condo","Townhouse","Apartment","Condo"],
+        "Location": ["Suburban","Suburban","Suburban","Rural"],
+        "Price": [271305,276780,233677,357729],
+        "Bedrooms": [5,5,3,5],
+        "Bathrooms": [3,2,2,3],
+        "Square_Footage": [823,1146,1565,1206],
+        "Days_On_Market": [93,118,127,46],
+        "Interest_Rate": [52,62,35,57],
+        "Economic_Index": [82,58,56,57],
+        "School_Rating": [8,8,1,2],
+        "Demand_Score": [116,85,101,103],
+        "Year": [2022,2022,2022,2022],
+        "Month": [1,1,1,1],
+        "Price_per_SqFt": [329,241,149,296]
+    }
+    df = pd.DataFrame(sample_data)
 else:
     uploaded = st.sidebar.file_uploader("Upload CSV", type=["csv"])
     if uploaded:
-        df_raw = pd.read_csv(uploaded)
-        df_raw.columns = df_raw.columns.str.strip()
+        df = pd.read_csv(uploaded)
+        df.columns = df.columns.str.strip()
         st.sidebar.success("Uploaded successfully!")
 
 # -------------------------------------------------------------
-# CLEANING + BASIC MAPPING
+# BASIC CLEANING
 # -------------------------------------------------------------
-mapped_df = None
-if df_raw is not None:
-    mapped_df = pd.DataFrame()
-    for key, friendly in DEFAULT_COLUMNS.items():
-        mapped_df[key] = df_raw[friendly] if friendly in df_raw.columns else None
-
-    # Convert dates
-    if "launch_date" in mapped_df:
-        mapped_df["launch_date"] = pd.to_datetime(mapped_df["launch_date"], errors="coerce")
-
-    # Numeric fields
-    numeric_cols = ["inventory", "leads", "qualified", "site_visits", "bookings", "revenue"]
-    for col in numeric_cols:
-        if col in mapped_df.columns:
-            mapped_df[col] = pd.to_numeric(mapped_df[col], errors="coerce")
+if df is not None:
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 
 # -------------------------------------------------------------
 # PAGE CONTENT
 # -------------------------------------------------------------
-
-# --------------------------- HOME --------------------------------
+# --------------------------- HOME ---------------------------
 if current_page == "Home":
-    st.title("Real Estate Analytics Dashboard")
+    st.title("Real Estate Market Dashboard")
     st.markdown("""
-    Welcome to **Real Estate Analytics**,  
-    a complete analytical suite for evaluating:
-    - Project performance  
-    - Lead funnel efficiency  
-    - Sales velocity  
-    - Revenue tracking  
-    - City-wise market trends  
-    """)
-    st.image("https://i.imgur.com/0ZfPPrf.jpeg", caption="Real Estate Market Intelligence", use_column_width=True)
-
-# --------------------------- ABOUT --------------------------------
-elif current_page == "About Real Estate Analytics":
-    st.title("About Real Estate Analytics")
-    st.markdown("""
-    Real Estate Analytics tracks **end-to-end real estate performance** including:
-    - Project demand  
-    - Lead quality  
-    - Sales pipeline  
-    - Inventory aging  
-    - Market shifts  
+    Explore key insights from real estate listings including:
+    • Price trends  
+    • Market demand  
+    • Location-based analysis  
+    • Property types  
+    • School ratings impact  
     """)
 
-# --------------------------- INVENTORY -----------------------------
-elif current_page == "Inventory Overview":
-    st.title("Inventory Overview")
-    if mapped_df is None:
-        st.warning("Upload a dataset to view inventory metrics.")
-    else:
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total Inventory", f"{mapped_df['inventory'].sum():,}")
-        col2.metric("Avg Unit Launch Date", mapped_df['launch_date'].min().strftime("%Y-%m-%d"))
-        col3.metric("Total Projects", mapped_df['project'].nunique())
+# --------------------------- MARKET OVERVIEW ---------------------------
+elif current_page == "Market Overview":
+    st.title("Market Overview")
 
-        # city-wise inventory
-        inv = mapped_df.groupby("city")["inventory"].sum().reset_index()
-        fig = px.bar(inv, x="city", y="inventory", title="City-wise Inventory")
+    if df is None:
+        st.warning("Upload a dataset to continue.")
+    else:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Listings", len(df))
+        c2.metric("Avg Price", f"{df['Price'].mean():,.0f}")
+        c3.metric("Avg Days on Market", f"{df['Days_On_Market'].mean():.1f}")
+
+        fig = px.box(df, y="Price", title="Price Distribution")
         st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------- LEADS FUNNEL --------------------------
-elif current_page == "Lead Funnel Analysis":
-    st.title("Lead Funnel Analysis")
-    if mapped_df is None:
-        st.warning("Upload a dataset first.")
-    else:
-        funnel = [
-            mapped_df["leads"].sum(),
-            mapped_df["qualified"].sum(),
-            mapped_df["site_visits"].sum(),
-            mapped_df["bookings"].sum()
-        ]
+# --------------------------- PRICE TRENDS ---------------------------
+elif current_page == "Price Trends":
+    st.title("Price Trends")
 
-        funnel_df = pd.DataFrame({
-            "Stage": ["Leads", "Qualified", "Site Visits", "Bookings"],
-            "Count": funnel
-        })
-
-        fig = px.funnel(funnel_df, x="Count", y="Stage", title="Lead Funnel Overview")
-        st.plotly_chart(fig, use_container_width=True)
-
-# --------------------------- SALES --------------------------
-elif current_page == "Sales Performance":
-    st.title("Sales Performance")
-    if mapped_df is None:
+    if df is None:
         st.warning("Upload a dataset.")
     else:
-        city_sales = mapped_df.groupby("city")["revenue"].sum().reset_index()
-        fig = px.bar(city_sales, x="city", y="revenue", text="revenue",
-                     title="Revenue by City")
+        fig = px.line(df, x="Date", y="Price", color="Property_Type", title="Daily Price Trend")
         st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------- PROJECT METRICS -----------------------
-elif current_page == "Project-Level Metrics":
-    st.title("Project-Level Metrics")
-    if mapped_df is None:
+        fig2 = px.scatter(df, x="Square_Footage", y="Price", color="Location",
+                          size="Bedrooms", title="Price vs SqFt")
+        st.plotly_chart(fig2, use_container_width=True)
+
+# --------------------------- DEMAND & RATINGS ---------------------------
+elif current_page == "Demand & Ratings":
+    st.title("Demand & Ratings")
+
+    if df is None:
         st.warning("Upload a dataset.")
     else:
-        fig = px.scatter(mapped_df, x="inventory", y="bookings", color="city",
-                         size="revenue", hover_name="project",
-                         title="Project Performance Bubble Chart")
+        fig = px.scatter(df, x="School_Rating", y="Demand_Score",
+                         color="Location", title="School Rating vs Demand")
         st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------- MARKET INSIGHTS -----------------------
-elif current_page == "Market Insights":
-    st.title("Market Insights")
-    st.markdown("Additional market intelligence visuals can go here.")
+        fig2 = px.bar(df, x="Property_Type", y="Demand_Score", 
+                      title="Demand by Property Type", barmode="group")
+        st.plotly_chart(fig2, use_container_width=True)
 
+# --------------------------- PROPERTY MIX ---------------------------
+elif current_page == "Property Mix":
+    st.title("Property Type Mix")
 
+    if df is None:
+        st.warning("Upload a dataset.")
+    else:
+        mix = df["Property_Type"].value_counts().reset_index()
+        mix.columns = ["Type", "Count"]
+
+        fig = px.pie(mix, names="Type", values="Count", title="Property Distribution")
+        st.plotly_chart(fig, use_container_width=True)
+
+# --------------------------- LOCATION INSIGHTS ---------------------------
+elif current_page == "Location Insights":
+    st.title("Location Insights")
+
+    if df is None:
+        st.warning("Upload a dataset.")
+    else:
+        fig = px.bar(df.groupby("Location")["Price"].mean().reset_index(),
+                     x="Location", y="Price", title="Avg Price by Location")
+        st.plotly_chart(fig, use_container_width=True)
+
+        fig2 = px.box(df, x="Location", y="Days_On_Market",
+                      title="Days on Market by Location")
+        st.plotly_chart(fig2, use_container_width=True)
