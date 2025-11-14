@@ -7,31 +7,31 @@ from datetime import datetime
 # APP CONFIG
 # -------------------------------------------------------------
 st.set_page_config(
-    page_title="Real Estate Market Dashboard",
+    page_title="Real Estate Analytics Dashboard",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # -------------------------------------------------------------
-# PAGE NAVIGATION STATE
+# PAGE STATE
 # -------------------------------------------------------------
 if "page_index" not in st.session_state:
     st.session_state.page_index = 0
 
 PAGES = [
     "Home",
-    "Market Overview",
-    "Price Trends",
-    "Demand & Ratings",
-    "Property Mix",
-    "Location Insights"
+    "Project Overview",
+    "Inventory Analysis",
+    "Lead Funnel Analytics",
+    "Sales Performance",
+    "Market Intelligence"
 ]
 
 PAGE_MAP = {
-    "Overview": ["Home", "Market Overview"],
-    "Market": ["Price Trends", "Demand & Ratings"],
-    "Inventory": ["Property Mix"],
-    "Location": ["Location Insights"]
+    "Overview": ["Home", "Project Overview"],
+    "Inventory": ["Inventory Analysis"],
+    "Sales": ["Lead Funnel Analytics", "Sales Performance"],
+    "Market": ["Market Intelligence"]
 }
 
 # -------------------------------------------------------------
@@ -68,129 +68,163 @@ colC.button("Next ⟶", on_click=go_next)
 current_page = PAGES[st.session_state.page_index]
 
 # -------------------------------------------------------------
-# SIDEBAR DATA UPLOAD
+# SIDEBAR DATA LOAD
 # -------------------------------------------------------------
-st.sidebar.markdown("### Upload Dataset")
+st.sidebar.markdown("### Upload Real Estate Dataset")
 
-use_sample = st.sidebar.radio("Choose Data Source", ["Use sample dataset", "Upload CSV"])
+data_choice = st.sidebar.radio("Select Data Source:", ["Use Sample Industry Dataset", "Upload CSV"])
 
-df = None
+df_projects = df_inventory = df_leads = df_market = None
 
-if use_sample == "Use sample dataset":
-    sample_data = {
-        "Date": ["2022-01-01","2022-01-02","2022-01-03","2022-01-04"],
-        "Property_Type": ["Condo","Townhouse","Apartment","Condo"],
-        "Location": ["Suburban","Suburban","Suburban","Rural"],
-        "Price": [271305,276780,233677,357729],
-        "Bedrooms": [5,5,3,5],
-        "Bathrooms": [3,2,2,3],
-        "Square_Footage": [823,1146,1565,1206],
-        "Days_On_Market": [93,118,127,46],
-        "Interest_Rate": [52,62,35,57],
-        "Economic_Index": [82,58,56,57],
-        "School_Rating": [8,8,1,2],
-        "Demand_Score": [116,85,101,103],
-        "Year": [2022,2022,2022,2022],
-        "Month": [1,1,1,1],
-        "Price_per_SqFt": [329,241,149,296]
-    }
-    df = pd.DataFrame(sample_data)
+# ---------------- SAMPLE INDUSTRY DATASET ----------------
+if data_choice == "Use Sample Industry Dataset":
+
+    df_projects = pd.DataFrame({
+        "Project_ID": [1, 2],
+        "Project_Name": ["Skyline Heights", "Urban Crest"],
+        "Builder_Name": ["ABC Developers", "Prime Estates"],
+        "City": ["Chennai", "Bangalore"],
+        "Location": ["Velachery", "Whitefield"],
+        "Launch_Date": ["2021-06-01", "2020-09-15"],
+        "RERA_Approval": ["Yes", "Yes"],
+        "Land_Area_Acres": [4.5, 6.2],
+        "Total_Units": [450, 620],
+        "Construction_Status": ["Ongoing", "Completed"]
+    })
+
+    df_inventory = pd.DataFrame({
+        "Unit_ID": [101,102,103,201,202],
+        "Project_ID": [1,1,2,2,2],
+        "Unit_Type": ["2BHK","3BHK","2BHK","3BHK","Villa"],
+        "Carpet_Area": [950, 1250, 900, 1400, 2400],
+        "Builtup_Area": [1200,1500,1100,1600,3000],
+        "Price": [72,95,68,110,260],
+        "Floor": [3,10,2,7,1],
+        "Facing": ["East","North","West","East","South"],
+        "Status": ["Available","Booked","Available","Hold","Sold"]
+    })
+
+    df_leads = pd.DataFrame({
+        "Lead_ID": [1001,1002,1003,1004],
+        "Project_ID": [1,1,2,2],
+        "Channel": ["Website","Broker","Referral","Walk-in"],
+        "Lead_Date": ["2023-01-01","2023-01-05","2023-02-01","2023-02-10"],
+        "Qualified": ["Yes","No","Yes","Yes"],
+        "Site_Visit_Date": ["2023-01-10",None,"2023-02-05","2023-02-15"],
+        "Booking_Date": ["2023-01-20",None,"2023-02-20",None],
+        "Booking_Amount": [200000,0,300000,0],
+        "Final_Amount": [7200000,0,6800000,0],
+        "Cancellation_Status": ["No","No","No","Yes"]
+    })
+
+    df_market = pd.DataFrame({
+        "City": ["Chennai","Bangalore"],
+        "Location": ["Velachery","Whitefield"],
+        "Avg_Market_Price": [7800,9200],
+        "Inventory_Overhang_Months": [8,12],
+        "Demand_Index": [78,85],
+        "Rental_Yield": [3.5,4.1],
+        "School_Rating": [4,5],
+        "Connectivity_Score": [8,9]
+    })
+
+
+# ------------- USER UPLOAD -----------------
 else:
-    uploaded = st.sidebar.file_uploader("Upload CSV", type=["csv"])
-    if uploaded:
-        df = pd.read_csv(uploaded)
-        df.columns = df.columns.str.strip()
-        st.sidebar.success("Uploaded successfully!")
+    st.sidebar.info("Upload all 4 datasets: Projects, Inventory, Leads, Market.")
 
-# -------------------------------------------------------------
-# BASIC CLEANING
-# -------------------------------------------------------------
-if df is not None:
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    p = st.sidebar.file_uploader("Projects.csv", type=["csv"])
+    i = st.sidebar.file_uploader("Inventory.csv", type=["csv"])
+    l = st.sidebar.file_uploader("Leads.csv", type=["csv"])
+    m = st.sidebar.file_uploader("Market.csv", type=["csv"])
+
+    if p and i and l and m:
+        df_projects = pd.read_csv(p)
+        df_inventory = pd.read_csv(i)
+        df_leads = pd.read_csv(l)
+        df_market = pd.read_csv(m)
+        st.sidebar.success("All datasets uploaded!")
 
 # -------------------------------------------------------------
 # PAGE CONTENT
 # -------------------------------------------------------------
 # --------------------------- HOME ---------------------------
 if current_page == "Home":
-    st.title("Real Estate Market Dashboard")
+    st.title("🏙️ Real Estate Analytics Suite")
     st.markdown("""
-    Explore key insights from real estate listings including:
-    • Price trends  
-    • Market demand  
-    • Location-based analysis  
-    • Property types  
-    • School ratings impact  
+    A complete industry-grade analytics dashboard covering:
+    • Project performance  
+    • Inventory status  
+    • Lead funnel & conversion  
+    • Sales insights  
+    • Market intelligence  
     """)
 
-# --------------------------- MARKET OVERVIEW ---------------------------
-elif current_page == "Market Overview":
-    st.title("Market Overview")
+# ---------------- PROJECT OVERVIEW ----------------
+elif current_page == "Project Overview":
+    st.title("📌 Project Overview")
 
-    if df is None:
-        st.warning("Upload a dataset to continue.")
-    else:
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Total Listings", len(df))
-        c2.metric("Avg Price", f"{df['Price'].mean():,.0f}")
-        c3.metric("Avg Days on Market", f"{df['Days_On_Market'].mean():.1f}")
+    if df_projects is not None:
+        st.dataframe(df_projects)
 
-        fig = px.box(df, y="Price", title="Price Distribution")
+        fig = px.bar(df_projects, x="Project_Name", y="Total_Units", title="Total Units per Project")
         st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------- PRICE TRENDS ---------------------------
-elif current_page == "Price Trends":
-    st.title("Price Trends")
+# ---------------- INVENTORY ----------------
+elif current_page == "Inventory Analysis":
+    st.title("🏘️ Inventory Analysis")
 
-    if df is None:
-        st.warning("Upload a dataset.")
-    else:
-        fig = px.line(df, x="Date", y="Price", color="Property_Type", title="Daily Price Trend")
+    if df_inventory is not None:
+        st.dataframe(df_inventory)
+
+        fig = px.histogram(df_inventory, x="Price", color="Unit_Type", title="Price Distribution by Unit Type")
         st.plotly_chart(fig, use_container_width=True)
 
-        fig2 = px.scatter(df, x="Square_Footage", y="Price", color="Location",
-                          size="Bedrooms", title="Price vs SqFt")
-        st.plotly_chart(fig2, use_container_width=True)
+# ---------------- LEAD FUNNEL ----------------
+elif current_page == "Lead Funnel Analytics":
+    st.title("🧭 Lead Funnel Analytics")
 
-# --------------------------- DEMAND & RATINGS ---------------------------
-elif current_page == "Demand & Ratings":
-    st.title("Demand & Ratings")
+    if df_leads is not None:
+        df_leads["Qualified_Flag"] = df_leads["Qualified"].apply(lambda x: 1 if x=="Yes" else 0)
+        df_leads["Booked_Flag"] = df_leads["Booking_Date"].notnull().astype(int)
 
-    if df is None:
-        st.warning("Upload a dataset.")
-    else:
-        fig = px.scatter(df, x="School_Rating", y="Demand_Score",
-                         color="Location", title="School Rating vs Demand")
+        funnel_data = {
+            "Stage": ["Leads","Qualified Leads","Bookings"],
+            "Count": [
+                len(df_leads),
+                df_leads["Qualified_Flag"].sum(),
+                df_leads["Booked_Flag"].sum()
+            ]
+        }
+
+        funnel_df = pd.DataFrame(funnel_data)
+        fig = px.funnel(funnel_df, x="Count", y="Stage", title="Lead Funnel")
         st.plotly_chart(fig, use_container_width=True)
 
-        fig2 = px.bar(df, x="Property_Type", y="Demand_Score", 
-                      title="Demand by Property Type", barmode="group")
-        st.plotly_chart(fig2, use_container_width=True)
+# ---------------- SALES ----------------
+elif current_page == "Sales Performance":
+    st.title("💰 Sales Performance")
 
-# --------------------------- PROPERTY MIX ---------------------------
-elif current_page == "Property Mix":
-    st.title("Property Type Mix")
+    if df_leads is not None:
+        booked = df_leads[df_leads["Booking_Date"].notnull()]
 
-    if df is None:
-        st.warning("Upload a dataset.")
-    else:
-        mix = df["Property_Type"].value_counts().reset_index()
-        mix.columns = ["Type", "Count"]
+        st.metric("Total Sales Value", f"{booked['Final_Amount'].sum():,.0f}")
+        st.metric("Total Bookings", len(booked))
 
-        fig = px.pie(mix, names="Type", values="Count", title="Property Distribution")
+        fig = px.bar(booked, x="Project_ID", y="Final_Amount",
+                     title="Sales Value by Project", text="Final_Amount")
         st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------- LOCATION INSIGHTS ---------------------------
-elif current_page == "Location Insights":
-    st.title("Location Insights")
+# ---------------- MARKET ----------------
+elif current_page == "Market Intelligence":
+    st.title("🌍 Market & Competition Analysis")
 
-    if df is None:
-        st.warning("Upload a dataset.")
-    else:
-        fig = px.bar(df.groupby("Location")["Price"].mean().reset_index(),
-                     x="Location", y="Price", title="Avg Price by Location")
+    if df_market is not None:
+        fig = px.bar(df_market, x="Location", y="Avg_Market_Price",
+                     title="Average Market Price by Location")
         st.plotly_chart(fig, use_container_width=True)
 
-        fig2 = px.box(df, x="Location", y="Days_On_Market",
-                      title="Days on Market by Location")
+        fig2 = px.scatter(df_market, x="Demand_Index", y="Rental_Yield",
+                          color="City", size="Connectivity_Score",
+                          title="Demand vs Rental Yield")
         st.plotly_chart(fig2, use_container_width=True)
