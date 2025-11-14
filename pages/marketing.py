@@ -243,6 +243,7 @@ pages = [
 st.sidebar.title("Pages")
 page = st.sidebar.radio("Go to", pages)
 
+
 # ------------------------
 # PAGE: About Marketing Analytics
 # ------------------------
@@ -255,21 +256,25 @@ if page == "About Marketing Analytics":
     """)
 
     st.subheader("How it works — architecture")
-if os.path.exists(arch_path):
-    st.image(Image.open(arch_path), caption="End-to-End Marketing Analytics Architecture", use_column_width=True)
-else:
-    st.info("Architecture image not found at: " + arch_path)
 
-if os.path.exists(funnel_path):
-    st.image(Image.open(funnel_path), caption="Marketing Funnel: Awareness → Consideration → Conversion", use_column_width=True)
-else:
-    st.info("Funnel image not found at: " + funnel_path)
+    if os.path.exists(arch_path):
+        st.image(Image.open(arch_path),
+                 caption="End-to-End Marketing Analytics Architecture",
+                 use_column_width=True)
+    else:
+        st.info("Architecture image not found at: " + arch_path)
 
+    if os.path.exists(funnel_path):
+        st.image(Image.open(funnel_path),
+                 caption="Marketing Funnel: Awareness → Consideration → Conversion",
+                 use_column_width=True)
+    else:
+        st.info("Funnel image not found at: " + funnel_path)
 
     st.markdown("### Why this matters")
     st.markdown("""
-    - Track Reach, CTR, CPC, CAC and engagement to measure campaign health.  
-    - Use data to target audiences, optimize creatives, and allocate budget.  
+    - Track Reach, CTR, CPC, CAC and engagement to measure campaign health.
+    - Use data to target audiences, optimize creatives, and allocate budget.
     - Visualize funnel drop-offs and act where conversions are lost.
     """)
 
