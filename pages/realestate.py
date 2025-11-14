@@ -41,17 +41,27 @@ def format_inr(value):
     if abs_v >= 1e5:
         return f"₹{v/1e5:.2f} L"
     # Otherwise use Indian comma format for thousands
-    s = f"{int(round(v)):,}"
-    # convert to Indian grouping (12,34,567)
-    s = s[::-1]
-    parts = []
-    parts.append(s[:3])
-    s = s[3:]
-    while s:
-        parts.append(s[:2])
-        s = s[2:]
-    formatted = ",".join(parts)[::-1]
-    return "₹" + formatted
+    # start from raw integer without any commas
+    n = int(round(v))
+    s = str(abs(n))
+    # build indian grouping
+    if len(s) <= 3:
+        grouped = s
+    else:
+        # last 3 digits
+        last3 = s[-3:]
+        rem = s[:-3]
+        parts = []
+        while len(rem) > 2:
+            parts.append(rem[-2:])
+            rem = rem[:-2]
+        if rem:
+            parts.append(rem)
+        parts = parts[::-1]
+        grouped = ",".join(parts) + "," + last3
+    if n < 0:
+        grouped = "-" + grouped
+    return "₹" + grouped
 
 # ---------- OneHotEncoder compatibility ----------
 def safe_ohe():
@@ -433,7 +443,9 @@ if "Price" in dff.columns:
     fig = px.histogram(dff, x="Price", nbins=50, title="Price distribution", labels={"Price":"Price"})
     fig.update_traces(texttemplate="%{y}", textposition="inside")
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown("**Purpose:** Discover where listings cluster and detect outliers.")
+    with st.expander("Purpose & Quick Tips — Price Distribution", expanded=False):
+        st.markdown("- **Purpose:** Discover where listings cluster and detect outliers.")
+        st.markdown("- **Quick Tips:** Try log-scale or filter by city to reveal local patterns. Use 20–50 bins for typical datasets.")
 else:
     st.info("Price column missing.")
 
@@ -443,6 +455,9 @@ if "City" in dff.columns and "Price" in dff.columns:
     fig = px.box(dff, x="City", y="Price", color="Property_Type", title="Price by City and Property Type", points="outliers")
     fig.update_traces(boxmean=True)
     st.plotly_chart(fig, use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Price by City & Type", expanded=False):
+        st.markdown("- **Purpose:** Compare pricing distributions across cities and product types.")
+        st.markdown("- **Quick Tips:** Look for wide boxes (high variance) and outliers—they indicate inconsistent pricing or special listings.")
 else:
     st.info("City or Price missing.")
 
@@ -452,6 +467,9 @@ if "City" in dff.columns and "Price_per_SqFt" in dff.columns:
     pps = dff.groupby("City", as_index=False)["Price_per_SqFt"].mean().sort_values("Price_per_SqFt", ascending=False)
     fig = px.bar(pps, x="City", y="Price_per_SqFt", title="Avg Price per Sqft by City", text_auto=".2f")
     st.plotly_chart(fig, use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Avg ₹/sqft", expanded=False):
+        st.markdown("- **Purpose:** Identify high-value cities and relative pricing per area.")
+        st.markdown("- **Quick Tips:** Combine this with demand score to find undervalued markets.")
 else:
     st.info("Price_per_SqFt or City missing.")
 
@@ -462,6 +480,9 @@ if "Property_Type" in dff.columns:
     mix.columns = ["Property_Type","Count"]
     fig = px.pie(mix, names="Property_Type", values="Count", hole=0.35, title="Property Type Mix")
     st.plotly_chart(fig, use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Property Mix", expanded=False):
+        st.markdown("- **Purpose:** See product mix (supply composition).")
+        st.markdown("- **Quick Tips:** Use this to match inventory to demand; large share + low demand = slow-moving inventory.")
 else:
     st.info("Property_Type missing.")
 
@@ -476,12 +497,18 @@ if dff["Latitude"].notna().any() and dff["Longitude"].notna().any():
         geo_sample = geo_sample.sample(1500, random_state=42)
     fig = px.scatter_geo(geo_sample, lat="Latitude", lon="Longitude", color="Price", hover_name="City", size="Price", title="Geo scatter (size ~ price)")
     st.plotly_chart(fig, use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Geo Visuals", expanded=False):
+        st.markdown("- **Purpose:** Visualize spatial clusters & price hotspots.")
+        st.markdown("- **Quick Tips:** Use real lat/lon for accurate maps. Sample large datasets to keep performance smooth.")
 else:
     # fallback pivot heatmap: location x property_type
     if "Locality" in dff.columns and "Property_Type" in dff.columns and "Price_per_SqFt" in dff.columns:
         heat = dff.pivot_table(index="Locality", columns="Property_Type", values="Price_per_SqFt", aggfunc="mean").fillna(0)
         fig = px.imshow(heat, title="Avg ₹/sqft by Locality and Property Type", labels={"x":"Property Type","y":"Locality","color":"Avg ₹/sqft"})
         st.plotly_chart(fig, use_container_width=True)
+        with st.expander("Purpose & Quick Tips — Locality Heatmap", expanded=False):
+            st.markdown("- **Purpose:** Compare locality-level price intensity across product types.")
+            st.markdown("- **Quick Tips:** Filter to top localities to avoid clutter. Hover cells for exact ₹/sqft.")
     else:
         st.info("Latitude/Longitude missing and insufficient columns for location heatmap.")
 
@@ -499,6 +526,9 @@ if "Listing_Agent" in dff.columns:
     ).reset_index().sort_values("Total_Value", ascending=False)
     agent_df["Total_Value_str"] = agent_df["Total_Value"].apply(format_inr)
     st.dataframe(agent_df.head(20), use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Agent Leaderboard", expanded=False):
+        st.markdown("- **Purpose:** Identify top-performing agents by value and volume.")
+        st.markdown("- **Quick Tips:** Combine with Avg_Price to spot agents selling premium inventory vs. volume sellers.")
 else:
     st.info("Listing_Agent missing — leaderboard not available.")
 
@@ -524,6 +554,9 @@ if "Price" in dff.columns and "Square_Footage" in dff.columns:
         st.plotly_chart(fig, use_container_width=True)
         st.write("Cluster distribution:")
         st.write(clu_df["cluster"].value_counts())
+        with st.expander("Purpose & Quick Tips — Clustering", expanded=False):
+            st.markdown("- **Purpose:** Create segments to price/position inventory differently.")
+            st.markdown("- **Quick Tips:** Try different k (3–6). Label clusters by centroid price & size for business use.")
 else:
     st.info("Price and Square_Footage required for clustering.")
 
@@ -567,6 +600,9 @@ if "Listing_Date" in dff.columns and "Price" in dff.columns:
         combined = pd.concat([monthly[["YearMonth","Price"]].rename(columns={"Price":"Actual_Price"}), forecast], ignore_index=True, sort=False)
         fig = px.line(combined, x="YearMonth", y=["Actual_Price","Predicted_Price"], title="Price Forecast (monthly)")
         st.plotly_chart(fig, use_container_width=True)
+        with st.expander("Purpose & Quick Tips — Forecasting", expanded=False):
+            st.markdown("- **Purpose:** Predict short-term direction for prices.")
+            st.markdown("- **Quick Tips:** Use more history and macro indicators (interest rates, CPI) for stability.")
 else:
     st.info("Listing_Date or Price missing — forecasting unavailable.")
 
@@ -591,6 +627,9 @@ if "Price" in dff.columns and "Square_Footage" in dff.columns:
             sim_idx = inds[0][1:]
             st.write("Similar listings:")
             st.dataframe(cand.iloc[sim_idx][["Listing_ID","City","Locality","Property_Type","Price","Square_Footage","Bedrooms","Bathrooms"]])
+            with st.expander("Purpose & Quick Tips — Recommender", expanded=False):
+                st.markdown("- **Purpose:** Surface comparable listings for buyers or investors.")
+                st.markdown("- **Quick Tips:** Pick a representative index (not an outlier) for better recommendations.")
         except Exception as e:
             st.info("Recommender error: " + str(e))
     else:
@@ -675,8 +714,14 @@ if query:
             cols_show = ["Listing_ID","City","Locality","Property_Type","Bedrooms","Bathrooms","Square_Footage","Price_str","Parking"]
             available = [c for c in cols_show if c in display.columns]
             st.dataframe(display[available].head(200), use_container_width=True)
+        with st.expander("Purpose & Quick Tips — Keyword Search", expanded=False):
+            st.markdown("- **Purpose:** Quickly find candidate listings using natural keywords.")
+            st.markdown("- **Quick Tips:** Use `under 1.5cr`, `3BHK`, or city names. If 0 matches, broaden budget or remove BHK filter.")
     else:
         st.info("No matches found. Try broader terms or check sample CSV.")
+        with st.expander("Purpose & Quick Tips — Keyword Search", expanded=False):
+            st.markdown("- **Purpose:** Quickly find candidate listings using natural keywords.")
+            st.markdown("- **Quick Tips:** Use `under 1.5cr`, `3BHK`, or city names. If 0 matches, broaden budget or remove BHK filter.")
 
 # -------------------------
 # Lead scoring & funnel
@@ -690,6 +735,9 @@ if "Lead_Status" in dff.columns:
     funnel.columns = ["Stage","Count"]
     fig = px.bar(funnel, x="Stage", y="Count", title="Lead Funnel")
     st.plotly_chart(fig, use_container_width=True)
+    with st.expander("Purpose & Quick Tips — Lead Funnel", expanded=False):
+        st.markdown("- **Purpose:** Visualize lead progression across stages.")
+        st.markdown("- **Quick Tips:** Use Lead_Source filter to evaluate channel performance.")
 else:
     st.info("Lead_Status missing — cannot show funnel.")
 
@@ -710,6 +758,9 @@ if "Lead_Status" in dff.columns and "Lead_Score" in dff.columns:
             st.write(f"Lead->Booked model RMSE: {rmse:.3f} (lower is better)")
             st.markdown("Top features used:")
             st.write(features)
+            with st.expander("Purpose & Quick Tips — Lead Scoring", expanded=False):
+                st.markdown("- **Purpose:** Prioritize leads with higher conversion probability.")
+                st.markdown("- **Quick Tips:** Use more CRM features (followups, source, agent touchpoints) for accuracy.")
         else:
             st.info("Not enough data or no variance in Booking flag to train lead model.")
     else:
@@ -738,6 +789,9 @@ if "Time_to_Sell" in dff.columns:
             sample = {c: [tdf[c].median()] for c in features}
             pred_days = m.predict(pd.DataFrame(sample))[0]
             st.success(f"Predicted Days on Market: {pred_days:.0f}")
+        with st.expander("Purpose & Quick Tips — Time-to-Sell", expanded=False):
+            st.markdown("- **Purpose:** Estimate listing duration to help pricing and incentives.")
+            st.markdown("- **Quick Tips:** Combine with agent & locality performance for realistic targets.")
     else:
         st.info("Not enough data or features to train time-to-sell model.")
 else:
@@ -838,7 +892,8 @@ else:
                     pred_price = rf.predict(Xin)[0]
                     st.success(f"Predicted price: {format_inr(pred_price)}")
                     if "Square_Footage" in input_df.columns and float(input_df["Square_Footage"].iloc[0])>0:
-                        st.info(f"Predicted ₹/sqft: {format_inr(pred_price/float(input_df['Square_Footage'].iloc[0]))}")
+                        pps_val = pred_price/float(input_df['Square_Footage'].iloc[0])
+                        st.info(f"Predicted ₹/sqft: {format_inr(pps_val)}")
                 except Exception as e:
                     st.error("Prediction failed: " + str(e))
 
