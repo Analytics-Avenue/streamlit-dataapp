@@ -74,11 +74,9 @@ def make_sample_csv_bytes():
 # ------------------------
 # Paths (images)
 # ------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# pages/marketing.py -> go two levels up to repo root, then images/
-IMAGES_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "..", "images"))
-ARCH_IMAGE_PATH = os.path.join(IMAGES_DIR, "marketing_analytics_architecture.jpg")
-FUNNEL_IMAGE_PATH = os.path.join(IMAGES_DIR, "marketing_funnel.jpg")
+arch_path = "./images/marketing_analytics_architecture.jpg"
+funnel_path = "./images/marketing_funnel.jpg"
+
 
 # ------------------------
 # Default GitHub dataset raw URL (converted from user's repo URL)
@@ -257,22 +255,16 @@ if page == "About Marketing Analytics":
     """)
 
     st.subheader("How it works — architecture")
-    if os.path.exists(ARCH_IMAGE_PATH):
-        try:
-            st.image(Image.open(ARCH_IMAGE_PATH), caption="End-to-End Marketing Analytics Architecture", use_column_width=True)
-        except Exception:
-            st.warning("Could not load architecture image (corrupt or unsupported).")
-    else:
-        st.info("Architecture image not found at the repository path. Place the file at: " + ARCH_IMAGE_PATH)
+if os.path.exists(arch_path):
+    st.image(Image.open(arch_path), caption="End-to-End Marketing Analytics Architecture", use_column_width=True)
+else:
+    st.info("Architecture image not found at: " + arch_path)
 
-    st.subheader("Marketing funnel")
-    if os.path.exists(FUNNEL_IMAGE_PATH):
-        try:
-            st.image(Image.open(FUNNEL_IMAGE_PATH), caption="Marketing Funnel: Awareness → Consideration → Conversion", use_column_width=True)
-        except Exception:
-            st.warning("Could not load funnel image (corrupt or unsupported).")
-    else:
-        st.info("Funnel image not found at the repository path. Place the file at: " + FUNNEL_IMAGE_PATH)
+if os.path.exists(funnel_path):
+    st.image(Image.open(funnel_path), caption="Marketing Funnel: Awareness → Consideration → Conversion", use_column_width=True)
+else:
+    st.info("Funnel image not found at: " + funnel_path)
+
 
     st.markdown("### Why this matters")
     st.markdown("""
