@@ -14,10 +14,12 @@ st.set_page_config(
     layout="wide"
 )
 
+st.title("🏠 Real Estate Analytics Dashboard")
+
 # -------------------------------------------------
-# Synthetic Real Estate Dataset Generator
+# Synthetic Dataset Generator
 # -------------------------------------------------
-def generate_real_estate_data():
+def generate_data():
     np.random.seed(42)
 
     cities = ["Chennai", "Bangalore", "Hyderabad", "Mumbai", "Pune", "Delhi"]
@@ -34,7 +36,7 @@ def generate_real_estate_data():
         city = random.choice(cities)
         prop_type = random.choice(property_types)
         area = np.random.randint(600, 4000)
-        price = np.random.randint(20, 250) * 1e5  # 20L to 2.5Cr
+        price = np.random.randint(20, 250) * 1e5
         bedrooms = np.random.randint(1, 5)
         bath = np.random.randint(1, 4)
         status_val = random.choice(status)
@@ -55,9 +57,9 @@ def generate_real_estate_data():
             agent,
             listing_date,
             np.random.choice(amenities),
-            np.random.randint(50, 1000),  # Lead count
-            np.random.randint(10, 300),   # Site visits
-            np.random.randint(5, 50),     # Offers
+            np.random.randint(50, 1000),
+            np.random.randint(10, 300),
+            np.random.randint(5, 50),
         ])
 
     df = pd.DataFrame(rows, columns=[
@@ -71,20 +73,52 @@ def generate_real_estate_data():
 
     return df
 
+# -------------------------------------------------
+# File Upload
+# -------------------------------------------------
+st.sidebar.header("Upload Data")
 
-df = generate_real_estate_data()
+uploaded_file = st.sidebar.file_uploader(
+    "Upload Real Estate Dataset (CSV or Excel)", 
+    type=["csv", "xlsx"]
+)
+
+if uploaded_file:
+    if uploaded_file.name.endswith(".csv"):
+        df = pd.read_csv(uploaded_file)
+    else:
+        df = pd.read_excel(uploaded_file)
+else:
+    df = generate_data()
+
+# -------------------------------------------------
+# Sidebar Navigation
+# -------------------------------------------------
+st.sidebar.title("Navigation")
+page = st.sidebar.radio(
+    "Go to",
+    ["Home", "KPIs", "Dashboard Charts", "Raw Data"]
+)
 
 # -------------------------------------------------
 # Sidebar Filters
 # -------------------------------------------------
 st.sidebar.title("Filters")
 
-city_filter = st.sidebar.multiselect("Select City", df["City"].unique(), default=df["City"].unique())
-type_filter = st.sidebar.multiselect("Property Type", df["Property_Type"].unique(), default=df["Property_Type"].unique())
-status_filter = st.sidebar.multiselect("Status", df["Status"].unique(), default=df["Status"].unique())
-agent_filter = st.sidebar.multiselect("Agent", df["Agent"].unique(), default=df["Agent"].unique())
+city_filter = st.sidebar.multiselect(
+    "City", df["City"].unique(), default=df["City"].unique()
+)
+type_filter = st.sidebar.multiselect(
+    "Property Type", df["Property_Type"].unique(), default=df["Property_Type"].unique()
+)
+status_filter = st.sidebar.multiselect(
+    "Status", df["Status"].unique(), default=df["Status"].unique()
+)
+agent_filter = st.sidebar.multiselect(
+    "Agent", df["Agent"].unique(), default=df["Agent"].unique()
+)
 
-df_filtered = df[
+df_f = df[
     (df["City"].isin(city_filter)) &
     (df["Property_Type"].isin(type_filter)) &
     (df["Status"].isin(status_filter)) &
@@ -92,94 +126,72 @@ df_filtered = df[
 ]
 
 # -------------------------------------------------
-# Navigation Buttons
+# PAGES
 # -------------------------------------------------
-col1, col2, col3 = st.columns([1,1,1])
 
-if col1.button("Home"):
-    st.session_state["page"] = "Home"
+# HOME
+if page == "Home":
+    st.subheader("Overview")
+    st.write("""
+    This dashboard provides end-to-end analytics for the real estate industry, including:
+    - Property pricing insights  
+    - City-wise supply trends  
+    - Agent performance  
+    - Lead funnel performance  
+    - Full data upload support  
+    """)
 
-if col2.button("Previous"):
-    st.session_state["page"] = "KPIs"
+# KPIs
+elif page == "KPIs":
+    st.subheader("📊 Key Metrics")
 
-if col3.button("Next"):
-    st.session_state["page"] = "Charts"
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Listings", len(df_f))
+    col2.metric("Avg Price", f"₹{df_f['Price'].mean():,.0f}")
+    col3.metric("Median Price/Sqft", f"₹{df_f['Price_per_sqft'].median():,.0f}")
 
-if "page" not in st.session_state:
-    st.session_state["page"] = "Home"
+    col4, col5, col6 = st.columns(3)
+    sold_count = len(df_f[df_f["Status"] == "Sold"])
+    conv_rate = (sold_count / len(df_f) * 100) if len(df_f) > 0 else 0
 
-# -------------------------------------------------
-# HOME PAGE
-# -------------------------------------------------
-if st.session_state["page"] == "Home":
-    st.title("🏠 Real Estate Analytics Dashboard")
-    st.markdown("Comprehensive insights across pricing, supply, demand, agents, and conversions.")
+    col4.metric("Sold Properties", sold_count)
+    col5.metric("Avg Leads", round(df_f["Leads"].mean(), 2))
+    col6.metric("Conversion Rate", f"{round(conv_rate, 2)}%")
 
+# CHARTS
+elif page == "Dashboard Charts":
+    st.subheader("📈 Visual Dashboard")
 
-# -------------------------------------------------
-# KPI PAGE
-# -------------------------------------------------
-if st.session_state["page"] == "KPIs":
-    st.title("📊 Key Performance Metrics")
-
-    total_listings = len(df_filtered)
-    avg_price = round(df_filtered["Price"].mean(), 2)
-    median_ppsqft = round(df_filtered["Price_per_sqft"].median(), 2)
-    sold_count = len(df_filtered[df_filtered["Status"] == "Sold"])
-    avg_leads = round(df_filtered["Leads"].mean(), 2)
-    conv_rate = round((sold_count / total_listings) * 100, 2) if total_listings > 0 else 0
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Total Listings", total_listings)
-    c2.metric("Avg Property Price", f"₹{avg_price:,.0f}")
-    c3.metric("Median Price/Sqft", f"₹{median_ppsqft:,.0f}")
-
-    d1, d2, d3 = st.columns(3)
-    d1.metric("Total Sold", sold_count)
-    d2.metric("Avg Leads per Listing", avg_leads)
-    d3.metric("Sale Conversion Rate", f"{conv_rate}%")
-
-# -------------------------------------------------
-# CHARTS PAGE
-# -------------------------------------------------
-if st.session_state["page"] == "Charts":
-    st.title("📈 Dashboard Visualizations")
-
-    # Price Distribution
-    fig1 = px.box(df_filtered, x="City", y="Price", color="Property_Type")
-    st.subheader("Price Distribution by City")
+    st.write("### Price Distribution")
+    fig1 = px.box(df_f, x="City", y="Price", color="Property_Type")
     st.plotly_chart(fig1, use_container_width=True)
 
-    # Avg Price per Sqft
+    st.write("### Avg Price per Sqft by City")
     fig2 = px.bar(
-        df_filtered.groupby("City")["Price_per_sqft"].mean().reset_index(),
-        x="City", y="Price_per_sqft",
-        title="Average Price per Sqft by City"
+        df_f.groupby("City")["Price_per_sqft"].mean().reset_index(),
+        x="City", y="Price_per_sqft"
     )
     st.plotly_chart(fig2, use_container_width=True)
 
-    # Property Supply
-    fig3 = px.pie(
-        df_filtered, names="Property_Type",
-        title="Property Type Distribution"
-    )
+    st.write("### Property Type Distribution")
+    fig3 = px.pie(df_f, names="Property_Type")
     st.plotly_chart(fig3, use_container_width=True)
 
-    # Agent Performance
+    st.write("### Agent Performance")
     fig4 = px.bar(
-        df_filtered.groupby("Agent")["Offers"].sum().reset_index(),
-        x="Agent", y="Offers",
-        title="Agent Performance (Total Offers)"
+        df_f.groupby("Agent")["Offers"].sum().reset_index(),
+        x="Agent", y="Offers"
     )
     st.plotly_chart(fig4, use_container_width=True)
 
-    # Leads vs Site Visits vs Offers
+    st.write("### Lead-to-Offer Funnel")
     fig5 = px.scatter(
-        df_filtered,
-        x="Leads", y="Offers", size="Site_Visits",
-        color="City",
-        title="Lead Funnel Performance"
+        df_f,
+        x="Leads", y="Offers", size="Site_Visits", color="City"
     )
     st.plotly_chart(fig5, use_container_width=True)
 
-# END
+# RAW DATA
+elif page == "Raw Data":
+    st.subheader("📄 Raw Dataset")
+    st.dataframe(df_f, use_container_width=True)
