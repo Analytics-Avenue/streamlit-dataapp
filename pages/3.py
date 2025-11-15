@@ -7,6 +7,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
 # ----------------------------------------------------------
 # REQUIRED COLUMNS FOR THIS ENTIRE APPLICATION
 # ----------------------------------------------------------
