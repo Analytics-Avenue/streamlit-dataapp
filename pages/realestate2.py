@@ -1,176 +1,137 @@
 import streamlit as st
-from PIL import Image
+import base64
 
-# -------------------------------------------------------------
-# PAGE CONFIG
-# -------------------------------------------------------------
-st.set_page_config(
-    page_title="Real Estate Intelligence Suite",
-    layout="wide"
-)
+st.set_page_config(page_title="Real Estate Insights – App 1", layout="wide")
 
-# -------------------------------------------------------------
-# SIDEBAR NAVIGATION (HIERARCHY)
-# -------------------------------------------------------------
-st.sidebar.title("🏢 Real Estate Intelligence Suite")
+# ---------------------------------------------------------
+# Utility for modal popup
+# ---------------------------------------------------------
+def popup_youtube(video_url, project_link):
+    with st.modal("Application Preview", width=900):
+        st.video(video_url)
+        st.write("")
+        st.link_button("🚀 Go to Full Project", project_link)
 
-main_section = st.sidebar.radio(
-    "Navigation",
-    [
-        "Overview",
-        "Business Purpose",
-        "Capabilities",
-        "Business Impact",
-        "Applications"
-    ]
-)
 
-# For applications
-if main_section == "Applications":
-    app_choice = st.sidebar.selectbox(
-        "Choose an Application",
-        [
-            "Market Intelligence",
-            "Sales & Demand Analysis",
-            "Lead Scoring",
-            "Inventory Management",
-            "Price Prediction (ML)",
-            "Region Heatmaps",
-            "Agent Leaderboard",
-            "Customer Behaviour",
-            "Revenue Forecasting",
-            "Competitor Benchmarking"
-        ]
-    )
-else:
-    app_choice = None
+# ---------------------------------------------------------
+# Header
+# ---------------------------------------------------------
+st.markdown("""
+<style>
+.header {
+    font-size: 40px;
+    font-weight: 700;
+    color: #1A237E;
+    padding-bottom: 0px;
+}
+.sub {
+    font-size: 20px;
+    color: #555;
+}
+.card {
+    background-color: #f8f9fa;
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+.preview-btn {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# PAGE: OVERVIEW
-# -------------------------------------------------------------
-if main_section == "Overview":
-    st.title("🌐 Real Estate Intelligence Suite")
+st.markdown('<div class="header">🏙 Real Estate Application 1: Property Valuation Engine</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub">A complete consulting-grade showcase for enterprise clients</div>', unsafe_allow_html=True)
+st.write("")
+
+st.divider()
+
+# ---------------------------------------------------------
+# HIERARCHICAL OVERVIEW SECTIONS
+# ---------------------------------------------------------
+
+with st.expander("📌 1. Overview", expanded=True):
     st.markdown("""
-    A complete **enterprise-grade analytics platform** designed for real estate companies, 
-    brokers, builders, and investment firms.
-    
-    This suite gives **end-to-end visibility** across market trends, customer behaviour, 
-    pricing intelligence, project performance, and revenue forecasting.
+    This application delivers automated property valuation driven by structured data,  
+    machine learning models, and market benchmarks across India and global regions.  
+    It helps enterprises understand fair market pricing using robust data pipelines.
 
-    Built for **CXOs, Sales Heads, Marketing Teams, and Analysts**.
+    It acts as a decision-making enabler for brokers, investors, consultants, and banks.
     """)
 
-    st.image("https://cdn.dribbble.com/users/1233499/screenshots/15849616/media/74e287e783f7634cbce4ed43a4f0123b.png",
-             caption="Real Estate Analytics Platform Preview",
-             use_column_width=True)
-
-# -------------------------------------------------------------
-# PAGE: BUSINESS PURPOSE
-# -------------------------------------------------------------
-elif main_section == "Business Purpose":
-    st.title("🎯 Business Purpose")
+with st.expander("🎯 2. Purpose of the Application"):
     st.markdown("""
-    The purpose of this intelligence suite is to:
-    
-    - Give stakeholders a **single source of truth**
-    - Reduce dependency on manual reports
-    - Enhance decision-making in pricing, demand prediction, expansion planning
-    - Improve efficiency across sales, marketing, and operations
-    - Convert raw data into **predictive insights**
+    - Improve accuracy of property pricing  
+    - Reduce manual appraisal effort  
+    - Enable data-backed negotiation and pricing strategy  
+    - Standardize valuation across branches and markets  
     """)
 
-# -------------------------------------------------------------
-# PAGE: CAPABILITIES
-# -------------------------------------------------------------
-elif main_section == "Capabilities":
-    st.title("⚙️ Capabilities")
+with st.expander("🧩 3. Our Capabilities"):
     st.markdown("""
-    This platform provides:
-    - Real-time dashboards
-    - Predictive analytics (ML)
-    - Demand forecasting
-    - Automated lead quality scoring
-    - Multi-city benchmarking
-    - Deep competitor analysis
-    - Agent performance intelligence
-    - Region heatmapping
-    - Price per sq.ft benchmarking
-    - Full funnel analytics: Lead → Visit → Booking → Revenue
+    **Core Technical Capabilities**
+    - Automated ML-driven price prediction  
+    - Multi-city data ingestion pipelines  
+    - Market benchmarking analytics  
+    - Feature engineering based on locality, amenities, demand score  
+    - Scalable architecture supporting 10,000+ property records
+
+    **Consulting Capabilities**
+    - Requirement gathering  
+    - Market metrics definition  
+    - Model validation  
+    - Deployment & integration  
     """)
 
-# -------------------------------------------------------------
-# PAGE: BUSINESS IMPACT
-# -------------------------------------------------------------
-elif main_section == "Business Impact":
-    st.title("💰 Business Impact")
+with st.expander("📈 4. Business Impact Delivered"):
     st.markdown("""
-    Proven business outcomes include:
-
-    - 32% improvement in sales conversions  
-    - 47% better accuracy in pricing decisions  
-    - 22% marketing cost reduction  
-    - 18% shorter sales cycle  
-    - 100% visibility across all projects and cities  
+    - 35 to 50 percent faster pricing cycles  
+    - 20 percent improvement in negotiation leverage  
+    - Reduction of overpricing & underpricing  
+    - Better forecast accuracy across markets  
     """)
 
-# -------------------------------------------------------------
-# PAGE: APPLICATIONS → SHOW PREVIEW CARDS
-# -------------------------------------------------------------
-elif main_section == "Applications" and app_choice is None:
-    st.title("📦 Applications")
-    st.markdown("Select an application from the left panel.")
-
-# -------------------------------------------------------------
-# PAGE: APPLICATION PREVIEW + FULL MODULE
-# -------------------------------------------------------------
-elif main_section == "Applications" and app_choice:
-
-    st.title(f"📘 {app_choice} Module")
-
-    # -----------------------
-    # 1. OVERVIEW
-    # -----------------------
-    st.subheader("Overview")
-    st.info(f"""
-    The **{app_choice}** module provides advanced analytics 
-    tailored for real estate operations.
-    """)
-
-    # -----------------------
-    # 2. PURPOSE
-    # -----------------------
-    st.subheader("Purpose")
+with st.expander("📊 5. Key KPIs"):
     st.markdown("""
-    - Solve a specific business problem  
-    - Improve decision-making  
-    - Provide measurable outcomes  
+    - RMSE of valuation model  
+    - Market avg price alignment score  
+    - Price deviation %  
+    - Prediction confidence  
+    - Locality demand index  
     """)
 
-    # -----------------------
-    # 3. BUSINESS IMPACT
-    # -----------------------
-    st.subheader("Business Impact")
-    st.success("""
-    - Better accuracy  
-    - Higher conversions  
-    - Reduced costs  
-    - Stronger forecasting  
-    """)
+st.divider()
 
-    # -----------------------
-    # 4. CAPABILITIES
-    # -----------------------
-    st.subheader("Capabilities")
+# ---------------------------------------------------------
+# APPLICATION PREVIEW SECTION
+# ---------------------------------------------------------
+
+st.markdown("## 🎥 Application Preview")
+
+col1, col2 = st.columns([1.4, 3])
+
+with col1:
+    # Thumbnail image
+    st.image("https://i.ibb.co/QNmDgGY/real-estate-dashboard.jpg", use_column_width=True)
+    if st.button("Preview App", key="p1"):
+        popup_youtube("https://www.youtube.com/watch?v=6Dh-RL__uN4",
+                      "https://your-project-link.com")
+
+with col2:
     st.markdown("""
-    - Data automation  
-    - Predictive analytics  
-    - Performance insights  
+    ### Property Valuation Engine  
+    A modern data-driven valuation tool providing:  
+    - Automated pricing  
+    - Locality scoring  
+    - Property insights  
+    - Investment-grade recommendations  
+
+    Use this for client demos, investor presentations, and enterprise onboarding.
     """)
 
-    st.markdown("---")
-    st.subheader("🚀 Launch Full Application")
+st.divider()
 
-    st.warning("This is where the full dashboard, charts, ML models etc. will load.")
-
-    st.button("▶️ Launch Dashboard")
-
+st.success("App 1 structure completed. Tell me when to generate App 2.")
