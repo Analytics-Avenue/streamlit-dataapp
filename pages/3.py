@@ -149,39 +149,37 @@ with tab2:
             st.success("Dataset uploaded.")
             st.dataframe(df.head())
 # --------------------------------------------------------------
-# 3. UPLOAD CSV + COLUMN MAPPING  (CLEAN + REQUIRED ONLY)
+# 3. UPLOAD + COLUMN MAPPING (ONLY REQUIRED COLS)
 # --------------------------------------------------------------
 if mode == "Upload CSV + Column Mapping":
     file = st.file_uploader("Upload dataset", type=["csv"])
+    
     if file:
         raw = pd.read_csv(file)
-        st.write("Uploaded Data Preview", raw.head())
+        st.write("Uploaded Data", raw.head())
 
-        st.markdown("### Map Required Columns")
+        st.markdown("### Map Required Columns Only")
 
-        # Show only REQUIRED_COLS on left
         mapping = {}
 
-        for req_col in REQUIRED_COLS:
-            mapping[req_col] = st.selectbox(
-                f"Select column for **{req_col}**",
-                options=raw.columns,
-                index=None,
-                key=req_col
+        # Ask mapping ONLY for required cols
+        for col in REQUIRED_COLS:
+            mapping[col] = st.selectbox(
+                f"Map your column to: {col}", 
+                options=["-- Select --"] + list(raw.columns)
             )
 
-        # Validate: All fields must be mapped
-        if any(v is None for v in mapping.values()):
-            st.warning("Please map all required columns to proceed.")
-            st.stop()
+        # Validate
+        if st.button("Apply Mapping"):
+            # Check missing mappings
+            missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
 
-        # Apply mapping
-        df = raw.rename(columns=mapping)
-
-        st.success("Column mapping applied successfully.")
-        st.dataframe(df.head(), use_container_width=True)
-
-
+            if missing:
+                st.error(f"Please map all required columns: {missing}")
+            else:
+                df = raw.rename(columns=mapping)
+                st.success("Mapping applied successfully.")
+                st.dataframe(df.head())
     # --------------------------------------------------------------
     # PROCEED ONLY IF DATA LOADED
     # --------------------------------------------------------------
