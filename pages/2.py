@@ -115,6 +115,13 @@ with tab2:
 
     df = None
 
+    REQUIRED = {
+        "City": "City",
+        "Date": "Date",
+        "Property_Type": "Property Type",
+        "Price": "Price",
+    }
+
     mode = st.radio(
         "Select Input Method",
         ["Default Dataset", "Upload CSV (Auto Detect)", "Upload CSV (Manual Mapping)"],
@@ -141,6 +148,10 @@ with tab2:
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
+            missing = [c for c in REQUIRED if c not in df.columns]
+            if missing:
+                st.error(f"Dataset missing required columns: {missing}")
+                st.stop()
             st.success("Dataset uploaded.")
             st.dataframe(df.head(), use_container_width=True)
         else:
@@ -176,11 +187,11 @@ with tab2:
             st.stop()
 
     # ----------------------------------------------------------
-    # FINAL REQUIRED COLUMN CHECK
+    # FINAL COLUMN CHECK
     # ----------------------------------------------------------
-    required = ["City", "Date", "Property_Type", "Price"]
-    if not all(col in df.columns for col in required):
-        st.error(f"Dataset must contain required columns: {required}")
+    if not all(col in df.columns for col in REQUIRED):
+        missing = [c for c in REQUIRED if c not in df.columns]
+        st.error(f"Dataset must contain required columns: {missing}")
         st.stop()
 
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
@@ -244,7 +255,7 @@ with tab2:
         yaxis_title="<b>Demand</b>"
     )
 
-    fig1.update_traces(textposition="top center")
+    fig1.update_traces(textposition="top center", textfont=dict(size=12))
 
     st.plotly_chart(fig1, use_container_width=True)
 
@@ -278,7 +289,7 @@ with tab2:
         yaxis_title="<b>Demand</b>"
     )
 
-    fig2.update_traces(textposition="outside")
+    fig2.update_traces(textposition="outside", textfont=dict(size=12))
 
     st.plotly_chart(fig2, use_container_width=True)
 
@@ -319,11 +330,11 @@ with tab2:
             yaxis_title="<b>Forecasted Demand</b>"
         )
 
-        fig3.update_traces(textposition="top center")
+        fig3.update_traces(textposition="top center", textfont=dict(size=12))
 
         st.plotly_chart(fig3, use_container_width=True)
 
         with st.expander("Insights"):
-            st.write("Forecast shows short-term demand direction.")
+            st.write("Forecast indicates future demand movement based on historical trends.")
     else:
         st.warning("Not enough monthly data for forecasting.")
