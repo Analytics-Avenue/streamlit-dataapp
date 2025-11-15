@@ -1,17 +1,17 @@
-# market_intel_app.py
-"""
-Real Estate Market Intelligence Dashboard
-Single-file Streamlit app (deployable).
-Features:
- - 3 dataset options: Default GitHub, Upload CSV, Upload CSV + Manual Mapping
- - Sample dataset generator (10k rows) and download
- - KPIs, trend charts, city-level bars with labels, property mix pie with labels
- - Geo scatter (lat/lon) and locality heatmap fallback
- - Filters and filtered CSV download
- - Purpose & Quick Tips as expanders for each chart
-"""
-
 import streamlit as st
+
+st.set_page_config(layout="wide")
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
