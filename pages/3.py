@@ -224,31 +224,45 @@ with tab2:
     # ==========================================================
     # CHARTS
     # ==========================================================
-    st.markdown("### Price Distribution")
 
-    fig = px.histogram(
-        filt,
-        x="Price",
-        nbins=40,
-        color_discrete_sequence=px.colors.qualitative.Vivid
-    )
+    # ==========================================================
+# PRICE DISTRIBUTION WITH DATA LABELS
+# ==========================================================
+import numpy as np
 
-    fig.update_layout(
-        xaxis_title="<b>Price</b>",
-        yaxis_title="<b>Count</b>",
-        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
-        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
-        bargap=0.1
-    )
+st.markdown("### Price Distribution")
 
-    fig.update_traces(
-        marker=dict(line=dict(width=1, color="black")),
-        opacity=0.85
-    )
+# compute histogram data for labels
+counts, bins = np.histogram(filt["Price"], bins=40)
+bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
-    st.plotly_chart(fig, use_container_width=True)
+hist_df = pd.DataFrame({
+    "bin_center": bin_centers,
+    "count": counts
+})
 
+fig = px.bar(
+    hist_df,
+    x="bin_center",
+    y="count",
+    text="count",
+    color_discrete_sequence=px.colors.qualitative.Vivid
+)
 
+fig.update_traces(
+    textposition="outside",
+    marker=dict(line=dict(width=1, color="black")),
+    opacity=0.9
+)
+
+fig.update_layout(
+    xaxis_title="<b>Price</b>",
+    yaxis_title="<b>Count</b>",
+    xaxis=dict(showline=True, linewidth=2, linecolor="black"),
+    yaxis=dict(showline=True, linewidth=2, linecolor="black"),
+)
+
+st.plotly_chart(fig, use_container_width=True)
     # ----------------------------------------------------------
     st.markdown("### City-wise Average Price")
 
