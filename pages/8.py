@@ -55,20 +55,28 @@ with tab2:
     df = None
 
     mode = st.radio(
-        "Select Option:",
-        ["Upload CSV", "Upload CSV + Column Mapping"],
+        "Select Dataset Option:",
+        ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
         horizontal=True
     )
 
-    if mode == "Upload CSV":
+    if mode == "Default Dataset":
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
+        try:
+            df = pd.read_csv(URL)
+        except Exception as e:
+            st.error(f"Failed to load default dataset. {e}")
+    
+    elif mode == "Upload CSV":
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
+
     elif mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
             raw = pd.read_csv(file)
-            st.write("Uploaded Data", raw.head())
+            st.write("Uploaded Data Preview", raw.head())
             mapping = {}
             for col in REQUIRED_COLS:
                 mapping[col] = st.selectbox(f"Map your column to: {col}", options=["-- Select --"] + list(raw.columns))
@@ -130,7 +138,7 @@ with tab2:
     st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("### Buyer Sentiment Hotspot Map")
-    # Normalize only if range > 0
+    # Normalize sentiment
     if filt["Buyer_Sentiment"].max() - filt["Buyer_Sentiment"].min() > 0:
         filt["Sentiment_Norm"] = (filt["Buyer_Sentiment"] - filt["Buyer_Sentiment"].min()) / (filt["Buyer_Sentiment"].max() - filt["Buyer_Sentiment"].min())
     else:
@@ -151,5 +159,6 @@ with tab2:
     fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Sentiment Score"), margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig3, use_container_width=True)
 
+    # Download filtered dataset
     csv = filt.to_csv(index=False)
     st.download_button("Download Filtered Dataset", csv, "buyer_sentiment_filtered.csv", "text/csv")
