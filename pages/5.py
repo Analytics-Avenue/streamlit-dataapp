@@ -215,32 +215,33 @@ with tab2:
     st.plotly_chart(fig2, use_container_width=True)
 
     # ----------------------------------------------------------
-    # Hotspot Map
-    # ----------------------------------------------------------
+    # Hotspot Map with proper color variation
     st.markdown("### Hotspot Map")
     
-    # Ensure Latitude and Longitude exist and are numeric
-    filt_map = filt.dropna(subset=["Latitude", "Longitude"])
-    filt_map = filt_map[(filt_map["Latitude"].apply(lambda x: isinstance(x, (int, float)))) &
-                        (filt_map["Longitude"].apply(lambda x: isinstance(x, (int, float))))]
+    # Normalize Conversion_Probability for better color visualization
+    filt["Conversion_Normalized"] = (filt["Conversion_Probability"] - filt["Conversion_Probability"].min()) / (
+        filt["Conversion_Probability"].max() - filt["Conversion_Probability"].min()
+    )
     
-    if filt_map.empty:
-        st.warning("No valid latitude/longitude data available for map.")
-    else:
-        fig3 = px.scatter_mapbox(
-            filt_map,
-            lat="Latitude",
-            lon="Longitude",
-            size="Price",
-            color="Conversion_Probability",
-            hover_name="Property_Type",
-            hover_data=["City", "Price", "Agent_Name"],
-            color_continuous_scale=px.colors.sequential.Viridis,
-            size_max=15,
-            zoom=10
-        )
-        fig3.update_layout(mapbox_style="open-street-map", margin={"r":0,"t":0,"l":0,"b":0})
-        st.plotly_chart(fig3, use_container_width=True)
+    fig3 = px.scatter_mapbox(
+        filt,
+        lat="Latitude",
+        lon="Longitude",
+        size="Expected_ROI",  # size proportional to expected ROI
+        color="Conversion_Normalized",  # normalized for color scale
+        hover_name="Property_Type",
+        hover_data=["City", "Price", "Agent_Name", "Conversion_Probability"],
+        color_continuous_scale=px.colors.sequential.Viridis,
+        size_max=20,
+        zoom=10
+    )
+    fig3.update_layout(
+        mapbox_style="open-street-map",
+        coloraxis_colorbar=dict(title="Conversion Probability"),
+        margin={"r":0,"t":0,"l":0,"b":0}
+    )
+    st.plotly_chart(fig3, use_container_width=True)
+
     
     # ==========================================================
     # Top Investment Properties
