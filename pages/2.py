@@ -176,7 +176,7 @@ with tab2:
 
             df = raw.rename(columns={
                 city_col: "City",
-                date_col: "Date",
+                date_col: "Listing_Date",
                 type_col: "Property_Type",
                 price_col: "Price"
             })
