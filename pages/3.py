@@ -62,10 +62,53 @@ with tab1:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-    This platform provides an enterprise-grade real estate intelligence framework.
+    This platform provides an enterprise-grade real estate intelligence framework covering valuation, 
+    forecasting, performance analytics, and city-level dashboards.
     </div>
     """, unsafe_allow_html=True)
 
+    st.markdown("### Purpose")
+    st.markdown("""
+    <div class='card'>
+    • Standardize property pricing<br>
+    • Improve valuation accuracy<br>
+    • Support investors, developers, agencies<br>
+    • Fast decision-making with ML automation
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Capabilities")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        <div class='card'>
+        <b>Technical</b><br>
+        • Machine learning valuation<br>
+        • Interactive dashboards<br>
+        • Geo intelligence<br>
+        • NLP Search<br>
+        • Region-wise segmentation
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class='card'>
+        <b>Business</b><br>
+        • Faster deal closures<br>
+        • Transparent pricing<br>
+        • Better negotiations<br>
+        • Predictable demand mapping
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("### KPIs")
+    k1, k2, k3, k4 = st.columns(4)
+    k1.markdown("<div class='metric-card'>Model RMSE</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Avg Price Deviation%</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card'>Lead Score Efficiency</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Market Alignment Score</div>", unsafe_allow_html=True)
+
+# ==========================================================
 # ==========================================================
 # TAB 2 - APPLICATION
 # ==========================================================
