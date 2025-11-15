@@ -92,13 +92,14 @@ else:
                 st.write("Dive into the data, uncover insights, and visualize trends.")
                 
                 # Remove .py extension for switch_page
-                page_name = os.path.splitext(uc["page"])[0]
+                page_file = uc["page"]           # e.g., "8.py"
+                page_name = page_file.replace(".py", "")  # remove extension
                 
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     try:
-                        st.switch_page(page_name)
-                    except Exception:
-                        st.error(f"⚠️ Could not link to '{page_name}'. Make sure it exists in /pages/ folder.")
+                        st.switch_page(page_name)  # just the name, no path
+                    except Exception as e:
+                        st.error(f"⚠️ Could not link to '{page_name}'. Make sure it exists in /pages/ folder.\nError: {e}")
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
