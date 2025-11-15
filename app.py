@@ -30,25 +30,25 @@ sectors = {
     "Real Estate Analytics": [
         {"name": f"Real Estate Use Case {i+1}", 
          "image": "real_estate_thumb.png", 
-         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"}  # last URL
+         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"
         for i in range(1, 10)
     ],
     "Customer Intelligence": [
         {"name": f"Customer Use Case {i+1}", 
          "image": "customer_thumb.png", 
-         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/customer_{i+1}.py"} 
+         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/customer_{i+1}.py"} 
         for i in range(1, 10)
     ],
     "Sales & Revenue Analytics": [
         {"name": f"Sales Use Case {i+1}", 
          "image": "sales_thumb.png", 
-         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/sales_{i+1}.py"} 
+         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/sales_{i+1}.py"} 
         for i in range(1, 10)
     ],
     "Operational Insights": [
         {"name": f"Operations Use Case {i+1}", 
          "image": "ops_thumb.png", 
-         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/ops_{i+1}.py"} 
+         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/ops_{i+1}.py"} 
         for i in range(1, 10)
     ],
 }
