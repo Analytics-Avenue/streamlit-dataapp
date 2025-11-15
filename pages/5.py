@@ -195,7 +195,6 @@ with tab2:
     # KPIs
     # ==========================================================
     st.markdown("### Key Metrics")
-    k1, k2, k3, k4 = st.columns(4)
     filt["Expected_ROI"] = filt["Price"] * filt["Conversion_Probability"]
     
     k1.metric("High ROI Properties", len(filt[filt["Conversion_Probability"] > 0.7]))
@@ -218,6 +217,7 @@ with tab2:
                   color_discrete_sequence=px.colors.qualitative.Bold)
     fig1.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig1, use_container_width=True)
+    st.markdown("**Purpose:** Identify cities providing highest ROI.<br>**Quick Tip:** Look for cities with high ROI and moderate property prices.", unsafe_allow_html=True)
 
     st.markdown("### ROI by Property Type")
     ptype_roi = filt.groupby("Property_Type")["Expected_ROI"].mean().reset_index()
@@ -225,12 +225,11 @@ with tab2:
                   color_discrete_sequence=px.colors.qualitative.Vivid)
     fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("**Purpose:** Analyze which property types give the best ROI.<br>**Quick Tip:** Premium property types may yield higher returns.", unsafe_allow_html=True)
 
     # ==========================================================
     # Hotspot Map
     # ==========================================================
-    st.markdown("### Hotspot Map")
-    # Normalize Conversion_Probability
     if filt["Conversion_Probability"].nunique() > 1:
         filt["Conversion_Normalized"] = (filt["Conversion_Probability"] - filt["Conversion_Probability"].min()) / (
             filt["Conversion_Probability"].max() - filt["Conversion_Probability"].min()
@@ -256,6 +255,7 @@ with tab2:
         margin={"r":0,"t":0,"l":0,"b":0}
     )
     st.plotly_chart(fig3, use_container_width=True)
+    st.markdown("**Purpose:** Visualize high-potential investment locations.<br>**Quick Tip:** Darker points indicate higher conversion probability.", unsafe_allow_html=True)
 
     # ==========================================================
     # Top Investment Properties
@@ -263,6 +263,7 @@ with tab2:
     st.markdown("### Top Investment Properties")
     top_inv = filt.sort_values("Expected_ROI", ascending=False).head(10)
     st.dataframe(top_inv[["City","Property_Type","Price","Conversion_Probability","Expected_ROI","Agent_Name"]])
+    st.markdown("**Purpose:** Quickly spot top properties for investment.<br>**Quick Tip:** Use filters to narrow by city or agent.", unsafe_allow_html=True)
 
     csv = top_inv.to_csv(index=False)
     st.download_button("Download Top Investment Properties", csv, "top_investments.csv", "text/csv")
