@@ -229,6 +229,7 @@ with tab2:
     # ==========================================================
     # Hotspot Map
     # ==========================================================
+    st.markdown("### Hotspot Map")
     # Normalize Conversion_Probability
     if filt["Conversion_Probability"].nunique() > 1:
         filt["Conversion_Normalized"] = (filt["Conversion_Probability"] - filt["Conversion_Probability"].min()) / (
