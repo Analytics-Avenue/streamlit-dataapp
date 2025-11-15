@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import webbrowser
 
 # --- Streamlit setup ---
 st.set_page_config(
@@ -17,29 +18,37 @@ st.markdown("""
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
-PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
 # --- Hierarchy Data ---
 sectors = {
     "Marketing Analytics": [
-        {"name": f"Marketing Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"marketing_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Marketing Use Case {i+1}", 
+         "image": "marketing_thumb.png", 
+         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"} 
+        for i in range(1, 9)  # adjust range if more pages
     ],
     "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"real_estate_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Real Estate Use Case {i+1}", 
+         "image": "real_estate_thumb.png", 
+         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"}  # last URL
     ],
     "Customer Intelligence": [
-        {"name": f"Customer Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"customer_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Customer Use Case {i+1}", 
+         "image": "customer_thumb.png", 
+         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/customer_{i+1}.py"} 
+        for i in range(1, 10)
     ],
     "Sales & Revenue Analytics": [
-        {"name": f"Sales Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"sales_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Sales Use Case {i+1}", 
+         "image": "sales_thumb.png", 
+         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/sales_{i+1}.py"} 
+        for i in range(1, 10)
     ],
     "Operational Insights": [
-        {"name": f"Operations Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"ops_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Operations Use Case {i+1}", 
+         "image": "ops_thumb.png", 
+         "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/ops_{i+1}.py"} 
+        for i in range(1, 10)
     ],
 }
 
@@ -73,7 +82,7 @@ if st.session_state["sector"] is None:
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
-    st.markdown("Select a use case to go to its project page.")
+    st.markdown("Select a use case to open its project page on GitHub.")
     
     usecases = sectors[sector_name]
     
@@ -91,15 +100,8 @@ else:
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
                 
-                # Remove .py extension for switch_page
-                page_file = uc["page"]           # e.g., "8.py"
-                page_name = page_file.replace(".py", "")  # remove extension
-                
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    try:
-                        st.switch_page(page_name)  # just the name, no path
-                    except Exception as e:
-                        st.error(f"⚠️ Could not link to '{page_name}'. Make sure it exists in /pages/ folder.\nError: {e}")
+                    st.markdown(f"[Open Project]({uc['url']})", unsafe_allow_html=True)
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
