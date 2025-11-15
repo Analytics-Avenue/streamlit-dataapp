@@ -47,6 +47,14 @@ use_cases = {
     "#4 Real Estate Agent & Market Insights": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "4.py"
+    },
+    "#5 Real Estate Agent & Market Insights": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "5.py"
+    },
+    "#6 Real Estate Agent & Market Insights": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "6.py"
     }
 }
 
