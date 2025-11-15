@@ -2,7 +2,19 @@ import streamlit as st
 import os
 
 # --- Streamlit setup ---
-st.set_page_config(page_title="Data Analytics Hub", layout="wide")
+st.set_page_config(
+    page_title="Data Analytics Hub",
+    layout="wide",
+)
+
+# Hide the default Streamlit sidebar page selector
+hide_default_format = """
+    <style>
+        [data-testid="stSidebarNav"] {display: none;}
+    </style>
+"""
+st.markdown(hide_default_format, unsafe_allow_html=True)
+
 st.title("Data Analytics Case Studies")
 st.markdown("Welcome! Choose a project to explore its dashboard.")
 
@@ -24,7 +36,7 @@ use_cases = {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "realestate.py"
     },
-    "Real Estate Analytics": {
+    "Real Estate Analytics 2": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "realestate2.py"
     }
