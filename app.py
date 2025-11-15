@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# Hide the default Streamlit sidebar page selector
+# Hide default sidebar
 hide_default_format = """
     <style>
         [data-testid="stSidebarNav"] {display: none;}
@@ -15,75 +15,89 @@ hide_default_format = """
 """
 st.markdown(hide_default_format, unsafe_allow_html=True)
 
-st.title("Data Analytics Case Studies")
-st.markdown("Welcome! Choose a project to explore its dashboard.")
-
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# --- Use cases and preview images ---
-use_cases = {
-    "Marketing Analytics": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "marketing.py"
-    },
-    "Real Estate Analytics": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "realestate.py"
-    },
-    "#1 Real Estate Intelligence Suite": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "1.py"
-    },
-    "#2 Real Estate Customer Segmentation & Buyer Persona Intelligence": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "2.py"
-    },
-    "#3 REAL ESTATE PRICE VS PROPERTY FEATURES ANALYZER": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "3.py"
-    },
-    "#4 Real Estate Agent & Market Insights": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "4.py"
-    },
-    "#5 Real Estate Agent & Market Insights": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "5.py"
-    },
-    "#6 Tenant Risk & Market Trend Analyzer": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "6.py"
-    },
-    "#7 Rental Yield & Investment Analyzer": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "7.py"
-    },
-    "#8 Real Estate Market Buzz & Activity Dashboard": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "8.py"
-    }
+# --- Hierarchy Data ---
+sectors = {
+    "Marketing Analytics": [
+        {"name": f"Marketing Use Case {i+1}", "image": "marketing_thumb.png", "page": f"marketing_{i+1}.py"} 
+        for i in range(10)
+    ],
+    "Real Estate Analytics": [
+        {"name": f"Real Estate Use Case {i+1}", "image": "realestate_thumb.png", "page": f"realestate_{i+1}.py"} 
+        for i in range(10)
+    ],
+    "Customer Intelligence": [
+        {"name": f"Customer Use Case {i+1}", "image": "customer_thumb.png", "page": f"customer_{i+1}.py"} 
+        for i in range(10)
+    ],
+    "Sales & Revenue Analytics": [
+        {"name": f"Sales Use Case {i+1}", "image": "sales_thumb.png", "page": f"sales_{i+1}.py"} 
+        for i in range(10)
+    ],
+    "Operational Insights": [
+        {"name": f"Operations Use Case {i+1}", "image": "ops_thumb.png", "page": f"ops_{i+1}.py"} 
+        for i in range(10)
+    ],
 }
 
-# --- Layout: 3 columns ---
-cols = st.columns(3)
+# --- Initialize session state ---
+if "sector" not in st.session_state:
+    st.session_state["sector"] = None
 
-# --- Display each card ---
-for i, (name, info) in enumerate(use_cases.items()):
-    with cols[i % 3]:
-        if os.path.exists(info["image"]):
-            st.image(info["image"], use_container_width=True)
-        else:
-            st.warning(f"Preview not found for {name}")
+# --- Home Page ---
+if st.session_state["sector"] is None:
+    st.title("Data Analytics Hub")
+    st.markdown("Welcome! Choose a sector to explore its use cases.")
 
-        st.markdown(f"### {name}")
-        st.write("Dive into the data, uncover insights, and visualize trends.")
+    cols = st.columns(5)
+    for idx, (sector_name, usecases) in enumerate(sectors.items()):
+        with cols[idx]:
+            thumb_path = os.path.join(ASSETS_DIR, f"{sector_name.lower().replace(' ', '_')}_thumb.png")
+            if os.path.exists(thumb_path):
+                st.image(thumb_path, use_container_width=True)
+            else:
+                st.warning(f"Thumbnail not found for {sector_name}")
+            
+            st.markdown(f"### {sector_name}")
+            st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
+            
+            if st.button(f"Explore {sector_name}", key=sector_name):
+                st.session_state["sector"] = sector_name
+                st.experimental_rerun()
 
-        # --- Button navigation ---
-        page_path = f"pages/{info['page']}"
-        if st.button(f"Go to {name}", key=name):
-            try:
-                st.switch_page(page_path)
-            except Exception:
-                st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
+# --- Sector Page ---
+else:
+    sector_name = st.session_state["sector"]
+    st.header(f"{sector_name} Use Cases")
+    st.markdown("Select a use case to go to its project page.")
+    
+    usecases = sectors[sector_name]
+    
+    # Display use cases in grid: 3 columns
+    for i in range(0, len(usecases), 3):
+        cols = st.columns(3)
+        for j, uc in enumerate(usecases[i:i+3]):
+            with cols[j]:
+                thumb_path = os.path.join(ASSETS_DIR, uc["image"])
+                if os.path.exists(thumb_path):
+                    st.image(thumb_path, use_container_width=True)
+                else:
+                    st.warning(f"Thumbnail not found for {uc['name']}")
+                
+                st.markdown(f"### {uc['name']}")
+                st.write("Dive into the data, uncover insights, and visualize trends.")
+                
+                page_path = f"pages/{uc['page']}"
+                if st.button(f"Go to {uc['name']}", key=uc["name"]):
+                    try:
+                        st.switch_page(page_path)
+                    except Exception:
+                        st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
+
+    # Back button to Home
+    if st.button("⬅️ Back to Sectors"):
+        st.session_state["sector"] = None
+        st.experimental_rerun()
