@@ -219,18 +219,66 @@ with tab2:
     k2.metric("Avg Price", f"₹ {filt['Price'].mean():,.0f}")
     k3.metric("Avg Area", f"{filt['Area_sqft'].mean():,.0f} sqft")
 
+
+    
     # ==========================================================
     # CHARTS
     # ==========================================================
     st.markdown("### Price Distribution")
-    fig = px.histogram(filt, x="Price")
+
+    fig = px.histogram(
+        filt,
+        x="Price",
+        nbins=40,
+        color_discrete_sequence=px.colors.qualitative.Vivid
+    )
+
+    fig.update_layout(
+        xaxis_title="<b>Price</b>",
+        yaxis_title="<b>Count</b>",
+        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
+        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
+        bargap=0.1
+    )
+
+    fig.update_traces(
+        marker=dict(line=dict(width=1, color="black")),
+        opacity=0.85
+    )
+
     st.plotly_chart(fig, use_container_width=True)
 
+
+    # ----------------------------------------------------------
     st.markdown("### City-wise Average Price")
+
     city_avg = filt.groupby("City")["Price"].mean().reset_index()
-    fig2 = px.bar(city_avg, x="City", y="Price", text="Price")
-    fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
+
+    fig2 = px.bar(
+        city_avg,
+        x="City",
+        y="Price",
+        text="Price",
+        color="City",
+        color_discrete_sequence=px.colors.qualitative.Bold
+    )
+
+    fig2.update_layout(
+        xaxis_title="<b>City</b>",
+        yaxis_title="<b>Average Price</b>",
+        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
+        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
+    )
+
+    fig2.update_traces(
+        texttemplate="₹ %{text:,.0f}",
+        textposition="outside",
+        marker=dict(line=dict(width=1, color="black")),
+        opacity=0.9
+    )
+
     st.plotly_chart(fig2, use_container_width=True)
+
 
     # ==========================================================
     # MACHINE LEARNING - PRICE PREDICTION
