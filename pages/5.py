@@ -214,22 +214,34 @@ with tab2:
     fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig2, use_container_width=True)
 
+    # ----------------------------------------------------------
+    # Hotspot Map
+    # ----------------------------------------------------------
     st.markdown("### Hotspot Map")
-    fig3 = px.scatter_mapbox(
-        filt,
-        lat="Latitude",
-        lon="Longitude",
-        size="Price",
-        color="Conversion_Probability",
-        hover_name="Property_Type",
-        hover_data=["City", "Price", "Agent_Name"],
-        color_continuous_scale=px.colors.sequential.Viridis,
-        size_max=15,
-        zoom=10
-    )
-    fig3.update_layout(mapbox_style="open-street-map")
-    st.plotly_chart(fig3, use_container_width=True)
-
+    
+    # Ensure Latitude and Longitude exist and are numeric
+    filt_map = filt.dropna(subset=["Latitude", "Longitude"])
+    filt_map = filt_map[(filt_map["Latitude"].apply(lambda x: isinstance(x, (int, float)))) &
+                        (filt_map["Longitude"].apply(lambda x: isinstance(x, (int, float))))]
+    
+    if filt_map.empty:
+        st.warning("No valid latitude/longitude data available for map.")
+    else:
+        fig3 = px.scatter_mapbox(
+            filt_map,
+            lat="Latitude",
+            lon="Longitude",
+            size="Price",
+            color="Conversion_Probability",
+            hover_name="Property_Type",
+            hover_data=["City", "Price", "Agent_Name"],
+            color_continuous_scale=px.colors.sequential.Viridis,
+            size_max=15,
+            zoom=10
+        )
+        fig3.update_layout(mapbox_style="open-street-map", margin={"r":0,"t":0,"l":0,"b":0})
+        st.plotly_chart(fig3, use_container_width=True)
+    
     # ==========================================================
     # Top Investment Properties
     # ==========================================================
