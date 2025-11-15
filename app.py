@@ -91,12 +91,14 @@ else:
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
                 
-                page_path = os.path.join(PAGES_DIR, uc["page"])
+                # Remove .py extension for switch_page
+                page_name = os.path.splitext(uc["page"])[0]
+                
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     try:
-                        st.switch_page(uc["page"])  # Streamlit switch_page uses relative page name
+                        st.switch_page(page_name)
                     except Exception:
-                        st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
+                        st.error(f"⚠️ Could not link to '{page_name}'. Make sure it exists in /pages/ folder.")
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
