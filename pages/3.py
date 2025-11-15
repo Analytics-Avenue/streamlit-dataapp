@@ -1,13 +1,17 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+import plotly.express as px
 
-# -------------------------------------------------------------------
-# PAGE SETUP
-# -------------------------------------------------------------------
-st.set_page_config(page_title="Real Estate Intelligence Suite - App 3", layout="wide")
+st.set_page_config(page_title="Real Estate Price vs Property Features Analyzer", layout="wide")
 
+# --------------------------
+# Hide default sidebar
+# --------------------------
 hide_sidebar = """
 <style>
 [data-testid="stSidebarNav"] {display: none;}
@@ -16,23 +20,23 @@ section[data-testid="stSidebar"] {display: none;}
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
-# -------------------------------------------------------------------
-# REQUIRED COLUMNS FOR APP 3
-# -------------------------------------------------------------------
+# --------------------------
+# Required columns for analysis
+# --------------------------
 REQUIRED_COLS = [
     "City",
     "Property_Type",
     "BHK",
     "Bathroom_Count",
-    "Parking",
-    "Age_Years",
+    "Area_sqft",
     "Price",
-    "Area_sqft"
+    "Parking",
+    "Age_Years"
 ]
 
-# -------------------------------------------------------------------
-# GLOBAL STYLING
-# -------------------------------------------------------------------
+# --------------------------
+# CSS for headers & cards
+# --------------------------
 st.markdown("""
 <style>
 .big-header {
@@ -46,14 +50,14 @@ box-shadow:0 4px 20px rgba(0,0,0,0.08);}
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------------------------
-# MAIN HEADER
-# -------------------------------------------------------------------
-st.markdown("<div class='big-header'>Real Estate Intelligence Suite - App 3</div>", unsafe_allow_html=True)
+# --------------------------
+# Main header
+# --------------------------
+st.markdown("<div class='big-header'>Real Estate Price vs Property Features Analyzer</div>", unsafe_allow_html=True)
 
-# -------------------------------------------------------------------
+# ==========================================================
 # TABS
-# -------------------------------------------------------------------
+# ==========================================================
 tab1, tab2 = st.tabs(["Overview", "Application"])
 
 # ==========================================================
@@ -63,18 +67,19 @@ with tab1:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-    This module analyzes how property features such as bedrooms, bathrooms, parking, 
-    age and size drive price variations across cities and asset classes.
+    This analytics module explores real estate prices in relation to property features
+    like bedrooms, bathrooms, area, age, and amenities. It supports valuation, investment,
+    and market insights.
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("### Purpose")
     st.markdown("""
     <div class='card'>
-    • Benchmark property pricing based on features<br>
-    • Identify price-value anomalies<br>
-    • Enable transparent buyer-seller negotiations<br>
-    • Support project positioning and segmentation
+    • Analyze price trends across property features<br>
+    • Compare city and property type valuations<br>
+    • Predict estimated price using ML<br>
+    • Support strategic investment decisions
     </div>
     """, unsafe_allow_html=True)
 
@@ -84,216 +89,195 @@ with tab1:
         st.markdown("""
         <div class='card'>
         <b>Technical</b><br>
-        • Price-feature analytics<br>
-        • Matplotlib charts with insights<br>
-        • Feature correlation patterns<br>
-        • Outlier detection capabilities
+        • Feature-wise price analysis<br>
+        • Interactive dashboards<br>
+        • ML-based price prediction<br>
+        • Geo and city-level comparison
         </div>
         """, unsafe_allow_html=True)
     with c2:
         st.markdown("""
         <div class='card'>
         <b>Business</b><br>
-        • Better unit pricing<br>
-        • Accurate feature-based valuation<br>
-        • Improved listing quality<br>
-        • Faster decision-making
+        • Improved negotiation insights<br>
+        • Transparent pricing trends<br>
+        • Better investment planning<br>
+        • Fast feature-based comparison
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("### KPIs")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>Avg Price</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Price per Sqft</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Avg Price per SqFt</div>", unsafe_allow_html=True)
     k3.markdown("<div class='metric-card'>Top Property Type</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>City with Max Listings</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Top City</div>", unsafe_allow_html=True)
 
 # ==========================================================
 # TAB 2 - APPLICATION
 # ==========================================================
 with tab2:
-
-    # --------------------------------------------------------------
-    # LOAD DATA
-    # --------------------------------------------------------------
     st.markdown("### Step 1: Load Dataset")
+    df = None
 
     mode = st.radio(
-        "Choose Option:",
+        "Select Option:",
         ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
         horizontal=True
     )
 
-    df = None
-
-    # DEFAULT DATASET
+    # ----------------------------------------------------------
+    # Default dataset
+    # ----------------------------------------------------------
     if mode == "Default Dataset":
-        url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
         try:
-            df = pd.read_csv(url)
-            st.success("Default dataset loaded.")
-            st.dataframe(df.head())
-        except:
-            st.error("Could not load dataset")
+            df = pd.read_csv(URL)
+            st.success("Default dataset loaded successfully.")
+            st.write(df.head())
+        except Exception as e:
+            st.error(f"Could not load dataset: {e}")
 
-    # DIRECT CSV UPLOAD
+    # ----------------------------------------------------------
+    # Upload CSV
+    # ----------------------------------------------------------
     if mode == "Upload CSV":
-        file = st.file_uploader("Upload CSV", type=["csv"])
+        file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
             st.success("Dataset uploaded.")
             st.dataframe(df.head())
 
-    # COLUMN MAPPING
+    # ----------------------------------------------------------
+    # Upload + Column Mapping
+    # ----------------------------------------------------------
     if mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
             raw = pd.read_csv(file)
             st.write("Uploaded Data", raw.head())
-
-            st.markdown("### Map Required Columns")
+            st.markdown("### Map Required Columns Only")
             mapping = {}
-
             for col in REQUIRED_COLS:
                 mapping[col] = st.selectbox(
                     f"Map your column to: {col}",
-                    ["-- Select --"] + list(raw.columns)
+                    options=["-- Select --"] + list(raw.columns)
                 )
-
             if st.button("Apply Mapping"):
-                if any(v == "-- Select --" for v in mapping.values()):
-                    st.error("Map all required fields first.")
+                missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
+                if missing:
+                    st.error(f"Please map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
                     st.success("Mapping applied successfully.")
                     st.dataframe(df.head())
 
+    # ----------------------------------------------------------
     if df is None:
         st.stop()
 
-    # Validate required columns
+    # Ensure required columns exist
     if not all(col in df.columns for col in REQUIRED_COLS):
         st.error("Dataset missing required columns.")
-        st.write("Required:", REQUIRED_COLS)
+        st.write("Required columns:", REQUIRED_COLS)
         st.stop()
 
     df = df.dropna()
 
-    # --------------------------------------------------------------
-    # FILTERS
-    # --------------------------------------------------------------
+    # ==========================================================
+    # Step 2: Filters
+    # ==========================================================
     st.markdown("### Step 2: Dashboard Filters")
-
-    f1, f2, f3 = st.columns(3)
+    f1, f2, f3, f4 = st.columns(4)
 
     with f1:
         city = st.multiselect("City", df["City"].unique())
     with f2:
         ptype = st.multiselect("Property Type", df["Property_Type"].unique())
     with f3:
-        bhk = st.multiselect("BHK", sorted(df["BHK"].unique()))
-
-    f4, f5 = st.columns(2)
+        bhk = st.multiselect("Bedrooms", sorted(df["BHK"].unique()))
     with f4:
         bath = st.multiselect("Bathrooms", sorted(df["Bathroom_Count"].unique()))
-    with f5:
-        parking = st.multiselect("Parking", df["Parking"].unique())
 
-    price_range = st.slider(
-        "Price Range",
-        int(df["Price"].min()),
-        int(df["Price"].max()),
-        (int(df["Price"].min()), int(df["Price"].max()))
-    )
-
-    filtered = df.copy()
-
+    filt = df.copy()
     if city:
-        filtered = filtered[filtered["City"].isin(city)]
+        filt = filt[filt["City"].isin(city)]
     if ptype:
-        filtered = filtered[filtered["Property_Type"].isin(ptype)]
+        filt = filt[filt["Property_Type"].isin(ptype)]
     if bhk:
-        filtered = filtered[filtered["BHK"].isin(bhk)]
+        filt = filt[filt["BHK"].isin(bhk)]
     if bath:
-        filtered = filtered[filtered["Bathroom_Count"].isin(bath)]
-    if parking:
-        filtered = filtered[filtered["Parking"].isin(parking)]
+        filt = filt[filt["Bathroom_Count"].isin(bath)]
 
-    filtered = filtered[(filtered["Price"] >= price_range[0]) & (filtered["Price"] <= price_range[1])]
+    st.markdown("### Data Preview")
+    st.dataframe(filt.head(), use_container_width=True)
 
-    # --------------------------------------------------------------
+    # ==========================================================
     # KPIs
-    # --------------------------------------------------------------
+    # ==========================================================
     st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Average Price", f"₹ {filt['Price'].mean():,.0f}")
+    k2.metric("Avg Price per SqFt", f"₹ {(filt['Price'] / filt['Area_sqft']).mean():,.0f}")
+    k3.metric("Top Property Type", filt["Property_Type"].mode()[0] if not filt.empty else "NA")
+    k4.metric("Top City", filt["City"].mode()[0] if not filt.empty else "NA")
 
-    k1.metric("Avg Price", f"₹ {filtered.Price.mean():,.0f}")
-    k2.metric("Avg Price per Sqft", f"{(filtered.Price / filtered.Area_sqft).mean():.0f}")
-    k3.metric("Top Property Type", filtered.Property_Type.mode()[0] if not filtered.empty else "NA")
-    k4.metric("City with Most Listings", filtered.City.mode()[0] if not filtered.empty else "NA")
+    # ==========================================================
+    # Charts
+    # ==========================================================
+    # Price vs Bedrooms
+    st.markdown("### Price vs Bedrooms")
+    grouped_bhk = filt.groupby("BHK")["Price"].mean().reset_index()
+    fig = px.bar(grouped_bhk, x="BHK", y="Price", text="Price", color="BHK", color_discrete_sequence=px.colors.qualitative.Vivid)
+    fig.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
+    st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("---")
+    # Price vs Bathrooms
+    st.markdown("### Price vs Bathrooms")
+    grouped_bath = filt.groupby("Bathroom_Count")["Price"].mean().reset_index()
+    fig2 = px.bar(grouped_bath, x="Bathroom_Count", y="Price", text="Price", color="Bathroom_Count", color_discrete_sequence=px.colors.qualitative.Bold)
+    fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
+    st.plotly_chart(fig2, use_container_width=True)
 
-    # --------------------------------------------------------------
-    # CHART 1 – PRICE VS BHK
-    # --------------------------------------------------------------
-    st.markdown("### Price vs BHK")
-
-    fig, ax = plt.subplots(figsize=(8,5))
-    grouped = filtered.groupby("BHK")["Price"].mean()
-
-    ax.bar(grouped.index.astype(str), grouped.values, color="skyblue", edgecolor="black")
-    ax.set_xlabel("BHK", fontweight="bold")
-    ax.set_ylabel("Avg Price", fontweight="bold")
-    ax.set_title("Price vs BHK")
-
-    for i, v in enumerate(grouped.values):
-        ax.text(i, v, f"{int(v):,}", ha="center", va="bottom", fontsize=9)
-
-    st.pyplot(fig)
-
-    st.markdown("**Purpose:** Understand how BHK count impacts valuation.")
-    st.markdown("---")
-
-    # --------------------------------------------------------------
-    # CHART 2 – PRICE VS AGE
-    # --------------------------------------------------------------
-    st.markdown("### Price vs Property Age")
-
-    fig2, ax2 = plt.subplots(figsize=(8,5))
-    grouped2 = filtered.groupby("Age_Years")["Price"].mean()
-
-    ax2.plot(grouped2.index, grouped2.values, marker="o", linewidth=2)
-    ax2.set_xlabel("Age (Years)", fontweight="bold")
-    ax2.set_ylabel("Avg Price", fontweight="bold")
-    ax2.set_title("Price vs Age")
-
-    for i, val in enumerate(grouped2.values):
-        ax2.text(i, val, f"{int(val):,}", ha="center", va="bottom", fontsize=9)
-
-    st.pyplot(fig2)
-    st.markdown("**Purpose:** See depreciation or appreciation trend over age.")
-    st.markdown("---")
-
-    # --------------------------------------------------------------
-    # CHART 3 – PRICE VS SQFT (SCATTER)
-    # --------------------------------------------------------------
+    # Price vs Area
     st.markdown("### Price vs Area")
+    fig3 = px.scatter(filt, x="Area_sqft", y="Price", color="Property_Type", size="BHK",
+                      color_discrete_sequence=px.colors.qualitative.Pastel, hover_data=["City"])
+    st.plotly_chart(fig3, use_container_width=True)
 
-    fig3, ax3 = plt.subplots(figsize=(8,5))
-    ax3.scatter(filtered["Area_sqft"], filtered["Price"], alpha=0.6)
-    ax3.set_xlabel("Area (sqft)", fontweight="bold")
-    ax3.set_ylabel("Price", fontweight="bold")
-    ax3.set_title("Price vs Sqft")
+    # ==========================================================
+    # ML Price Prediction
+    # ==========================================================
+    st.markdown("### Step 3: ML Price Prediction")
+    X = filt[["City", "Property_Type", "BHK", "Bathroom_Count", "Area_sqft"]]
+    y = filt["Price"]
 
-    st.pyplot(fig3)
-    st.markdown("---")
+    transformer = ColumnTransformer([
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["City", "Property_Type"]),
+        ("num", StandardScaler(), ["BHK", "Bathroom_Count", "Area_sqft"])
+    ])
 
-    # --------------------------------------------------------------
-    # DATA TABLE + DOWNLOAD
-    # --------------------------------------------------------------
-    st.subheader("Filtered Dataset")
-    st.dataframe(filtered, use_container_width=True)
+    X_trans = transformer.fit_transform(X)
 
-    csv = filtered.to_csv(index=False)
-    st.download_button("Download Filtered Data", csv, "App3_filtered_data.csv", "text/csv")
+    X_train, X_test, y_train, y_test = train_test_split(X_trans, y, test_size=0.2, random_state=42)
+    model = RandomForestRegressor()
+    model.fit(X_train, y_train)
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        p_city = st.selectbox("City", filt["City"].unique())
+    with c2:
+        p_ptype = st.selectbox("Property Type", filt["Property_Type"].unique())
+    with c3:
+        p_bhk = st.selectbox("Bedrooms", sorted(filt["BHK"].unique()))
+    with c4:
+        p_bath = st.selectbox("Bathrooms", sorted(filt["Bathroom_Count"].unique()))
+
+    p_area = st.number_input("Area (sqft)", min_value=300, max_value=10000, value=1200)
+
+    pred_input = transformer.transform(pd.DataFrame([[p_city, p_ptype, p_bhk, p_bath, p_area]],
+                     columns=["City","Property_Type","BHK","Bathroom_Count","Area_sqft"]))
+
+    price_pred = model.predict(pred_input)[0]
+    st.metric("Estimated Price", f"₹ {price_pred:,.0f}")
+
