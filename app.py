@@ -1,4 +1,4 @@
-import streamlit as st
+1import streamlit as st
 import os
 
 # --- Streamlit setup ---
@@ -36,10 +36,6 @@ use_cases = {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "realestate.py"
     },
-    "Real Estate Analytics 2": {
-        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "realestate2.py"
-    },
     "#1 Real Estate Intelligence Suite": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "1.py"
@@ -51,6 +47,10 @@ use_cases = {
     "#3 REAL ESTATE PRICE VS PROPERTY FEATURES ANALYZER": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "3.py"
+    },
+    "#4 Real Estate Agent & Market Insights": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "4.py"
     }
 }
 
