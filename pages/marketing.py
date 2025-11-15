@@ -7,6 +7,16 @@ from PIL import Image
 import os
 import io
 
+st.set_page_config(layout="wide")
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
 # ------------------------
 # App Config
 # ------------------------
