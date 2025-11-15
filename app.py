@@ -55,6 +55,10 @@ use_cases = {
     "#6 Tenant Risk & Market Trend Analyzer": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "6.py"
+    },
+    "#7 Rental Yield & Investment Analyzer": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "7.py"
     }
 }
 
