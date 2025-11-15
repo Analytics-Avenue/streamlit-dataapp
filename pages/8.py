@@ -152,29 +152,36 @@ with tab2:
                     df = raw.rename(columns=mapping)
                     st.success("Mapping applied successfully.")
                     st.dataframe(df.head())
-
     # ----------------------------------------------------------
     # PROCEED ONLY IF DATA LOADED
     # ----------------------------------------------------------
     if df is None:
         st.stop()
-
-    # Use mapped columns dynamically
-    LAT_COL = "Latitude"
-    LON_COL = "Longitude"
-    PRICE_COL = "Price"
-    SENT_COL = "Buyer_Sentiment"
-    LOCAL_COL = "Locality"
-
+    
+    # Dynamically determine columns based on mapping (if used)
     if mode == "Upload CSV + Column Mapping" and 'mapping' in locals():
         LAT_COL = mapping["Latitude"]
         LON_COL = mapping["Longitude"]
         PRICE_COL = mapping["Price"]
         SENT_COL = mapping["Buyer_Sentiment"]
         LOCAL_COL = mapping["Locality"]
+    else:
+        # Default column names
+        LAT_COL = "Latitude"
+        LON_COL = "Longitude"
+        PRICE_COL = "Price"
+        SENT_COL = "Buyer_Sentiment"
+        LOCAL_COL = "Locality"
+    
+    # Check if required columns exist
+    missing_cols = [c for c in [LAT_COL, LON_COL, PRICE_COL, SENT_COL, LOCAL_COL] if c not in df.columns]
+    if missing_cols:
+        st.error(f"The following required columns are missing in your dataset: {missing_cols}")
+        st.stop()
+    
+    # Drop rows with missing values in the required columns
+    df = df.dropna(subset=[LAT_COL, LON_COL, PRICE_COL, SENT_COL, LOCAL_COL])
 
-    # Drop rows with missing values in required columns
-    df = df.dropna(subset=[LAT_COL, LON_COL, PRICE_COL, SENT_COL])
 
     # ==========================================================
     # FILTERS
