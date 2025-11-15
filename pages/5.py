@@ -57,18 +57,19 @@ with tab1:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-    This application identifies high-return real estate opportunities by analyzing city-level, agent-level, 
-    and property-type performance. Ideal for investors and developers to make strategic investment decisions.
+    This application helps investors and developers identify high-return real estate opportunities by analyzing city-level, agent-level, 
+    and property-type performance metrics. It highlights properties with strong conversion potential, enabling data-driven 
+    investment decisions across multiple regions and segments.
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("### Purpose")
     st.markdown("""
     <div class='card'>
-    • Highlight high-ROI properties<br>
-    • Analyze agent performance<br>
-    • Identify market hotspots<br>
-    • Support data-driven investment decisions
+    • Identify high-ROI properties based on price and conversion probability.<br>
+    • Compare agent performance to optimize portfolio management.<br>
+    • Analyze city and property-type trends for strategic investment.<br>
+    • Visualize market hotspots and prioritize investment opportunities.
     </div>
     """, unsafe_allow_html=True)
 
@@ -79,7 +80,7 @@ with tab1:
         <div class='card'>
         <b>Technical</b><br>
         • Conversion-adjusted ROI<br>
-        • Interactive maps<br>
+        • Interactive maps with hover dropdowns<br>
         • City and property segmentation<br>
         • Agent performance dashboards
         </div>
@@ -155,9 +156,6 @@ with tab2:
                     st.success("Mapping applied successfully.")
                     st.dataframe(df.head())
 
-    # ----------------------------------------------------------
-    # PROCEED ONLY IF DATA LOADED
-    # ----------------------------------------------------------
     if df is None:
         st.stop()
 
@@ -196,14 +194,14 @@ with tab2:
     # ==========================================================
     st.markdown("### Key Metrics")
     filt["Expected_ROI"] = filt["Price"] * filt["Conversion_Probability"]
-    
+
     k1.metric("High ROI Properties", len(filt[filt["Conversion_Probability"] > 0.7]))
     k2.metric(
-        "Top Performing Agents", 
+        "Top Performing Agents",
         filt.groupby("Agent_Name")["Conversion_Probability"].mean().sort_values(ascending=False).head(1).index[0]
     )
     k3.metric(
-        "Hotspot Cities", 
+        "Hotspot Cities",
         filt.groupby("City")["Price"].mean().sort_values(ascending=False).head(1).index[0]
     )
     k4.metric("Average Conversion Rate", f"{filt['Conversion_Probability'].mean():.2f}")
@@ -217,7 +215,8 @@ with tab2:
                   color_discrete_sequence=px.colors.qualitative.Bold)
     fig1.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig1, use_container_width=True)
-    st.markdown("**Purpose:** Identify cities providing highest ROI.<br>**Quick Tip:** Look for cities with high ROI and moderate property prices.", unsafe_allow_html=True)
+    st.markdown("**Purpose:** Identify cities with highest expected ROI to prioritize investment. Analyze city-level trends and opportunities.")
+    st.markdown("**Quick Tip:** Focus on cities with strong conversion and high price.")
 
     st.markdown("### ROI by Property Type")
     ptype_roi = filt.groupby("Property_Type")["Expected_ROI"].mean().reset_index()
@@ -225,7 +224,8 @@ with tab2:
                   color_discrete_sequence=px.colors.qualitative.Vivid)
     fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig2, use_container_width=True)
-    st.markdown("**Purpose:** Analyze which property types give the best ROI.<br>**Quick Tip:** Premium property types may yield higher returns.", unsafe_allow_html=True)
+    st.markdown("**Purpose:** Understand which property types offer highest ROI and conversion probability.")
+    st.markdown("**Quick Tip:** 3BHK or larger units often yield stronger ROI in premium locations.")
 
     # ==========================================================
     # Hotspot Map
@@ -244,7 +244,16 @@ with tab2:
         size="Expected_ROI",
         color="Conversion_Normalized",
         hover_name="Property_Type",
-        hover_data=["City", "Price", "Agent_Name", "Conversion_Probability", "Expected_ROI"],
+        hover_data={
+            "City": True,
+            "Price": True,
+            "Agent_Name": True,
+            "Conversion_Probability": True,
+            "Expected_ROI": True,
+            "Latitude": False,
+            "Longitude": False,
+            "Conversion_Normalized": False
+        },
         color_continuous_scale=px.colors.sequential.Viridis,
         size_max=20,
         zoom=10
@@ -255,7 +264,8 @@ with tab2:
         margin={"r":0,"t":0,"l":0,"b":0}
     )
     st.plotly_chart(fig3, use_container_width=True)
-    st.markdown("**Purpose:** Visualize high-potential investment locations.<br>**Quick Tip:** Darker points indicate higher conversion probability.", unsafe_allow_html=True)
+    st.markdown("**Purpose:** Visualize market hotspots by ROI and conversion probability. Identify investment clusters quickly.")
+    st.markdown("**Quick Tip:** Green areas indicate high-conversion properties, ideal for priority investment.")
 
     # ==========================================================
     # Top Investment Properties
@@ -263,7 +273,6 @@ with tab2:
     st.markdown("### Top Investment Properties")
     top_inv = filt.sort_values("Expected_ROI", ascending=False).head(10)
     st.dataframe(top_inv[["City","Property_Type","Price","Conversion_Probability","Expected_ROI","Agent_Name"]])
-    st.markdown("**Purpose:** Quickly spot top properties for investment.<br>**Quick Tip:** Use filters to narrow by city or agent.", unsafe_allow_html=True)
 
     csv = top_inv.to_csv(index=False)
     st.download_button("Download Top Investment Properties", csv, "top_investments.csv", "text/csv")
