@@ -35,6 +35,7 @@ st.markdown("<div class='big-header'>Real Estate Buyer Sentiment Analyzer</div>"
 # Tabs
 tab1, tab2 = st.tabs(["Overview", "Application"])
 
+# --------------------- OVERVIEW ---------------------
 with tab1:
     st.markdown("### Overview")
     st.markdown("<div class='card'>This app measures buyer sentiment across properties and locations for investment insights.</div>", unsafe_allow_html=True)
@@ -47,31 +48,34 @@ with tab1:
     k3.markdown("<div class='metric-card'>Top Property Types</div>", unsafe_allow_html=True)
     k4.markdown("<div class='metric-card'>Average Sentiment Score</div>", unsafe_allow_html=True)
 
-# ==========================================================
-# APPLICATION
-# ==========================================================
+# --------------------- APPLICATION ---------------------
 with tab2:
     st.markdown("### Step 1: Load Dataset")
     df = None
 
     mode = st.radio(
-        "Select Dataset Option:",
+        "Select Option:",
         ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
         horizontal=True
     )
 
+    # ---------- Default Dataset ----------
     if mode == "Default Dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
         try:
             df = pd.read_csv(URL)
+            st.success("Default dataset loaded successfully.")
         except Exception as e:
-            st.error(f"Failed to load default dataset. {e}")
-    
+            st.error(f"Failed to load default dataset: {e}")
+
+    # ---------- Upload CSV ----------
     elif mode == "Upload CSV":
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-
+            st.success("Dataset uploaded.")
+    
+    # ---------- Upload CSV + Column Mapping ----------
     elif mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
@@ -86,22 +90,28 @@ with tab2:
                     st.error(f"Please map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
-                    st.success("Mapping applied successfully.")
+                    st.success("Column mapping applied successfully.")
 
     if df is None:
         st.stop()
 
-    # Ensure required columns exist
+    # Check required columns
     missing_cols = [col for col in REQUIRED_COLS if col not in df.columns]
     if missing_cols:
         st.error(f"The following required columns are missing in your dataset: {missing_cols}")
         st.stop()
 
+    # Drop missing values
     df = df.dropna(subset=REQUIRED_COLS)
 
-    # Filters
-    city = st.multiselect("City", df["City"].unique())
-    ptype = st.multiselect("Property Type", df["Property_Type"].unique())
+    # ---------- Filters ----------
+    # Strip spaces
+    for col in ["City", "Property_Type"]:
+        df[col] = df[col].astype(str).str.strip()
+
+    st.markdown("### Step 2: Apply Filters")
+    city = st.multiselect("City", sorted(df["City"].unique()))
+    ptype = st.multiselect("Property Type", sorted(df["Property_Type"].unique()))
 
     filt = df.copy()
     if city: filt = filt[filt["City"].isin(city)]
@@ -110,23 +120,20 @@ with tab2:
     st.markdown("### Data Preview")
     st.dataframe(filt.head(), use_container_width=True)
 
-    # KPIs
+    # ---------- KPIs ----------
+    st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
     k1.metric("High Sentiment Properties", len(filt[filt["Buyer_Sentiment"] > 0.7]))
     k2.metric("Top Cities by Sentiment", filt.groupby("City")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
     k3.metric("Top Property Types", filt.groupby("Property_Type")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
     k4.metric("Average Sentiment Score", f"{filt['Buyer_Sentiment'].mean():.2f}")
 
-    # ==========================================================
-    # PURPOSE & QUICK TIP DROPDOWN
-    # ==========================================================
+    # ---------- Purpose & Quick Tip ----------
     with st.expander("Purpose & Quick Tip for Charts"):
         st.markdown("**Purpose:** Track buyer sentiment across cities and property types to guide marketing and investment decisions.")
         st.markdown("**Quick Tip:** Focus on properties and areas with sentiment >0.7 for high demand opportunities.")
 
-    # ==========================================================
-    # CHARTS
-    # ==========================================================
+    # ---------- Charts ----------
     st.markdown("### Buyer Sentiment Distribution by Property Type")
     fig1 = px.histogram(filt, x="Buyer_Sentiment", nbins=20, color="Property_Type", marginal="box", color_discrete_sequence=px.colors.qualitative.Pastel)
     st.plotly_chart(fig1, use_container_width=True)
@@ -138,7 +145,7 @@ with tab2:
     st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("### Buyer Sentiment Hotspot Map")
-    # Normalize sentiment
+    # Normalize for color scale
     if filt["Buyer_Sentiment"].max() - filt["Buyer_Sentiment"].min() > 0:
         filt["Sentiment_Norm"] = (filt["Buyer_Sentiment"] - filt["Buyer_Sentiment"].min()) / (filt["Buyer_Sentiment"].max() - filt["Buyer_Sentiment"].min())
     else:
@@ -159,6 +166,6 @@ with tab2:
     fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Sentiment Score"), margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig3, use_container_width=True)
 
-    # Download filtered dataset
+    # ---------- Download Filtered Data ----------
     csv = filt.to_csv(index=False)
     st.download_button("Download Filtered Dataset", csv, "buyer_sentiment_filtered.csv", "text/csv")
