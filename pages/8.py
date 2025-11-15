@@ -226,7 +226,8 @@ with tab2:
         fig = px.scatter_mapbox(
             filt, lat="Latitude", lon="Longitude", size="Price", color="Sentiment_Normalized",
             hover_name="Locality", hover_data=["City","Property_Type","Price","Buyer_Sentiment"],
-            color_continuous_scale=px.colors.sequential.RdYlGn, size_max=15, zoom=10
+            color_continuous_scale=px.colors.sequential.Viridis,  # <- replace RdYlGn
+            size_max=15, zoom=10
         )
         fig.update_layout(mapbox_style="open-street-map",
                           coloraxis_colorbar=dict(title="Buyer Sentiment"),
