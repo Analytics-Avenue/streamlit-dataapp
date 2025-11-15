@@ -194,8 +194,8 @@ with tab2:
         st.error(f"Dataset must contain required columns: {missing}")
         st.stop()
 
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    df = df.dropna(subset=["Date"])
+    df["Date"] = pd.to_datetime(df["Listing_Date"], errors="coerce")
+    df = df.dropna(subset=["Listing_Date"])
 
     # ----------------------------------------------------------
     # FILTERS
