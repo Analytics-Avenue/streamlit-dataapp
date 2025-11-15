@@ -18,6 +18,17 @@ from sklearn.neighbors import NearestNeighbors
 import inspect
 import re
 
+st.set_page_config(layout="wide")
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+
 # -------------------------
 # Page config & helper utils
 # -------------------------
