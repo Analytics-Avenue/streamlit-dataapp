@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -19,17 +18,13 @@ section[data-testid="stSidebar"] {display: none;}
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
 # ----------------------------------------------------------
-# REQUIRED COLUMNS FOR THIS ENTIRE APPLICATION
+# REQUIRED COLUMNS ONLY FOR THIS APPLICATION
 # ----------------------------------------------------------
 REQUIRED_COLS = [
-    "Property_ID","City","Locality","Country","Region","Property_Type","BHK",
-    "Bathroom_Count","Area_sqft","Price","Price_per_sqft","Floor_Number",
-    "Total_Floors","Age_Years","Facing","Furnishing","Parking","Amenities",
-    "Maintenance_Fees","Registration_Cost","Tax_Percent","Currency","Latitude",
-    "Longitude","Zone","Agent_Name","Agent_ID","Listing_Date","Listing_Channel",
-    "Lead_Score","Days_On_Market","Status","Views_Count","Inquiries_Count",
-    "Site_Visits_Count","Conversion_Probability","Description","Highlights",
-    "Nearby_Landmarks"
+    "City",
+    "Property_Type",
+    "Area_sqft",
+    "Price"
 ]
 
 # ----------------------------------------------------------
@@ -67,51 +62,9 @@ with tab1:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-    This platform provides an enterprise-grade real estate intelligence framework covering valuation, 
-    forecasting, performance analytics, and city-level dashboards.
+    This platform provides an enterprise-grade real estate intelligence framework.
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### Purpose")
-    st.markdown("""
-    <div class='card'>
-    • Standardize property pricing<br>
-    • Improve valuation accuracy<br>
-    • Support investors, developers, agencies<br>
-    • Fast decision-making with ML automation
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Capabilities")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("""
-        <div class='card'>
-        <b>Technical</b><br>
-        • Machine learning valuation<br>
-        • Interactive dashboards<br>
-        • Geo intelligence<br>
-        • NLP Search<br>
-        • Region-wise segmentation
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class='card'>
-        <b>Business</b><br>
-        • Faster deal closures<br>
-        • Transparent pricing<br>
-        • Better negotiations<br>
-        • Predictable demand mapping
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("### KPIs")
-    k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card'>Model RMSE</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Avg Price Deviation%</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Lead Score Efficiency</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Market Alignment Score</div>", unsafe_allow_html=True)
 
 # ==========================================================
 # TAB 2 - APPLICATION
@@ -119,7 +72,6 @@ with tab1:
 with tab2:
 
     st.markdown("### Step 1: Load Dataset")
-
     df = None
 
     mode = st.radio(
@@ -128,7 +80,7 @@ with tab2:
         horizontal=True
     )
 
-# --------------------------------------------------------------
+    # --------------------------------------------------------------
     # 1. DEFAULT DATASET
     # --------------------------------------------------------------
     if mode == "Default Dataset":
@@ -138,7 +90,8 @@ with tab2:
             st.success("Default dataset loaded successfully.")
             st.write(df.head())
         except Exception as e:
-            st.error(f"Failed to load dataset. Error: {e}")
+            st.error(f"Could not load dataset: {e}")
+
     # --------------------------------------------------------------
     # 2. UPLOAD CSV
     # --------------------------------------------------------------
@@ -148,45 +101,45 @@ with tab2:
             df = pd.read_csv(file)
             st.success("Dataset uploaded.")
             st.dataframe(df.head())
-# --------------------------------------------------------------
-# 3. UPLOAD + COLUMN MAPPING (ONLY REQUIRED COLS)
-# --------------------------------------------------------------
-if mode == "Upload CSV + Column Mapping":
-    file = st.file_uploader("Upload dataset", type=["csv"])
-    
-    if file:
-        raw = pd.read_csv(file)
-        st.write("Uploaded Data", raw.head())
 
-        st.markdown("### Map Required Columns Only")
+    # --------------------------------------------------------------
+    # 3. UPLOAD + COLUMN MAPPING (ONLY REQUIRED COLS)
+    # --------------------------------------------------------------
+    if mode == "Upload CSV + Column Mapping":
+        file = st.file_uploader("Upload dataset", type=["csv"])
+        
+        if file:
+            raw = pd.read_csv(file)
+            st.write("Uploaded Data", raw.head())
 
-        mapping = {}
+            st.markdown("### Map Required Columns Only")
 
-        # Ask mapping ONLY for required cols
-        for col in REQUIRED_COLS:
-            mapping[col] = st.selectbox(
-                f"Map your column to: {col}", 
-                options=["-- Select --"] + list(raw.columns)
-            )
+            mapping = {}
 
-        # Validate
-        if st.button("Apply Mapping"):
-            # Check missing mappings
-            missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
+            # Ask mapping ONLY for required cols
+            for col in REQUIRED_COLS:
+                mapping[col] = st.selectbox(
+                    f"Map your column to: {col}",
+                    options=["-- Select --"] + list(raw.columns)
+                )
 
-            if missing:
-                st.error(f"Please map all required columns: {missing}")
-            else:
-                df = raw.rename(columns=mapping)
-                st.success("Mapping applied successfully.")
-                st.dataframe(df.head())
+            if st.button("Apply Mapping"):
+                missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
+
+                if missing:
+                    st.error(f"Please map all required columns: {missing}")
+                else:
+                    df = raw.rename(columns=mapping)
+                    st.success("Mapping applied successfully.")
+                    st.dataframe(df.head())
+
     # --------------------------------------------------------------
     # PROCEED ONLY IF DATA LOADED
     # --------------------------------------------------------------
     if df is None:
         st.stop()
 
-    # Check required columns
+    # Ensure required columns exist
     if not all(col in df.columns for col in REQUIRED_COLS):
         st.error("Dataset missing required columns.")
         st.write("Required columns:", REQUIRED_COLS)
@@ -195,7 +148,7 @@ if mode == "Upload CSV + Column Mapping":
     df = df.dropna()
 
     # ==========================================================
-    # FILTERS & DASHBOARD
+    # FILTERS
     # ==========================================================
     st.markdown("### Step 2: Dashboard Filters")
 
@@ -214,23 +167,22 @@ if mode == "Upload CSV + Column Mapping":
     st.markdown("### Data Preview")
     st.dataframe(filt.head(), use_container_width=True)
 
+    # ==========================================================
     # KPIs
+    # ==========================================================
     st.markdown("### Key Metrics")
     k1, k2, k3 = st.columns(3)
     k1.metric("Total Properties", len(filt))
     k2.metric("Avg Price", f"₹ {filt['Price'].mean():,.0f}")
     k3.metric("Avg Area", f"{filt['Area_sqft'].mean():,.0f} sqft")
 
-    # --------------------------------------------------------------
-    # CHART 1 - PRICE DISTRIBUTION
-    # --------------------------------------------------------------
+    # ==========================================================
+    # CHARTS
+    # ==========================================================
     st.markdown("### Price Distribution")
     fig = px.histogram(filt, x="Price")
     st.plotly_chart(fig, use_container_width=True)
 
-    # --------------------------------------------------------------
-    # CHART 2 - CITY-WISE AVG PRICE
-    # --------------------------------------------------------------
     st.markdown("### City-wise Average Price")
     city_avg = filt.groupby("City")["Price"].mean().reset_index()
     fig2 = px.bar(city_avg, x="City", y="Price", text="Price")
