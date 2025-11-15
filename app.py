@@ -26,7 +26,7 @@ sectors = {
         for i in range(10)
     ],
     "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_preview.jpg", "page": {i+1}.py"} 
+        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_preview.jpg", "page": "{i+1}.py"} 
         for i in range(10)
     ],
     "Customer Intelligence": [
