@@ -47,6 +47,7 @@ use_cases = {
     "#2 Real Estate Customer Segmentation & Buyer Persona Intelligence": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "2.py"
+    }
 }
 
 # --- Layout: 3 columns ---
