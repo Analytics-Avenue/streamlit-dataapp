@@ -8,42 +8,42 @@ st.set_page_config(
 )
 
 # Hide default sidebar
-hide_default_format = """
+st.markdown("""
     <style>
         [data-testid="stSidebarNav"] {display: none;}
     </style>
-"""
-st.markdown(hide_default_format, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
 # --- Hierarchy Data ---
 sectors = {
     "Marketing Analytics": [
-        {"name": f"Marketing Use Case {i+1}", "image": "marketing_thumb.png", "page": f"marketing_{i+1}.py"} 
+        {"name": f"Marketing Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"marketing_{i+1}.py"} 
         for i in range(10)
     ],
     "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", "image": "realestate_thumb.png", "page": f"realestate_{i+1}.py"} 
+        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"realestate_{i+1}.py"} 
         for i in range(10)
     ],
     "Customer Intelligence": [
-        {"name": f"Customer Use Case {i+1}", "image": "customer_thumb.png", "page": f"customer_{i+1}.py"} 
+        {"name": f"Customer Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"customer_{i+1}.py"} 
         for i in range(10)
     ],
     "Sales & Revenue Analytics": [
-        {"name": f"Sales Use Case {i+1}", "image": "sales_thumb.png", "page": f"sales_{i+1}.py"} 
+        {"name": f"Sales Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"sales_{i+1}.py"} 
         for i in range(10)
     ],
     "Operational Insights": [
-        {"name": f"Operations Use Case {i+1}", "image": "ops_thumb.png", "page": f"ops_{i+1}.py"} 
+        {"name": f"Operations Use Case {i+1}", "image": "real_estate_preview.jpg", "page": f"ops_{i+1}.py"} 
         for i in range(10)
     ],
 }
 
-# --- Initialize session state ---
+# --- Session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
@@ -55,7 +55,8 @@ if st.session_state["sector"] is None:
     cols = st.columns(5)
     for idx, (sector_name, usecases) in enumerate(sectors.items()):
         with cols[idx]:
-            thumb_path = os.path.join(ASSETS_DIR, f"{sector_name.lower().replace(' ', '_')}_thumb.png")
+            thumb_file = f"{sector_name.lower().replace(' ', '_')}_thumb.png"
+            thumb_path = os.path.join(ASSETS_DIR, thumb_file)
             if os.path.exists(thumb_path):
                 st.image(thumb_path, use_container_width=True)
             else:
@@ -76,7 +77,7 @@ else:
     
     usecases = sectors[sector_name]
     
-    # Display use cases in grid: 3 columns
+    # Display use cases in 3-column grid
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
@@ -90,10 +91,10 @@ else:
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
                 
-                page_path = f"pages/{uc['page']}"
+                page_path = os.path.join(PAGES_DIR, uc["page"])
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     try:
-                        st.switch_page(page_path)
+                        st.switch_page(uc["page"])  # Streamlit switch_page uses relative page name
                     except Exception:
                         st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
 
