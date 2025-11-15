@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
 
 st.set_page_config(page_title="Real Estate Buyer Sentiment Analyzer", layout="wide")
@@ -57,22 +56,15 @@ with tab2:
 
     mode = st.radio(
         "Select Option:",
-        ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
+        ["Upload CSV", "Upload CSV + Column Mapping"],
         horizontal=True
     )
 
-    if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
-        try:
-            df = pd.read_csv(URL)
-        except:
-            pass
-
     if mode == "Upload CSV":
         file = st.file_uploader("Upload your dataset", type=["csv"])
-        if file: df = pd.read_csv(file)
-
-    if mode == "Upload CSV + Column Mapping":
+        if file:
+            df = pd.read_csv(file)
+    elif mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
             raw = pd.read_csv(file)
@@ -88,17 +80,14 @@ with tab2:
                     df = raw.rename(columns=mapping)
                     st.success("Mapping applied successfully.")
 
-    if df is None or df.empty:
-        st.warning("Dataset missing or empty, generating fake dataset...")
-        n = 200
-        df = pd.DataFrame({
-            "City": np.random.choice(["Chennai", "Bangalore", "Mumbai", "Delhi"], n),
-            "Property_Type": np.random.choice(["Apartment", "Villa", "Studio"], n),
-            "Price": np.random.randint(3000000, 50000000, n),
-            "Latitude": np.random.uniform(12, 28, n),
-            "Longitude": np.random.uniform(77, 77.5, n),
-            "Buyer_Sentiment": np.round(np.random.uniform(0, 1, n), 2)
-        })
+    if df is None:
+        st.stop()
+
+    # Ensure required columns exist
+    missing_cols = [col for col in REQUIRED_COLS if col not in df.columns]
+    if missing_cols:
+        st.error(f"The following required columns are missing in your dataset: {missing_cols}")
+        st.stop()
 
     df = df.dropna(subset=REQUIRED_COLS)
 
