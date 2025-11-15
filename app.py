@@ -31,6 +31,7 @@ sectors = {
         {"name": f"Real Estate Use Case {i+1}", 
          "image": "real_estate_thumb.png", 
          "url": "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"}  # last URL
+        for i in range(1, 10)
     ],
     "Customer Intelligence": [
         {"name": f"Customer Use Case {i+1}", 
