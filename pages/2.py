@@ -117,7 +117,7 @@ with tab2:
 
     REQUIRED = {
         "City": "City",
-        "Date": "Date",
+        "Listing_Date": "Date",
         "Property_Type": "Property Type",
         "Price": "Price",
     }
