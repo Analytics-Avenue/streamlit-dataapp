@@ -248,44 +248,43 @@ with tab2:
     # ==========================================================
     # ML Price Prediction
     # ==========================================================
+    # ==========================================================
     st.markdown("### Step 3: ML Price Prediction")
-
-    # Use the full df for ML, not filtered
-    X_full = df[["City", "Property_Type", "BHK", "Bathroom_Count", "Area_sqft"]]
-    y_full = df["Price"]
-
-    # Transformer handles unseen categories
+    
+    # Features
+    X = filt[["City", "Property_Type", "BHK", "Bathroom_Count", "Area_sqft"]]
+    y = np.log1p(filt["Price"])  # log-transform to stabilize skew
+    
     transformer = ColumnTransformer([
         ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["City", "Property_Type"]),
-        ("num", StandardScaler(), ["BHK", "Bathroom_Count", "Area_sqft"])
+        ("num", "passthrough", ["BHK", "Bathroom_Count", "Area_sqft"])
     ])
-
-    X_trans_full = transformer.fit_transform(X_full)
-
-    # Train model
-    X_train, X_test, y_train, y_test = train_test_split(X_trans_full, y_full, test_size=0.2, random_state=42)
-    model = RandomForestRegressor()
+    
+    X_trans = transformer.fit_transform(X)
+    
+    X_train, X_test, y_train, y_test = train_test_split(X_trans, y, test_size=0.2, random_state=42)
+    model = RandomForestRegressor(n_estimators=300, random_state=42)
     model.fit(X_train, y_train)
-
-    # Inputs for prediction
+    
+    # Input from user
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        p_city = st.selectbox("City", df["City"].unique())
+        p_city = st.selectbox("City", filt["City"].unique())
     with c2:
-        p_ptype = st.selectbox("Property Type", df["Property_Type"].unique())
+        p_ptype = st.selectbox("Property Type", filt["Property_Type"].unique())
     with c3:
-        p_bhk = st.selectbox("Bedrooms", sorted(df["BHK"].unique()))
+        p_bhk = st.selectbox("Bedrooms", sorted(filt["BHK"].unique()))
     with c4:
-        p_bath = st.selectbox("Bathrooms", sorted(df["Bathroom_Count"].unique()))
-
+        p_bath = st.selectbox("Bathrooms", sorted(filt["Bathroom_Count"].unique()))
+    
     p_area = st.number_input("Area (sqft)", min_value=300, max_value=10000, value=1200)
-
-    # Transform the single input row
+    
     pred_input = transformer.transform(pd.DataFrame([[p_city, p_ptype, p_bhk, p_bath, p_area]],
                          columns=["City","Property_Type","BHK","Bathroom_Count","Area_sqft"]))
-
-    price_pred = model.predict(pred_input)[0]
-
+    
+    price_pred = np.expm1(model.predict(pred_input)[0])  # reverse log-transform
     st.metric("Estimated Price", f"₹ {price_pred:,.0f}")
-
-
+    
+    
+    
+    
