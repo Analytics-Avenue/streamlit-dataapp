@@ -226,43 +226,43 @@ with tab2:
     # ==========================================================
 
     # ==========================================================
-# PRICE DISTRIBUTION WITH DATA LABELS
-# ==========================================================
-import numpy as np
+    # PRICE DISTRIBUTION WITH DATA LABELS
+    # ==========================================================
+    import numpy as np
 
-st.markdown("### Price Distribution")
+    st.markdown("### Price Distribution")
 
-# compute histogram data for labels
-counts, bins = np.histogram(filt["Price"], bins=40)
-bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    # compute histogram data for labels
+    counts, bins = np.histogram(filt["Price"], bins=40)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
-hist_df = pd.DataFrame({
-    "bin_center": bin_centers,
-    "count": counts
-})
+    hist_df = pd.DataFrame({
+        "bin_center": bin_centers,
+        "count": counts
+    })
 
-fig = px.bar(
-    hist_df,
-    x="bin_center",
-    y="count",
-    text="count",
-    color_discrete_sequence=px.colors.qualitative.Vivid
-)
+    fig = px.bar(
+        hist_df,
+        x="bin_center",
+        y="count",
+        text="count",
+        color_discrete_sequence=px.colors.qualitative.Vivid
+    )
 
-fig.update_traces(
-    textposition="outside",
-    marker=dict(line=dict(width=1, color="black")),
-    opacity=0.9
-)
+    fig.update_traces(
+        textposition="outside",
+        marker=dict(line=dict(width=1, color="black")),
+        opacity=0.9
+    )
 
-fig.update_layout(
-    xaxis_title="<b>Price</b>",
-    yaxis_title="<b>Count</b>",
-    xaxis=dict(showline=True, linewidth=2, linecolor="black"),
-    yaxis=dict(showline=True, linewidth=2, linecolor="black"),
-)
+    fig.update_layout(
+        xaxis_title="<b>Price</b>",
+        yaxis_title="<b>Count</b>",
+        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
+        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
+    )
 
-st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
     # ----------------------------------------------------------
     st.markdown("### City-wise Average Price")
 
