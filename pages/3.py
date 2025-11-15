@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
 import plotly.express as px
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
+
 
 st.set_page_config(layout="wide")
 
@@ -17,243 +19,193 @@ section[data-testid="stSidebar"] {display: none;}
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
-# ----------------------------------------------------------
-# REQUIRED COLUMNS FOR THIS ENTIRE APPLICATION
-# ----------------------------------------------------------
+# ---------------------------------------------------------------
+# PAGE CONFIG
+# ---------------------------------------------------------------
+st.set_page_config(page_title="Real Estate Analytics", layout="wide")
+st.title("🏙️ Real Estate Analytics Dashboard")
+
+# ---------------------------------------------------------------
+# REQUIRED COLUMNS
+# ---------------------------------------------------------------
 REQUIRED_COLS = [
-    "Property_ID","City","Locality","Country","Region","Property_Type","BHK",
-    "Bathroom_Count","Area_sqft","Price","Price_per_sqft","Floor_Number",
-    "Total_Floors","Age_Years","Facing","Furnishing","Parking","Amenities",
-    "Maintenance_Fees","Registration_Cost","Tax_Percent","Currency","Latitude",
-    "Longitude","Zone","Agent_Name","Agent_ID","Listing_Date","Listing_Channel",
-    "Lead_Score","Days_On_Market","Status","Views_Count","Inquiries_Count",
-    "Site_Visits_Count","Conversion_Probability","Description","Highlights",
-    "Nearby_Landmarks"
+    "Price",
+    "City",
+    "Area_sqft",
+    "Bedrooms",
+    "Bathrooms",
+    "Property_Type",
+    "Parking",
+    "Furnishing"
 ]
 
-# ----------------------------------------------------------
-# PAGE SETTINGS + CSS
-# ----------------------------------------------------------
-st.set_page_config(page_title="Real Estate Intelligence Suite", layout="wide")
+# ---------------------------------------------------------------
+# 1. DATASET SELECTION
+# ---------------------------------------------------------------
+mode = st.sidebar.radio(
+    "Select Data Source",
+    ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"]
+)
 
-st.markdown("""
-<style>
-.big-header {
-    font-size: 40px; font-weight: 900;
-    background: linear-gradient(90deg,#0A5EB0,#2E82FF);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
-.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center;}
-</style>
-""", unsafe_allow_html=True)
+df = None
 
-# ----------------------------------------------------------
-# MAIN HEADER
-# ----------------------------------------------------------
-st.markdown("<div class='big-header'>Real Estate Intelligence Suite</div>", unsafe_allow_html=True)
+# ---------------------------------------------------------------
+# DEFAULT DATASET
+# ---------------------------------------------------------------
+if mode == "Default Dataset":
+    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+    
+    try:
+        df = pd.read_csv(URL)
+        st.success("Default dataset loaded successfully.")
+    except Exception as e:
+        st.error(f"Could not load dataset: {e}")
 
-# ==========================================================
-# TABS
-# ==========================================================
-tab1, tab2 = st.tabs(["Overview", "Application"])
+# ---------------------------------------------------------------
+# UPLOAD CSV
+# ---------------------------------------------------------------
+if mode == "Upload CSV":
+    file = st.file_uploader("Upload your dataset", type=["csv"])
+    if file:
+        df = pd.read_csv(file)
+        st.success("Dataset uploaded successfully.")
 
-# ==========================================================
-# TAB 1 - OVERVIEW
-# ==========================================================
-with tab1:
-    st.markdown("### Overview")
-    st.markdown("""
-    <div class='card'>
-    This platform provides an enterprise-grade real estate intelligence framework covering valuation, 
-    forecasting, performance analytics, and city-level dashboards.
-    </div>
-    """, unsafe_allow_html=True)
+# ---------------------------------------------------------------
+# UPLOAD CSV + MAPPING
+# ---------------------------------------------------------------
+if mode == "Upload CSV + Column Mapping":
+    file = st.file_uploader("Upload dataset", type=["csv"])
+    if file:
+        raw = pd.read_csv(file)
+        st.write("Uploaded Data Preview", raw.head())
 
-    st.markdown("### Purpose")
-    st.markdown("""
-    <div class='card'>
-    • Standardize property pricing<br>
-    • Improve valuation accuracy<br>
-    • Support investors, developers, agencies<br>
-    • Fast decision-making with ML automation
-    </div>
-    """, unsafe_allow_html=True)
+        st.subheader("Map Required Columns")
+        mapping = {}
+        for col in REQUIRED_COLS:
+            mapping[col] = st.selectbox(f"Select column for {col}", raw.columns)
 
-    st.markdown("### Capabilities")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("""
-        <div class='card'>
-        <b>Technical</b><br>
-        • Machine learning valuation<br>
-        • Interactive dashboards<br>
-        • Geo intelligence<br>
-        • NLP Search<br>
-        • Region-wise segmentation
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class='card'>
-        <b>Business</b><br>
-        • Faster deal closures<br>
-        • Transparent pricing<br>
-        • Better negotiations<br>
-        • Predictable demand mapping
-        </div>
-        """, unsafe_allow_html=True)
+        df = raw.rename(columns=mapping)
+        st.success("Column mapping applied.")
 
-    st.markdown("### KPIs")
-    k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card'>Model RMSE</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Avg Price Deviation%</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Lead Score Efficiency</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Market Alignment Score</div>", unsafe_allow_html=True)
+# ---------------------------------------------------------------
+# STOP IF NO DATA
+# ---------------------------------------------------------------
+if df is None:
+    st.warning("Dataset not loaded.")
+    st.stop()
 
-# ==========================================================
-# TAB 2 - APPLICATION
-# ==========================================================
-with tab2:
+# ---------------------------------------------------------------
+# FILTERS
+# ---------------------------------------------------------------
+st.sidebar.header("Filters")
 
-    st.markdown("### Step 1: Load Dataset")
+cities = st.sidebar.multiselect("City", df["City"].unique(), default=df["City"].unique())
+ptype = st.sidebar.multiselect("Property Type", df["Property_Type"].unique(), default=df["Property_Type"].unique())
 
-    df = None
+filtered_df = df[df["City"].isin(cities) & df["Property_Type"].isin(ptype)]
 
-    mode = st.radio(
-        "Select Option:",
-        ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
-        horizontal=True
-    )
+# ---------------------------------------------------------------
+# KPIs
+# ---------------------------------------------------------------
+col1, col2, col3 = st.columns(3)
 
-# --------------------------------------------------------------
-    # 1. DEFAULT DATASET
-    # --------------------------------------------------------------
-    if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
-        try:
-            df = pd.read_csv(URL)
-            st.success("Default dataset loaded successfully.")
-            st.write(df.head())
-        except Exception as e:
-            st.error(f"Failed to load dataset. Error: {e}")
-    # --------------------------------------------------------------
-    # 2. UPLOAD CSV
-    # --------------------------------------------------------------
-    if mode == "Upload CSV":
-        file = st.file_uploader("Upload your dataset", type=["csv"])
-        if file:
-            df = pd.read_csv(file)
-            st.success("Dataset uploaded.")
-            st.dataframe(df.head())
+col1.metric("Avg Price", f"₹{filtered_df['Price'].mean():,.0f}")
+col2.metric("Avg Area (sqft)", f"{filtered_df['Area_sqft'].mean():,.0f}")
+col3.metric("Listings", f"{len(filtered_df)}")
 
-    # --------------------------------------------------------------
-    # 3. UPLOAD + COLUMN MAPPING
-    # --------------------------------------------------------------
-    if mode == "Upload CSV + Column Mapping":
-        file = st.file_uploader("Upload dataset", type=["csv"])
-        if file:
-            raw = pd.read_csv(file)
-            st.write("Uploaded Data", raw.head())
+# ---------------------------------------------------------------
+# DOWNLOAD FILTERED DATA
+# ---------------------------------------------------------------
+csv = filtered_df.to_csv(index=False).encode("utf-8")
+st.download_button("📥 Download Filtered Data", csv, "filtered_realestate.csv", "text/csv")
 
-            st.markdown("### Map Required Columns")
+# ---------------------------------------------------------------
+# CHART SECTION
+# ---------------------------------------------------------------
+st.subheader("Price by City")
 
-            mapping = {}
-            for col in REQUIRED_COLS:
-                mapping[col] = st.selectbox(f"Map column for: {col}", raw.columns)
+# Purpose + Quick Tips
+with st.expander("📘 Purpose of Chart"):
+    st.write("""
+    This chart shows the average property prices across selected cities.  
+    Helps in understanding market variation and demand-supply gaps.
+    """)
 
-            df = raw.rename(columns=mapping)
-            st.success("Mapping applied successfully.")
-            st.dataframe(df.head())
+with st.expander("💡 Quick Tips"):
+    st.write("""
+    • Compare metro vs tier-2 markets  
+    • Spot overpriced cities  
+    • Great for investor portfolio planning  
+    """)
 
-    # --------------------------------------------------------------
-    # PROCEED ONLY IF DATA LOADED
-    # --------------------------------------------------------------
-    if df is None:
-        st.stop()
+# Chart
+city_data = filtered_df.groupby("City")["Price"].mean().reset_index()
 
-    # Check required columns
-    if not all(col in df.columns for col in REQUIRED_COLS):
-        st.error("Dataset missing required columns.")
-        st.write("Required columns:", REQUIRED_COLS)
-        st.stop()
+fig = px.bar(
+    city_data,
+    x="City",
+    y="Price",
+    text="Price",
+)
 
-    df = df.dropna()
+fig.update_traces(texttemplate="₹%{text:,.0f}", textposition="outside")
 
-    # ==========================================================
-    # FILTERS & DASHBOARD
-    # ==========================================================
-    st.markdown("### Step 2: Dashboard Filters")
+fig.update_layout(
+    title="Average Price by City",
+    xaxis_title="City",
+    yaxis_title="Avg Price",
+    xaxis=dict(title_font=dict(size=16, color="black")),
+    yaxis=dict(title_font=dict(size=16, color="black")),
+)
 
-    f1, f2 = st.columns(2)
-    with f1:
-        city = st.multiselect("City", df["City"].unique())
-    with f2:
-        ptype = st.multiselect("Property Type", df["Property_Type"].unique())
+st.plotly_chart(fig, use_container_width=True)
 
-    filt = df.copy()
-    if city:
-        filt = filt[filt["City"].isin(city)]
-    if ptype:
-        filt = filt[filt["Property_Type"].isin(ptype)]
+# ---------------------------------------------------------------
+# INSIGHTS
+# ---------------------------------------------------------------
+st.subheader("🔎 Automated Insights")
 
-    st.markdown("### Data Preview")
-    st.dataframe(filt.head(), use_container_width=True)
+try:
+    max_city = city_data.loc[city_data["Price"].idxmax()]["City"]
+    min_city = city_data.loc[city_data["Price"].idxmin()]["City"]
 
-    # KPIs
-    st.markdown("### Key Metrics")
-    k1, k2, k3 = st.columns(3)
-    k1.metric("Total Properties", len(filt))
-    k2.metric("Avg Price", f"₹ {filt['Price'].mean():,.0f}")
-    k3.metric("Avg Area", f"{filt['Area_sqft'].mean():,.0f} sqft")
+    st.write(f"• Highest prices in **{max_city}**")  
+    st.write(f"• Lowest prices in **{min_city}**")  
+    st.write("• Price variation suggests investment opportunities in low-cost high-growth cities")
+except:
+    st.write("Not enough data for insights.")
 
-    # --------------------------------------------------------------
-    # CHART 1 - PRICE DISTRIBUTION
-    # --------------------------------------------------------------
-    st.markdown("### Price Distribution")
-    fig = px.histogram(filt, x="Price")
-    st.plotly_chart(fig, use_container_width=True)
+# ---------------------------------------------------------------
+# ML SECTION
+# ---------------------------------------------------------------
+st.subheader("ML Prediction Model")
 
-    # --------------------------------------------------------------
-    # CHART 2 - CITY-WISE AVG PRICE
-    # --------------------------------------------------------------
-    st.markdown("### City-wise Average Price")
-    city_avg = filt.groupby("City")["Price"].mean().reset_index()
-    fig2 = px.bar(city_avg, x="City", y="Price", text="Price")
-    fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
-    st.plotly_chart(fig2, use_container_width=True)
+try:
+    df_ml = df.dropna()
 
-    # ==========================================================
-    # MACHINE LEARNING - PRICE PREDICTION
-    # ==========================================================
-    st.markdown("### Step 3: ML Price Prediction")
+    X = df_ml.drop("Price", axis=1)
+    y = df_ml["Price"]
 
-    X = df[["City", "Property_Type", "Area_sqft"]]
-    y = df["Price"]
+    cat_cols = X.select_dtypes(include=["object"]).columns
+    num_cols = X.select_dtypes(include=["number"]).columns
 
-    transformer = ColumnTransformer([
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["City", "Property_Type"]),
-        ("num", StandardScaler(), ["Area_sqft"])
+    preprocessor = ColumnTransformer([
+        ("num", StandardScaler(), num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols)
     ])
 
-    X_trans = transformer.fit_transform(X)
+    model = Pipeline([
+        ("prep", preprocessor),
+        ("rf", RandomForestRegressor())
+    ])
 
-    X_train, X_test, y_train, y_test = train_test_split(X_trans, y, test_size=0.2)
-    model = RandomForestRegressor()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
     model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    rmse = ((y_test - preds) ** 2).mean() ** 0.5
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        p_city = st.selectbox("City", df["City"].unique())
-    with c2:
-        p_ptype = st.selectbox("Property Type", df["Property_Type"].unique())
-    with c3:
-        p_area = st.number_input("Area (sqft)", min_value=300, max_value=10000, value=1200)
+    st.metric("Model RMSE", f"₹{rmse:,.0f}")
 
-    pred = transformer.transform(pd.DataFrame([[p_city, p_ptype, p_area]],
-                     columns=["City","Property_Type","Area_sqft"]))
-
-    price_pred = model.predict(pred)[0]
-
-    st.metric("Estimated Price", f"₹ {price_pred:,.0f}")
+except Exception as e:
+    st.error(f"ML failed: {e}")
