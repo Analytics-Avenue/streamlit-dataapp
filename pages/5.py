@@ -2,10 +2,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(page_title="Real Estate Investment Opportunity Analyzer", layout="wide")
 
+# ----------------------------
+# Hide Sidebar
+# ----------------------------
 hide_sidebar = """
 <style>
 [data-testid="stSidebarNav"] {display: none;}
@@ -194,43 +196,55 @@ with tab2:
     # ==========================================================
     st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
+    filt["Expected_ROI"] = filt["Price"] * filt["Conversion_Probability"]
+    
     k1.metric("High ROI Properties", len(filt[filt["Conversion_Probability"] > 0.7]))
-    k2.metric("Top Performing Agents", filt.groupby("Agent_Name")["Conversion_Probability"].mean().sort_values(ascending=False).head(1).index[0])
-    k3.metric("Hotspot Cities", filt.groupby("City")["Price"].mean().sort_values(ascending=False).head(1).index[0])
+    k2.metric(
+        "Top Performing Agents", 
+        filt.groupby("Agent_Name")["Conversion_Probability"].mean().sort_values(ascending=False).head(1).index[0]
+    )
+    k3.metric(
+        "Hotspot Cities", 
+        filt.groupby("City")["Price"].mean().sort_values(ascending=False).head(1).index[0]
+    )
     k4.metric("Average Conversion Rate", f"{filt['Conversion_Probability'].mean():.2f}")
 
     # ==========================================================
-    # CHARTS
+    # Charts
     # ==========================================================
     st.markdown("### ROI by City")
-    city_roi = (filt["Price"] * filt["Conversion_Probability"]).groupby(filt["City"]).mean().reset_index(name="Expected_ROI")
-    fig1 = px.bar(city_roi, x="City", y="Expected_ROI", color="City", text="Expected_ROI", color_discrete_sequence=px.colors.qualitative.Bold)
+    city_roi = filt.groupby("City")["Expected_ROI"].mean().reset_index()
+    fig1 = px.bar(city_roi, x="City", y="Expected_ROI", color="City", text="Expected_ROI",
+                  color_discrete_sequence=px.colors.qualitative.Bold)
     fig1.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig1, use_container_width=True)
 
     st.markdown("### ROI by Property Type")
-    ptype_roi = (filt["Price"] * filt["Conversion_Probability"]).groupby(filt["Property_Type"]).mean().reset_index(name="Expected_ROI")
-    fig2 = px.bar(ptype_roi, x="Property_Type", y="Expected_ROI", color="Property_Type", text="Expected_ROI", color_discrete_sequence=px.colors.qualitative.Vivid)
+    ptype_roi = filt.groupby("Property_Type")["Expected_ROI"].mean().reset_index()
+    fig2 = px.bar(ptype_roi, x="Property_Type", y="Expected_ROI", color="Property_Type", text="Expected_ROI",
+                  color_discrete_sequence=px.colors.qualitative.Vivid)
     fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
     st.plotly_chart(fig2, use_container_width=True)
 
-    # ----------------------------------------------------------
-    # Hotspot Map with proper color variation
-    st.markdown("### Hotspot Map")
-    
-    # Normalize Conversion_Probability for better color visualization
-    filt["Conversion_Normalized"] = (filt["Conversion_Probability"] - filt["Conversion_Probability"].min()) / (
-        filt["Conversion_Probability"].max() - filt["Conversion_Probability"].min()
-    )
-    
+    # ==========================================================
+    # Hotspot Map
+    # ==========================================================
+    # Normalize Conversion_Probability
+    if filt["Conversion_Probability"].nunique() > 1:
+        filt["Conversion_Normalized"] = (filt["Conversion_Probability"] - filt["Conversion_Probability"].min()) / (
+            filt["Conversion_Probability"].max() - filt["Conversion_Probability"].min()
+        )
+    else:
+        filt["Conversion_Normalized"] = 0.5
+
     fig3 = px.scatter_mapbox(
         filt,
         lat="Latitude",
         lon="Longitude",
-        size="Expected_ROI",  # size proportional to expected ROI
-        color="Conversion_Normalized",  # normalized for color scale
+        size="Expected_ROI",
+        color="Conversion_Normalized",
         hover_name="Property_Type",
-        hover_data=["City", "Price", "Agent_Name", "Conversion_Probability"],
+        hover_data=["City", "Price", "Agent_Name", "Conversion_Probability", "Expected_ROI"],
         color_continuous_scale=px.colors.sequential.Viridis,
         size_max=20,
         zoom=10
@@ -242,14 +256,12 @@ with tab2:
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    
     # ==========================================================
     # Top Investment Properties
     # ==========================================================
     st.markdown("### Top Investment Properties")
-    filt["Expected_ROI"] = filt["Price"] * filt["Conversion_Probability"]
     top_inv = filt.sort_values("Expected_ROI", ascending=False).head(10)
     st.dataframe(top_inv[["City","Property_Type","Price","Conversion_Probability","Expected_ROI","Agent_Name"]])
-    
+
     csv = top_inv.to_csv(index=False)
     st.download_button("Download Top Investment Properties", csv, "top_investments.csv", "text/csv")
