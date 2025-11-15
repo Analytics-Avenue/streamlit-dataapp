@@ -115,7 +115,7 @@ with tab2:
 
     # 1. DEFAULT DATASET
     if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
         try:
             df = pd.read_csv(URL)
             st.success("Default dataset loaded successfully.")
