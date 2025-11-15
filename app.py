@@ -59,6 +59,10 @@ use_cases = {
     "#7 Rental Yield & Investment Analyzer": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "7.py"
+    },
+    "#8 Real Estate Market Buzz & Activity Dashboard": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "8.py"
     }
 }
 
