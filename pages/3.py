@@ -185,7 +185,7 @@ with tab2:
     # Default dataset
     # -------------------------------------------
     if method == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/plotly/datasets/master/real_estate_data.csv"
+        URL = "https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/datasets/RealEstate/real_estate_data.csv"
         try:
             df = pd.read_csv(URL)
             st.success("Default dataset loaded successfully.")
