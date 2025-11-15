@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-import webbrowser
+import re
 
 # --- Streamlit setup ---
 st.set_page_config(
@@ -17,41 +17,33 @@ st.markdown("""
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PAGES_DIR = os.path.join(BASE_DIR, "pages")
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# --- Hierarchy Data ---
-sectors = {
-    "Marketing Analytics": [
-        {"name": f"Marketing Use Case {i+1}", 
-         "image": "marketing_thumb.png", 
-         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"} 
-        for i in range(1, 9)  # adjust range if more pages
-    ],
-    "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", 
-         "image": "real_estate_thumb.png", 
-         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/{i+1}.py"}
-        for i in range(1, 10)
-    ],
-    "Customer Intelligence": [
-        {"name": f"Customer Use Case {i+1}", 
-         "image": "customer_thumb.png", 
-         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/customer_{i+1}.py"} 
-        for i in range(1, 10)
-    ],
-    "Sales & Revenue Analytics": [
-        {"name": f"Sales Use Case {i+1}", 
-         "image": "sales_thumb.png", 
-         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/sales_{i+1}.py"} 
-        for i in range(1, 10)
-    ],
-    "Operational Insights": [
-        {"name": f"Operations Use Case {i+1}", 
-         "image": "ops_thumb.png", 
-         "url": f"https://github.com/Analytics-Avenue/streamlit-dataapp/blob/main/pages/ops_{i+1}.py"} 
-        for i in range(1, 10)
-    ],
+# --- Detect all pages in /pages/ ---
+all_pages = [f for f in os.listdir(PAGES_DIR) if f.endswith(".py")]
+
+# --- Auto-group by sector based on filename prefix ---
+sector_patterns = {
+    "Marketing Analytics": r"usecase_marketing_\d+\.py",
+    "Real Estate Analytics": r"usecase_real_estate_\d+\.py",
+    "Customer Intelligence": r"usecase_customer_\d+\.py",
+    "Sales & Revenue Analytics": r"usecase_sales_\d+\.py",
+    "Operational Insights": r"usecase_ops_\d+\.py",
 }
+
+sectors = {}
+for sector_name, pattern in sector_patterns.items():
+    matched_pages = sorted([p for p in all_pages if re.match(pattern, p)])
+    usecases = []
+    for p in matched_pages:
+        i = re.findall(r'\d+', p)[0]
+        usecases.append({
+            "name": f"{sector_name} Use Case {i}",
+            "image": f"{sector_name.lower().replace(' ', '_')}_thumb.png",
+            "page": p.replace(".py", "")
+        })
+    sectors[sector_name] = usecases
 
 # --- Session state ---
 if "sector" not in st.session_state:
@@ -71,10 +63,10 @@ if st.session_state["sector"] is None:
                 st.image(thumb_path, use_container_width=True)
             else:
                 st.warning(f"Thumbnail not found for {sector_name}")
-            
+
             st.markdown(f"### {sector_name}")
             st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
-            
+
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["sector"] = sector_name
                 st.experimental_rerun()
@@ -83,10 +75,10 @@ if st.session_state["sector"] is None:
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
-    st.markdown("Select a use case to open its project page on GitHub.")
-    
+    st.markdown("Select a use case to go to its project page.")
+
     usecases = sectors[sector_name]
-    
+
     # Display use cases in 3-column grid
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
@@ -97,12 +89,15 @@ else:
                     st.image(thumb_path, use_container_width=True)
                 else:
                     st.warning(f"Thumbnail not found for {uc['name']}")
-                
+
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
-                
+
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    st.markdown(f"[Open Project]({uc['url']})", unsafe_allow_html=True)
+                    try:
+                        st.switch_page(uc["page"])
+                    except Exception as e:
+                        st.error(f"⚠️ Could not link to '{uc['page']}'. Make sure it exists in /pages/ folder.\nError: {e}")
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
