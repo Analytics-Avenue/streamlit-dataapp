@@ -148,25 +148,39 @@ with tab2:
             df = pd.read_csv(file)
             st.success("Dataset uploaded.")
             st.dataframe(df.head())
+# --------------------------------------------------------------
+# 3. UPLOAD CSV + COLUMN MAPPING  (CLEAN + REQUIRED ONLY)
+# --------------------------------------------------------------
+if mode == "Upload CSV + Column Mapping":
+    file = st.file_uploader("Upload dataset", type=["csv"])
+    if file:
+        raw = pd.read_csv(file)
+        st.write("Uploaded Data Preview", raw.head())
 
-    # --------------------------------------------------------------
-    # 3. UPLOAD + COLUMN MAPPING
-    # --------------------------------------------------------------
-    if mode == "Upload CSV + Column Mapping":
-        file = st.file_uploader("Upload dataset", type=["csv"])
-        if file:
-            raw = pd.read_csv(file)
-            st.write("Uploaded Data", raw.head())
+        st.markdown("### Map Required Columns")
 
-            st.markdown("### Map Required Columns")
+        # Show only REQUIRED_COLS on left
+        mapping = {}
 
-            mapping = {}
-            for col in REQUIRED_COLS:
-                mapping[col] = st.selectbox(f"Map column for: {col}", raw.columns)
+        for req_col in REQUIRED_COLS:
+            mapping[req_col] = st.selectbox(
+                f"Select column for **{req_col}**",
+                options=raw.columns,
+                index=None,
+                key=req_col
+            )
 
-            df = raw.rename(columns=mapping)
-            st.success("Mapping applied successfully.")
-            st.dataframe(df.head())
+        # Validate: All fields must be mapped
+        if any(v is None for v in mapping.values()):
+            st.warning("Please map all required columns to proceed.")
+            st.stop()
+
+        # Apply mapping
+        df = raw.rename(columns=mapping)
+
+        st.success("Column mapping applied successfully.")
+        st.dataframe(df.head(), use_container_width=True)
+
 
     # --------------------------------------------------------------
     # PROCEED ONLY IF DATA LOADED
