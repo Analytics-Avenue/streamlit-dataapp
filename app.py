@@ -43,7 +43,10 @@ use_cases = {
     "#1 Real Estate Intelligence Suite": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "3.py"
-    }
+    },
+    "#2 Real Estate Customer Segmentation & Buyer Persona Intelligence": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "2.py"
 }
 
 # --- Layout: 3 columns ---
