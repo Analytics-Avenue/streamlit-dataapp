@@ -42,11 +42,15 @@ use_cases = {
     },
     "#1 Real Estate Intelligence Suite": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
-        "page": "3.py"
+        "page": "1.py"
     },
     "#2 Real Estate Customer Segmentation & Buyer Persona Intelligence": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "2.py"
+    },
+    "#3 REAL ESTATE PRICE VS PROPERTY FEATURES ANALYZER": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "3.py"
     }
 }
 
