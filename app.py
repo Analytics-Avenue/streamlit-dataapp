@@ -25,11 +25,11 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 # --- Use cases and preview images ---
 use_cases = {
     "Marketing Analytics": {
-        "image": os.path.join(ASSETS_DIR, "marketing_preview.jpg"),
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "marketing.py"
     },
     "Healthcare Analytics": {
-        "image": os.path.join(ASSETS_DIR, "healthcare_preview.jpg"),
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "healthcare.py"
     },
     "Real Estate Analytics": {
@@ -39,6 +39,10 @@ use_cases = {
     "Real Estate Analytics 2": {
         "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
         "page": "realestate2.py"
+    },
+    "Real Estate Analytics 3": {
+        "image": os.path.join(ASSETS_DIR, "real_estate_preview.jpg"),
+        "page": "3.py"
     }
 }
 
