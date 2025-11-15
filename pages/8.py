@@ -5,9 +5,6 @@ import plotly.express as px
 
 st.set_page_config(page_title="Real Estate Buyer Sentiment Analyzer", layout="wide")
 
-# --------------------------
-# Hide default sidebar
-# --------------------------
 hide_sidebar = """
 <style>
 [data-testid="stSidebarNav"] {display: none;}
@@ -16,16 +13,16 @@ section[data-testid="stSidebar"] {display: none;}
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
-# --------------------------
-# Required Columns
-# --------------------------
+# ----------------------------------------------------------
+# REQUIRED COLUMNS ONLY FOR THIS APPLICATION
+# ----------------------------------------------------------
 REQUIRED_COLS = [
     "City", "Property_Type", "Price", "Latitude", "Longitude", "Buyer_Sentiment"
 ]
 
-# --------------------------
+# ----------------------------------------------------------
 # PAGE SETTINGS + CSS
-# --------------------------
+# ----------------------------------------------------------
 st.markdown("""
 <style>
 .big-header {
@@ -39,9 +36,9 @@ box-shadow:0 4px 20px rgba(0,0,0,0.08);}
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------
-# HEADER
-# --------------------------
+# ----------------------------------------------------------
+# MAIN HEADER
+# ----------------------------------------------------------
 st.markdown("<div class='big-header'>Real Estate Buyer Sentiment Analyzer</div>", unsafe_allow_html=True)
 
 # ==========================================================
@@ -56,19 +53,19 @@ with tab1:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-    This application provides insights into buyer sentiment across properties, cities, and property types.
-    Investors, developers, and real estate agencies can identify regions with high buyer positivity and prioritize 
-    marketing and sales strategies accordingly.
+    This application measures buyer sentiment across properties and locations, helping 
+    investors and agents understand demand trends, identify high-interest areas, and 
+    optimize property marketing strategies.
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("### Purpose")
     st.markdown("""
     <div class='card'>
-    • Analyze buyer sentiment distribution across cities and property types.<br>
-    • Highlight properties and regions with high positive sentiment.<br>
-    • Support investment and marketing prioritization.<br>
-    • Understand market perception trends over time.
+    • Monitor buyer sentiment for properties<br>
+    • Identify city-wise and property-type trends<br>
+    • Highlight potential investment hotspots<br>
+    • Support data-driven marketing & pricing decisions
     </div>
     """, unsafe_allow_html=True)
 
@@ -78,29 +75,27 @@ with tab1:
         st.markdown("""
         <div class='card'>
         <b>Technical</b><br>
-        • Interactive sentiment heatmaps<br>
-        • City & property type segmentation<br>
-        • Filterable dashboards<br>
-        • Buyer sentiment scoring
+        • Sentiment scoring<br>
+        • Interactive sentiment hotspot maps<br>
+        • City & property segmentation dashboards
         </div>
         """, unsafe_allow_html=True)
     with c2:
         st.markdown("""
         <div class='card'>
         <b>Business</b><br>
-        • Identify high-opportunity regions<br>
-        • Optimize property marketing<br>
-        • Prioritize sales outreach<br>
-        • Data-driven investor guidance
+        • Identify high-demand properties<br>
+        • Track agent engagement effectiveness<br>
+        • Optimize marketing and sales campaigns
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("### KPIs")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>High Sentiment Properties</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Top Cities by Positivity</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Top Cities by Sentiment</div>", unsafe_allow_html=True)
     k3.markdown("<div class='metric-card'>Top Property Types</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Avg Sentiment Score</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Average Sentiment Score</div>", unsafe_allow_html=True)
 
 # ==========================================================
 # TAB 2 - APPLICATION
@@ -115,31 +110,29 @@ with tab2:
         horizontal=True
     )
 
-    # 1. DEFAULT DATASET
+    # ----------------------------------------------------------
+    # DEFAULT DATASET
+    # ----------------------------------------------------------
     if mode == "Default Dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
         try:
             df = pd.read_csv(URL)
-            # Generate fake Buyer_Sentiment column
-            np.random.seed(42)
-            df["Buyer_Sentiment"] = np.random.choice(["Positive", "Neutral", "Negative"], size=len(df))
             st.success("Default dataset loaded successfully.")
-            st.write(df.head())
         except Exception as e:
             st.error(f"Could not load dataset: {e}")
 
-    # 2. UPLOAD CSV
+    # ----------------------------------------------------------
+    # UPLOAD CSV
+    # ----------------------------------------------------------
     if mode == "Upload CSV":
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-            if "Buyer_Sentiment" not in df.columns:
-                np.random.seed(42)
-                df["Buyer_Sentiment"] = np.random.choice(["Positive", "Neutral", "Negative"], size=len(df))
             st.success("Dataset uploaded.")
-            st.dataframe(df.head())
 
-    # 3. UPLOAD + COLUMN MAPPING
+    # ----------------------------------------------------------
+    # UPLOAD + COLUMN MAPPING
+    # ----------------------------------------------------------
     if mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
@@ -158,28 +151,34 @@ with tab2:
                     st.error(f"Please map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
-                    # Ensure Buyer_Sentiment exists
-                    if "Buyer_Sentiment" not in df.columns:
-                        np.random.seed(42)
-                        df["Buyer_Sentiment"] = np.random.choice(["Positive", "Neutral", "Negative"], size=len(df))
                     st.success("Mapping applied successfully.")
                     st.dataframe(df.head())
 
+    # ----------------------------------------------------------
+    # CHECK DATA LOADED
+    # ----------------------------------------------------------
     if df is None:
         st.stop()
 
-    # Drop rows with essential missing values
-    LAT_COL, LON_COL, PRICE_COL, SENT_COL = "Latitude", "Longitude", "Price", "Buyer_Sentiment"
-    df = df.dropna(subset=[LAT_COL, LON_COL, PRICE_COL, SENT_COL])
+    if not all(col in df.columns for col in REQUIRED_COLS):
+        st.warning("Some columns missing. Faker dataset will be generated.")
+        # Generate faker data
+        n = 200
+        df = pd.DataFrame({
+            "City": np.random.choice(["Chennai", "Bangalore", "Mumbai", "Delhi"], n),
+            "Property_Type": np.random.choice(["Apartment", "Villa", "Studio"], n),
+            "Price": np.random.randint(3000000, 50000000, n),
+            "Latitude": np.random.uniform(12, 28, n),
+            "Longitude": np.random.uniform(77, 77.5, n),
+            "Buyer_Sentiment": np.round(np.random.uniform(0, 1, n), 2)
+        })
 
-    # Map sentiment to numeric for calculations
-    sentiment_map = {"Positive": 0.9, "Neutral": 0.5, "Negative": 0.2}
-    df["Sentiment_Score"] = df[SENT_COL].map(sentiment_map)
+    df = df.dropna(subset=REQUIRED_COLS)
 
     # ==========================================================
     # FILTERS
     # ==========================================================
-    st.markdown("### Step 2: Filters")
+    st.markdown("### Step 2: Dashboard Filters")
     f1, f2 = st.columns(2)
     with f1:
         city = st.multiselect("City", df["City"].unique())
@@ -200,81 +199,99 @@ with tab2:
     # ==========================================================
     st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("High Sentiment Properties", len(filt[filt["Sentiment_Score"] > 0.7]))
-    k2.metric("Top Cities by Positivity", filt.groupby("City")["Sentiment_Score"].mean().sort_values(ascending=False).head(1).index[0])
-    k3.metric("Top Property Types", filt.groupby("Property_Type")["Sentiment_Score"].mean().sort_values(ascending=False).head(1).index[0])
-    k4.metric("Average Sentiment Score", f"{filt['Sentiment_Score'].mean():.2f}")
+    k1.metric("High Sentiment Properties", len(filt[filt["Buyer_Sentiment"] > 0.7]))
+    k2.metric("Top Cities by Sentiment", filt.groupby("City")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
+    k3.metric("Top Property Types", filt.groupby("Property_Type")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
+    k4.metric("Average Sentiment Score", f"{filt['Buyer_Sentiment'].mean():.2f}")
 
     # ==========================================================
-    # CHARTS
+    # Charts with Purpose + Quick Tip dropdown
     # ==========================================================
-    def chart_dropdown(title, purpose, quick_tip, chart_func):
-        with st.expander(f"{title} ▼", expanded=True):
+    def chart_dropdown(title, purpose, tip, chart_func):
+        with st.expander(title):
             st.markdown(f"**Purpose:** {purpose}")
-            st.markdown(f"**Quick Tip:** {quick_tip}")
+            st.markdown(f"**Quick Tip:** {tip}")
             chart_func()
 
-    # ---------------- Chart 1: Sentiment Distribution ----------------
+    # ----------------------------
+    # Chart 1 – Sentiment Distribution
+    # ----------------------------
     def chart1():
-        dist = filt["Buyer_Sentiment"].value_counts().reset_index()
-        dist.columns = ["Sentiment", "Count"]
-        fig = px.pie(dist, names="Sentiment", values="Count", color="Sentiment",
-                     color_discrete_map={"Positive":"green", "Neutral":"orange", "Negative":"red"})
+        fig = px.histogram(
+            filt,
+            x="Buyer_Sentiment",
+            nbins=20,
+            color="Property_Type",
+            marginal="box",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     chart_dropdown(
-        "Buyer Sentiment Distribution",
-        "Understand the overall sentiment trend across all properties.",
-        "Positive sentiment often indicates higher buyer interest.",
+        "Buyer Sentiment Distribution by Property Type",
+        "Understand the distribution of buyer sentiment scores across different property types.",
+        "High sentiment properties usually indicate strong market interest.",
         chart1
     )
 
-    # ---------------- Chart 2: City-wise Avg Sentiment ----------------
+    # ----------------------------
+    # Chart 2 – City-wise Average Sentiment
+    # ----------------------------
     def chart2():
-        city_sent = filt.groupby("City")["Sentiment_Score"].mean().reset_index()
-        fig = px.bar(city_sent, x="City", y="Sentiment_Score", text="Sentiment_Score",
-                     color="Sentiment_Score", color_continuous_scale=px.colors.sequential.Teal)
+        city_avg = filt.groupby("City")["Buyer_Sentiment"].mean().reset_index()
+        fig = px.bar(
+            city_avg,
+            x="City",
+            y="Buyer_Sentiment",
+            color="City",
+            text="Buyer_Sentiment",
+            color_discrete_sequence=px.colors.qualitative.Bold
+        )
         fig.update_traces(texttemplate="%{text:.2f}", textposition="outside")
         st.plotly_chart(fig, use_container_width=True)
 
     chart_dropdown(
-        "City-wise Avg Sentiment Score",
-        "Compare buyer sentiment across different cities.",
-        "Target marketing in cities with high positive sentiment.",
+        "City-wise Average Buyer Sentiment",
+        "Compare average sentiment across cities to identify high-interest markets.",
+        "Focus on cities with sentiment above 0.7 for potential investment hotspots.",
         chart2
     )
 
-    # ---------------- Chart 3: Buyer Sentiment Hotspot Map ----------------
+    # ----------------------------
+    # Chart 3 – Buyer Sentiment Hotspot Map
+    # ----------------------------
     def chart3():
+        filt["Sentiment_Norm"] = (filt["Buyer_Sentiment"] - filt["Buyer_Sentiment"].min()) / (
+            filt["Buyer_Sentiment"].max() - filt["Buyer_Sentiment"].min()
+        )
         fig = px.scatter_mapbox(
             filt,
-            lat=LAT_COL,
-            lon=LON_COL,
-            size=PRICE_COL,
-            color="Sentiment_Score",
+            lat="Latitude",
+            lon="Longitude",
+            size="Price",
+            color="Sentiment_Norm",
             hover_name="Property_Type",
             hover_data=["City", "Price", "Buyer_Sentiment"],
-            color_continuous_scale=px.colors.sequential.RdYlGn,
+            color_continuous_scale=px.colors.diverging.RdYlGn,
             size_max=15,
             zoom=10
         )
-        fig.update_layout(mapbox_style="open-street-map",
-                          coloraxis_colorbar=dict(title="Sentiment Score"),
-                          margin={"r":0,"t":0,"l":0,"b":0})
+        fig.update_layout(
+            mapbox_style="open-street-map",
+            coloraxis_colorbar=dict(title="Sentiment Score"),
+            margin={"r":0,"t":0,"l":0,"b":0}
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     chart_dropdown(
         "Buyer Sentiment Hotspot Map",
-        "Visualize geographic regions with high buyer positivity.",
-        "Focus investments or marketing in hotspots with high sentiment.",
+        "Visualize sentiment geographically to identify property hotspots.",
+        "Green areas indicate positive sentiment; red areas indicate negative sentiment.",
         chart3
     )
 
-    # -------------------------
-    # Top Properties by Sentiment
-    # -------------------------
-    st.markdown("### Top Properties by Sentiment Score")
-    top_props = filt.sort_values("Sentiment_Score", ascending=False).head(10)
-    st.dataframe(top_props[["City","Property_Type","Price","Buyer_Sentiment","Sentiment_Score"]])
-    csv = top_props.to_csv(index=False)
-    st.download_button("Download Top Properties", csv, "top_properties_sentiment.csv", "text/csv")
+    # ----------------------------
+    # Download filtered data
+    # ----------------------------
+    csv = filt.to_csv(index=False)
+    st.download_button("Download Filtered Dataset", csv, "buyer_sentiment_filtered.csv", "text/csv")
