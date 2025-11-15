@@ -2,28 +2,23 @@ import streamlit as st
 import os
 import re
 
-# --- Streamlit setup ---
-st.set_page_config(
-    page_title="Data Analytics Hub",
-    layout="wide",
-)
+st.set_page_config(page_title="Data Analytics Hub", layout="wide")
 
-# Hide default sidebar
+# Hide sidebar
 st.markdown("""
-    <style>
-        [data-testid="stSidebarNav"] {display: none;}
-    </style>
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+</style>
 """, unsafe_allow_html=True)
 
-# --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PAGES_DIR = os.path.join(BASE_DIR, "pages")
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# --- Detect all pages in /pages/ ---
+# Detect all pages dynamically
 all_pages = [f for f in os.listdir(PAGES_DIR) if f.endswith(".py")]
 
-# --- Auto-group by sector based on filename prefix ---
+# Auto-group by sector
 sector_patterns = {
     "Marketing Analytics": r"usecase_marketing_\d+\.py",
     "Real Estate Analytics": r"usecase_real_estate_\d+\.py",
@@ -45,9 +40,17 @@ for sector_name, pattern in sector_patterns.items():
         })
     sectors[sector_name] = usecases
 
-# --- Session state ---
+# Session state
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
+if "go_to_page" not in st.session_state:
+    st.session_state["go_to_page"] = None
+
+# --- Handle page navigation ---
+if st.session_state["go_to_page"]:
+    page_name = st.session_state["go_to_page"]
+    st.session_state["go_to_page"] = None
+    st.switch_page(page_name)
 
 # --- Home Page ---
 if st.session_state["sector"] is None:
@@ -69,7 +72,7 @@ if st.session_state["sector"] is None:
 
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["sector"] = sector_name
-                st.experimental_rerun()
+                st.experimental_rerun()  # safe here
 
 # --- Sector Page ---
 else:
@@ -79,7 +82,7 @@ else:
 
     usecases = sectors[sector_name]
 
-    # Display use cases in 3-column grid
+    # 3-column grid
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
@@ -94,12 +97,11 @@ else:
                 st.write("Dive into the data, uncover insights, and visualize trends.")
 
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    try:
-                        st.switch_page(uc["page"])
-                    except Exception as e:
-                        st.error(f"⚠️ Could not link to '{uc['page']}'. Make sure it exists in /pages/ folder.\nError: {e}")
+                    # ✅ Use session state to avoid rerun inside loop
+                    st.session_state["go_to_page"] = uc["page"]
+                    st.experimental_rerun()
 
-    # Back button to Home
+    # Back button
     if st.button("⬅️ Back to Sectors"):
         st.session_state["sector"] = None
         st.experimental_rerun()
