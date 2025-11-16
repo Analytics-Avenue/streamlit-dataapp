@@ -7,12 +7,6 @@ st.set_page_config(
     layout="wide",
 )
 
-# Hide default sidebar
-st.markdown("""
-<style>
-[data-testid="stSidebarNav"] {display: none;}
-</style>
-""", unsafe_allow_html=True)
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
