@@ -15,7 +15,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 sectors = {
     "Marketing Analytics": [
         {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
-        {"name": "Customer Journey & Funnel Insights", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
+        {"name": "Marketing Intelligence & Forecasting Lab", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
         {"name": "Marketing Spend vs ROI Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
         {"name": "Lead Scoring & Conversion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
         {"name": "Social Media Engagement Tracker", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
