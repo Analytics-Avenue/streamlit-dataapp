@@ -16,14 +16,15 @@ PAGES_DIR = os.path.join(BASE_DIR, "pages")
 # --- Hierarchy Data ---
 sectors = {
     "Marketing Analytics": [
-        {"name": f"Marketing Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"marketing_{i+1}.py"} 
+        {"name": f"Marketing Use Case {i+1}", "image": "marketing_thumb.jpg", "page": f"marketing_{i+1}.py"} 
         for i in range(10)
     ],
     "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"realestate_{i+1}.py"} 
-        for i in range(10)
+        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"usecase_real_estate_{i+1}.py"} 
+        for i in range(8)  # only 8 use cases
     ],
 }
+
 
 # --- Direct thumbnail paths for home page ---
 home_thumbs = {
