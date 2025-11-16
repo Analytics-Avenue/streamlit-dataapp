@@ -154,11 +154,16 @@ if st.session_state.df is not None:
             ("num", StandardScaler(), numeric_cols),
             ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
         ])
-
         if model_type == "Regression":
+            # Convert target to numeric, errors='coerce' will turn non-numeric to NaN
+            y = pd.to_numeric(y, errors='coerce')
+            # Drop rows with NaN in target or features
+            X = X[y.notna()]
+            y = y[y.notna()]
             model = RandomForestRegressor()
         else:
             model = RandomForestClassifier()
+
 
         pipeline = Pipeline([("prep", preprocessor), ("model", model)])
 
