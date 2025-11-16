@@ -177,22 +177,31 @@ if st.session_state.df is not None:
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
         # Sanitize numeric columns: remove commas, convert to numeric, fill NaN with median
+        # Ensure numeric columns are numeric and fill missing values
         for col in numeric_cols:
             X[col] = pd.to_numeric(X[col].astype(str).str.replace(',', ''), errors='coerce')
             X[col] = X[col].fillna(X[col].median())
-
-        # Ensure target is numeric if regression
+        
+        # Ensure categorical columns are strings and fill missing values
+        for col in cat_cols:
+            X[col] = X[col].astype(str).fillna("Missing")
+        
+        # Ensure target is numeric for regression
         if model_type == "Regression":
             y = pd.to_numeric(y.astype(str).str.replace(',', ''), errors='coerce')
-
-        # Drop rows only if target is missing
+        
+        # Drop rows only if target is NaN
         valid_rows = y.notna()
         X = X.loc[valid_rows]
         y = y.loc[valid_rows]
-
-        if len(X) < 2:
-            st.error(f"Not enough valid rows after cleaning: {len(X)} rows")
-            st.stop()
+        
+        # After this, X and y should have NO missing values
+        if X.isna().sum().sum() > 0:
+            st.warning(f"Warning: {X.isna().sum().sum()} missing values remain. Filling with median for numeric, 'Missing' for categorical.")
+            for col in X.select_dtypes(include=np.number).columns:
+                X[col] = X[col].fillna(X[col].median())
+            for col in X.select_dtypes(exclude=np.number).columns:
+                X[col] = X[col].fillna("Missing")
 
         # Recompute numeric/categorical columns after cleaning
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
