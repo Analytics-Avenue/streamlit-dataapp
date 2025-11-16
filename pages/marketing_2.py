@@ -14,6 +14,35 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
+from openai import OpenAI
+
+# Load API Key from Streamlit Secrets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+st.title("Gen-AI Marketing Assistant")
+
+st.markdown("Ask anything about your marketing dataset. The AI will analyze and respond.")
+
+user_input = st.text_area("Write your question", "")
+
+if st.button("Generate Insights"):
+    if not user_input.strip():
+        st.warning("Please enter a question.")
+    else:
+        with st.spinner("Analyzing…"):
+            response = client.chat.completions.create(
+                model="gpt-4.1",
+                messages=[
+                    {"role": "system", "content": "You are a data analytics expert specialized in marketing analytics."},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+
+            ai_output = response.choices[0].message["content"]
+            st.success("Response:")
+            st.write(ai_output)
+
+
 st.set_page_config(page_title="Marketing Intelligence & Forecasting Lab", layout="wide")
 
 # -------------------------
