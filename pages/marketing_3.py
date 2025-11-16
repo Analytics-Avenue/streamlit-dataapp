@@ -119,14 +119,14 @@ if st.session_state.df is not None:
     model_type = st.radio("Select Model Type", ["Regression", "Classification"])
 
     if target:
-        X = df.drop(columns=[target])
-        y = df[target]
+        X = df.drop(columns=[target]).copy()
+        y = df[target].copy()
 
         # Numeric / categorical split
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
-        # Convert numeric columns safely
+        # Convert all numeric columns safely
         for col in numeric_cols:
             X[col] = pd.to_numeric(X[col], errors='coerce')
 
@@ -134,15 +134,22 @@ if st.session_state.df is not None:
         if model_type == "Regression":
             y = pd.to_numeric(y, errors='coerce')
 
-        # Drop NaNs
-        X = X.dropna()
-        y = y.loc[X.index]
+        # Drop rows with any NaNs in features or target
+        combined = X.copy()
+        combined[target] = y
+        combined = combined.dropna()
+        X = combined.drop(columns=[target])
+        y = combined[target]
 
         if len(X) < 2:
             st.error("Not enough valid rows after cleaning for training.")
             st.stop()
 
-        # Pipeline setup
+        # Recalculate numeric/categorical columns after dropping NaNs
+        numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
+        cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
+
+        # Pipeline
         preprocessor = ColumnTransformer([
             ("num", StandardScaler(), numeric_cols),
             ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
@@ -153,7 +160,10 @@ if st.session_state.df is not None:
         test_size = st.slider("Test Size", 0.1, 0.5, 0.2)
 
         if st.button("Train Model"):
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=test_size, random_state=42
+            )
+            # Fit model
             pipeline.fit(X_train, y_train)
             st.session_state.pipeline = pipeline
             score = pipeline.score(X_test, y_test)
@@ -170,6 +180,7 @@ if st.session_state.df is not None:
                 st.plotly_chart(fig, use_container_width=True)
             except:
                 st.info("Feature importance not available for this model.")
+
 
 # ---------------------------
 # Quick Predict Single Row
