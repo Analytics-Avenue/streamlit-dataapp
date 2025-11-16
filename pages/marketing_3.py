@@ -80,8 +80,6 @@ if page == "Upload Data":
 
     # ----------------- TAB 1 -----------------
     with tab1:
-        tabs = st.tabs(["Overview", "Application"])
-
         st.markdown("### Welcome to the Marketing ML Dashboard")
         st.markdown("""
         <div class='card'>
