@@ -115,9 +115,8 @@ with tab2:
             st.error(f"Could not load dataset: {e}")
 
     elif mode == "Upload CSV":
-        
-    st.markdown("#### Download Sample CSV for Reference")
-    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"    
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+        st.markdown("#### Download Sample CSV for Reference")
         try:
             # Load default dataset
             sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
@@ -130,7 +129,7 @@ with tab2:
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-            
+                
     elif mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
