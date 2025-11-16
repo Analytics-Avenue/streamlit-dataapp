@@ -143,6 +143,27 @@ if st.session_state.df is not None:
     if target:
         X = df.drop(columns=[target])
         y = df[target]
+        
+        # Identify numeric and categorical columns
+        numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
+        cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
+        
+        # Convert numeric columns safely
+        for col in numeric_cols:
+            X[col] = pd.to_numeric(X[col], errors='coerce')
+        
+        # Convert target if regression
+        if model_type == "Regression":
+            y = pd.to_numeric(y, errors='coerce')
+        
+        # Drop rows with any NaN in X or y
+        X = X.dropna()
+        y = y.loc[X.index]
+        
+        # Stop if dataset too small
+        if len(X) < 2:
+            st.error("Not enough valid rows after cleaning for training. Please check your dataset.")
+            st.stop()
 
         numeric_cols = X.select_dtypes(include=np.number).columns
         cat_cols = X.select_dtypes(exclude=np.number).columns
