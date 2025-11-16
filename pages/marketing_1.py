@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
 
-st.set_page_config(page_title="Marketing Campaign Performance Analyzer", layout="wide")
+st.set_page_config(page_title="Marketing Analytics Dashboard", layout="wide")
 
 # -------------------------------
 # HIDE SIDEBAR
@@ -21,39 +20,32 @@ box-shadow:0 4px 20px rgba(0,0,0,0.08);}
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("<div class='big-header'>Marketing Analytics Dashboard</div>", unsafe_allow_html=True)
+
 # -------------------------------
 # REQUIRED COLUMNS
 # -------------------------------
-REQUIRED_COLS = [
-    "Campaign", "Channel", "Date", "Impressions", "Clicks", "Leads", "Conversions", "Spend"
-]
-
-# -------------------------------
-# HEADER
-# -------------------------------
-st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
+REQUIRED_COLS = ['Campaign','Channel','Date','Impressions','Clicks','Leads','Conversions','Spend']
 
 # -------------------------------
 # TABS
 # -------------------------------
-tab1, tab2 = st.tabs(["Overview", "Application"])
+tab1, tab2 = st.tabs(["Overview","Application"])
 
 # -------------------------------
 # TAB 1: OVERVIEW
 # -------------------------------
 with tab1:
     st.markdown("### Overview")
-    st.markdown("<div class='card'>This app tracks marketing campaign performance across multiple channels, analyzing lead generation, conversion, and ROI metrics.</div>", unsafe_allow_html=True)
-    
+    st.markdown("<div class='card'>This app tracks marketing campaign performance across channels, helping measure engagement, conversions, and ROI.</div>", unsafe_allow_html=True)
     st.markdown("### Purpose")
-    st.markdown("<div class='card'>• Evaluate campaign efficiency by channel<br>• Track impressions, clicks, and conversions<br>• Calculate ROI per campaign<br>• Identify high-performing campaigns for scaling</div>", unsafe_allow_html=True)
-
+    st.markdown("<div class='card'>• Measure campaign effectiveness<br>• Identify top-performing channels<br>• Track conversions and ROI<br>• Support budget allocation and optimization</div>", unsafe_allow_html=True)
     st.markdown("### KPIs")
-    k1, k2, k3, k4 = st.columns(4)
+    k1,k2,k3,k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>Total Impressions</div>", unsafe_allow_html=True)
     k2.markdown("<div class='metric-card'>Total Clicks</div>", unsafe_allow_html=True)
     k3.markdown("<div class='metric-card'>Total Leads</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Average Conversion Rate</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Total Spend</div>", unsafe_allow_html=True)
 
 # -------------------------------
 # TAB 2: APPLICATION
@@ -62,17 +54,15 @@ with tab2:
     st.markdown("### Step 1: Load Dataset")
     df = None
 
-    mode = st.radio(
-        "Select Dataset Option:",
-        ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
-        horizontal=True
-    )
+    mode = st.radio("Select Dataset Option:",
+                    ["Default Dataset","Upload CSV","Upload CSV + Column Mapping"],
+                    horizontal=True)
 
     # -------------------------------
     # DEFAULT DATASET
     # -------------------------------
     if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing/sample_marketing.csv"
         try:
             df = pd.read_csv(URL)
         except Exception as e:
@@ -82,31 +72,30 @@ with tab2:
     # UPLOAD CSV
     # -------------------------------
     elif mode == "Upload CSV":
-        st.markdown("#### Download Sample CSV for Reference")
-        try:
-            sample_df = pd.read_csv(URL).head(5)
-            sample_csv = sample_df.to_csv(index=False)
-            st.download_button("Download Sample CSV", sample_csv, "sample_marketing.csv", "text/csv")
-        except Exception as e:
-            st.info(f"Sample CSV unavailable: {e}")
-        
-        file = st.file_uploader("Upload your dataset", type=["csv"])
+        file = st.file_uploader("Upload your CSV file", type=["csv"])
         if file:
             df = pd.read_csv(file)
+            st.success("File uploaded successfully.")
+            # Optional: auto-map FB Ads dataset
+            fb_map = {
+                "Campaign":"Campaign name",
+                "Channel":"Page Name",
+                "Date":"Day",
+                "Impressions":"Impressions",
+                "Clicks":"Link clicks",
+                "Leads":"Results",
+                "Conversions":"Results",
+                "Spend":"Amount spent (INR)"
+            }
+            if all(col in df.columns for col in fb_map.values()):
+                df = df.rename(columns=fb_map)
+                st.info("Auto-mapped Facebook Ads dataset successfully.")
 
     # -------------------------------
     # UPLOAD CSV + COLUMN MAPPING
     # -------------------------------
     elif mode == "Upload CSV + Column Mapping":
-        st.markdown("#### Download Sample CSV for Reference")
-        try:
-            sample_df = pd.read_csv(URL).head(5)
-            sample_csv = sample_df.to_csv(index=False)
-            st.download_button("Download Sample CSV", sample_csv, "sample_marketing.csv", "text/csv")
-        except Exception as e:
-            st.info(f"Sample CSV unavailable: {e}")
-
-        file = st.file_uploader("Upload dataset", type=["csv"])
+        file = st.file_uploader("Upload your CSV file", type=["csv"])
         if file:
             raw = pd.read_csv(file)
             st.write("Uploaded Data Preview", raw.head())
@@ -114,12 +103,12 @@ with tab2:
             for col in REQUIRED_COLS:
                 mapping[col] = st.selectbox(f"Map your column to: {col}", options=["-- Select --"] + list(raw.columns))
             if st.button("Apply Mapping"):
-                missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
+                missing = [col for col, mapped in mapping.items() if mapped=="-- Select --"]
                 if missing:
                     st.error(f"Please map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
-                    st.success("Mapping applied successfully.")
+                    st.success("Column mapping applied successfully.")
 
     # -------------------------------
     # VALIDATION
@@ -138,12 +127,12 @@ with tab2:
     # -------------------------------
     # FILTERS
     # -------------------------------
-    channels = st.multiselect("Channel", df["Channel"].unique())
-    campaigns = st.multiselect("Campaign", df["Campaign"].unique())
+    campaign = st.multiselect("Campaign", df["Campaign"].unique())
+    channel = st.multiselect("Channel", df["Channel"].unique())
 
     filt = df.copy()
-    if channels: filt = filt[filt["Channel"].isin(channels)]
-    if campaigns: filt = filt[filt["Campaign"].isin(campaigns)]
+    if campaign: filt = filt[filt["Campaign"].isin(campaign)]
+    if channel: filt = filt[filt["Channel"].isin(channel)]
 
     st.markdown("### Data Preview")
     st.dataframe(filt.head(), use_container_width=True)
@@ -151,40 +140,31 @@ with tab2:
     # -------------------------------
     # KPIs
     # -------------------------------
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Total Impressions", filt["Impressions"].sum())
-    k2.metric("Total Clicks", filt["Clicks"].sum())
-    k3.metric("Total Leads", filt["Leads"].sum())
-    conv_rate = filt["Conversions"].sum() / (filt["Clicks"].sum() + 1e-6)
-    k4.metric("Average Conversion Rate", f"{conv_rate*100:.2f}%")
-
-    # -------------------------------
-    # PURPOSE & QUICK TIP
-    # -------------------------------
-    with st.expander("Purpose & Quick Tip"):
-        st.markdown("**Purpose:** Evaluate marketing campaigns by impressions, clicks, leads, and conversions to optimize ROI.")
-        st.markdown("**Quick Tip:** Focus on campaigns with high conversion rates and low spend for efficiency.")
+    k1,k2,k3,k4 = st.columns(4)
+    k1.metric("Total Impressions", int(filt["Impressions"].sum()))
+    k2.metric("Total Clicks", int(filt["Clicks"].sum()))
+    k3.metric("Total Leads", int(filt["Leads"].sum()))
+    k4.metric("Total Spend (INR)", round(filt["Spend"].sum(),2))
 
     # -------------------------------
     # CHARTS
     # -------------------------------
-    st.markdown("### Clicks vs Impressions by Campaign")
-    fig1 = px.scatter(filt, x="Impressions", y="Clicks", color="Campaign", size="Leads", hover_data=["Channel","Conversions"])
-    st.plotly_chart(fig1, use_container_width=True)
+    st.markdown("### Campaign-wise Clicks")
+    fig1 = px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks", color_discrete_sequence=px.colors.qualitative.Bold)
+    fig1.update_traces(texttemplate="%{text}", textposition="outside")
+    st.plotly_chart(fig1,use_container_width=True)
 
-    st.markdown("### Conversion Rate by Channel")
-    channel_df = filt.groupby("Channel")[["Clicks","Conversions"]].sum().reset_index()
-    channel_df["Conversion_Rate"] = channel_df["Conversions"] / (channel_df["Clicks"] + 1e-6)
-    fig2 = px.bar(channel_df, x="Channel", y="Conversion_Rate", color="Channel", text="Conversion_Rate", color_discrete_sequence=px.colors.qualitative.Bold)
-    fig2.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("### Channel-wise Leads")
+    fig2 = px.pie(filt, names="Channel", values="Leads", color="Channel", color_discrete_sequence=px.colors.qualitative.Pastel)
+    st.plotly_chart(fig2,use_container_width=True)
 
-    st.markdown("### Spend vs Leads")
-    fig3 = px.scatter(filt, x="Spend", y="Leads", color="Channel", size="Conversions", hover_data=["Campaign"])
-    st.plotly_chart(fig3, use_container_width=True)
+    st.markdown("### Spend vs Conversions")
+    fig3 = px.scatter(filt, x="Spend", y="Conversions", size="Impressions", color="Channel", hover_data=["Campaign"], size_max=30, color_discrete_sequence=px.colors.qualitative.Set2)
+    st.plotly_chart(fig3,use_container_width=True)
 
     # -------------------------------
-    # DOWNLOAD
+    # DOWNLOAD FILTERED DATA
     # -------------------------------
     csv = filt.to_csv(index=False)
     st.download_button("Download Filtered Dataset", csv, "marketing_filtered.csv", "text/csv")
+
