@@ -62,7 +62,7 @@ with tab2:
     # DEFAULT DATASET
     # -------------------------------
     if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics"
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
         try:
             df = pd.read_csv(URL)
         except Exception as e:
