@@ -43,7 +43,7 @@ if "pipeline" not in st.session_state:
 
 # ---------------------------
 # Dataset input: default, upload, mapping
-# -------------------------
+# ---------------------------
 st.markdown("### Step 1 — Load dataset")
 mode = st.radio(
     "Dataset option:",
@@ -52,36 +52,30 @@ mode = st.radio(
 )
 
 df = None
-
-# REQUIRED FIELDS (for mapping)
 REQUIRED_MARKETING_COLS = ["Campaign", "Clicks", "Impressions", "Budget"]
 
-# Placeholder auto-map function
+# Auto-mapping placeholder
 def auto_map_columns(df):
     for col in REQUIRED_MARKETING_COLS:
         if col not in df.columns:
             df[col] = np.nan
     return df
 
-# -------------------------
-# Mode: Default dataset
-# -------------------------
+# --- Default Dataset ---
 if mode == "Default dataset":
     DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
     try:
         df = pd.read_csv(DEFAULT_URL)
         df.columns = df.columns.str.strip()
         df = auto_map_columns(df)
-        st.session_state.df = df  # Always assign here
+        st.session_state.df = df
         st.success("Default dataset loaded")
         st.dataframe(df.head())
     except Exception as e:
         st.error("Failed to load default dataset: " + str(e))
         st.stop()
 
-# -------------------------
-# Mode: Upload CSV
-# -------------------------
+# --- Upload CSV ---
 elif mode == "Upload CSV":
     st.markdown("#### Download Sample CSV for Reference")
     SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
@@ -97,15 +91,13 @@ elif mode == "Upload CSV":
         df = pd.read_csv(uploaded)
         df.columns = df.columns.str.strip()
         df = auto_map_columns(df)
-        st.session_state.df = df  # Always assign here
+        st.session_state.df = df
         st.success("File uploaded.")
         st.dataframe(df.head())
         sample_small = df.head(5).to_csv(index=False)
         st.download_button("Download sample (first 5 rows)", sample_small, "sample_uploaded_5rows.csv", "text/csv")
 
-# -------------------------
-# Mode: Upload + Column Mapping
-# -------------------------
+# --- Upload + Column Mapping ---
 else:
     uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
     if uploaded is not None:
@@ -125,7 +117,7 @@ else:
                 st.error("Please map all required columns: " + ", ".join(missing))
             else:
                 df = raw.rename(columns={v: k for k, v in mapping.items()})
-                st.session_state.df = df  # Always assign here
+                st.session_state.df = df
                 st.success("Mapping applied.")
                 st.dataframe(df.head())
                 sample_small = df.head(5).to_csv(index=False)
@@ -135,9 +127,6 @@ else:
                     "mapped_sample_5rows.csv",
                     "text/csv"
                 )
-
-
-
 
 # ---------------------------
 # EDA Section
@@ -159,7 +148,7 @@ if st.session_state.df is not None:
         fig = px.bar(df, x="Campaign", y="Clicks", color="Campaign")
         st.plotly_chart(fig, use_container_width=True)
 
-
+# ---------------------------
 # ML Section
 # ---------------------------
 if st.session_state.df is not None:
@@ -172,56 +161,51 @@ if st.session_state.df is not None:
         X = df.drop(columns=[target]).copy()
         y = df[target].copy()
 
-        # Identify numeric and categorical columns
+        # Numeric / categorical split
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
-        # Sanitize numeric columns: remove commas, convert to numeric, fill NaN with median
-        # Ensure numeric columns are numeric and fill missing values
+        # --- Cleaning Data ---
         for col in numeric_cols:
             X[col] = pd.to_numeric(X[col].astype(str).str.replace(',', ''), errors='coerce')
             X[col] = X[col].fillna(X[col].median())
-        
-        # Ensure categorical columns are strings and fill missing values
         for col in cat_cols:
             X[col] = X[col].astype(str).fillna("Missing")
-        
-        # Ensure target is numeric for regression
+
         if model_type == "Regression":
             y = pd.to_numeric(y.astype(str).str.replace(',', ''), errors='coerce')
-        
-        # Drop rows only if target is NaN
+
+        # Keep only rows with valid target
         valid_rows = y.notna()
         X = X.loc[valid_rows]
         y = y.loc[valid_rows]
-        
-        # After this, X and y should have NO missing values
+
         if X.isna().sum().sum() > 0:
-            st.warning(f"Warning: {X.isna().sum().sum()} missing values remain. Filling with median for numeric, 'Missing' for categorical.")
             for col in X.select_dtypes(include=np.number).columns:
                 X[col] = X[col].fillna(X[col].median())
             for col in X.select_dtypes(exclude=np.number).columns:
                 X[col] = X[col].fillna("Missing")
 
-        # Recompute numeric/categorical columns after cleaning
+        if len(X) < 2:
+            st.error("Not enough valid rows after cleaning for training.")
+            st.stop()
+
+        # Recalculate numeric/categorical columns
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
-        # Build preprocessing pipeline
+        # Pipeline
         preprocessor = ColumnTransformer([
             ("num", StandardScaler(), numeric_cols),
             ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
         ])
-
         model = RandomForestRegressor() if model_type == "Regression" else RandomForestClassifier()
         pipeline = Pipeline([("prep", preprocessor), ("model", model)])
 
         test_size = st.slider("Test Size", 0.1, 0.5, 0.2)
 
         if st.button("Train Model"):
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=test_size, random_state=42
-            )
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
             pipeline.fit(X_train, y_train)
             st.session_state.pipeline = pipeline
             score = pipeline.score(X_test, y_test)
@@ -238,7 +222,6 @@ if st.session_state.df is not None:
                 st.plotly_chart(fig, use_container_width=True)
             except:
                 st.info("Feature importance not available for this model.")
-
 
 # ---------------------------
 # Quick Predict Single Row
