@@ -42,8 +42,6 @@ if "pipeline" not in st.session_state:
     st.session_state.pipeline = None
 
 # ---------------------------
-# Dataset Selection
-# -------------------------
 # Dataset input: default, upload, mapping
 # -------------------------
 st.markdown("### Step 1 — Load dataset")
@@ -68,8 +66,6 @@ def auto_map_columns(df):
 
 # -------------------------
 # Dataset input: default, upload, mapping
-# -------------------------
-st.markdown("### Step 1 — Load dataset")
 mode = st.radio(
     "Dataset option:",
     ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
