@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
 
 st.set_page_config(page_title="Neighborhood Lifestyle & Risk Aware Analyzer", layout="wide")
 
@@ -165,18 +170,9 @@ with tab2:
     st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("### Lifestyle & Risk Hotspot Map")
-    # Normalize scores
-    if filt["Lifestyle_Score"].max() - filt["Lifestyle_Score"].min() > 0:
-        filt["Lifestyle_Norm"] = (filt["Lifestyle_Score"] - filt["Lifestyle_Score"].min()) / (filt["Lifestyle_Score"].max() - filt["Lifestyle_Score"].min())
-    else:
-        filt["Lifestyle_Norm"] = 0.5
-    if filt["Climate_Risk_Score"].max() - filt["Climate_Risk_Score"].min() > 0:
-        filt["Risk_Norm"] = (filt["Climate_Risk_Score"] - filt["Climate_Risk_Score"].min()) / (filt["Climate_Risk_Score"].max() - filt["Climate_Risk_Score"].min())
-    else:
-        filt["Risk_Norm"] = 0.5
-
+    filt["Lifestyle_Norm"] = (filt["Lifestyle_Score"] - filt["Lifestyle_Score"].min()) / (filt["Lifestyle_Score"].max() - filt["Lifestyle_Score"].min())
+    filt["Risk_Norm"] = (filt["Climate_Risk_Score"] - filt["Climate_Risk_Score"].min()) / (filt["Climate_Risk_Score"].max() - filt["Climate_Risk_Score"].min())
     filt["Combined_Color"] = filt["Lifestyle_Norm"] * (1 - filt["Risk_Norm"])
-
     fig3 = px.scatter_mapbox(
         filt,
         lat="Latitude",
@@ -192,41 +188,52 @@ with tab2:
     fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Lifestyle-Risk Score"), margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig3, use_container_width=True)
 
-    # --- Previous code above stays the same ---
+    # -------------------------------
+    # NEW CHARTS
+    # -------------------------------
+    st.markdown("### City-Neighborhood Heatmap (Lifestyle / Risk)")
+    heatmap_data = filt.groupby(["City","Neighborhood"])[["Lifestyle_Score","Climate_Risk_Score"]].mean().reset_index()
+    heatmap_data["Score"] = heatmap_data["Lifestyle_Score"] / (heatmap_data["Climate_Risk_Score"]+0.01)
+    fig4 = px.density_heatmap(
+        heatmap_data,
+        x="City",
+        y="Neighborhood",
+        z="Score",
+        color_continuous_scale="Viridis",
+        text_auto=True
+    )
+    st.plotly_chart(fig4, use_container_width=True)
 
-    # -------------------------------
-    # ADDITIONAL CHARTS
-    # -------------------------------
-    st.markdown("### Neighborhood Lifestyle vs. Climate Risk")
-    fig4 = px.scatter(
+    st.markdown("### Lifestyle vs Climate Risk Scatter")
+    fig5 = px.scatter(
         filt,
-        x="Climate_Risk_Score",
-        y="Lifestyle_Score",
+        x="Lifestyle_Score",
+        y="Climate_Risk_Score",
         color="City",
         size="Price",
         hover_name="Neighborhood",
-        hover_data=["Property_Type", "Price"],
-        color_discrete_sequence=px.colors.qualitative.Set2,
-        size_max=15
+        color_discrete_sequence=px.colors.qualitative.Set2
     )
-    fig4.update_layout(xaxis_title="Climate Risk Score", yaxis_title="Lifestyle Score")
-    st.plotly_chart(fig4, use_container_width=True)
-    
-    st.markdown("### Top 10 Neighborhoods by Risk-Adjusted Score")
-    filt["Risk_Adjusted_Score"] = filt["Lifestyle_Score"] / (filt["Climate_Risk_Score"] + 0.01)
-    top10 = filt.groupby("Neighborhood")["Risk_Adjusted_Score"].mean().sort_values(ascending=False).head(10).reset_index()
-    fig5 = px.bar(top10, x="Neighborhood", y="Risk_Adjusted_Score", text="Risk_Adjusted_Score", color="Risk_Adjusted_Score", color_continuous_scale=px.colors.sequential.Teal)
-    fig5.update_traces(texttemplate="%{text:.2f}", textposition="outside")
     st.plotly_chart(fig5, use_container_width=True)
-    
-    st.markdown("### Property Type vs. Average Lifestyle Score")
-    ptype_avg = filt.groupby("Property_Type")["Lifestyle_Score"].mean().reset_index()
-    fig6 = px.pie(ptype_avg, names="Property_Type", values="Lifestyle_Score", color="Property_Type", color_discrete_sequence=px.colors.qualitative.Pastel)
-    st.plotly_chart(fig6, use_container_width=True)
-
 
     # -------------------------------
-    # DOWNLOAD
+    # ML Suggestions
+    # -------------------------------
+    st.markdown("### ML Suggested Top Neighborhoods")
+    filt["Risk_Adjusted_Score"] = filt["Lifestyle_Score"] / (filt["Climate_Risk_Score"] + 0.01)
+    X = filt[["Lifestyle_Score","Climate_Risk_Score","Price","Property_Type"]]
+    y = filt["Risk_Adjusted_Score"]
+    pipeline = Pipeline([
+        ("preprocess", ColumnTransformer([("ptype", OneHotEncoder(), ["Property_Type"])], remainder="passthrough")),
+        ("model", RandomForestRegressor(n_estimators=50, random_state=42))
+    ])
+    pipeline.fit(X, y)
+    filt["Predicted_Score"] = pipeline.predict(X)
+    top_suggestions = filt.sort_values("Predicted_Score", ascending=False).head(10)
+    st.dataframe(top_suggestions[["City","Neighborhood","Property_Type","Predicted_Score"]], use_container_width=True)
+
+    # -------------------------------
+    # Download
     # -------------------------------
     csv = filt.to_csv(index=False)
     st.download_button("Download Filtered Dataset", csv, "neighborhood_lifestyle_risk.csv", "text/csv")
