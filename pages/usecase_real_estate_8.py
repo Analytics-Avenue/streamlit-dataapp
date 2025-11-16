@@ -68,6 +68,16 @@ with tab2:
 
     # 2. Upload CSV
     elif mode == "Upload CSV":
+        st.markdown("#### Download Sample CSV for Reference")
+        try:
+            # Load default dataset
+            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+        except Exception as e:
+            st.info(f"Sample CSV unavailable: {e}")
+    
+        # Upload actual CSV
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
