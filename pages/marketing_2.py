@@ -31,16 +31,16 @@ if st.button("Generate Insights"):
     else:
         with st.spinner("Analyzing…"):
             response = client.chat.completions.create(
+            response = client.responses.create(
                 model="gpt-4.1",
                 messages=[
-                    {"role": "system", "content": "You are a data analytics expert specialized in marketing analytics."},
-                    {"role": "user", "content": user_input}
+                    {"role": "system", "content": "You are a marketing analytics assistant."},
+                    {"role": "user", "content": prompt}
                 ]
             )
-
-            ai_output = response.choices[0].message["content"]
-            st.success("Response:")
-            st.write(ai_output)
+            
+            reply = response.output_text
+            st.write(reply)
 
 
 st.set_page_config(page_title="Marketing Intelligence & Forecasting Lab", layout="wide")
