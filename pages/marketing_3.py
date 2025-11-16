@@ -365,44 +365,48 @@ with tab2:
             # ------------------------------
             st.subheader("Quick Predict (Single Row)")
             
-            try:
-                feat_cols = X.columns.tolist()
-                num_cols = X.select_dtypes(include=np.number).columns
-                cat_cols = X.select_dtypes(exclude=np.number).columns
+            feat_cols = X.columns.tolist()
+            num_cols = X.select_dtypes(include=np.number).columns.tolist()
+            cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
             
-                inputs = {}
+            # input UI
+            values = {}
+            cols = st.columns(3)
             
-                # generate UI inputs
-                ui_cols = st.columns(3)
-                for i, col in enumerate(feat_cols):
-                    with ui_cols[i % 3]:
-                        if col in num_cols:
-                            default_val = float(X[col].median()) if pd.api.types.is_numeric_dtype(X[col]) else 0.0
-                            inputs[col] = st.number_input(col, value=default_val)
-                        else:
-                            options = sorted(X[col].dropna().unique().tolist())
-                            if not options:
-                                options = ["Unknown"]
-                            inputs[col] = st.selectbox(col, options=options)
+            for i, col in enumerate(feat_cols):
+                with cols[i % 3]:
+                    if col in num_cols:
+                        default_val = float(X[col].median()) if pd.api.types.is_numeric_dtype(X[col]) else 0.0
+                        values[col] = st.number_input(col, value=default_val)
+                    else:
+                        opts = sorted([str(x) for x in X[col].dropna().unique().tolist()])
+                        if not opts:
+                            opts = ["Unknown"]
+                        values[col] = st.selectbox(col, opts)
             
-                # predict
-                if st.button("Predict Value"):
-                    input_df = pd.DataFrame([inputs])
+            if st.button("Predict Value"):
+                try:
+                    # convert to DataFrame with same columns and types
+                    row = pd.DataFrame([values])
             
-                    # ensure columns match
-                    missing_cols = [c for c in feat_cols if c not in input_df.columns]
-                    for mc in missing_cols:
-                        input_df[mc] = 0
+                    # correct dtype casting
+                    for c in num_cols:
+                        row[c] = pd.to_numeric(row[c], errors='coerce').fillna(0)
             
-                    # reorder correctly
-                    input_df = input_df[feat_cols]
+                    for c in cat_cols:
+                        row[c] = row[c].astype(str)
             
-                    pred = pipeline.predict(input_df)[0]
+                    # reorder to match X
+                    row = row[feat_cols]
             
-                    st.success(f"Prediction: {round(float(pred), 2)}")
+                    # core fix:
+                    # let pipeline handle encoding + scaling exactly like training
+                    pred_raw = pipeline.predict(row)[0]
             
-            except Exception as e:
-                st.error(f"Quick predict failed: {str(e)}")
+                    st.success(f"Prediction: {round(float(pred_raw), 2)}")
+            
+                except Exception as e:
+                    st.error(f"Prediction failed: {e}")
 
 
     st.markdown("---")
