@@ -361,52 +361,51 @@ with tab2:
                 st.info("Feature importance not available / failed to map feature names.")
 
            # ------------------------------
-            # QUICK SINGLE ROW PREDICTION
-            # ------------------------------
-            st.subheader("Quick Predict (Single Row)")
+           # ----------------------------------------------------
+            # QUICK PREDICT — ALWAYS SHOW IF PIPELINE EXISTS
+            # ----------------------------------------------------
             
-            feat_cols = X.columns.tolist()
-            num_cols = X.select_dtypes(include=np.number).columns.tolist()
-            cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
+            if "pipeline" in st.session_state:
+                st.subheader("Quick Predict (Single Row)")
             
-            # input UI
-            values = {}
-            cols = st.columns(3)
+                feat_cols = st.session_state.X_columns
+                num_cols = st.session_state.num_cols
+                cat_cols = st.session_state.cat_cols
             
-            for i, col in enumerate(feat_cols):
-                with cols[i % 3]:
-                    if col in num_cols:
-                        default_val = float(X[col].median()) if pd.api.types.is_numeric_dtype(X[col]) else 0.0
-                        values[col] = st.number_input(col, value=default_val)
-                    else:
-                        opts = sorted([str(x) for x in X[col].dropna().unique().tolist()])
-                        if not opts:
-                            opts = ["Unknown"]
-                        values[col] = st.selectbox(col, opts)
+                cols = st.columns(3)
+                values = {}
             
-            if st.button("Predict Value"):
-                try:
-                    # convert to DataFrame with same columns and types
-                    row = pd.DataFrame([values])
+                for i, col in enumerate(feat_cols):
+                    with cols[i % 3]:
+                        if col in num_cols:
+                            median_val = float(st.session_state.train_df[col].median())
+                            values[col] = st.number_input(col, value=median_val)
+                        else:
+                            opts = sorted(st.session_state.train_df[col].dropna().unique().tolist())
+                            opts = [str(x) for x in opts] if opts else ["Unknown"]
+                            values[col] = st.selectbox(col, opts)
             
-                    # correct dtype casting
-                    for c in num_cols:
-                        row[c] = pd.to_numeric(row[c], errors='coerce').fillna(0)
+                if st.button("Predict (Single Row)"):
+                    try:
+                        row = pd.DataFrame([values])
             
-                    for c in cat_cols:
-                        row[c] = row[c].astype(str)
+                        # type fix
+                        for c in num_cols:
+                            row[c] = pd.to_numeric(row[c], errors="coerce").fillna(0)
+                        for c in cat_cols:
+                            row[c] = row[c].astype(str)
             
-                    # reorder to match X
-                    row = row[feat_cols]
+                        # keep exact column order
+                        row = row[feat_cols]
             
-                    # core fix:
-                    # let pipeline handle encoding + scaling exactly like training
-                    pred_raw = pipeline.predict(row)[0]
+                        pred = st.session_state.pipeline.predict(row)[0]
+                        st.success(f"Prediction: {round(float(pred), 2)}")
             
-                    st.success(f"Prediction: {round(float(pred_raw), 2)}")
+                    except Exception as e:
+                        st.error("Prediction failed: " + str(e))
             
-                except Exception as e:
-                    st.error(f"Prediction failed: {e}")
+            else:
+                st.info("Train a model first to enable quick prediction.")
 
 
     st.markdown("---")
