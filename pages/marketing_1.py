@@ -77,15 +77,16 @@ with tab2:
             df = pd.read_csv(file)
             st.success("File uploaded successfully.")
             # Optional: auto-map FB Ads dataset
+        
             fb_map = {
-                "Campaign":"Campaign name",
-                "Channel":"Page Name",
-                "Date":"Day",
-                "Impressions":"Impressions",
-                "Clicks":"Link clicks",
-                "Leads":"Results",
-                "Conversions":"Results",
-                "Spend":"Amount spent (INR)"
+                "Campaign": "Campaign name",
+                "Channel": "Page Name",
+                "Date": "Day",
+                "Impressions": "Impressions",
+                "Clicks": "Link clicks",
+                "Leads": "Results",
+                "Conversions": "Results",
+                "Spend": "Amount spent (INR)"
             }
             if all(col in df.columns for col in fb_map.values()):
                 df = df.rename(columns=fb_map)
