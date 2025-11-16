@@ -206,57 +206,6 @@ with tabs[0]:
     """, unsafe_allow_html=True)
 
    
-    # ----------- TITLE -----------
-    st.markdown("<h3>Overview</h3>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class='card'>
-    This app measures buyer sentiment across properties and locations to highlight
-    investment-ready hotspots and forecast market opportunities.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ----------- PURPOSE -----------
-    st.markdown("<h3>Purpose</h3>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class='card'>
-    • Monitor buyer sentiment across cities and property types<br>
-    • Detect lifestyle, climate-risk and neighborhood growth patterns<br>
-    • Identify investment hotspots & risk-aware zones<br>
-    • Support pricing, marketing and forecasting decisions
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ----------- KPIs -----------
-    st.markdown("<h3>KPIs</h3>", unsafe_allow_html=True)
-
-    k1, k2, k3, k4 = st.columns(4)
-
-    k1.markdown("""
-    <div class='metric-card' title='Counts properties scoring above the sentiment threshold'>
-        High Sentiment Properties
-    </div>
-    """, unsafe_allow_html=True)
-
-    k2.markdown("""
-    <div class='metric-card' title='Cities ranked by average sentiment among buyers'>
-        Top Cities by Sentiment
-    </div>
-    """, unsafe_allow_html=True)
-
-    k3.markdown("""
-    <div class='metric-card' title='Most preferred property types by buyer interest patterns'>
-        Top Property Types
-    </div>
-    """, unsafe_allow_html=True)
-
-    k4.markdown("""
-    <div class='metric-card' title='Mean sentiment score across all listings'>
-        Average Sentiment Score
-    </div>
-    """, unsafe_allow_html=True)
-
 
 
 with tabs[1]:
