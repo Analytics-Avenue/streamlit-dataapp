@@ -201,13 +201,20 @@ with tab2:
     st.dataframe(filt.head(), use_container_width=True)
 
     # -------------------------------
-    # KPIs
     # -------------------------------
-    k1,k2,k3,k4 = st.columns(4)
-    k1.metric("Total Impressions", int(filt["Impressions"].sum()))
-    k2.metric("Total Clicks", int(filt["Clicks"].sum()))
-    k3.metric("Total Leads", int(filt["Leads"].sum()))
-    k4.metric("Total Spend", round(filt["Spend"].sum(),2))
+    # KPIs (with currency formatting)
+    # -------------------------------
+    
+    def inr(x):
+        return f"₹{x:,.2f}"
+    
+    k1, k2, k3, k4 = st.columns(4)
+    
+    k1.metric("Total Impressions", f"{int(filt['Impressions'].sum()):,}")
+    k2.metric("Total Clicks", f"{int(filt['Clicks'].sum()):,}")
+    k3.metric("Total Leads", f"{int(filt['Leads'].sum()):,}")
+    k4.metric("Total Spend", inr(filt["Spend"].sum()))
+
 
     # -------------------------------
     # CHARTS
