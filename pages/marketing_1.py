@@ -76,7 +76,8 @@ with tab2:
                 "Clicks": "Link clicks",
                 "Leads": "Results",
                 "Conversions": "Results",
-                "Spend": "Amount spent (INR)"
+                "Spend": "Amount spent (INR)",
+                "Leads": "Results"
             }
             if all(v in df.columns for v in fb_map.values()):
                 df = df.rename(columns={v:k for k,v in fb_map.items()})
