@@ -3,7 +3,7 @@ import os
 
 # --- Streamlit setup ---
 st.set_page_config(
-    page_title="Data Analytics Hub",
+    page_title="Data Analytics Solutions",
     layout="wide",
 )
 
@@ -31,6 +31,12 @@ sectors = {
     ],
 }
 
+# --- Direct thumbnail paths for home page ---
+home_thumbs = {
+    "Marketing Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
+    "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
+}
+
 # --- Initialize session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
@@ -40,10 +46,10 @@ if st.session_state["sector"] is None:
     st.title("Data Analytics Hub")
     st.markdown("Welcome! Choose a sector to explore its use cases.")
 
-    cols = st.columns(5)
+    cols = st.columns(len(sectors))
     for idx, (sector_name, usecases) in enumerate(sectors.items()):
         with cols[idx]:
-            thumb_path = os.path.join(ASSETS_DIR, f"{sector_name.lower().replace(' ', '_')}_thumb.jpg")
+            thumb_path = home_thumbs.get(sector_name)
             if os.path.exists(thumb_path):
                 st.image(thumb_path, use_container_width=True)
             else:
