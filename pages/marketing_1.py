@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from io import StringIO
 
 st.set_page_config(page_title="Marketing Analytics Dashboard", layout="wide")
 
 # -------------------------------
-# HIDE SIDEBAR
+# STYLING
 # -------------------------------
 st.markdown("""
 <style>
@@ -65,6 +66,8 @@ with tab2:
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
         try:
             df = pd.read_csv(URL)
+            df.columns = df.columns.str.strip()
+            st.success("Default dataset loaded successfully.")
         except Exception as e:
             st.error(f"Failed to load default dataset: {e}")
 
@@ -75,9 +78,10 @@ with tab2:
         file = st.file_uploader("Upload your CSV file", type=["csv"])
         if file:
             df = pd.read_csv(file)
+            df.columns = df.columns.str.strip()
             st.success("File uploaded successfully.")
-            # Optional: auto-map FB Ads dataset
-        
+
+            # Auto-map Facebook Ads dataset if applicable
             fb_map = {
                 "Campaign": "Campaign name",
                 "Channel": "Page Name",
@@ -88,9 +92,13 @@ with tab2:
                 "Conversions": "Results",
                 "Spend": "Amount spent (INR)"
             }
-            if all(col in df.columns for col in fb_map.values()):
-                df = df.rename(columns=fb_map)
+            if all(v in df.columns for v in fb_map.values()):
+                df = df.rename(columns={v:k for k,v in fb_map.items()})
                 st.info("Auto-mapped Facebook Ads dataset successfully.")
+
+            # Provide sample CSV download
+            sample_csv = df.head(5).to_csv(index=False)
+            st.download_button("Download Sample CSV (5 rows)", sample_csv, "sample_marketing.csv", "text/csv")
 
     # -------------------------------
     # UPLOAD CSV + COLUMN MAPPING
@@ -99,6 +107,7 @@ with tab2:
         file = st.file_uploader("Upload your CSV file", type=["csv"])
         if file:
             raw = pd.read_csv(file)
+            raw.columns = raw.columns.str.strip()
             st.write("Uploaded Data Preview", raw.head())
             mapping = {}
             for col in REQUIRED_COLS:
@@ -151,16 +160,19 @@ with tab2:
     # CHARTS
     # -------------------------------
     st.markdown("### Campaign-wise Clicks")
-    fig1 = px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks", color_discrete_sequence=px.colors.qualitative.Bold)
+    fig1 = px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks",
+                  color_discrete_sequence=px.colors.qualitative.Bold)
     fig1.update_traces(texttemplate="%{text}", textposition="outside")
     st.plotly_chart(fig1,use_container_width=True)
 
     st.markdown("### Channel-wise Leads")
-    fig2 = px.pie(filt, names="Channel", values="Leads", color="Channel", color_discrete_sequence=px.colors.qualitative.Pastel)
+    fig2 = px.pie(filt, names="Channel", values="Leads",
+                  color="Channel", color_discrete_sequence=px.colors.qualitative.Pastel)
     st.plotly_chart(fig2,use_container_width=True)
 
     st.markdown("### Spend vs Conversions")
-    fig3 = px.scatter(filt, x="Spend", y="Conversions", size="Impressions", color="Channel", hover_data=["Campaign"], size_max=30, color_discrete_sequence=px.colors.qualitative.Set2)
+    fig3 = px.scatter(filt, x="Spend", y="Conversions", size="Impressions", color="Channel",
+                      hover_data=["Campaign"], size_max=30, color_discrete_sequence=px.colors.qualitative.Set2)
     st.plotly_chart(fig3,use_container_width=True)
 
     # -------------------------------
@@ -168,4 +180,3 @@ with tab2:
     # -------------------------------
     csv = filt.to_csv(index=False)
     st.download_button("Download Filtered Dataset", csv, "marketing_filtered.csv", "text/csv")
-
