@@ -192,6 +192,39 @@ with tab2:
     fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Lifestyle-Risk Score"), margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig3, use_container_width=True)
 
+    # --- Previous code above stays the same ---
+
+    # -------------------------------
+    # ADDITIONAL CHARTS
+    # -------------------------------
+    st.markdown("### Neighborhood Lifestyle vs. Climate Risk")
+    fig4 = px.scatter(
+        filt,
+        x="Climate_Risk_Score",
+        y="Lifestyle_Score",
+        color="City",
+        size="Price",
+        hover_name="Neighborhood",
+        hover_data=["Property_Type", "Price"],
+        color_discrete_sequence=px.colors.qualitative.Set2,
+        size_max=15
+    )
+    fig4.update_layout(xaxis_title="Climate Risk Score", yaxis_title="Lifestyle Score")
+    st.plotly_chart(fig4, use_container_width=True)
+    
+    st.markdown("### Top 10 Neighborhoods by Risk-Adjusted Score")
+    filt["Risk_Adjusted_Score"] = filt["Lifestyle_Score"] / (filt["Climate_Risk_Score"] + 0.01)
+    top10 = filt.groupby("Neighborhood")["Risk_Adjusted_Score"].mean().sort_values(ascending=False).head(10).reset_index()
+    fig5 = px.bar(top10, x="Neighborhood", y="Risk_Adjusted_Score", text="Risk_Adjusted_Score", color="Risk_Adjusted_Score", color_continuous_scale=px.colors.sequential.Teal)
+    fig5.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    st.markdown("### Property Type vs. Average Lifestyle Score")
+    ptype_avg = filt.groupby("Property_Type")["Lifestyle_Score"].mean().reset_index()
+    fig6 = px.pie(ptype_avg, names="Property_Type", values="Lifestyle_Score", color="Property_Type", color_discrete_sequence=px.colors.qualitative.Pastel)
+    st.plotly_chart(fig6, use_container_width=True)
+
+
     # -------------------------------
     # DOWNLOAD
     # -------------------------------
