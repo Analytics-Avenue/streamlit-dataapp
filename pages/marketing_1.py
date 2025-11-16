@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from io import StringIO
 
-st.set_page_config(page_title="Marketing Analytics Dashboard", layout="wide")
+st.set_page_config(page_title="Marketing Campaign Performance Analyzer", layout="wide")
 
 # -------------------------------
 # STYLING
