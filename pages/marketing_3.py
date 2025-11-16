@@ -360,27 +360,49 @@ with tab2:
             except Exception:
                 st.info("Feature importance not available / failed to map feature names.")
 
-            # quick single-row predict UI
-            st.markdown("**Quick predict (single row)**")
-            pcols = st.columns(len(feat_cols))
-            inputs = {}
-            for i, col in enumerate(feat_cols):
-                if col in num_cols:
-                    inputs[col] = pcols[i].number_input(col, value=float(X[col].median()))
-                else:
-                    options = sorted(X[col].dropna().unique().tolist())[:200]
-                    default_index = 0 if options else None
-                    inputs[col] = pcols[i].selectbox(col, options=options, index=default_index if default_index is not None else 0)
+           # ------------------------------
+            # QUICK SINGLE ROW PREDICTION
+            # ------------------------------
+            st.subheader("Quick Predict (Single Row)")
+            
+            try:
+                feat_cols = X.columns.tolist()
+                num_cols = X.select_dtypes(include=np.number).columns
+                cat_cols = X.select_dtypes(exclude=np.number).columns
+            
+                inputs = {}
+            
+                # generate UI inputs
+                ui_cols = st.columns(3)
+                for i, col in enumerate(feat_cols):
+                    with ui_cols[i % 3]:
+                        if col in num_cols:
+                            default_val = float(X[col].median()) if pd.api.types.is_numeric_dtype(X[col]) else 0.0
+                            inputs[col] = st.number_input(col, value=default_val)
+                        else:
+                            options = sorted(X[col].dropna().unique().tolist())
+                            if not options:
+                                options = ["Unknown"]
+                            inputs[col] = st.selectbox(col, options=options)
+            
+                # predict
+                if st.button("Predict Value"):
+                    input_df = pd.DataFrame([inputs])
+            
+                    # ensure columns match
+                    missing_cols = [c for c in feat_cols if c not in input_df.columns]
+                    for mc in missing_cols:
+                        input_df[mc] = 0
+            
+                    # reorder correctly
+                    input_df = input_df[feat_cols]
+            
+                    pred = pipeline.predict(input_df)[0]
+            
+                    st.success(f"Prediction: {round(float(pred), 2)}")
+            
+            except Exception as e:
+                st.error(f"Quick predict failed: {str(e)}")
 
-            if st.button("Predict Clicks (single)"):
-                row = pd.DataFrame([inputs])
-                try:
-                    pred_val = pipeline.predict(row)[0]
-                    st.success(f"Predicted Clicks: {int(round(pred_val))}")
-                except Exception as e:
-                    st.error("Prediction failed: " + str(e))
 
     st.markdown("---")
-    st.caption("If you want forecasting or Gen-AI insights integrated, mention that and I'll add a safe, documented button for external API calls. Not adding that by default prevents secret leakage and dependency issues.")
-
-# End of file
