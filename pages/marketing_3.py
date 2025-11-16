@@ -43,46 +43,99 @@ if "pipeline" not in st.session_state:
 
 # ---------------------------
 # Dataset Selection
-# ---------------------------
-st.header("Step 1: Choose Dataset")
-dataset_option = st.radio("Select Dataset Source", ["Default Dataset", "Upload CSV", "Manual Entry"])
+# -------------------------
+# Dataset input: default, upload, mapping
+# -------------------------
+st.markdown("### Step 1 — Load dataset")
+mode = st.radio(
+    "Dataset option:",
+    ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
+    horizontal=True
+)
 
-if dataset_option == "Default Dataset":
-    @st.cache_data
-    def load_default():
-        return pd.DataFrame({
-            "Campaign": ["A", "B", "C", "D"],
-            "Clicks": [120, 150, 80, 200],
-            "Impressions": [1000, 1300, 700, 1600],
-            "Budget": [500, 700, 300, 900]
-        })
-    df = load_default()
-    st.session_state.df = df
-    st.success("Default dataset loaded")
+df = None
 
-elif dataset_option == "Upload CSV":
-    uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file)
-        st.session_state.df = df
-        st.success("Dataset uploaded successfully")
+# REQUIRED FIELDS (for mapping)
+REQUIRED_MARKETING_COLS = ["Campaign", "Clicks", "Impressions", "Budget"]
 
-elif dataset_option == "Manual Entry":
-    st.markdown("Enter dataset manually (columns separated by comma)")
-    cols = st.text_input("Columns (comma separated)")
-    if cols:
-        cols_list = [c.strip() for c in cols.split(",")]
-        rows = st.text_area("Rows (comma separated values per row)")
-        if rows:
-            data = []
-            for line in rows.strip().split("\n"):
-                data.append([v.strip() for v in line.split(",")])
-            try:
-                df = pd.DataFrame(data, columns=cols_list)
-                st.session_state.df = df
-                st.success("Manual dataset created")
-            except Exception as e:
-                st.error(f"Error creating dataset: {e}")
+# Placeholder: replace with actual auto-mapping logic
+def auto_map_columns(df):
+    # Example: just ensure required columns exist; real mapping logic can go here
+    for col in REQUIRED_MARKETING_COLS:
+        if col not in df.columns:
+            df[col] = np.nan
+    return df
+
+# -------------------------
+# Mode: Default dataset
+# -------------------------
+if mode == "Default dataset":
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
+    try:
+        df = pd.read_csv(DEFAULT_URL)
+        df.columns = df.columns.str.strip()
+        df = auto_map_columns(df)
+        st.success("Default dataset loaded")
+        st.dataframe(df.head())
+    except Exception as e:
+        st.error("Failed to load default dataset: " + str(e))
+        st.stop()
+
+# -------------------------
+# Mode: Upload CSV
+# -------------------------
+elif mode == "Upload CSV":
+    st.markdown("#### Download Sample CSV for Reference")
+    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
+    try:
+        sample_df = pd.read_csv(URL).head(5)
+        sample_csv = sample_df.to_csv(index=False)
+        st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+    except Exception as e:
+        st.info(f"Sample CSV unavailable: {e}")
+
+    uploaded = st.file_uploader("Upload CSV file", type=["csv"])
+    if uploaded is not None:
+        df = pd.read_csv(uploaded)
+        df.columns = df.columns.str.strip()
+        st.success("File uploaded.")
+        df = auto_map_columns(df)
+        st.dataframe(df.head())
+        sample_small = df.head(5).to_csv(index=False)
+        st.download_button("Download sample (first 5 rows)", sample_small, "sample_uploaded_5rows.csv", "text/csv")
+
+# -------------------------
+# Mode: Upload + Column Mapping
+# -------------------------
+else:
+    uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+    if uploaded is not None:
+        raw = pd.read_csv(uploaded)
+        raw.columns = raw.columns.str.strip()
+        st.write("Preview (first 5 rows):")
+        st.dataframe(raw.head())
+
+        st.markdown("Map your columns to required fields (only required fields shown).")
+        mapping = {}
+        for req in REQUIRED_MARKETING_COLS:
+            mapping[req] = st.selectbox(f"Map → {req}", options=["-- Select --"] + list(raw.columns))
+
+        if st.button("Apply mapping"):
+            missing = [k for k, v in mapping.items() if v == "-- Select --"]
+            if missing:
+                st.error("Please map all required columns: " + ", ".join(missing))
+            else:
+                df = raw.rename(columns={v: k for k, v in mapping.items()})
+                st.success("Mapping applied.")
+                st.dataframe(df.head())
+                sample_small = df.head(5).to_csv(index=False)
+                st.download_button(
+                    "Download mapped sample (5 rows)",
+                    sample_small,
+                    "mapped_sample_5rows.csv",
+                    "text/csv"
+                )
+
 
 # Preview Dataset
 if st.session_state.df is not None:
