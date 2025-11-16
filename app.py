@@ -7,14 +7,19 @@ st.set_page_config(
     layout="wide",
 )
 
+# Hide default sidebar
+st.markdown("""
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+</style>
+""", unsafe_allow_html=True)
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
-
-# --- Hierarchy Data with actual project names ---
+# --- Hierarchy Data ---
 sectors = {
     "Marketing Analytics": [
         {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
@@ -40,10 +45,9 @@ sectors = {
     ],
 }
 
-
-# --- Direct thumbnail paths for home page ---
+# --- Direct thumbnails for home page ---
 home_thumbs = {
-    "Marketing Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
+    "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
 }
 
@@ -51,9 +55,25 @@ home_thumbs = {
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
+if "next_sector" not in st.session_state:
+    st.session_state["next_sector"] = None
+
+if "next_page" not in st.session_state:
+    st.session_state["next_page"] = None
+
+# --- Handle sector selection first ---
+if st.session_state["next_sector"]:
+    st.session_state["sector"] = st.session_state.pop("next_sector")
+    st.experimental_rerun()
+
+# --- Handle page switch ---
+if st.session_state["next_page"]:
+    page_path = st.session_state.pop("next_page")
+    st.switch_page(page_path)
+
 # --- Home Page ---
 if st.session_state["sector"] is None:
-    st.title("Data Analytics Solutions")
+    st.title("Data Analytics Hub")
     st.markdown("Welcome! Choose a sector to explore its use cases.")
 
     cols = st.columns(len(sectors))
@@ -69,7 +89,7 @@ if st.session_state["sector"] is None:
             st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
             
             if st.button(f"Explore {sector_name}", key=sector_name):
-                st.session_state["sector"] = sector_name
+                st.session_state["next_sector"] = sector_name
                 st.experimental_rerun()
 
 # --- Sector Page ---
@@ -94,13 +114,9 @@ else:
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
                 
-                # Path-based button navigation
-                page_path = f"pages/{uc['page']}"
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    try:
-                        st.switch_page(page_path)
-                    except Exception:
-                        st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
+                    st.session_state["next_page"] = f"pages/{uc['page']}"
+                    st.experimental_rerun()
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
