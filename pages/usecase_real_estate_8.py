@@ -69,9 +69,10 @@ with tab2:
     # 2. Upload CSV
     elif mode == "Upload CSV":
         st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
         try:
             # Load default dataset
-            sample_df = df.head()  # Take first 5 rows
+            sample_df = pd.read_csv(URL).head()  # Take first 5 rows
             sample_csv = sample_df.to_csv(index=False)
             st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
         except Exception as e:
