@@ -56,27 +56,6 @@ df = None
 # REQUIRED FIELDS (for mapping)
 REQUIRED_MARKETING_COLS = ["Campaign", "Clicks", "Impressions", "Budget"]
 
-# Placeholder: replace with actual auto-mapping logic
-def auto_map_columns(df):
-    # Example: just ensure required columns exist; real mapping logic can go here
-    for col in REQUIRED_MARKETING_COLS:
-        if col not in df.columns:
-            df[col] = np.nan
-    return df
-
-# -------------------------
-# Dataset input: default, upload, mapping
-mode = st.radio(
-    "Dataset option:",
-    ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
-    horizontal=True
-)
-
-df = None
-
-# REQUIRED FIELDS (for mapping)
-REQUIRED_MARKETING_COLS = ["Campaign", "Clicks", "Impressions", "Budget"]
-
 # Placeholder auto-map function
 def auto_map_columns(df):
     for col in REQUIRED_MARKETING_COLS:
