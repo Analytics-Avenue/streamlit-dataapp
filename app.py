@@ -63,7 +63,6 @@ if st.session_state["sector"] is None:
 
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["sector"] = sector_name
-                st.experimental_rerun()  # only rerun on sector selection
 
 # --- Sector Page ---
 else:
@@ -84,11 +83,9 @@ else:
                 st.markdown(f"### {uc['name']}")
                 st.write("Explore insights and dashboards.")
 
-                # Direct switch_page, works first click
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     st.switch_page(f"pages/{uc['page']}")
 
     # Back button
     if st.button("⬅️ Back to Sectors"):
         st.session_state["sector"] = None
-        st.experimental_rerun()
