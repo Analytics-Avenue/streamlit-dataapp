@@ -142,11 +142,20 @@ with tab2:
     # Upload CSV
     # ----------------------------------------------------------
     if mode == "Upload CSV":
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+        st.markdown("#### Download Sample CSV for Reference")
+        try:
+            # Load default dataset
+            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+        except Exception as e:
+            st.info(f"Sample CSV unavailable: {e}")
+    
+        # Upload actual CSV
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-            st.success("Dataset uploaded.")
-            st.dataframe(df.head())
 
     # ----------------------------------------------------------
     # Upload + Column Mapping
