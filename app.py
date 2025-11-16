@@ -13,17 +13,25 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
-# --- Hierarchy Data ---
+
+# --- Hierarchy Data with actual project names ---
 sectors = {
     "Marketing Analytics": [
         {"name": f"Marketing Use Case {i+1}", "image": "marketing_thumb.jpg", "page": f"marketing_{i+1}.py"} 
         for i in range(10)
     ],
     "Real Estate Analytics": [
-        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"usecase_real_estate_{i+1}.py"} 
-        for i in range(8)  # only 8 use cases
+        {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
+        {"name": "Customer Segmentation & Buyer Persona Intelligence", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_2.py"},
+        {"name": "Price vs Property Features Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_3.py"},
+        {"name": "Agent & Market Insights Dashboard", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_4.py"},
+        {"name": "Property Demand vs Supply Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_5.py"},
+        {"name": "Tenant Risk & Market Trend Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_6.py"},
+        {"name": "Rental Yield & Investment Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_7.py"},
+        {"name": "Market Buzz & Activity Dashboard", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_8.py"},
     ],
 }
+
 
 
 # --- Direct thumbnail paths for home page ---
