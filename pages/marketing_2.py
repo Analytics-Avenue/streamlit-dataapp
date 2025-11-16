@@ -118,6 +118,7 @@ with tabs[1]:
 
     elif mode == "Upload CSV":
         st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
         try:
             # Load default dataset
             sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
