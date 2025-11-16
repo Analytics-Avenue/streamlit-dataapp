@@ -37,7 +37,7 @@ if "sector" not in st.session_state:
 
 # --- Home Page ---
 if st.session_state["sector"] is None:
-    st.title("Data Analytics Hub")
+    st.title("Data Analytics Solutions")
     st.markdown("Welcome! Choose a sector to explore its use cases.")
 
     cols = st.columns(len(sectors))
