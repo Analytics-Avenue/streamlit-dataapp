@@ -220,7 +220,7 @@ with tabs[1]:
 
     if mode == "Default dataset":
         # Default dataset URL (user-provided repo). Change if different.
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
         try:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
