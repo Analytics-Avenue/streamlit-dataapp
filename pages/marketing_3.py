@@ -12,6 +12,49 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 # APP CONFIG
 # ----------------------------------------------------
 st.set_page_config(page_title="Marketing ML Dashboard", layout="wide")
+st.markdown("""
+<style>
+
+.card {
+    background: rgba(255,255,255,0.08);
+    padding: 18px 20px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    backdrop-filter: blur(6px);
+    transition: all .25s ease;
+}
+
+.card:hover {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 0 22px rgba(255,255,255,0.5);
+    transform: scale(1.03);
+}
+
+/* Metric card */
+.metric-card {
+    background: rgba(255,255,255,0.12);
+    padding: 20px;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.30);
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    backdrop-filter: blur(5px);
+}
+
+.metric-card:hover {
+    background: rgba(255,255,255,0.20);
+    box-shadow: 0 0 16px rgba(255,255,255,0.45);
+    transform: scale(1.04);
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.title("Marketing Analytics App — ML Dashboard")
 st.markdown("Build insights from your marketing data using classical ML. No AI API required.")
 
@@ -37,11 +80,33 @@ if page == "Upload Data":
 
     # ----------------- TAB 1 -----------------
     with tab1:
-        st.subheader("Overview")
-        st.write("""
-        This section allows you to upload your marketing dataset in CSV format.
-        Once uploaded, you will see a preview and the file will be available for EDA and ML modeling.
-        """)
+tabs = st.tabs(["Overview", "Application"])
+
+        st.markdown("### Welcome to the Marketing ML Dashboard")
+        st.markdown("""
+        <div class='card'>
+            A lightweight machine-learning workspace built for marketers.
+            Upload your dataset, explore patterns, and run classical ML models
+            without requiring any external AI API.
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.markdown("### What This App Does")
+        st.markdown("""
+        <div class='card'>
+            • Understand campaign-level trends<br>
+            • Create automated EDA visualizations<br>
+            • Train ML classification/regression models<br>
+            • Predict outcomes from new input values<br>
+            • Explore correlations, feature importance, and KPIs<br>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        k1, k2, k3 = st.columns(3)
+    
+        k1.markdown("<div class='metric-card'>EDA</div>", unsafe_allow_html=True)
+        k2.markdown("<div class='metric-card'>ML Models</div>", unsafe_allow_html=True)
+        k3.markdown("<div class='metric-card'>Predictions</div>", unsafe_allow_html=True)
 
     # ----------------- TAB 2 -----------------
     with tab2:
