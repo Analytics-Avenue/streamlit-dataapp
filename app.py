@@ -45,31 +45,29 @@ sectors = {
     ],
 }
 
-# --- Direct thumbnails for home page ---
+# --- Home page thumbnails ---
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
 }
 
-# --- Initialize session state ---
+# --- Session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
-
 if "next_sector" not in st.session_state:
     st.session_state["next_sector"] = None
-
 if "next_page" not in st.session_state:
     st.session_state["next_page"] = None
 
-# --- Handle sector selection first ---
+# --- Page switch handler ---
+if st.session_state["next_page"]:
+    page_path = st.session_state.pop("next_page")
+    st.switch_page(page_path)  # st.switch_page already reruns
+
+# --- Sector switch handler ---
 if st.session_state["next_sector"]:
     st.session_state["sector"] = st.session_state.pop("next_sector")
     st.experimental_rerun()
-
-# --- Handle page switch ---
-if st.session_state["next_page"]:
-    page_path = st.session_state.pop("next_page")
-    st.switch_page(page_path)
 
 # --- Home Page ---
 if st.session_state["sector"] is None:
@@ -84,10 +82,10 @@ if st.session_state["sector"] is None:
                 st.image(thumb_path, use_container_width=True)
             else:
                 st.warning(f"Thumbnail not found for {sector_name}")
-            
+
             st.markdown(f"### {sector_name}")
             st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
-            
+
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["next_sector"] = sector_name
                 st.experimental_rerun()
@@ -97,10 +95,10 @@ else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
     st.markdown("Select a use case to go to its project page.")
-    
+
     usecases = sectors[sector_name]
-    
-    # Display use cases in grid: 3 columns
+
+    # Display use cases in a 3-column grid
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
@@ -110,13 +108,13 @@ else:
                     st.image(thumb_path, use_container_width=True)
                 else:
                     st.warning(f"Thumbnail not found for {uc['name']}")
-                
+
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
-                
+
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     st.session_state["next_page"] = f"pages/{uc['page']}"
-                    st.experimental_rerun()
+                    # No rerun needed; switch_page handles it
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
