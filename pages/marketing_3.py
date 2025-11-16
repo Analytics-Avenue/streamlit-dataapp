@@ -136,12 +136,6 @@ else:
                     "text/csv"
                 )
 
-# -------------------------
-# Preview Dataset
-# -------------------------
-if st.session_state.df is not None:
-    st.subheader("Dataset Preview")
-    st.dataframe(st.session_state.df)
 
 
 
