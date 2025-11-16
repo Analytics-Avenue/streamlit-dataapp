@@ -4,7 +4,7 @@ import os
 # --- Streamlit setup ---
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 
-# Hide sidebar
+# Hide default main sidebar nav
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # --- Paths ---
@@ -35,11 +35,10 @@ sectors = {
         {"name": "Rental Yield & Investment Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_7.py"},
         {"name": "Market Buzz & Activity Dashboard", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_8.py"},
         {"name": "Real Estate Intelligence — Hybrid Dashboard (Property + CRM)", "image": "real_estate_thumb.jpg", "page": "realestate.py"},
-    
     ],
 }
 
-# --- Home page thumbnails ---
+# --- Home thumbnails ---
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
@@ -49,24 +48,17 @@ home_thumbs = {
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
-# --- Home Page ---
+# --- Sidebar for sectors ---
+st.sidebar.title("Sectors")
+for sector_name in sectors.keys():
+    if st.sidebar.button(sector_name):
+        st.session_state["sector"] = sector_name
+
+# --- Main page ---
 if st.session_state["sector"] is None:
     st.title("Data Analytics Hub")
-    st.markdown("Welcome! Choose a sector to explore its use cases:")
+    st.markdown("Welcome! Choose a sector from the sidebar to explore its use cases.")
 
-    cols = st.columns(len(sectors))
-    for idx, (sector_name, usecases) in enumerate(sectors.items()):
-        with cols[idx]:
-            thumb_path = home_thumbs.get(sector_name)
-            if os.path.exists(thumb_path):
-                st.image(thumb_path, use_container_width=True)
-            st.markdown(f"### {sector_name}")
-            st.write(f"{len(usecases)} use cases available.")
-
-            if st.button(f"Explore {sector_name}", key=sector_name):
-                st.session_state["sector"] = sector_name
-
-# --- Sector Page ---
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
@@ -88,6 +80,6 @@ else:
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
                     st.switch_page(f"pages/{uc['page']}")
 
-    # Back button
+    # Back button in main page
     if st.button("⬅️ Back to Sectors"):
         st.session_state["sector"] = None
