@@ -96,38 +96,45 @@ st.markdown("Enterprise-capable marketing analytics: ML predictions, time-series
 
 st.markdown("""
 <style>
-.card {
-    background: #ffffff10;
-    padding: 15px;
-    border-radius: 12px;
+
+ /* Stronger selector: forces Streamlit to obey */
+div[data-testid="stMarkdownContainer"] .card {
+    background: rgba(255,255,255,0.07);
+    padding: 18px 20px;
+    border-radius: 14px;
     margin-bottom: 15px;
-    border: 1px solid #ffffff20;
-    font-size: 15px;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    backdrop-filter: blur(4px);
 }
 
-.metric-card {
-    background: #ffffff15;
-    padding: 18px;
-    border-radius: 12px;
+div[data-testid="stMarkdownContainer"] .metric-card {
+    background: rgba(255,255,255,0.10);
+    padding: 20px;
+    border-radius: 14px;
     text-align: center;
-    border: 1px solid #ffffff30;
+    border: 1px solid rgba(255,255,255,0.30);
     font-weight: 600;
     font-size: 16px;
-    transition: 0.2s;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    backdrop-filter: blur(4px);
 }
 
-.metric-card:hover {
-    background: #ffffff25;
-    border-color: #ffffff60;
-    transform: scale(1.03);
+/* Glow + scale hover */
+div[data-testid="stMarkdownContainer"] .metric-card:hover {
+    background: rgba(255,255,255,0.20);
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 0 18px rgba(255,255,255,0.4);
+    transform: scale(1.04);
     cursor: pointer;
 }
 
+/* Tooltip (unchanged) */
 .metric-card[title] {
     position: relative;
 }
 
-/* Tooltip */
 .metric-card[title]:hover:after {
     content: attr(title);
     position: absolute;
@@ -136,14 +143,15 @@ st.markdown("""
     transform: translateX(-50%);
     background: #222;
     padding: 6px 10px;
-    color: white;
+    color: #fff;
     border-radius: 6px;
     font-size: 12px;
     white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
 }
+
 </style>
 """, unsafe_allow_html=True)
-
 
 tabs = st.tabs(["Overview", "Application"])
 
