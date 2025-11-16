@@ -159,7 +159,7 @@ if st.session_state.df is not None:
         fig = px.bar(df, x="Campaign", y="Clicks", color="Campaign")
         st.plotly_chart(fig, use_container_width=True)
 
-# ---------------------------
+
 # ML Section
 # ---------------------------
 if st.session_state.df is not None:
@@ -172,38 +172,38 @@ if st.session_state.df is not None:
         X = df.drop(columns=[target]).copy()
         y = df[target].copy()
 
-        # Numeric / categorical split
+        # Identify numeric and categorical columns
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
-        # Convert all numeric columns safely
+        # Sanitize numeric columns: remove commas, convert to numeric, fill NaN with median
         for col in numeric_cols:
-            X[col] = pd.to_numeric(X[col], errors='coerce')
+            X[col] = pd.to_numeric(X[col].astype(str).str.replace(',', ''), errors='coerce')
+            X[col] = X[col].fillna(X[col].median())
 
-        # Regression target numeric conversion
+        # Ensure target is numeric if regression
         if model_type == "Regression":
-            y = pd.to_numeric(y, errors='coerce')
+            y = pd.to_numeric(y.astype(str).str.replace(',', ''), errors='coerce')
 
-        # Drop rows with any NaNs in features or target
-        combined = X.copy()
-        combined[target] = y
-        combined = combined.dropna()
-        X = combined.drop(columns=[target])
-        y = combined[target]
+        # Drop rows only if target is missing
+        valid_rows = y.notna()
+        X = X.loc[valid_rows]
+        y = y.loc[valid_rows]
 
         if len(X) < 2:
-            st.error("Not enough valid rows after cleaning for training.")
+            st.error(f"Not enough valid rows after cleaning: {len(X)} rows")
             st.stop()
 
-        # Recalculate numeric/categorical columns after dropping NaNs
+        # Recompute numeric/categorical columns after cleaning
         numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
         cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
 
-        # Pipeline
+        # Build preprocessing pipeline
         preprocessor = ColumnTransformer([
             ("num", StandardScaler(), numeric_cols),
             ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
         ])
+
         model = RandomForestRegressor() if model_type == "Regression" else RandomForestClassifier()
         pipeline = Pipeline([("prep", preprocessor), ("model", model)])
 
@@ -213,7 +213,6 @@ if st.session_state.df is not None:
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=test_size, random_state=42
             )
-            # Fit model
             pipeline.fit(X_train, y_train)
             st.session_state.pipeline = pipeline
             score = pipeline.score(X_test, y_test)
