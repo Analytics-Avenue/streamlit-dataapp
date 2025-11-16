@@ -88,6 +88,22 @@ with tab2:
     # UPLOAD CSV
     # -------------------------------
     elif mode == "Upload CSV":
+        # Sample CSV for download
+        sample_data = pd.DataFrame({
+            "City": ["Chennai", "Bangalore", "Mumbai", "Delhi", "Hyderabad"],
+            "Neighborhood": ["Adyar", "Whitefield", "Bandra", "Dwarka", "Hitech City"],
+            "Property_Type": ["Apartment", "Villa", "Studio", "Apartment", "Villa"],
+            "Price": [5000000, 12000000, 8000000, 7000000, 9000000],
+            "Latitude": [13.01, 12.97, 19.07, 28.58, 17.44],
+            "Longitude": [80.25, 77.75, 72.87, 77.03, 78.48],
+            "Lifestyle_Score": [0.8, 0.7, 0.9, 0.6, 0.75],
+            "Climate_Risk_Score": [0.2, 0.3, 0.1, 0.4, 0.25]
+        })
+        st.markdown("#### Download Sample CSV for Reference")
+        sample_csv = sample_data.to_csv(index=False)
+        st.download_button("Download Sample CSV", sample_csv, "sample_neighborhood_data.csv", "text/csv")
+    
+        # Upload actual CSV
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
