@@ -14,33 +14,6 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
-from openai import OpenAI
-
-# Load API Key from Streamlit Secrets
-client = OpenAI(api_key="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")
-
-st.title("Gen-AI Marketing Assistant")
-
-st.markdown("Ask anything about your marketing dataset. The AI will analyze and respond.")
-
-user_input = st.text_area("Write your question", "")
-
-if st.button("Generate Insights"):
-    if not user_input.strip():
-        st.warning("Please enter a question.")
-    else:
-        with st.spinner("Analyzing…"):
-            response = client.responses.create(
-                model="gpt-4.1",
-                messages=[
-                    {"role": "system", "content": "You are a marketing analytics assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            
-            reply = response.output_text
-            st.write(reply)
-
 
 st.set_page_config(page_title="Marketing Intelligence & Forecasting Lab", layout="wide")
 
@@ -640,8 +613,3 @@ with tabs[1]:
             download_df(out[["Campaign","Channel","Date","Clicks","Predicted_Conversions"]], "predicted_conversions.csv")
         else:
             st.info("Conversion_Rate not available — cannot predict.")
-
-    st.success("App ready. If you want a tighter Gen-AI integration (call to external LLM), paste an API key and I will add a button that sends a structured prompt to OpenAI/Anthropic — but that requires outbound network and an API key from you.")
-
-# End of app
-
