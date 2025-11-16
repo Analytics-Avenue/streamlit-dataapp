@@ -27,13 +27,30 @@ REQUIRED_MARKETING_COLS = [
 # Candidate auto-mapping keywords to friendly required names
 AUTO_MAPS = {
     "Campaign": ["campaign name", "campaign_name", "campaign", "Campaign name", "Campaign Name"],
-    "Channel": ["page name", "page", "channel", "Channel", "Page Name"],
     "Date": ["date", "day", "reporting starts", "reporting ends", "day"],
     "Impressions": ["impressions", "Impression", "Impressions"],
-    "Clicks": ["link clicks", "clicks", "Clicks", "Link clicks", "Clicks (all)"],
-    "Leads": ["results", "leads", "Results"],
-    "Conversions": ["conversions", "Conversions", "Website conversions"],
-    "Spend": ["amount spent (inr)", "amount spent", "spend", "Amount spent (INR)", "Amount spent"]
+    "Channel": [
+        "page name", "page", "channel", "source", "platform",
+        "adset", "adset name", "placement", "medium"
+    ],
+    "Date": [
+        "date", "day", "reporting starts", "reporting ends",
+        "start date", "end date"
+    ],
+    "Clicks": [
+        "link clicks", "clicks", "all clicks", "total clicks"
+    ],
+    "Leads": [
+        "results", "leads", "lead", "cpl results"
+    ],
+    "Conversions": [
+        "conversions", "website conversions", "purchase",
+        "add to cart", "complete registration"
+    ],
+    "Spend": [
+        "amount spent (inr)", "amount spent", "spend",
+        "cost", "ad spend", "budget used"
+    ]
 }
 
 def auto_map_columns(df):
@@ -81,17 +98,30 @@ tabs = st.tabs(["Overview", "Application"])
 
 with tabs[0]:
     st.subheader("Overview")
-    st.markdown("""
-    **What this app does (short):**  
-    1. Train predictive models (clicks, leads or conversions) and show feature importance.  
-    2. Produce time-series forecasts for spend / clicks / conversions at campaign or channel level.  
-    3. Provide automated, rule-based insights (Gen-AI style) from historical performance and forecasts.  
 
-    **Why:** Helps media planners decide where to scale, where to pause, and how budget should move next quarter.
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Datasets Supported", "Marketing Analytics")
+    with col2:
+        st.metric("ML Models", "Regression + Classification")
+    with col3:
+        st.metric("Forecasting", "Time-series (Daily)")
+
+    st.markdown("""
+    This lab helps you evaluate channel performance, predict conversions,
+    and generate forecasted KPIs using machine learning and automated insight rules.
     """)
-    with st.expander("Purpose & Quick Tips (click to open)", expanded=False):
-        st.markdown("**Purpose:** Give marketing teams a single tool to predict performance and get recommended actions — reducing manual analysis and enabling budget reallocation faster.")
-        st.markdown("**Quick tip:** Use consistent reporting date columns. If your dataset is Facebook Ads, use the CSV `Day`, `Campaign name`, `Page Name` columns (auto-mapping included).")
+
+    st.markdown("### Capabilities")
+    st.markdown("""
+    - Automated column mapping  
+    - KPI dashboard (CTR, CPC, CPA, ROAS)  
+    - Campaign vs Channel benchmarking  
+    - ML-powered Click & Conversion prediction  
+    - Time-series forecasting  
+    - Budget planning insights
+    """)
+
 
 with tabs[1]:
     st.header("Application")
