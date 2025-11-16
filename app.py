@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import re
 
 # --- Streamlit setup ---
 st.set_page_config(
@@ -17,45 +16,24 @@ st.markdown("""
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PAGES_DIR = os.path.join(BASE_DIR, "pages")
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
-# --- Detect all pages in /pages/ ---
-all_pages = [f for f in os.listdir(PAGES_DIR) if f.endswith(".py")]
-
-# --- Auto-group by sector based on filename prefix ---
-sector_patterns = {
-    "Marketing Analytics": r"usecase_marketing_\d+\.py",
-    "Real Estate Analytics": r"usecase_real_estate_\d+\.py",
-    "Customer Intelligence": r"usecase_customer_\d+\.py",
-    "Sales & Revenue Analytics": r"usecase_sales_\d+\.py",
-    "Operational Insights": r"usecase_ops_\d+\.py",
+# --- Hierarchy Data ---
+sectors = {
+    "Marketing Analytics": [
+        {"name": f"Marketing Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"marketing_{i+1}.py"} 
+        for i in range(10)
+    ],
+    "Real Estate Analytics": [
+        {"name": f"Real Estate Use Case {i+1}", "image": "real_estate_thumb.jpg", "page": f"realestate_{i+1}.py"} 
+        for i in range(10)
+    ],
 }
 
-sectors = {}
-for sector_name, pattern in sector_patterns.items():
-    matched_pages = sorted([p for p in all_pages if re.match(pattern, p)])
-    usecases = []
-    for p in matched_pages:
-        i = re.findall(r'\d+', p)[0]
-        usecases.append({
-            "name": f"{sector_name} Use Case {i}",
-            "image": f"{sector_name.lower().replace(' ', '_')}_thumb.jpg",  # use .jpg now
-            "page": p.replace(".py", "")
-        })
-    sectors[sector_name] = usecases
-
-# --- Session state ---
+# --- Initialize session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
-if "go_to_page" not in st.session_state:
-    st.session_state["go_to_page"] = None
-
-# --- Handle page navigation ---
-if st.session_state["go_to_page"]:
-    page_name = st.session_state["go_to_page"]
-    st.session_state["go_to_page"] = None
-    st.switch_page(page_name)
 
 # --- Home Page ---
 if st.session_state["sector"] is None:
@@ -70,10 +48,10 @@ if st.session_state["sector"] is None:
                 st.image(thumb_path, use_container_width=True)
             else:
                 st.warning(f"Thumbnail not found for {sector_name}")
-
+            
             st.markdown(f"### {sector_name}")
             st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
-
+            
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["sector"] = sector_name
                 st.experimental_rerun()
@@ -83,10 +61,10 @@ else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
     st.markdown("Select a use case to go to its project page.")
-
+    
     usecases = sectors[sector_name]
-
-    # Display use cases in 3-column grid
+    
+    # Display use cases in grid: 3 columns
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
@@ -96,13 +74,17 @@ else:
                     st.image(thumb_path, use_container_width=True)
                 else:
                     st.warning(f"Thumbnail not found for {uc['name']}")
-
+                
                 st.markdown(f"### {uc['name']}")
                 st.write("Dive into the data, uncover insights, and visualize trends.")
-
+                
+                # Path-based button navigation
+                page_path = f"pages/{uc['page']}"
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    st.session_state["go_to_page"] = uc["page"]
-                    st.experimental_rerun()
+                    try:
+                        st.switch_page(page_path)
+                    except Exception:
+                        st.error(f"⚠️ Could not link to {page_path}. Make sure it exists in /pages/ folder.")
 
     # Back button to Home
     if st.button("⬅️ Back to Sectors"):
