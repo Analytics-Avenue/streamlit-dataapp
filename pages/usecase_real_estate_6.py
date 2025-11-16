@@ -126,11 +126,12 @@ with tab2:
             st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
+    
         # Upload actual CSV
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-    |
+    
     elif mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
         if file:
