@@ -67,6 +67,28 @@ def auto_map_columns(df):
     return df
 
 # -------------------------
+# Dataset input: default, upload, mapping
+# -------------------------
+st.markdown("### Step 1 — Load dataset")
+mode = st.radio(
+    "Dataset option:",
+    ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
+    horizontal=True
+)
+
+df = None
+
+# REQUIRED FIELDS (for mapping)
+REQUIRED_MARKETING_COLS = ["Campaign", "Clicks", "Impressions", "Budget"]
+
+# Placeholder auto-map function
+def auto_map_columns(df):
+    for col in REQUIRED_MARKETING_COLS:
+        if col not in df.columns:
+            df[col] = np.nan
+    return df
+
+# -------------------------
 # Mode: Default dataset
 # -------------------------
 if mode == "Default dataset":
@@ -75,6 +97,7 @@ if mode == "Default dataset":
         df = pd.read_csv(DEFAULT_URL)
         df.columns = df.columns.str.strip()
         df = auto_map_columns(df)
+        st.session_state.df = df  # Always assign here
         st.success("Default dataset loaded")
         st.dataframe(df.head())
     except Exception as e:
@@ -86,9 +109,9 @@ if mode == "Default dataset":
 # -------------------------
 elif mode == "Upload CSV":
     st.markdown("#### Download Sample CSV for Reference")
-    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
+    SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
     try:
-        sample_df = pd.read_csv(URL).head(5)
+        sample_df = pd.read_csv(SAMPLE_URL).head(5)
         sample_csv = sample_df.to_csv(index=False)
         st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
     except Exception as e:
@@ -98,8 +121,9 @@ elif mode == "Upload CSV":
     if uploaded is not None:
         df = pd.read_csv(uploaded)
         df.columns = df.columns.str.strip()
-        st.success("File uploaded.")
         df = auto_map_columns(df)
+        st.session_state.df = df  # Always assign here
+        st.success("File uploaded.")
         st.dataframe(df.head())
         sample_small = df.head(5).to_csv(index=False)
         st.download_button("Download sample (first 5 rows)", sample_small, "sample_uploaded_5rows.csv", "text/csv")
@@ -126,6 +150,7 @@ else:
                 st.error("Please map all required columns: " + ", ".join(missing))
             else:
                 df = raw.rename(columns={v: k for k, v in mapping.items()})
+                st.session_state.df = df  # Always assign here
                 st.success("Mapping applied.")
                 st.dataframe(df.head())
                 sample_small = df.head(5).to_csv(index=False)
@@ -136,11 +161,14 @@ else:
                     "text/csv"
                 )
 
-
+# -------------------------
 # Preview Dataset
+# -------------------------
 if st.session_state.df is not None:
     st.subheader("Dataset Preview")
     st.dataframe(st.session_state.df)
+
+
 
 # ---------------------------
 # EDA Section
