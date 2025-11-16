@@ -2,22 +2,14 @@ import streamlit as st
 import os
 
 # --- Streamlit setup ---
-st.set_page_config(
-    page_title="Data Analytics Solutions",
-    layout="wide",
-)
+st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 
-# Hide default sidebar
-st.markdown("""
-<style>
-[data-testid="stSidebarNav"] {display: none;}
-</style>
-""", unsafe_allow_html=True)
+# Hide sidebar
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
-PAGES_DIR = os.path.join(BASE_DIR, "pages")
 
 # --- Hierarchy Data ---
 sectors = {
@@ -54,25 +46,11 @@ home_thumbs = {
 # --- Session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
-if "next_sector" not in st.session_state:
-    st.session_state["next_sector"] = None
-if "next_page" not in st.session_state:
-    st.session_state["next_page"] = None
-
-# --- Page switch handler ---
-if st.session_state["next_page"]:
-    page_path = st.session_state.pop("next_page")
-    st.switch_page(page_path)  # st.switch_page already reruns
-
-# --- Sector switch handler ---
-if st.session_state["next_sector"]:
-    st.session_state["sector"] = st.session_state.pop("next_sector")
-    st.experimental_rerun()
 
 # --- Home Page ---
 if st.session_state["sector"] is None:
     st.title("Data Analytics Hub")
-    st.markdown("Welcome! Choose a sector to explore its use cases.")
+    st.markdown("Welcome! Choose a sector to explore its use cases:")
 
     cols = st.columns(len(sectors))
     for idx, (sector_name, usecases) in enumerate(sectors.items()):
@@ -80,25 +58,22 @@ if st.session_state["sector"] is None:
             thumb_path = home_thumbs.get(sector_name)
             if os.path.exists(thumb_path):
                 st.image(thumb_path, use_container_width=True)
-            else:
-                st.warning(f"Thumbnail not found for {sector_name}")
-
             st.markdown(f"### {sector_name}")
-            st.write(f"Explore {len(usecases)} use cases in {sector_name}.")
+            st.write(f"{len(usecases)} use cases available.")
 
             if st.button(f"Explore {sector_name}", key=sector_name):
-                st.session_state["next_sector"] = sector_name
-                st.experimental_rerun()
+                st.session_state["sector"] = sector_name
+                st.experimental_rerun()  # only rerun on sector selection
 
 # --- Sector Page ---
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
-    st.markdown("Select a use case to go to its project page.")
+    st.markdown("Select a use case to go to its project page:")
 
     usecases = sectors[sector_name]
 
-    # Display use cases in a 3-column grid
+    # Grid: 3 columns
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
@@ -106,17 +81,14 @@ else:
                 thumb_path = os.path.join(ASSETS_DIR, uc["image"])
                 if os.path.exists(thumb_path):
                     st.image(thumb_path, use_container_width=True)
-                else:
-                    st.warning(f"Thumbnail not found for {uc['name']}")
-
                 st.markdown(f"### {uc['name']}")
-                st.write("Dive into the data, uncover insights, and visualize trends.")
+                st.write("Explore insights and dashboards.")
 
+                # Direct switch_page, works first click
                 if st.button(f"Go to {uc['name']}", key=uc["name"]):
-                    st.session_state["next_page"] = f"pages/{uc['page']}"
-                    # No rerun needed; switch_page handles it
+                    st.switch_page(f"pages/{uc['page']}")
 
-    # Back button to Home
+    # Back button
     if st.button("⬅️ Back to Sectors"):
         st.session_state["sector"] = None
         st.experimental_rerun()
