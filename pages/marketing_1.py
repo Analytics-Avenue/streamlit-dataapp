@@ -63,13 +63,27 @@ with tab2:
     # DEFAULT DATASET
     # -------------------------------
     if mode == "Default Dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
+    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Marketing_Analytics.csv"
         try:
             df = pd.read_csv(URL)
-            df.columns = df.columns.str.strip()
-            st.success("Default dataset loaded successfully.")
+            df.columns = df.columns.str.strip()  # remove extra spaces
+            # Auto-map columns
+            fb_map = {
+                "Campaign": "Campaign name",
+                "Channel": "Page Name",
+                "Date": "Day",
+                "Impressions": "Impressions",
+                "Clicks": "Link clicks",
+                "Leads": "Results",
+                "Conversions": "Results",
+                "Spend": "Amount spent (INR)"
+            }
+            if all(v in df.columns for v in fb_map.values()):
+                df = df.rename(columns={v:k for k,v in fb_map.items()})
+            st.success("Default dataset loaded and auto-mapped successfully.")
         except Exception as e:
             st.error(f"Failed to load default dataset: {e}")
+
 
     # -------------------------------
     # UPLOAD CSV
