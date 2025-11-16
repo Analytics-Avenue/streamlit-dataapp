@@ -1,4 +1,3 @@
-# app2_marketing_intelligence.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -225,7 +224,7 @@ with tabs[1]:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
             df = auto_map_columns(df)
-            st.success("Default dataset loaded (auto-mapping attempted).")
+            st.success("Default dataset loaded")
             st.dataframe(df.head())
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
@@ -333,9 +332,9 @@ with tabs[1]:
         start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
         filt = filt[(filt["Date"] >= start) & (filt["Date"] <= end)]
 
-    st.markdown("Filtered preview (first 200 rows)")
-    st.dataframe(filt.head(200), use_container_width=True)
-    download_df(filt.head(200), "filtered_preview.csv")
+    st.markdown("Filtered preview")
+    st.dataframe(filt.head(5), use_container_width=True)
+    download_df(filt.head(5), "filtered_preview.csv")
 
     # -------------------------
     # KPIs
