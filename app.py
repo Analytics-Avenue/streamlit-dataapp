@@ -17,8 +17,16 @@ PAGES_DIR = os.path.join(BASE_DIR, "pages")
 # --- Hierarchy Data with actual project names ---
 sectors = {
     "Marketing Analytics": [
-        {"name": f"Marketing Use Case {i+1}", "image": "marketing_thumb.jpg", "page": f"marketing_{i+1}.py"} 
-        for i in range(10)
+        {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
+        {"name": "Customer Journey & Funnel Insights", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
+        {"name": "Marketing Spend vs ROI Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
+        {"name": "Lead Scoring & Conversion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
+        {"name": "Social Media Engagement Tracker", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
+        {"name": "Email Campaign Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
+        {"name": "Content Performance & SEO Insights", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
+        {"name": "Customer Retention & Churn Analysis", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
+        {"name": "Market Segmentation & Persona Insights", "image": "marketing_thumb.jpg", "page": "marketing_9.py"},
+        {"name": "Advertising Channel Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_10.py"},
     ],
     "Real Estate Analytics": [
         {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
@@ -31,7 +39,6 @@ sectors = {
         {"name": "Market Buzz & Activity Dashboard", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_8.py"},
     ],
 }
-
 
 
 # --- Direct thumbnail paths for home page ---
