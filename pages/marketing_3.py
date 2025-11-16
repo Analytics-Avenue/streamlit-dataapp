@@ -137,7 +137,210 @@ if st.session_state.df is not None:
 # ML Section
 # ---------------------------
 if st.session_state.df is not None:
+    st.header("Step 3: ML Moimport streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+# ---------------------------
+# App Config & CSS
+# ---------------------------
+st.set_page_config(page_title="Marketing ML Dashboard", layout="wide")
+st.markdown("""
+<style>
+.card {
+    background: rgba(255,255,255,0.08);
+    padding: 18px 20px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    backdrop-filter: blur(6px);
+    transition: all .25s ease;
+}
+.card:hover { background: rgba(255,255,255,0.18); transform: scale(1.03);}
+.metric-card { background: rgba(255,255,255,0.12); padding: 20px; border-radius: 14px; text-align: center; font-weight: 600; font-size: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
+.metric-card:hover { background: rgba(255,255,255,0.20); transform: scale(1.04);}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("Marketing Analytics ML Dashboard")
+st.markdown("Upload, explore, train ML, and predict in one place.")
+
+# ---------------------------
+# Session State
+# ---------------------------
+if "df" not in st.session_state:
+    st.session_state.df = None
+if "pipeline" not in st.session_state:
+    st.session_state.pipeline = None
+
+# ---------------------------
+# Dataset Selection
+# ---------------------------
+st.header("Step 1: Choose Dataset")
+dataset_option = st.radio("Select Dataset Source", ["Default Dataset", "Upload CSV", "Manual Entry"])
+
+if dataset_option == "Default Dataset":
+    @st.cache_data
+    def load_default():
+        return pd.DataFrame({
+            "Campaign": ["A", "B", "C", "D"],
+            "Clicks": [120, 150, 80, 200],
+            "Impressions": [1000, 1300, 700, 1600],
+            "Budget": [500, 700, 300, 900]
+        })
+    df = load_default()
+    st.session_state.df = df
+    st.success("Default dataset loaded")
+
+elif dataset_option == "Upload CSV":
+    uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+        st.session_state.df = df
+        st.success("Dataset uploaded successfully")
+
+elif dataset_option == "Manual Entry":
+    st.markdown("Enter dataset manually (columns separated by comma)")
+    cols = st.text_input("Columns (comma separated)")
+    if cols:
+        cols_list = [c.strip() for c in cols.split(",")]
+        rows = st.text_area("Rows (comma separated values per row)")
+        if rows:
+            data = []
+            for line in rows.strip().split("\n"):
+                data.append([v.strip() for v in line.split(",")])
+            try:
+                df = pd.DataFrame(data, columns=cols_list)
+                st.session_state.df = df
+                st.success("Manual dataset created")
+            except Exception as e:
+                st.error(f"Error creating dataset: {e}")
+
+# Preview Dataset
+if st.session_state.df is not None:
+    st.subheader("Dataset Preview")
+    st.dataframe(st.session_state.df)
+
+# ---------------------------
+# EDA Section
+# ---------------------------
+if st.session_state.df is not None:
+    st.header("Step 2: EDA & Visualization")
+    df = st.session_state.df
+    st.subheader("Summary Statistics")
+    st.write(df.describe(include="all"))
+
+    num_cols = df.select_dtypes(include=np.number).columns
+    if len(num_cols) > 0:
+        st.subheader("Correlation Heatmap")
+        fig = px.imshow(df[num_cols].corr(), text_auto=True)
+        st.plotly_chart(fig, use_container_width=True)
+
+    if "Campaign" in df.columns and "Clicks" in df.columns:
+        st.subheader("Clicks per Campaign")
+        fig = px.bar(df, x="Campaign", y="Clicks", color="Campaign")
+        st.plotly_chart(fig, use_container_width=True)
+
+# ---------------------------
+# ML Section
+# ---------------------------
+if st.session_state.df is not None:
     st.header("Step 3: ML Model & Prediction")
+
+    target = st.selectbox("Select Target Column", df.columns)
+    model_type = st.radio("Select Model Type", ["Regression", "Classification"])
+
+    if target:
+        X = df.drop(columns=[target])
+        y = df[target]
+
+        # Numeric / categorical split
+        numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
+        cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
+
+        # Convert numeric columns safely
+        for col in numeric_cols:
+            X[col] = pd.to_numeric(X[col], errors='coerce')
+
+        # Regression target numeric conversion
+        if model_type == "Regression":
+            y = pd.to_numeric(y, errors='coerce')
+
+        # Drop NaNs
+        X = X.dropna()
+        y = y.loc[X.index]
+
+        if len(X) < 2:
+            st.error("Not enough valid rows after cleaning for training.")
+            st.stop()
+
+        # Pipeline setup
+        preprocessor = ColumnTransformer([
+            ("num", StandardScaler(), numeric_cols),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
+        ])
+        model = RandomForestRegressor() if model_type == "Regression" else RandomForestClassifier()
+        pipeline = Pipeline([("prep", preprocessor), ("model", model)])
+
+        test_size = st.slider("Test Size", 0.1, 0.5, 0.2)
+
+        if st.button("Train Model"):
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+            pipeline.fit(X_train, y_train)
+            st.session_state.pipeline = pipeline
+            score = pipeline.score(X_test, y_test)
+            st.success(f"Trained — Score: {score:.3f}")
+
+            # Feature importance
+            try:
+                importances = pipeline.named_steps["model"].feature_importances_
+                feature_names = numeric_cols.copy()
+                if cat_cols:
+                    cat_names = pipeline.named_steps["prep"].named_transformers_["cat"].get_feature_names_out(cat_cols)
+                    feature_names += cat_names.tolist()
+                fig = px.bar(x=importances, y=feature_names, orientation="h", title="Feature Importances")
+                st.plotly_chart(fig, use_container_width=True)
+            except:
+                st.info("Feature importance not available for this model.")
+
+# ---------------------------
+# Quick Predict Single Row
+# ---------------------------
+if st.session_state.pipeline is not None:
+    st.header("Step 4: Quick Predict (Single Row)")
+
+    X = st.session_state.df.drop(columns=[target])
+    numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
+    cat_cols = X.select_dtypes(exclude=np.number).columns.tolist()
+    feat_cols = X.columns
+
+    pcols = st.columns(len(feat_cols))
+    inputs = {}
+    for i, col in enumerate(feat_cols):
+        if col in numeric_cols:
+            inputs[col] = pcols[i].number_input(col, value=float(X[col].median()))
+        else:
+            options = sorted(X[col].dropna().unique().tolist())[:200]
+            default_index = 0 if options else None
+            inputs[col] = pcols[i].selectbox(col, options=options, index=default_index if default_index is not None else 0)
+
+    if st.button("Predict Single Row"):
+        row = pd.DataFrame([inputs])
+        try:
+            pred_val = st.session_state.pipeline.predict(row)[0]
+            st.success(f"Prediction: {pred_val}")
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+else:
+    st.info("Train a model first to enable quick prediction.")
+del & Prediction")
 
     target = st.selectbox("Select Target Column", df.columns)
     if target:
