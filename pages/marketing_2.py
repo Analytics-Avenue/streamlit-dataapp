@@ -17,8 +17,7 @@ warnings.filterwarnings("ignore")
 from openai import OpenAI
 
 # Load API Key from Streamlit Secrets
-OPENAI_API_KEY = "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"
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key=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)
 
 st.title("Gen-AI Marketing Assistant")
 
