@@ -407,7 +407,7 @@ with tabs[1]:
             cat_cols = [c for c in X.columns if X[c].dtype == "object"]
             num_cols = [c for c in X.columns if c not in cat_cols]
             preprocessor = ColumnTransformer(transformers=[
-                ("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols),
+                ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
                 ("num", StandardScaler(), num_cols)
             ], remainder="drop")
             X_t = preprocessor.fit_transform(X)
