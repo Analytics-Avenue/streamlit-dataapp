@@ -339,18 +339,18 @@ with tabs[1]:
     # --------------AI
 
     if st.button("Generate AI Insights"):
-    prompt = f"""
-    Give a full marketing insight summary based on this dataset:
-    {filt.head(50).to_dict()}
-    """
-
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    st.write("### AI Insights")
-    st.write(response.choices[0].message["content"])
+        prompt = f"""
+        Give a full marketing insight summary based on this dataset:
+        {filt.head(50).to_dict()}
+        """
+    
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+    
+        st.write("### AI Insights")
+        st.write(response.choices[0].message["content"])
 
 
     # -------------------------
