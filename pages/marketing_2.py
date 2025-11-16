@@ -94,9 +94,110 @@ def download_df(df, filename):
 st.markdown("<h1 style='margin-bottom:0.2rem'>Marketing Intelligence & Forecasting Lab</h1>", unsafe_allow_html=True)
 st.markdown("Enterprise-capable marketing analytics: ML predictions, time-series forecasts and automated insights from campaign data. No fluff — only actionable outputs.")
 
+st.markdown("""
+<style>
+.card {
+    background: #ffffff10;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ffffff20;
+    font-size: 15px;
+}
+
+.metric-card {
+    background: #ffffff15;
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #ffffff30;
+    font-weight: 600;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.metric-card:hover {
+    background: #ffffff25;
+    border-color: #ffffff60;
+    transform: scale(1.03);
+    cursor: pointer;
+}
+
+.metric-card[title] {
+    position: relative;
+}
+
+/* Tooltip */
+.metric-card[title]:hover:after {
+    content: attr(title);
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    padding: 6px 10px;
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 tabs = st.tabs(["Overview", "Application"])
 
 with tabs[0]:
+    st.markdown("### Overview")
+
+    st.markdown("""
+    <div class='card'>
+        This app analyzes multi-channel marketing performance,
+        predicts outcomes using ML, and gives forecasting insights for
+        smarter budget allocation.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Purpose")
+    st.markdown("""
+    <div class='card'>
+        • Track campaign performance across channels<br>
+        • Identify high-ROI campaigns and adsets<br>
+        • Forecast future Clicks, Leads & Conversions<br>
+        • Optimize budget allocation using ML-driven insights<br>
+        • Understand channel trends and seasonality<br>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### KPIs")
+
+    k1, k2, k3, k4 = st.columns(4)
+
+    k1.markdown("""
+        <div class='metric-card' title='Total clicks generated across all campaigns'>
+            Total Clicks
+        </div>
+    """, unsafe_allow_html=True)
+
+    k2.markdown("""
+        <div class='metric-card' title='Total leads captured from marketing campaigns'>
+            Total Leads
+        </div>
+    """, unsafe_allow_html=True)
+
+    k3.markdown("""
+        <div class='metric-card' title='Overall conversion efficiency across campaigns'>
+            Conversion Rate
+        </div>
+    """, unsafe_allow_html=True)
+
+    k4.markdown("""
+        <div class='metric-card' title='Return on Ad Spend (Revenue generated per ₹1 spent)'>
+            ROAS
+        </div>
+    """, unsafe_allow_html=True)
+
+   
     # ----------- TITLE -----------
     st.markdown("<h3>Overview</h3>", unsafe_allow_html=True)
 
@@ -147,6 +248,7 @@ with tabs[0]:
         Average Sentiment Score
     </div>
     """, unsafe_allow_html=True)
+
 
 
 with tabs[1]:
