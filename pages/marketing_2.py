@@ -30,7 +30,6 @@ if st.button("Generate Insights"):
         st.warning("Please enter a question.")
     else:
         with st.spinner("Analyzing…"):
-            response = client.chat.completions.create(
             response = client.responses.create(
                 model="gpt-4.1",
                 messages=[
