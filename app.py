@@ -19,6 +19,10 @@ sectors = {
         {"name": "Click & Convertion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
         {"name": "Marketing Performance Analysis", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
         {"name": "Content & SEO Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
+        {"name": "Customer Retention & Churn Analysis", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
+        {"name": "Customer Journey & Funnel Insights,", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
+        {"name": "Google Ads Performance Analytics.", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
+        {"name": "Email & WhatsApp Marketing Forecast Lab", "image": "marketing_thumb.jpg", "page": "marketing_9.py"}, 
     ],
     "Real Estate Analytics": [
         {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
