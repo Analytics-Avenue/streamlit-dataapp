@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error, accuracy_score
+import shap
+import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -193,12 +195,21 @@ with tabs[1]:
     st.dataframe(filt.head(10), use_container_width=True)
     download_df(filt.head(10), "filtered_healthcare_preview.csv")
 
+    # Derived columns needed for prediction
+    if "Admission_Date" in filt.columns and "Discharge_Date" in filt.columns:
+        filt["Admission_Date"] = pd.to_datetime(filt["Admission_Date"], errors="coerce")
+        filt["Discharge_Date"] = pd.to_datetime(filt["Discharge_Date"], errors="coerce")
+        filt["Length_of_Stay"] = (filt["Discharge_Date"] - filt["Admission_Date"]).dt.days.fillna(0)
+    else:
+        filt["Length_of_Stay"] = 0
     
-    # --- Ensure these imports are at the top ---
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import accuracy_score
-    import shap
-    import matplotlib.pyplot as plt
+    # Readmission flag (binary)
+    if "Readmission" in filt.columns:
+        filt["Readmission_Flag"] = filt["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
+    else:
+        filt["Readmission_Flag"] = 0
+
+
     
     # Inside your Application tab code, after filters and metrics:
     st.markdown("### Predictive Analytics")
