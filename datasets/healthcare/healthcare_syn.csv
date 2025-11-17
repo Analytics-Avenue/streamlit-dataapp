@@ -1,0 +1,41 @@
+Hospital Name,Location,Hospital Type,Monthly Patients,Staff Count,Facilities Available,Facilities Missing,Ventilators Count,ECG Machine Count,X-Ray Machine Count,MRI Scanner Count,CT Scanner Count,Dialysis Machine Count,Infusion Pump Count,Hospital Beds Count,Patients Per Staff,Equipment Shortage Score,Facility Deficit Score,Overall Risk Score
+Hospital_1,Trichy,General,909,789,"CT Scan, Dialysis Unit, MRI, Blood Bank, ICU, X-Ray","Operation Theatre, Pharmacy, NICU, Emergency Ward",2,18,13,1,0,2,6,7,1.15,4,4,2.86
+Hospital_2,Coimbatore,Children,934,604,"Operation Theatre, Pharmacy, CT Scan, Emergency Ward, X-Ray","Blood Bank, NICU, ICU, MRI, Dialysis Unit",8,25,27,0,24,25,5,22,1.55,1,5,2.42
+Hospital_3,Velachery,Clinic,5052,189,"Blood Bank, NICU, Operation Theatre, CT Scan, ICU","Pharmacy, MRI, Dialysis Unit, X-Ray, Emergency Ward",11,27,11,19,8,25,1,23,26.73,1,5,12.49
+Hospital_4,T Nagar,Children,2545,417,"Operation Theatre, X-Ray, Blood Bank, Dialysis Unit","NICU, ICU, Pharmacy, MRI, CT Scan, Emergency Ward",6,22,2,1,21,7,24,9,6.1,2,6,4.84
+Hospital_5,Chennai South,Neuro,4314,133,"X-Ray, Emergency Ward, Blood Bank, NICU, MRI, Operation Theatre, Pharmacy","Dialysis Unit, ICU, CT Scan",21,8,22,29,21,20,2,19,32.44,1,3,14.18
+Hospital_6,Trichy,Multispeciality,9251,776,"MRI, Emergency Ward, Pharmacy, Dialysis Unit, Blood Bank","NICU, Operation Theatre, ICU, CT Scan, X-Ray",22,17,7,21,10,26,24,24,11.92,0,5,6.27
+Hospital_7,Chennai Central,Multispeciality,1025,353,"X-Ray, NICU, CT Scan, Dialysis Unit, Blood Bank, MRI, Operation Theatre","ICU, Pharmacy, Emergency Ward",20,15,12,28,29,20,14,4,2.9,1,3,2.36
+Hospital_8,Anna Nagar,Multispeciality,4540,792,"Operation Theatre, X-Ray, Pharmacy, Dialysis Unit, CT Scan, MRI, NICU, ICU","Blood Bank, Emergency Ward",16,15,2,24,1,27,3,4,5.73,4,2,4.09
+Hospital_9,Trichy,Multispeciality,7416,640,"Pharmacy, Dialysis Unit, Emergency Ward, X-Ray","Blood Bank, NICU, Operation Theatre, ICU, MRI, CT Scan",8,17,27,30,0,21,23,3,11.59,2,6,7.04
+Hospital_10,Trichy,Children,4871,686,"NICU, X-Ray, Pharmacy, Dialysis Unit, CT Scan, ICU","Operation Theatre, MRI, Blood Bank, Emergency Ward",30,23,28,23,8,16,24,5,7.1,0,4,4.04
+Hospital_11,Coimbatore,General,5389,684,"Dialysis Unit, CT Scan, MRI, Emergency Ward, NICU, X-Ray, ICU, Pharmacy","Operation Theatre, Blood Bank",10,15,0,3,29,11,28,26,7.88,2,2,4.35
+Hospital_12,Anna Nagar,Multispeciality,1449,276,"NICU, Dialysis Unit, Emergency Ward, Pharmacy, ICU, X-Ray, Operation Theatre, Blood Bank","CT Scan, MRI",21,15,30,17,5,8,16,27,5.25,0,2,2.7
+Hospital_13,Madurai,Teaching,3970,582,"CT Scan, X-Ray, Pharmacy, Blood Bank, Emergency Ward, MRI, Dialysis Unit, Operation Theatre, NICU, ICU",,7,7,2,10,0,18,17,7,6.82,2,0,3.33
+Hospital_14,Madurai,Multispeciality,617,102,"ICU, CT Scan, NICU, Dialysis Unit, MRI, Pharmacy, Emergency Ward, Operation Theatre, Blood Bank",X-Ray,6,17,4,23,29,28,18,18,6.05,1,1,3.02
+Hospital_15,T Nagar,Multispeciality,8249,446,"NICU, Dialysis Unit, Pharmacy, MRI, CT Scan","Blood Bank, Operation Theatre, ICU, X-Ray, Emergency Ward",13,14,27,23,1,21,20,20,18.5,1,5,9.2
+Hospital_16,Chennai South,General,7096,775,"NICU, CT Scan, Operation Theatre, Dialysis Unit, X-Ray, Emergency Ward","Pharmacy, ICU, MRI, Blood Bank",4,13,5,8,14,7,27,29,9.16,1,4,5.16
+Hospital_17,Chennai South,Teaching,9516,130,"Operation Theatre, ICU, NICU, Pharmacy","Blood Bank, MRI, Dialysis Unit, CT Scan, X-Ray, Emergency Ward",27,7,5,13,15,15,6,27,73.2,0,6,31.08
+Hospital_18,Velachery,General,3197,418,"Pharmacy, X-Ray, Emergency Ward, MRI","Blood Bank, NICU, Operation Theatre, ICU, Dialysis Unit, CT Scan",13,22,30,23,25,17,21,22,7.65,0,6,4.86
+Hospital_19,T Nagar,Multispeciality,3611,333,"ICU, Operation Theatre, Dialysis Unit, Blood Bank, MRI","NICU, Pharmacy, CT Scan, X-Ray, Emergency Ward",1,1,18,15,16,29,27,16,10.84,2,5,6.44
+Hospital_20,Chennai North,General,8820,112,"MRI, NICU, Operation Theatre, Blood Bank, Emergency Ward, CT Scan, ICU, Dialysis Unit, X-Ray, Pharmacy",,19,2,13,21,18,18,16,10,78.75,1,0,31.8
+Hospital_21,Anna Nagar,Multispeciality,5647,274,"Pharmacy, MRI, X-Ray, CT Scan, Operation Theatre, ICU","Dialysis Unit, Blood Bank, NICU, Emergency Ward",0,14,19,18,3,2,17,6,20.61,3,4,10.34
+Hospital_22,Coimbatore,Clinic,2670,387,"CT Scan, Blood Bank, X-Ray, NICU","Operation Theatre, ICU, MRI, Pharmacy, Dialysis Unit, Emergency Ward",14,26,17,22,9,19,25,20,6.9,0,6,4.56
+Hospital_23,Coimbatore,General,9586,336,"NICU, MRI, X-Ray, ICU, Pharmacy, Emergency Ward, Dialysis Unit, CT Scan, Operation Theatre",Blood Bank,19,6,22,10,6,21,20,27,28.53,0,1,11.71
+Hospital_24,Anna Nagar,Children,8504,287,"ICU, NICU, Pharmacy, Emergency Ward, MRI, Dialysis Unit, X-Ray, Operation Theatre, CT Scan, Blood Bank",,5,23,14,17,22,13,17,0,29.63,1,0,12.15
+Hospital_25,Chennai South,General,2942,588,"Blood Bank, Operation Theatre, MRI, CT Scan","NICU, ICU, Pharmacy, Dialysis Unit, X-Ray, Emergency Ward",4,1,9,11,28,29,25,27,5.0,2,6,4.4
+Hospital_26,Chennai Central,Clinic,3941,728,"NICU, Blood Bank, Pharmacy, X-Ray, Operation Theatre","ICU, MRI, Dialysis Unit, CT Scan, Emergency Ward",4,29,29,7,27,5,25,25,5.41,1,5,3.96
+Hospital_27,Chennai North,Teaching,906,213,"Blood Bank, Pharmacy, CT Scan, MRI, NICU, ICU, Emergency Ward, X-Ray, Dialysis Unit",Operation Theatre,7,6,26,29,14,11,9,26,4.25,0,1,2.0
+Hospital_28,Tambaram,Multispeciality,887,705,"Pharmacy, Blood Bank, X-Ray, Dialysis Unit, ICU","NICU, Operation Theatre, MRI, CT Scan, Emergency Ward",30,24,8,11,20,16,12,21,1.26,0,5,2.0
+Hospital_29,Coimbatore,Clinic,952,148,"MRI, X-Ray, ICU, Emergency Ward, Operation Theatre, CT Scan","Dialysis Unit, Pharmacy, Blood Bank, NICU",11,23,25,10,13,19,16,3,6.43,1,4,4.07
+Hospital_30,Velachery,Children,3614,290,"Pharmacy, ICU, CT Scan, MRI","Blood Bank, NICU, Operation Theatre, Dialysis Unit, X-Ray, Emergency Ward",13,2,30,21,29,10,19,10,12.46,1,6,7.08
+Hospital_31,Trichy,Neuro,2541,767,"Operation Theatre, X-Ray, Pharmacy, MRI, CT Scan, Emergency Ward","Dialysis Unit, ICU, Blood Bank, NICU",17,4,6,13,21,30,12,21,3.31,1,4,2.82
+Hospital_32,Salem,Multispeciality,9824,338,"Operation Theatre, ICU, X-Ray, MRI, NICU, CT Scan, Pharmacy","Dialysis Unit, Blood Bank, Emergency Ward",14,14,14,21,6,16,15,25,29.07,0,3,12.53
+Hospital_33,Salem,Multispeciality,1889,320,"Dialysis Unit, Blood Bank, NICU, Pharmacy, Emergency Ward, MRI, Operation Theatre, ICU","CT Scan, X-Ray",4,0,1,7,15,19,27,24,5.9,3,2,3.86
+Hospital_34,Chennai South,Teaching,7290,674,"CT Scan, Pharmacy, Emergency Ward, Dialysis Unit, NICU, Blood Bank, ICU, Operation Theatre","X-Ray, MRI",24,13,7,5,25,30,22,16,10.82,0,2,4.93
+Hospital_35,T Nagar,General,9632,285,"NICU, Emergency Ward, MRI, Pharmacy, CT Scan, X-Ray, Operation Theatre, Dialysis Unit, Blood Bank, ICU",,28,5,23,27,15,14,8,24,33.8,0,0,13.52
+Hospital_36,Tambaram,Neuro,5043,563,"CT Scan, X-Ray, Emergency Ward, ICU, Blood Bank, MRI, NICU","Dialysis Unit, Operation Theatre, Pharmacy",8,10,10,28,17,2,4,4,8.96,3,3,5.38
+Hospital_37,Tambaram,Teaching,3003,753,"NICU, Pharmacy, Operation Theatre, MRI, X-Ray","Blood Bank, ICU, Dialysis Unit, CT Scan, Emergency Ward",14,13,1,6,26,13,12,28,3.99,1,5,3.4
+Hospital_38,Madurai,Cardiac,820,619,"Emergency Ward, ICU, Blood Bank, MRI, CT Scan, Dialysis Unit, NICU","X-Ray, Operation Theatre, Pharmacy",15,7,8,13,15,0,12,10,1.32,1,3,1.73
+Hospital_39,Trichy,Cardiac,7124,771,"Emergency Ward, MRI, ICU, CT Scan, X-Ray","Blood Bank, NICU, Operation Theatre, Pharmacy, Dialysis Unit",18,21,0,2,20,13,4,27,9.24,3,5,6.1
+Hospital_40,T Nagar,Multispeciality,1323,296,"Blood Bank, CT Scan, Emergency Ward, MRI, Pharmacy, Operation Theatre, Dialysis Unit","ICU, X-Ray, NICU",24,30,26,13,8,26,2,15,4.47,1,3,2.99
