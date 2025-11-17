@@ -37,12 +37,21 @@ sectors = {
         {"name": "Neighborhood Lifestyle & Risk Aware Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_9.py"},
         {"name": "Real Estate Intelligence — Hybrid Dashboard (Property + CRM)", "image": "real_estate_thumb.jpg", "page": "realestate.py"},
     ],
+    "Health Care Analytics": [
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_1.py"},
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_2.py"},
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_3.py"},
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_4.py"},
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_5.py"},
+        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_6.py"},
+    ],
 }
 
 # --- Home page thumbnails ---
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
+    "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
 }
 
 # --- Session state ---
