@@ -40,7 +40,7 @@ sectors = {
         {"name": "Healthscope Insights", "image": "real_estate_thumb.jpg", "page": "healthcare_1.py"},
         {"name": "Patient Visit Analytics & Hospital Performance", "image": "real_estate_thumb.jpg", "page": "healthcare_2.py"},
         {"name": "PatientFlow Navigator", "image": "real_estate_thumb.jpg", "page": "healthcare_3.py"},
-        {"name": "Health Care Analytics0", "image": "real_estate_thumb.jpg", "page": "healthcare_4.py"},
+        {"name": "Ambulance Ops & Routing Lab", "image": "real_estate_thumb.jpg", "page": "healthcare_4.py"},
         {"name": "Health Care Analytics1", "image": "real_estate_thumb.jpg", "page": "healthcare_5.py"},
         {"name": "Health Care Analytics2", "image": "real_estate_thumb.jpg", "page": "healthcare_6.py"},
     ],
