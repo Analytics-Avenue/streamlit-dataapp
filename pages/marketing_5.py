@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 # -------------------------
 # App Config
 # -------------------------
-st.set_page_config(page_title="Content & SEO Dashboard — App 5", layout="wide")
+st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
 
 # -------------------------
 # Required columns
@@ -127,7 +127,7 @@ with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-        App 5 tracks content & SEO performance across pages, keywords, devices, and countries.
+        It tracks content & SEO performance across pages, keywords, devices, and countries.
         Provides engagement, conversion, and revenue insights, along with ML-driven predictions.
     </div>
     """, unsafe_allow_html=True)
@@ -161,7 +161,7 @@ with tabs[1]:
     df = None
 
     if mode == "Default dataset":
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/content_seo/content_seo.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/content_seo_dataset.csv"
         try:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
