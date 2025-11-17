@@ -266,24 +266,32 @@ with tabs[1]:
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
             
-            # Pick class 1 (Readmission = Yes) if binary classification
+            # Pick class 1 (Readmission = Yes)
             shap_class1 = shap_values[1] if isinstance(shap_values, list) else shap_values
             
-            # Ensure we have 2D array for mean calculation
-            if shap_class1.ndim == 1:
-                shap_class1 = shap_class1.reshape(1, -1)  # convert to 2D (1 sample x n_features)
+            # Convert to 2D array: rows = samples, cols = features
+            if isinstance(shap_class1, list):  # sometimes shap returns list of arrays per sample
+                shap_class1 = np.array(shap_class1)
+            elif shap_class1.ndim == 1:  # only one row
+                shap_class1 = shap_class1.reshape(1, -1)
             
-            shap_summary = pd.DataFrame({
-                'Feature': X_test.columns,
-                'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
-            }).sort_values('Mean_ABS_SHAP', ascending=False)
+            # Sanity check: number of features
+            if shap_class1.shape[1] != X_test.shape[1]:
+                st.warning(f"SHAP values ({shap_class1.shape}) and feature matrix ({X_test.shape}) mismatch. Skipping SHAP plot.")
+            else:
+                # Compute mean absolute SHAP values
+                shap_summary = pd.DataFrame({
+                    'Feature': X_test.columns,
+                    'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
+                }).sort_values('Mean_ABS_SHAP', ascending=False)
             
-            # Plotly bar chart
-            fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
-                              title="Readmission Prediction Feature Importance (SHAP)",
-                              text='Mean_ABS_SHAP')
-            fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
-            st.plotly_chart(fig_shap, use_container_width=True)
+                # Plot
+                fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
+                                  title="Readmission Prediction Feature Importance (SHAP)",
+                                  text='Mean_ABS_SHAP')
+                fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
+                st.plotly_chart(fig_shap, use_container_width=True)
+
 
 
     
