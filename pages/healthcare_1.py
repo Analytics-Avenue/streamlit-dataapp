@@ -130,7 +130,6 @@ with tabs[1]:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
             df = ensure_datetime(df, "Date")
-            st.success("Default dataset loaded from GitHub")
             st.dataframe(df.head())
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
