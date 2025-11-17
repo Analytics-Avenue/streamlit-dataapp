@@ -12,7 +12,7 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
-st.set_page_config(page_title="Healthcare Analytics Lab", layout="wide")
+st.set_page_config(page_title="Healthscope Insights", layout="wide")
 
 # -------------------------
 # Required columns for project
@@ -48,7 +48,7 @@ def to_currency(x):
 # -------------------------
 # Page header + overview
 # -------------------------
-st.markdown("<h1 style='margin-bottom:0.2rem'>Healthcare Analytics Lab</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='margin-bottom:0.2rem'>Healthscope Insights</h1>", unsafe_allow_html=True)
 st.markdown("Enterprise-ready healthcare analytics: Patient insights, hospital KPIs, and revenue analysis — actionable & visual.")
 
 st.markdown("""
