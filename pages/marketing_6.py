@@ -205,16 +205,22 @@ with tabs[1]:
     k3.metric("Retention Rate", f"{100*(1-filt['Churn_Flag'].mean()):.2f}%" if "Churn_Flag" in filt.columns else "N/A")
     k4.metric("Avg Order Value", f"₹ {filt['Avg_Order_Value'].mean():,.2f}" if "Avg_Order_Value" in filt.columns else "N/A")
 
+
     # Retention chart
     if "SignUp_Date" in filt.columns and "Churn_Flag" in filt.columns:
         retention = filt.groupby(filt["SignUp_Date"].dt.to_period("M")).agg(
             Total_Customers=("Customer_ID","count"),
             Churned=("Churn_Flag","sum")
         ).reset_index()
+        
+        # Convert Period to Timestamp
+        retention["SignUp_Date"] = retention["SignUp_Date"].dt.to_timestamp()
+        
         retention["Retention_Rate"] = 1 - retention["Churned"]/retention["Total_Customers"]
         fig = px.line(retention, x="SignUp_Date", y="Retention_Rate", title="Monthly Retention Rate", markers=True)
         st.plotly_chart(fig, use_container_width=True)
-
+    
+    
     # ML: Churn prediction
     st.markdown("### ML: Predict churn probability")
     if len(filt) > 40:
