@@ -115,7 +115,7 @@ with tabs[1]:
     df = None
 
     if mode == "Default dataset":
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare 2.csv"
         try:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
