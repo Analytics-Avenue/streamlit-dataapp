@@ -131,7 +131,7 @@ with tabs[1]:
     df = None
 
     if mode=="Default dataset":
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing/customer_journey_funnel_video.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/customer_journey_funnel_video.csv"
         try:
             df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
