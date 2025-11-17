@@ -232,93 +232,6 @@ with tabs[0]:
     - Streamlined patient movement and hospital throughput  
     """)
 
-    # Example KPI values (replace with dynamic values below if df available)
-    ambulance_response_time = "12.4 min"
-    acceptance_rate = "87%"
-    avg_trip_distance = "16.2 km"
-    hospital_wait_time = "22 min"
-    readmission_rate = "8.2%"
-    bed_occupancy = "74%"
-
-    # If dataframe exists, compute KPIs dynamically (safe guards)
-    if st.session_state.df is not None:
-        try:
-            df = st.session_state.df.copy()
-            # compute dynamic KPIs with safe fallbacks
-            if "Response_Time_min" in df.columns:
-                ambulance_response_time = f"{df['Response_Time_min'].dropna().mean():.1f} min"
-            if "Is_Interfacility_Transfer" in df.columns:
-                acceptance_rate = f"{(1 - df['Is_Interfacility_Transfer'].mean()):.0%}"  # example: not transfer ~ acceptance
-            if "Distance_km" in df.columns:
-                avg_trip_distance = f"{df['Distance_km'].dropna().mean():.1f} km"
-            if "Trip_Cost_Rs" in df.columns:
-                hospital_wait_time = hospital_wait_time  # keep sample unless you have wait metric
-            if "Readmission" in df.columns:
-                rr = 100 * df['Readmission'].apply(lambda x: 1 if str(x).lower() in ['yes','1','true'] else 0).mean()
-                readmission_rate = f"{rr:.1f}%"
-            if "Dropoff_Hospital_Occupancy_pct" in df.columns:
-                bed_occupancy = f"{df['Dropoff_Hospital_Occupancy_pct'].dropna().mean():.0f}%"
-        except Exception:
-            # keep sample values if anything fails
-            pass
-
-    kpis = [
-        {"title": "Avg Ambulance Response Time", "value": ambulance_response_time, "delta": "-1.8% vs last week", "badge": "Ambulance"},
-        {"title": "Ambulance Acceptance Rate", "value": acceptance_rate, "delta": "+4.2% vs last month", "badge": "Operations"},
-        {"title": "Avg Trip Distance", "value": avg_trip_distance, "delta": "+0.6 km", "badge": "Logistics"},
-        {"title": "Hospital Waiting Time", "value": hospital_wait_time, "delta": "-3 min improvement", "badge": "Hospital"},
-        {"title": "Readmission Rate", "value": readmission_rate, "delta": "-1.1% vs qtr", "badge": "Clinical"},
-        {"title": "Bed Occupancy", "value": bed_occupancy, "delta": "+6% seasonal", "badge": "Capacity"},
-    ]
-
-    # Render KPI cards
-    html = '<div class="kpi-container">'
-    for k in kpis:
-        html += f"""
-        <div class="kpi-card">
-            <div class="kpi-content">
-                <div class="kpi-title">{k['title']}<span class="kpi-badge">{k['badge']}</span></div>
-                <div class="kpi-value">{k['value']}</div>
-                <div class="kpi-delta">{k['delta']}</div>
-            </div>
-        </div>
-        """
-    html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
-
-    # If a dataset is loaded, show visuals summary (safe checks)
-    if st.session_state.df is None:
-        st.info("No dataset loaded. Go to Application tab and load/upload an ambulance dataset to see visuals.")
-    else:
-        df = st.session_state.df.copy()
-
-        st.markdown("### Busiest hospitals (by dropoffs)")
-        if "Dropoff_Hospital" in df.columns:
-            top_h = df["Dropoff_Hospital"].value_counts().reset_index()
-            top_h.columns = ["Hospital", "Trips"]
-            # guard empty
-            if len(top_h) > 0:
-                fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No dropoff hospital data available.")
-        else:
-            st.info("Dropoff_Hospital column missing in dataset.")
-
-        st.markdown("### Response time distribution")
-        if "Response_Time_min" in df.columns and df["Response_Time_min"].dropna().shape[0] > 0:
-            fig = px.histogram(df.dropna(subset=["Response_Time_min"]), x="Response_Time_min", nbins=40, title="Response Time (min)")
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Response_Time_min not available.")
-
-        st.markdown("### Map view (Incident locations)")
-        if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
-            mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
-            st.map(mdf)
-        else:
-            st.info("Incident latitude/longitude not available.")
-
 # -------------------------
 # APPLICATION
 # -------------------------
@@ -475,6 +388,36 @@ with tabs[1]:
         fig = px.scatter(filt.dropna(subset=["Distance_km","Response_Time_min"]), x="Distance_km", y="Response_Time_min", color="Patient_Severity", title="Response time vs distance")
         st.plotly_chart(fig, use_container_width=True)
 
+
+        st.markdown("### Busiest hospitals (by dropoffs)")
+        if "Dropoff_Hospital" in df.columns:
+            top_h = df["Dropoff_Hospital"].value_counts().reset_index()
+            top_h.columns = ["Hospital", "Trips"]
+            # guard empty
+            if len(top_h) > 0:
+                fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No dropoff hospital data available.")
+        else:
+            st.info("Dropoff_Hospital column missing in dataset.")
+
+        st.markdown("### Response time distribution")
+        if "Response_Time_min" in df.columns and df["Response_Time_min"].dropna().shape[0] > 0:
+            fig = px.histogram(df.dropna(subset=["Response_Time_min"]), x="Response_Time_min", nbins=40, title="Response Time (min)")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Response_Time_min not available.")
+
+        st.markdown("### Map view (Incident locations)")
+        if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
+            mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
+            st.map(mdf)
+        else:
+            st.info("Incident latitude/longitude not available.")
+
+
+    
     # -------------------------
     # ML Models (unchanged from your original)
     # -------------------------
