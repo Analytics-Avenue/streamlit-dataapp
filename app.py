@@ -18,12 +18,7 @@ sectors = {
         {"name": "Marketing Intelligence & Forecasting Lab", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
         {"name": "Click & Convertion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
         {"name": "Marketing Performance Analysis", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
-        {"name": "Social Media Engagement Tracker", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
-        {"name": "Email Campaign Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
-        {"name": "Content Performance & SEO Insights", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
-        {"name": "Customer Retention & Churn Analysis", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
-        {"name": "Market Segmentation & Persona Insights", "image": "marketing_thumb.jpg", "page": "marketing_9.py"},
-        {"name": "Advertising Channel Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_10.py"},
+        {"name": "Content & SEO Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
     ],
     "Real Estate Analytics": [
         {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
