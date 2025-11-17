@@ -60,7 +60,7 @@ mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV
 df = None
 
 if mode == "Default dataset":
-    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare.csv"
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_3.csv"
     try:
         df = pd.read_csv(DEFAULT_URL)
         df = auto_map_health_columns(df)
