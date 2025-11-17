@@ -262,7 +262,6 @@ with tabs[1]:
             fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
 
-
             # --- Safe SHAP summary for Readmission ---
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
@@ -273,18 +272,17 @@ with tabs[1]:
             else:
                 shap_class1 = shap_values
             
-            # Convert to NumPy array in case it's weirdly shaped
+            # Convert to NumPy array and squeeze any weird dimensions
             shap_class1 = np.array(shap_class1)
+            shap_class1 = np.atleast_2d(shap_class1)  # ensures 2D
             
-            # Ensure 2D: rows = samples, columns = features
-            if shap_class1.ndim == 1:
-                shap_class1 = shap_class1.reshape(1, -1)
-            elif shap_class1.ndim > 2:
+            # Sometimes SHAP returns (n_samples, n_features, 1) or (1, n_features)
+            if shap_class1.shape[0] == 1 and shap_class1.shape[1] != X_test.shape[1]:
                 shap_class1 = shap_class1.squeeze()
                 if shap_class1.ndim == 1:
                     shap_class1 = shap_class1.reshape(1, -1)
             
-            # Only create SHAP summary if feature count matches
+            # Only create summary if feature counts match
             if shap_class1.shape[1] != X_test.shape[1]:
                 st.warning(f"SHAP array ({shap_class1.shape}) does not match X_test ({X_test.shape}). Skipping SHAP plot.")
             else:
@@ -299,6 +297,7 @@ with tabs[1]:
                 fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
                 st.plotly_chart(fig_shap, use_container_width=True)
 
+           
     
     # --- Treatment Cost Prediction (Regression) ---
     st.markdown("#### Treatment Cost Prediction")
