@@ -125,31 +125,16 @@ with tabs[1]:
     df = None
 
     if mode == "Default dataset":
-        # Generate mock default dataset if none provided
-        num_rows = 500
-        hospitals = ["City Hospital", "Green Valley Clinic", "Sunrise Medical Center", "HopeCare Hospital"]
-        departments = ["Cardiology", "Orthopedics", "Neurology", "General Medicine", "Pediatrics"]
-        doctors = ["Dr. Smith", "Dr. Patel", "Dr. Chen", "Dr. Kumar", "Dr. Lopez"]
-        age_groups = ["0-18", "19-35", "36-50", "51-65", "65+"]
-        genders = ["Male", "Female", "Other"]
-
-        dates = pd.to_datetime(np.random.choice(pd.date_range("2024-01-01", "2025-11-01"), num_rows))
-        df = pd.DataFrame({
-            "Date": dates,
-            "Hospital": np.random.choice(hospitals, num_rows),
-            "Department": np.random.choice(departments, num_rows),
-            "Doctor": np.random.choice(doctors, num_rows),
-            "Patient": [f"Patient_{i}" for i in range(1, num_rows+1)],
-            "AgeGroup": np.random.choice(age_groups, num_rows),
-            "Gender": np.random.choice(genders, num_rows),
-            "Visits": np.random.randint(1,5, num_rows),
-            "TreatmentCost": np.random.randint(500,5000, num_rows),
-            "Revenue": np.random.randint(1000,7000, num_rows),
-            "RecoveryRate": np.random.uniform(70,100,num_rows).round(2),
-            "SatisfactionScore": np.random.uniform(1,5,num_rows).round(1)
-        })
-        st.success("Default mock dataset loaded")
-        st.dataframe(df.head())
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare.csv"
+        try:
+            df = pd.read_csv(DEFAULT_URL)
+            df.columns = df.columns.str.strip()
+            df = ensure_datetime(df, "Date")
+            st.success("Default dataset loaded from GitHub")
+            st.dataframe(df.head())
+        except Exception as e:
+            st.error("Failed to load default dataset: " + str(e))
+            st.stop()
 
     elif mode == "Upload CSV":
         uploaded = st.file_uploader("Upload CSV file", type=["csv"])
