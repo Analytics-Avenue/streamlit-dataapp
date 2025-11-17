@@ -118,7 +118,7 @@ div[data-testid="stMarkdownContainer"] .metric-card:hover {
 # -------------------------
 # Header + tabs
 # -------------------------
-st.markdown("<h1 style='margin-bottom:0.2rem'>Content & SEO Performance Dashboard — App 5</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='margin-bottom:0.2rem'>Content & SEO Performance Dashboard</h1>", unsafe_allow_html=True)
 st.markdown("Track page performance, keyword ROI, audience engagement & conversions for SEO & content strategy.")
 
 tabs = st.tabs(["Overview", "Application"])
