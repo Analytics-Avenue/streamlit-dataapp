@@ -177,8 +177,16 @@ with tabs[0]:
 
         st.markdown("### Busiest hospitals (by dropoffs)")
         if "Dropoff_Hospital" in df.columns:
-            top_h = df["Dropoff_Hospital"].value_counts().reset_index().rename(columns={"index":"Hospital","Dropoff_Hospital":"Trips"})
-            fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
+            top_h = df["Dropoff_Hospital"].value_counts().reset_index()
+            top_h.columns = ["Hospital", "Trips"]
+        
+            fig = px.bar(
+                top_h.head(10),
+                x="Hospital",
+                y="Trips",
+                text="Trips",
+                title="Top 10 Dropoff Hospitals"
+            )
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("Dropoff_Hospital column missing in dataset.")
