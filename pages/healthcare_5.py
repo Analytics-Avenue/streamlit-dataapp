@@ -1,360 +1,212 @@
-# ============================
-# app_hospital.py  (FULL FIXED VERSION)
-# ============================
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from io import BytesIO
+import random
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score, r2_score
-import warnings
-warnings.filterwarnings("ignore")
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.cluster import KMeans
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
+from datetime import datetime
 
-# ---------------------------------------------------
-# CONFIG
-# ---------------------------------------------------
-st.set_page_config(page_title="HospitalOps — Capacity & Risk Lab", layout="wide")
+# =========================================
+# Streamlit Page Config
+# =========================================
+st.set_page_config(page_title="Hospital Risk & Resource Dashboard", layout="wide")
+st.title("🏥 Hospital Risk & Resource Analytics Dashboard")
+st.write("Upload hospital dataset to run analytics, ML predictions & clustering.")
 
-st.markdown("<h1 style='margin-bottom:0.2rem'>HospitalOps — Capacity & Risk Lab</h1>", unsafe_allow_html=True)
-st.markdown("Operational analytics for hospital chains: facility gaps, equipment shortages, risk scoring and ML suggestions.")
+# =========================================
+# File Upload
+# =========================================
+uploaded_file = st.file_uploader("Upload Hospital Dataset (CSV)", type="csv")
 
-# ---------------------------------------------------
-# STYLING
-# ---------------------------------------------------
-st.markdown("""
-<style>
-.card {
-    background: rgba(255,255,255,0.06);
-    padding: 16px 18px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255,255,255,0.14);
-    box-shadow: 0 6px 22px rgba(0,0,0,0.12);
-}
-.metric-card {
-    background: rgba(255,255,255,0.08);
-    padding: 18px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.16);
-    font-weight: 700;
-    transition: all 0.22s ease;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-}
-.metric-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 6px 28px rgba(0,0,0,0.18), 0 0 18px rgba(255,255,255,0.04) inset;
-}
-</style>
-""", unsafe_allow_html=True)
+df = None
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
 
+    # -------- Duplicate Column Fix --------
+    df = df.loc[:, ~df.columns.duplicated()].copy()
+    df.columns = df.columns.str.strip()
+    # --------------------------------------
 
-# ---------------------------------------------------
-# UTILITIES
-# ---------------------------------------------------
-RAW_DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv"
+    st.success("Dataset loaded successfully!")
+    st.write("### Preview")
+    st.dataframe(df.head())
 
-REQUIRED_COLS = [
-    "Patient_ID","Visit_Date","Age","Gender","Department","Diagnosis",
-    "Treatment","Treatment_Cost","Length_of_Stay_days","Outcome",
-    "Readmission","Risk_Score","Risk_Level","Country","City"
-]
-
-def to_currency(x):
-    try:
-        return "₹ " + f"{float(x):,.2f}"
-    except:
-        return x
-
-def download_df(df, filename):
-    buffer = BytesIO()
-    buffer.write(df.to_csv(index=False).encode("utf-8"))
-    buffer.seek(0)
-    st.download_button("Download CSV", buffer, file_name=filename, mime="text/csv")
-
-def auto_map(df):
-    rename = {}
-    candidates = {
-        "Patient_ID":["patient"],
-        "Visit_Date":["date","visit"],
-        "Age":["age"],
-        "Gender":["gender","sex"],
-        "Department":["department","dept"],
-        "Diagnosis":["diagnosis"],
-        "Treatment":["treat"],
-        "Treatment_Cost":["cost","bill","charge"],
-        "Length_of_Stay_days":["los","stay"],
-        "Outcome":["outcome"],
-        "Readmission":["readmission","readmit"],
-        "Risk_Score":["risk_score","score"],
-        "Risk_Level":["risk"],
-        "Country":["country"],
-        "City":["city"]
-    }
-    for req, cands in candidates.items():
-        for col in df.columns:
-            lc = col.lower().strip()
-            if any(c in lc for c in cands):
-                rename[col] = req
-    return df.rename(columns=rename)
-
-
-# ---------------------------------------------------
-# SESSION STATE
-# ---------------------------------------------------
-if "pipeline_clf" not in st.session_state: st.session_state.pipeline_clf = None
-if "pipeline_reg" not in st.session_state: st.session_state.pipeline_reg = None
-if "loaded_df" not in st.session_state: st.session_state.loaded_df = None
-
-# ---------------------------------------------------
-# TABS
-# ---------------------------------------------------
-tabs = st.tabs(["Overview", "Application"])
-
-# ===================================================
-# TAB 2 - APPLICATION
-# ===================================================
-with tabs[1]:
-
-    st.header("Step 1 — Load dataset")
-
-    mode = st.radio("Select:", ["Default dataset","Upload CSV","Upload CSV + Mapping"], horizontal=True)
-
-    df = None
-
-    # DEFAULT DATASET
-    if mode == "Default dataset":
-        try:
-            df = pd.read_csv(RAW_DEFAULT_URL)
-            df = auto_map(df)
-            st.success("Default dataset loaded.")
-            st.dataframe(df.head())
-            st.session_state.loaded_df = df
-        except Exception as e:
-            st.error(f"Error loading file: {e}")
-            st.stop()
-
-    # UPLOAD
-    elif mode == "Upload CSV":
-        file = st.file_uploader("Upload healthcare CSV", type=["csv"])
-        if file:
-            try:
-                df = pd.read_csv(file)
-                df = auto_map(df)
-                st.success("File uploaded.")
-                st.dataframe(df.head())
-                st.session_state.loaded_df = df
-            except Exception as e:
-                st.error(f"Upload failed: {e}")
-                st.stop()
-
-    # MAPPING MODE
-    else:
-        file = st.file_uploader("Upload CSV to map", type=["csv"])
-        if file:
-            raw = pd.read_csv(file)
-            st.write("Preview:")
-            st.dataframe(raw.head())
-
-            mapping = {}
-            for req in REQUIRED_COLS:
-                mapping[req] = st.selectbox(
-                    f"Map column for {req}",
-                    ["--Select--"] + list(raw.columns)
-                )
-            if st.button("Apply mapping"):
-                missing = [k for k,v in mapping.items() if v == "--Select--"]
-                if missing:
-                    st.error("Missing mappings: " + ", ".join(missing))
-                else:
-                    df = raw.rename(columns={v:k for k,v in mapping.items()})
-                    st.success("Mapping applied.")
-                    st.dataframe(df.head())
-                    st.session_state.loaded_df = df
-
-# Nothing loaded - stop further UI
-if st.session_state.loaded_df is None:
-    with tabs[0]:
-        st.info("Load a dataset first in Application tab.")
+# Exit if no file
+if df is None:
     st.stop()
 
-df = st.session_state.loaded_df.copy()
+# =========================================
+# Column Detection
+# =========================================
+numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
+cat_cols = df.select_dtypes(exclude=np.number).columns.tolist()
 
-# CLEANING
-if "Visit_Date" in df.columns:
-    df["Visit_Date"] = pd.to_datetime(df["Visit_Date"], errors="coerce")
+# Remove Patient_ID if numeric
+if "Patient_ID" in numeric_cols:
+    numeric_cols.remove("Patient_ID")
 
-if "Readmission" in df.columns:
-    df["Readmission_Flag"] = df["Readmission"].astype(str).str.lower().isin(["yes","1","true","y","t"]).astype(int)
-else:
-    df["Readmission_Flag"] = 0
+# Risk labels
+risk_score_col = "Risk_Score" if "Risk_Score" in df.columns else None
+risk_level_col = "Risk_Level" if "Risk_Level" in df.columns else None
 
-# Ensure numeric
-for col in ["Age","Treatment_Cost","Length_of_Stay_days","Risk_Score"]:
-    if col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+# =========================================
+# Sidebar Navigation
+# =========================================
+menu = st.sidebar.radio(
+    "Navigation",
+    ["Overview", "ML Prediction", "Clustering", "Hospital Profiles"]
+)
 
+# =========================================
+# 1. OVERVIEW
+# =========================================
+if menu == "Overview":
+    st.header("📊 Data Overview")
 
-# ===================================================
-# TAB 1 — OVERVIEW
-# ===================================================
-with tabs[0]:
-    st.markdown("### High-level Overview")
+    st.write("#### Summary Stats")
+    st.dataframe(df.describe())
 
-    k1,k2,k3,k4,k5 = st.columns(5)
-    k1.markdown(f"<div class='metric-card'>Patients: {df['Patient_ID'].nunique()}</div>", unsafe_allow_html=True)
-    k2.markdown(f"<div class='metric-card'>Records: {len(df):,}</div>", unsafe_allow_html=True)
-    k3.markdown(f"<div class='metric-card'>Avg Age: {df['Age'].mean():.1f}</div>", unsafe_allow_html=True)
-    k4.markdown(f"<div class='metric-card'>Avg LOS: {df['Length_of_Stay_days'].mean():.1f}</div>", unsafe_allow_html=True)
-    k5.markdown(f"<div class='metric-card'>Readmission Rate: {df['Readmission_Flag'].mean()*100:.2f}%</div>", unsafe_allow_html=True)
+    # Risk distribution
+    if risk_level_col:
+        fig = px.histogram(df, x=risk_level_col, title="Risk Level Distribution",
+                           color=risk_level_col)
+        st.plotly_chart(fig, use_container_width=True)
 
+    # Numeric exploration
+    st.write("#### Explore Numeric Columns")
+    col_x = st.selectbox("Select numeric column for histogram", numeric_cols)
+    fig = px.histogram(df, x=col_x, title=f"Distribution of {col_x}")
+    st.plotly_chart(fig, use_container_width=True)
 
-# ===================================================
-# TAB 2 CONTINUES — FILTERS & ANALYSIS
-# ===================================================
-with tabs[1]:
+# =========================================
+# 2. MACHINE LEARNING
+# =========================================
+if menu == "ML Prediction":
+    st.header("🤖 ML Model Training & Prediction")
 
-    st.subheader("Step 2 — Filters")
+    # Target Selection
+    target = st.selectbox("Select Target Column", [risk_score_col, risk_level_col])
 
-    departments = sorted(df["Department"].dropna().unique())
-    genders = sorted(df["Gender"].dropna().unique())
-    date_min = df["Visit_Date"].min()
-    date_max = df["Visit_Date"].max()
-
-    c1,c2,c3 = st.columns([2,2,1])
-    with c1:
-        f_dept = st.multiselect("Department", departments, default=departments[:5])
-    with c2:
-        f_gender = st.multiselect("Gender", genders, default=genders)
-    with c3:
-        f_range = st.date_input("Visit Range", (date_min, date_max))
-
-    filt = df.copy()
-    if f_dept:
-        filt = filt[filt["Department"].isin(f_dept)]
-    if f_gender:
-        filt = filt[filt["Gender"].isin(f_gender)]
-    if len(f_range)==2:
-        s,e = f_range
-        filt = filt[(filt["Visit_Date"]>=pd.to_datetime(s)) & (filt["Visit_Date"]<=pd.to_datetime(e))]
-
-    st.write("Filtered preview:")
-    st.dataframe(filt.head(10))
-
-    download_df(filt, "filtered_health_data.csv")
-
-    # METRICS
-    st.subheader("Key Metrics")
-    c1,c2,c3,c4 = st.columns(4)
-    c1.metric("Unique Patients", filt["Patient_ID"].nunique())
-    c2.metric("Avg Cost", to_currency(filt["Treatment_Cost"].mean()))
-    c3.metric("Avg LOS", f"{filt['Length_of_Stay_days'].mean():.2f}")
-    c4.metric("Readmission %", f"{filt['Readmission_Flag'].mean()*100:.2f}%")
-
-    # CHARTS
-    st.subheader("Charts")
-
-    if "Outcome" in filt.columns:
-        st.plotly_chart(px.pie(filt, names="Outcome", title="Outcomes"), use_container_width=True)
-
-    if "Age" in filt.columns:
-        st.plotly_chart(px.histogram(filt, x="Age", nbins=30, title="Age Distribution"), use_container_width=True)
-
-    if "Department" in filt.columns:
-        dep = filt.groupby("Department")["Readmission_Flag"].mean().reset_index()
-        st.plotly_chart(px.bar(dep, x="Department", y="Readmission_Flag", title="Readmission by Department"), use_container_width=True)
-
-    if "Diagnosis" in filt.columns:
-        diag = filt.groupby("Diagnosis")["Treatment_Cost"].mean().reset_index().sort_values("Treatment_Cost", ascending=False).head(15)
-        st.plotly_chart(px.bar(diag, x="Diagnosis", y="Treatment_Cost", title="Top Diagnosis by Avg Cost"), use_container_width=True)
-
-
-    # ===================================================
-    # ML MODELS
-    # ===================================================
-    st.subheader("Step 3 — ML Models")
-
-    task = st.multiselect("Choose Models:", ["Readmission (Classification)", "Treatment Cost (Regression)"])
-
-    # Feature selection
-    excl = ["Patient_ID","Visit_Date","Outcome","Readmission","Readmission_Flag","Treatment_Cost"]
-    feat = [c for c in filt.columns if c not in excl]
-    feat_selected = st.multiselect("Features", feat, default=feat[:4])
-
-    if len(feat_selected) < 2 and task:
-        st.warning("Choose at least 2 features.")
+    if target is None:
+        st.error("No suitable target column found.")
         st.stop()
 
-    X = filt[feat_selected].copy().dropna()
-    num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
-    cat_cols = [c for c in feat_selected if c not in num_cols]
+    # Type of ML task
+    if target == risk_score_col:
+        model_task = "Regression"
+    else:
+        model_task = "Classification"
 
-    preprocessor = ColumnTransformer([
-        ("num", StandardScaler(), num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
-    ])
+    st.info(f"Detected ML Task: **{model_task}**")
 
-    # -------- Classification --------
-    if "Readmission (Classification)" in task:
+    # Prepare Features
+    feature_cols = [c for c in df.columns if c != target]
 
-        st.markdown("#### Readmission Prediction")
+    X = df[feature_cols]
+    y = df[target]
 
-        y = filt.loc[X.index, "Readmission_Flag"]
+    # Preprocessor
+    pre = ColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), [c for c in numeric_cols if c in X.columns]),
+            ('cat', OneHotEncoder(handle_unknown='ignore'), [c for c in cat_cols if c in X.columns])
+        ]
+    )
 
-        if y.nunique() < 2:
-            st.warning("Not enough classes to train classifier.")
+    # Model Selection
+    if model_task == "Regression":
+        model = RandomForestRegressor()
+    else:
+        model = RandomForestClassifier()
+
+    pipe = Pipeline([("preprocessor", pre), ("model", model)])
+
+    if st.button("Train Model"):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        pipe.fit(X_train, y_train)
+
+        st.session_state["ml_pipeline"] = pipe
+        st.success("Model trained successfully!")
+
+        # Metrics
+        preds = pipe.predict(X_test)
+
+        if model_task == "Regression":
+            st.write("### Performance")
+            st.write("MSE:", mean_squared_error(y_test, preds))
+            st.write("R2 Score:", r2_score(y_test, preds))
         else:
-            test_size = st.slider("Test size (classification)", 0.1, 0.4, 0.2)
-            if st.button("Train Classification Model"):
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=test_size, random_state=42, stratify=y
-                )
+            st.write("### Accuracy")
+            st.write("Accuracy:", accuracy_score(y_test, preds))
 
-                pipe = Pipeline([
-                    ("prep", preprocessor),
-                    ("model", RandomForestClassifier(n_estimators=150, random_state=42))
-                ])
-                pipe.fit(X_train, y_train)
+    # Single-row Predict
+    st.write("### 🔮 Single Hospital Prediction")
+    if "ml_pipeline" in st.session_state:
+        pipe = st.session_state["ml_pipeline"]
 
-                st.session_state.pipeline_clf = pipe
+        sim_vals = {}
+        st.write("Enter hospital values to simulate prediction:")
+        for col in feature_cols:
+            if col in numeric_cols:
+                sim_vals[col] = st.number_input(col, value=float(df[col].mean()))
+            else:
+                sim_vals[col] = st.selectbox(col, df[col].unique())
 
-                pred = pipe.predict(X_test)
-                acc = accuracy_score(y_test, pred)
-                auc = roc_auc_score(y_test, pipe.predict_proba(X_test)[:,1])
+        if st.button("Predict Now"):
+            row = pd.DataFrame([sim_vals])
+            pred = pipe.predict(row)[0]
+            st.success(f"Predicted Output: **{pred}**")
 
-                st.success(f"Model Trained — Accuracy {acc:.3f} | AUC {auc:.3f}")
+    else:
+        st.info("Train a model first.")
 
-    # -------- Regression --------
-    if "Treatment Cost (Regression)" in task:
+# =========================================
+# 3. CLUSTERING
+# =========================================
+if menu == "Clustering":
+    st.header("🧩 Hospital Clustering")
 
-        st.markdown("#### Treatment Cost Prediction")
+    cluster_features = st.multiselect("Select clustering features", numeric_cols, default=numeric_cols[:4])
+    k = st.slider("Number of Clusters", 2, 10, 3)
 
-        if "Treatment_Cost" not in filt.columns:
-            st.warning("No Treatment_Cost column available.")
-        else:
-            y = filt.loc[X.index, "Treatment_Cost"]
+    if st.button("Run Clustering"):
+        km = KMeans(n_clusters=k, random_state=42)
+        df["Cluster"] = km.fit_predict(df[cluster_features])
 
-            test_size = st.slider("Test size (regression)", 0.1, 0.4, 0.2)
-            if st.button("Train Regression Model"):
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=test_size, random_state=42
-                )
+        st.success("Clustering complete!")
 
-                pipe = Pipeline([
-                    ("prep", preprocessor),
-                    ("model", RandomForestRegressor(n_estimators=150, random_state=42))
-                ])
-                pipe.fit(X_train, y_train)
+        fig = px.scatter(df, x=cluster_features[0], y=cluster_features[1],
+                         color="Cluster", title="Cluster Visualization")
+        st.plotly_chart(fig, use_container_width=True)
 
-                st.session_state.pipeline_reg = pipe
+        st.write("### Cluster Counts")
+        st.write(df["Cluster"].value_counts())
 
-                pred = pipe.predict(X_test)
-                r2 = r2_score(y_test, pred)
+# =========================================
+# 4. HOSPITAL PROFILES
+# =========================================
+if menu == "Hospital Profiles":
+    st.header("🏥 Hospital Explorer")
 
-                st.success(f"Regression Model Trained — R2 Score {r2:.3f}")
+    if "Hospital Name" in df.columns:
+        selected = st.selectbox("Select Hospital", df["Hospital Name"].unique())
 
+        profile = df[df["Hospital Name"] == selected].iloc[0]
+        st.write("### Details")
+        st.write(profile)
+
+        # Radar Chart (if numeric cols exist)
+        if len(numeric_cols) >= 3:
+            fig = px.line_polar(
+                r=[profile[col] for col in numeric_cols[:6]],
+                theta=numeric_cols[:6],
+                line_close=True,
+                title="Hospital Capability Radar"
+            )
+            st.plotly_chart(fig, use_container_width=True)
