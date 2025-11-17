@@ -75,27 +75,37 @@ tabs = st.tabs(["Overview", "Application", "Predictions"])
 # Overview Tab
 # -------------------------
 with tabs[0]:
-    st.markdown("### Overview / KPIs")
-    
-    if "df" in st.session_state and st.session_state.df is not None:
-        df_overview = st.session_state.df
-        # Derived metrics
-        df_overview["Length_of_Stay"] = (pd.to_datetime(df_overview["Discharge_Date"]) - pd.to_datetime(df_overview["Admission_Date"])).dt.days.fillna(0)
-        df_overview["Readmission_Flag"] = df_overview["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
+    st.markdown("## Overview")
+    st.markdown("""
+    **Purpose:** Track patient trends, treatment efficiency, readmissions, and cost forecasting.  
+    **Business Impact:** Helps hospitals reduce readmission rates, optimize costs, and improve patient outcomes.  
+    **Capabilities:** Patient-level KPIs, treatment outcome analytics, predictive modeling, risk assessment.
+    """)
+
+    # Load default dataset only for computing KPIs
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_3.csv"
+    try:
+        df_default = pd.read_csv(DEFAULT_URL)
+        df_default = auto_map_health_columns(df_default)
         
-        k1,k2,k3,k4,k5 = st.columns(5)
-        k1.metric("Total Patients", f"{df_overview['Patient_ID'].nunique():,}")
-        k2.metric("Average Age", f"{df_overview['Age'].mean():.1f}")
-        k3.metric("Avg Length of Stay (days)", f"{df_overview['Length_of_Stay'].mean():.1f}")
-        k4.metric("Total Treatment Cost", to_currency(df_overview['Treatment_Cost'].sum()))
-        k5.metric("Readmission Rate", f"{df_overview['Readmission_Flag'].mean()*100:.2f}%")
+        # Derived metrics
+        df_default["Length_of_Stay"] = (pd.to_datetime(df_default["Discharge_Date"]) - pd.to_datetime(df_default["Admission_Date"])).dt.days.fillna(0)
+        df_default["Readmission_Flag"] = df_default["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
+
+        # KPIs
+        k1, k2, k3, k4, k5 = st.columns(5)
+        k1.metric("Total Patients", f"{df_default['Patient_ID'].nunique():,}")
+        k2.metric("Average Age", f"{df_default['Age'].mean():.1f}")
+        k3.metric("Avg Length of Stay (days)", f"{df_default['Length_of_Stay'].mean():.1f}")
+        k4.metric("Total Treatment Cost", to_currency(df_default['Treatment_Cost'].sum()))
+        k5.metric("Readmission Rate", f"{df_default['Readmission_Flag'].mean()*100:.2f}%")
         
         # Example chart: Treatment Outcomes
-        if "Outcome" in df_overview.columns:
-            fig_outcome = px.pie(df_overview, names="Outcome", title="Treatment Outcomes Overview")
+        if "Outcome" in df_default.columns:
+            fig_outcome = px.pie(df_default, names="Outcome", title="Treatment Outcomes Overview")
             st.plotly_chart(fig_outcome, use_container_width=True)
-    else:
-        st.info("No dataset loaded yet. Go to the Application tab to load/upload your data.")
+    except Exception as e:
+        st.warning("Unable to compute KPIs from default dataset: " + str(e))
 
 # -------------------------
 # Application Tab
