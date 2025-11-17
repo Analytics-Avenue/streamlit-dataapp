@@ -17,7 +17,11 @@ warnings.filterwarnings("ignore")
 # -----------------------------
 # Page config
 # -----------------------------
-st.set_page_config(page_title="App 3 — Marketing Intelligence", layout="wide")
+st.set_page_config(page_title="Marketing Intelligence", layout="wide")
+
+# Page header
+st.markdown("<h1 style='margin-bottom:0.2rem'>Marketing Intelligence & Convertion Analytics</h1>", unsafe_allow_html=True)
+st.markdown("Enterprise-capable marketing analytics: ML predictions, forecasting, and actionable insights from campaigns. No fluff — just results.")
 
 # -----------------------------
 # Required columns & auto-mapping
