@@ -54,70 +54,6 @@ def auto_map_health_columns(df):
         df = df.rename(columns=rename)
     return df
 
-# --- Dataset selection ---
-st.markdown("### Step 1 — Load dataset")
-mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
-df = None
-
-if mode == "Default dataset":
-    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_3.csv"
-    try:
-        df = pd.read_csv(DEFAULT_URL)
-        df = auto_map_health_columns(df)
-        st.success("Default dataset loaded")
-        st.dataframe(df.head())
-    except Exception as e:
-        st.error("Failed to load default dataset: " + str(e))
-        st.stop()
-
-elif mode == "Upload CSV":
-    uploaded = st.file_uploader("Upload CSV file", type=["csv"])
-    if uploaded:
-        df = pd.read_csv(uploaded)
-        df = auto_map_health_columns(df)
-        st.success("File uploaded and mapped")
-        st.dataframe(df.head())
-
-else:  # Upload + mapping
-    uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
-    if uploaded:
-        raw = pd.read_csv(uploaded)
-        st.write("Preview (first 5 rows):")
-        st.dataframe(raw.head())
-        mapping = {}
-        for req in REQUIRED_HEALTH_COLS:
-            mapping[req] = st.selectbox(f"Map → {req}", options=["-- Select --"] + list(raw.columns))
-        if st.button("Apply mapping"):
-            missing = [k for k,v in mapping.items() if v == "-- Select --"]
-            if missing:
-                st.error("Please map all required columns: " + ", ".join(missing))
-            else:
-                df = raw.rename(columns={v:k for k,v in mapping.items()})
-                st.success("Mapping applied")
-                st.dataframe(df.head())
-
-if df is None:
-    st.stop()
-
-# Validate required columns
-missing_cols = [c for c in REQUIRED_HEALTH_COLS if c not in df.columns]
-if missing_cols:
-    st.error("Missing required columns: " + ", ".join(missing_cols))
-    st.stop()
-
-# -------------------------
-# Type conversions
-# -------------------------
-df = df.copy()
-df["Admission_Date"] = pd.to_datetime(df["Admission_Date"], errors="coerce")
-df["Discharge_Date"] = pd.to_datetime(df["Discharge_Date"], errors="coerce")
-numeric_cols = ["Age", "Treatment_Cost"]
-for col in numeric_cols:
-    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
-
-# Derived metrics
-df["Length_of_Stay"] = (df["Discharge_Date"] - df["Admission_Date"]).dt.days.fillna(0)
-df["Readmission_Flag"] = df["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
 
 # -------------------------
 # Tabs: Overview & Application
@@ -145,6 +81,71 @@ with tabs[0]:
 # Application Tab
 # --------------------------
 with tabs[1]:
+    # --- Dataset selection ---
+    st.markdown("### Step 1 — Load dataset")
+    mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
+    df = None
+    
+    if mode == "Default dataset":
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_3.csv"
+        try:
+            df = pd.read_csv(DEFAULT_URL)
+            df = auto_map_health_columns(df)
+            st.success("Default dataset loaded")
+            st.dataframe(df.head())
+        except Exception as e:
+            st.error("Failed to load default dataset: " + str(e))
+            st.stop()
+    
+    elif mode == "Upload CSV":
+        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
+        if uploaded:
+            df = pd.read_csv(uploaded)
+            df = auto_map_health_columns(df)
+            st.success("File uploaded and mapped")
+            st.dataframe(df.head())
+    
+    else:  # Upload + mapping
+        uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+        if uploaded:
+            raw = pd.read_csv(uploaded)
+            st.write("Preview (first 5 rows):")
+            st.dataframe(raw.head())
+            mapping = {}
+            for req in REQUIRED_HEALTH_COLS:
+                mapping[req] = st.selectbox(f"Map → {req}", options=["-- Select --"] + list(raw.columns))
+            if st.button("Apply mapping"):
+                missing = [k for k,v in mapping.items() if v == "-- Select --"]
+                if missing:
+                    st.error("Please map all required columns: " + ", ".join(missing))
+                else:
+                    df = raw.rename(columns={v:k for k,v in mapping.items()})
+                    st.success("Mapping applied")
+                    st.dataframe(df.head())
+    
+    if df is None:
+        st.stop()
+    
+    # Validate required columns
+    missing_cols = [c for c in REQUIRED_HEALTH_COLS if c not in df.columns]
+    if missing_cols:
+        st.error("Missing required columns: " + ", ".join(missing_cols))
+        st.stop()
+    
+    # -------------------------
+    # Type conversions
+    # -------------------------
+    df = df.copy()
+    df["Admission_Date"] = pd.to_datetime(df["Admission_Date"], errors="coerce")
+    df["Discharge_Date"] = pd.to_datetime(df["Discharge_Date"], errors="coerce")
+    numeric_cols = ["Age", "Treatment_Cost"]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    
+    # Derived metrics
+    df["Length_of_Stay"] = (df["Discharge_Date"] - df["Admission_Date"]).dt.days.fillna(0)
+    df["Readmission_Flag"] = df["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
+
     st.header("Application / Filters")
     
     sel_dept = st.multiselect("Department", df["Department"].unique(), default=df["Department"].unique())
