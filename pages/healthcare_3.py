@@ -75,11 +75,8 @@ tabs = st.tabs(["Overview", "Application", "Predictions"])
 # Overview Tab
 # -------------------------
 with tabs[0]:
-    st.markdown("### Overview / Business Impact")
-    
+  
     st.markdown("""
-    <div style='background:#f0f0f0;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.15)'>
-    <h3>Healthcare Analytics App</h3>
     <p>Track patient trends, treatment efficiency, costs, readmissions, and predict outcomes.</p>
     <p><strong>Purpose:</strong> Enable hospitals and clinics to identify at-risk patients and optimize treatment costs.</p>
     <p><strong>Business Impact:</strong> Reduce readmissions, improve patient outcomes, and optimize resource allocation.</p>
