@@ -262,21 +262,26 @@ with tabs[1]:
             fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
     
-            # SHAP summary plot
+            import shap
+        
+            # --- SHAP for Readmission (Plotly) ---
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
             shap_class1 = shap_values[1] if isinstance(shap_values, list) else shap_values
-    
-            fig_shap, ax = plt.subplots(figsize=(8,5))
-            shap.summary_plot(shap_class1, X_test, plot_type="bar", show=False)
-            ax.set_title("Readmission Prediction Feature Importance (SHAP)", fontsize=14)
-            st.pyplot(fig_shap)
-    
-        else:
-            st.info("Not enough data to train readmission model (min 20 rows).")
-    else:
-        st.warning("Required columns for readmission prediction not available.")
-    
+            
+            # Convert to summary DataFrame
+            shap_summary = pd.DataFrame({
+                'Feature': X_test.columns,
+                'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
+            }).sort_values('Mean_ABS_SHAP', ascending=False)
+            
+            # Plotly bar chart
+            fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
+                              title="Readmission Prediction Feature Importance (SHAP)",
+                              text='Mean_ABS_SHAP')
+            fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
+            st.plotly_chart(fig_shap, use_container_width=True)
+
     
     # --- Treatment Cost Prediction (Regression) ---
     st.markdown("#### Treatment Cost Prediction")
