@@ -262,14 +262,17 @@ with tabs[1]:
             fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
     
-            import shap
-        
-            # --- SHAP for Readmission (Plotly) ---
+            # --- Safe SHAP summary for Readmission ---
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
+            
+            # Pick class 1 (Readmission = Yes) if binary classification
             shap_class1 = shap_values[1] if isinstance(shap_values, list) else shap_values
             
-            # Convert to summary DataFrame
+            # Ensure we have 2D array for mean calculation
+            if shap_class1.ndim == 1:
+                shap_class1 = shap_class1.reshape(1, -1)  # convert to 2D (1 sample x n_features)
+            
             shap_summary = pd.DataFrame({
                 'Feature': X_test.columns,
                 'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
@@ -281,6 +284,7 @@ with tabs[1]:
                               text='Mean_ABS_SHAP')
             fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
             st.plotly_chart(fig_shap, use_container_width=True)
+
 
     
     # --- Treatment Cost Prediction (Regression) ---
