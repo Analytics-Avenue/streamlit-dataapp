@@ -262,40 +262,6 @@ with tabs[1]:
             fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
 
-            # --- Safe SHAP summary for Readmission ---
-            explainer = shap.TreeExplainer(clf_model)
-            shap_values = explainer.shap_values(X_test)
-            
-            # Pick class 1 (Readmission = Yes) if binary classification
-            if isinstance(shap_values, list):
-                shap_class1 = shap_values[1]
-            else:
-                shap_class1 = shap_values
-            
-            # Convert to NumPy array and squeeze any weird dimensions
-            shap_class1 = np.array(shap_class1)
-            shap_class1 = np.atleast_2d(shap_class1)  # ensures 2D
-            
-            # Sometimes SHAP returns (n_samples, n_features, 1) or (1, n_features)
-            if shap_class1.shape[0] == 1 and shap_class1.shape[1] != X_test.shape[1]:
-                shap_class1 = shap_class1.squeeze()
-                if shap_class1.ndim == 1:
-                    shap_class1 = shap_class1.reshape(1, -1)
-            
-            # Only create summary if feature counts match
-            if shap_class1.shape[1] != X_test.shape[1]:
-                st.warning(f"SHAP array ({shap_class1.shape}) does not match X_test ({X_test.shape}). Skipping SHAP plot.")
-            else:
-                shap_summary = pd.DataFrame({
-                    'Feature': X_test.columns,
-                    'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
-                }).sort_values('Mean_ABS_SHAP', ascending=False)
-            
-                fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
-                                  title="Readmission Prediction Feature Importance (SHAP)",
-                                  text='Mean_ABS_SHAP')
-                fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
-                st.plotly_chart(fig_shap, use_container_width=True)
 
            
     
