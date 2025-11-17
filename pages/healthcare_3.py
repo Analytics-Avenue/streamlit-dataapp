@@ -209,16 +209,17 @@ with tabs[1]:
     else:
         filt["Readmission_Flag"] = 0
 
-
-    
-    # Inside your Application tab code, after filters and metrics:
+    # -------------------------
+    # Predictive Analytics
+    # -------------------------
     st.markdown("### Predictive Analytics")
     
     # --- Readmission Prediction (Classification) ---
     st.markdown("#### Readmission Prediction")
     
-    # Check required columns exist
+    # Required columns for readmission model
     req_clf_cols = ['Age','Gender','Department','Risk_Score','Length_of_Stay','Readmission_Flag']
+    
     if all(col in filt.columns for col in req_clf_cols):
         clf_df = filt[req_clf_cols].copy()
         
@@ -231,18 +232,18 @@ with tabs[1]:
         X_clf = clf_df.drop('Readmission_Flag', axis=1)
         y_clf = clf_df['Readmission_Flag']
     
-        if len(clf_df) > 20:  # minimal rows to train
+        if len(clf_df) > 20:
             X_train, X_test, y_train, y_test = train_test_split(X_clf, y_clf, test_size=0.2, random_state=42)
             clf_model = RandomForestClassifier(n_estimators=100, random_state=42)
             with st.spinner("Training Readmission model..."):
                 clf_model.fit(X_train, y_train)
-            
+    
             y_pred = clf_model.predict(X_test)
             acc = accuracy_score(y_test, y_pred)
-            st.markdown(f"Model Accuracy: **{acc*100:.2f}%**")
+            st.markdown(f"**Model Accuracy:** {acc*100:.2f}%")
             
-            # Predict new patient
-            st.markdown("##### Predict for new patient")
+            # Predict for new patient
+            st.markdown("##### Predict for a new patient")
             age = st.number_input("Age", min_value=0, max_value=120, value=30)
             gender = st.selectbox("Gender", filt['Gender'].unique())
             dept = st.selectbox("Department", filt['Department'].unique())
@@ -255,30 +256,32 @@ with tabs[1]:
                 pred = clf_model.predict(x_new)[0]
                 st.success(f"Predicted Readmission: {'Yes' if pred==1 else 'No'}")
     
-            # Feature Importance
+            # Feature Importance (Plotly)
             fi_df = pd.DataFrame({'Feature': X_clf.columns, 'Importance': clf_model.feature_importances_}).sort_values('Importance', ascending=False)
-            fig = px.bar(fi_df, x='Feature', y='Importance', title="Readmission Feature Importance")
+            fig = px.bar(fi_df, x='Feature', y='Importance', title="Readmission Feature Importance (Random Forest)", text='Importance')
+            fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
-        
-        
+    
+            # SHAP summary plot
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
-            
-            # For binary classification, shap_values is a list with two arrays [class 0, class 1]
-            # Use the array corresponding to class 1 (Readmission = Yes)
-            if isinstance(shap_values, list):
-                shap_values_class1 = shap_values[1]
-            else:
-                shap_values_class1 = shap_values
-            
-            # Plot
-            fig_shap, ax = plt.subplots()
-            shap.summary_plot(shap_values_class1, X_test, plot_type="bar", show=False)
+            shap_class1 = shap_values[1] if isinstance(shap_values, list) else shap_values
+    
+            fig_shap, ax = plt.subplots(figsize=(8,5))
+            shap.summary_plot(shap_class1, X_test, plot_type="bar", show=False)
+            ax.set_title("Readmission Prediction Feature Importance (SHAP)", fontsize=14)
             st.pyplot(fig_shap)
-
+    
+        else:
+            st.info("Not enough data to train readmission model (min 20 rows).")
+    else:
+        st.warning("Required columns for readmission prediction not available.")
+    
+    
     # --- Treatment Cost Prediction (Regression) ---
     st.markdown("#### Treatment Cost Prediction")
     req_reg_cols = ['Age','Gender','Department','Risk_Score','Length_of_Stay','Treatment_Cost']
+    
     if all(col in filt.columns for col in req_reg_cols):
         reg_df = filt[req_reg_cols].copy()
         reg_df['Gender'] = le_gender.fit_transform(reg_df['Gender'])
@@ -292,12 +295,12 @@ with tabs[1]:
             reg_model = RandomForestRegressor(n_estimators=100, random_state=42)
             with st.spinner("Training Treatment Cost model..."):
                 reg_model.fit(X_train_r, y_train_r)
-            
+    
             y_pred_r = reg_model.predict(X_test_r)
             rmse = np.sqrt(mean_squared_error(y_test_r, y_pred_r))
-            st.markdown(f"Model RMSE: **{rmse:.2f}**")
+            st.markdown(f"**Model RMSE:** {rmse:.2f}")
     
-            # Predict new patient cost
+            # Predict for new patient
             st.markdown("##### Predict Treatment Cost for new patient")
             age_r = st.number_input("Age (Cost)", min_value=0, max_value=120, value=30, key='age_r')
             gender_r = st.selectbox("Gender (Cost)", filt['Gender'].unique(), key='gender_r')
@@ -311,17 +314,21 @@ with tabs[1]:
                 pred_cost = reg_model.predict(x_new_r)[0]
                 st.success(f"Predicted Treatment Cost: ₹ {pred_cost:,.2f}")
     
-            # Feature Importance
+            # Feature Importance (Plotly)
             fi_reg = pd.DataFrame({'Feature': X_reg.columns, 'Importance': reg_model.feature_importances_}).sort_values('Importance', ascending=False)
-            fig_reg = px.bar(fi_reg, x='Feature', y='Importance', title="Treatment Cost Feature Importance")
+            fig_reg = px.bar(fi_reg, x='Feature', y='Importance', title="Treatment Cost Feature Importance (Random Forest)", text='Importance')
+            fig_reg.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig_reg, use_container_width=True)
     
-            # SHAP
+            # SHAP summary plot
             explainer_r = shap.TreeExplainer(reg_model)
             shap_values_r = explainer_r.shap_values(X_test_r)
-            fig_shap_r, ax2 = plt.subplots()
+    
+            fig_shap_r, ax2 = plt.subplots(figsize=(8,5))
             shap.summary_plot(shap_values_r, X_test_r, plot_type="bar", show=False)
+            ax2.set_title("Treatment Cost Feature Importance (SHAP)", fontsize=14)
             st.pyplot(fig_shap_r)
+    
         else:
             st.info("Not enough data to train treatment cost model (min 20 rows).")
     else:
