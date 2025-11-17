@@ -259,19 +259,23 @@ with tabs[1]:
             fi_df = pd.DataFrame({'Feature': X_clf.columns, 'Importance': clf_model.feature_importances_}).sort_values('Importance', ascending=False)
             fig = px.bar(fi_df, x='Feature', y='Importance', title="Readmission Feature Importance")
             st.plotly_chart(fig, use_container_width=True)
-    
-            # SHAP
+        
+        
             explainer = shap.TreeExplainer(clf_model)
             shap_values = explainer.shap_values(X_test)
+            
+            # For binary classification, shap_values is a list with two arrays [class 0, class 1]
+            # Use the array corresponding to class 1 (Readmission = Yes)
+            if isinstance(shap_values, list):
+                shap_values_class1 = shap_values[1]
+            else:
+                shap_values_class1 = shap_values
+            
+            # Plot
             fig_shap, ax = plt.subplots()
-            shap.summary_plot(shap_values[1], X_test, plot_type="bar", show=False)
+            shap.summary_plot(shap_values_class1, X_test, plot_type="bar", show=False)
             st.pyplot(fig_shap)
-        else:
-            st.info("Not enough data to train readmission model (min 20 rows).")
-    else:
-        st.warning("Required columns for readmission prediction not available.")
-    
-    
+
     # --- Treatment Cost Prediction (Regression) ---
     st.markdown("#### Treatment Cost Prediction")
     req_reg_cols = ['Age','Gender','Department','Risk_Score','Length_of_Stay','Treatment_Cost']
