@@ -261,44 +261,43 @@ with tabs[1]:
             fig = px.bar(fi_df, x='Feature', y='Importance', title="Readmission Feature Importance (Random Forest)", text='Importance')
             fig.update_layout(yaxis_title='Importance', xaxis_title='Feature')
             st.plotly_chart(fig, use_container_width=True)
-    
 
-                # --- Safe SHAP summary for Readmission ---
-                explainer = shap.TreeExplainer(clf_model)
-                shap_values = explainer.shap_values(X_test)
-                
-                # Pick class 1 (Readmission = Yes) if binary classification
-                if isinstance(shap_values, list):
-                    shap_class1 = shap_values[1]
-                else:
-                    shap_class1 = shap_values
-                
-                # Convert to NumPy array in case it's weirdly shaped
-                shap_class1 = np.array(shap_class1)
-                
-                # Ensure 2D: rows = samples, columns = features
+
+            # --- Safe SHAP summary for Readmission ---
+            explainer = shap.TreeExplainer(clf_model)
+            shap_values = explainer.shap_values(X_test)
+            
+            # Pick class 1 (Readmission = Yes) if binary classification
+            if isinstance(shap_values, list):
+                shap_class1 = shap_values[1]
+            else:
+                shap_class1 = shap_values
+            
+            # Convert to NumPy array in case it's weirdly shaped
+            shap_class1 = np.array(shap_class1)
+            
+            # Ensure 2D: rows = samples, columns = features
+            if shap_class1.ndim == 1:
+                shap_class1 = shap_class1.reshape(1, -1)
+            elif shap_class1.ndim > 2:
+                shap_class1 = shap_class1.squeeze()
                 if shap_class1.ndim == 1:
                     shap_class1 = shap_class1.reshape(1, -1)
-                elif shap_class1.ndim > 2:
-                    shap_class1 = shap_class1.squeeze()
-                    if shap_class1.ndim == 1:
-                        shap_class1 = shap_class1.reshape(1, -1)
-                
-                # Only create SHAP summary if feature count matches
-                if shap_class1.shape[1] != X_test.shape[1]:
-                    st.warning(f"SHAP array ({shap_class1.shape}) does not match X_test ({X_test.shape}). Skipping SHAP plot.")
-                else:
-                    shap_summary = pd.DataFrame({
-                        'Feature': X_test.columns,
-                        'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
-                    }).sort_values('Mean_ABS_SHAP', ascending=False)
-                
-                    fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
-                                      title="Readmission Prediction Feature Importance (SHAP)",
-                                      text='Mean_ABS_SHAP')
-                    fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
-                    st.plotly_chart(fig_shap, use_container_width=True)
-
+            
+            # Only create SHAP summary if feature count matches
+            if shap_class1.shape[1] != X_test.shape[1]:
+                st.warning(f"SHAP array ({shap_class1.shape}) does not match X_test ({X_test.shape}). Skipping SHAP plot.")
+            else:
+                shap_summary = pd.DataFrame({
+                    'Feature': X_test.columns,
+                    'Mean_ABS_SHAP': np.mean(np.abs(shap_class1), axis=0)
+                }).sort_values('Mean_ABS_SHAP', ascending=False)
+            
+                fig_shap = px.bar(shap_summary, x='Feature', y='Mean_ABS_SHAP',
+                                  title="Readmission Prediction Feature Importance (SHAP)",
+                                  text='Mean_ABS_SHAP')
+                fig_shap.update_layout(yaxis_title='Mean |SHAP value|', xaxis_title='Feature')
+                st.plotly_chart(fig_shap, use_container_width=True)
 
     
     # --- Treatment Cost Prediction (Regression) ---
