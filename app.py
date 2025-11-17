@@ -33,8 +33,8 @@ sectors = {
         {"name": "Real Estate Intelligence — Hybrid Dashboard (Property + CRM)", "image": "real_estate_thumb.jpg", "page": "realestate.py"},
     ],
     "Health Care Analytics": [
-        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_1.py"},
-        {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_2.py"},
+        {"name": "Healthscope Insights", "image": "real_estate_thumb.jpg", "page": "healthcare_1.py"},
+        {"name": "Patient Visit Analytics & Hospital Performance", "image": "real_estate_thumb.jpg", "page": "healthcare_2.py"},
         {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_3.py"},
         {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_4.py"},
         {"name": "Health Care Analytics", "image": "real_estate_thumb.jpg", "page": "healthcare_5.py"},
