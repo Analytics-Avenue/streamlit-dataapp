@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 # -------------------------
 # App Config
 # -------------------------
-st.set_page_config(page_title="Marketing Performance Dashboard — App 4", layout="wide")
+st.set_page_config(page_title="Marketing Performance Analysis", layout="wide")
 
 # -------------------------
 # Required columns
