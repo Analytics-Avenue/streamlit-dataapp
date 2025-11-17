@@ -88,7 +88,7 @@ with tabs[0]:
     """, unsafe_allow_html=True)
 
     # Static KPI cards (sample numbers for design)
-    st.markdown("### Key Metrics (Example)")
+    st.markdown("### KPIs")
     st.markdown("""
     <style>
     .metric-card {
@@ -114,10 +114,10 @@ with tabs[0]:
     """, unsafe_allow_html=True)
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card'>Total Patients<br>~1200</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Avg Age<br>~45</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Avg Length of Stay<br>~7 days</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Readmission Rate<br>~12%</div>", unsafe_allow_html=True)
+    k1.markdown("<div class='metric-card'>Total Patients<br></div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Avg Age<br></div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card'>Avg Length of Stay<br></div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Readmission Rate<br></div>", unsafe_allow_html=True)
 # -------------------------
 # Application Tab
 # -------------------------
