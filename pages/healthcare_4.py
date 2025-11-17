@@ -38,6 +38,67 @@ st.markdown("""
     font-weight:600;
     border: 1px solid rgba(255,255,255,0.12);
 }
+
+/* KPI glow cards used in Overview */
+.kpi-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    margin-bottom: 25px;
+}
+.kpi-card {
+    background: rgba(255,255,255,0.05);
+    padding: 18px 22px;
+    border-radius: 12px;
+    width: 230px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: all .20s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+.kpi-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 40px rgba(0,0,0,0.45), 0 0 25px rgba(0,120,255,0.45);
+    border-color: rgba(0,120,255,0.45);
+}
+.kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(circle at top left, rgba(0,120,255,0.25), transparent);
+    z-index: 0;
+}
+.kpi-content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+}
+.kpi-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.80);
+}
+.kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    color: #ffffff;
+}
+.kpi-delta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+}
+.kpi-badge {
+    font-size: 11px;
+    margin-left: 6px;
+    background: rgba(255,255,255,0.10);
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #fff;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -77,11 +138,9 @@ def ensure_datetime(df, col):
     return df
 
 def auto_map_columns(df):
-    # Gentle attempt to rename common variants to canonical names
     rename = {}
     cols = [c.strip() for c in df.columns]
     lower_map = {c.lower().replace(" ","_"): c for c in cols}
-    # simple heuristics
     candidates = {
         "Record_ID":["record","id","record_id"],
         "Ambulance_ID":["ambulance","ambulance_id","amb_id"],
@@ -117,7 +176,6 @@ def auto_map_columns(df):
             if cand in lower_map:
                 rename[lower_map[cand]] = target
                 break
-            # fuzzy match: substring
             for orig in cols:
                 if cand in orig.lower().replace(" ", "_"):
                     rename[orig] = target
@@ -134,7 +192,7 @@ def auto_map_columns(df):
 tabs = st.tabs(["Overview", "Application"])
 
 # -------------------------
-# Application tab logic will set st.session_state.df
+# Session state placeholders
 # -------------------------
 if "df" not in st.session_state:
     st.session_state.df = None
@@ -147,59 +205,115 @@ if "pipeline_clf" not in st.session_state:
 # OVERVIEW
 # -------------------------
 with tabs[0]:
-    st.markdown("### Overview")
-    st.markdown("""
-    <div class='card'>
-      Visual summary of ambulance operations: response time, busiest hospitals, transfer ratio, costs and fuel.
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader("Overview")
 
+    st.markdown("""
+    ### Application  
+    A unified **Ambulance and Hospital Analytics Platform** that connects triage, dispatch, 
+    emergency logistics, admissions, and readmission prediction into a single performance dashboard.
+
+    ### Purpose  
+    To improve emergency response, reduce delays, increase ambulance utilization, 
+    optimize hospital throughput, and support predictive decision-making.
+
+    ### Capabilities  
+    - Real-time ambulance operations tracking  
+    - Delay & bottleneck diagnostics  
+    - Hospital admission & discharge analytics  
+    - Readmission prediction & SHAP explainability  
+    - Emergency workflow optimization  
+    - Automated performance reports  
+
+    ### Business Impact Achieved  
+    - Faster ambulance response time  
+    - Reduced ER congestion  
+    - Higher ambulance acceptance rate  
+    - Lower readmission rates  
+    - Streamlined patient movement and hospital throughput  
+    """)
+
+    # Example KPI values (replace with dynamic values below if df available)
+    ambulance_response_time = "12.4 min"
+    acceptance_rate = "87%"
+    avg_trip_distance = "16.2 km"
+    hospital_wait_time = "22 min"
+    readmission_rate = "8.2%"
+    bed_occupancy = "74%"
+
+    # If dataframe exists, compute KPIs dynamically (safe guards)
+    if st.session_state.df is not None:
+        try:
+            df = st.session_state.df.copy()
+            # compute dynamic KPIs with safe fallbacks
+            if "Response_Time_min" in df.columns:
+                ambulance_response_time = f"{df['Response_Time_min'].dropna().mean():.1f} min"
+            if "Is_Interfacility_Transfer" in df.columns:
+                acceptance_rate = f"{(1 - df['Is_Interfacility_Transfer'].mean()):.0%}"  # example: not transfer ~ acceptance
+            if "Distance_km" in df.columns:
+                avg_trip_distance = f"{df['Distance_km'].dropna().mean():.1f} km"
+            if "Trip_Cost_Rs" in df.columns:
+                hospital_wait_time = hospital_wait_time  # keep sample unless you have wait metric
+            if "Readmission" in df.columns:
+                rr = 100 * df['Readmission'].apply(lambda x: 1 if str(x).lower() in ['yes','1','true'] else 0).mean()
+                readmission_rate = f"{rr:.1f}%"
+            if "Dropoff_Hospital_Occupancy_pct" in df.columns:
+                bed_occupancy = f"{df['Dropoff_Hospital_Occupancy_pct'].dropna().mean():.0f}%"
+        except Exception:
+            # keep sample values if anything fails
+            pass
+
+    kpis = [
+        {"title": "Avg Ambulance Response Time", "value": ambulance_response_time, "delta": "-1.8% vs last week", "badge": "Ambulance"},
+        {"title": "Ambulance Acceptance Rate", "value": acceptance_rate, "delta": "+4.2% vs last month", "badge": "Operations"},
+        {"title": "Avg Trip Distance", "value": avg_trip_distance, "delta": "+0.6 km", "badge": "Logistics"},
+        {"title": "Hospital Waiting Time", "value": hospital_wait_time, "delta": "-3 min improvement", "badge": "Hospital"},
+        {"title": "Readmission Rate", "value": readmission_rate, "delta": "-1.1% vs qtr", "badge": "Clinical"},
+        {"title": "Bed Occupancy", "value": bed_occupancy, "delta": "+6% seasonal", "badge": "Capacity"},
+    ]
+
+    # Render KPI cards
+    html = '<div class="kpi-container">'
+    for k in kpis:
+        html += f"""
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <div class="kpi-title">{k['title']}<span class="kpi-badge">{k['badge']}</span></div>
+                <div class="kpi-value">{k['value']}</div>
+                <div class="kpi-delta">{k['delta']}</div>
+            </div>
+        </div>
+        """
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+    # If a dataset is loaded, show visuals summary (safe checks)
     if st.session_state.df is None:
-        st.info("No dataset loaded yet. Go to Application tab and load the ambulance dataset (Default / Upload).")
+        st.info("No dataset loaded. Go to Application tab and load/upload an ambulance dataset to see visuals.")
     else:
         df = st.session_state.df.copy()
-        # Ensure datetimes
-        for c in ["Dispatch_Time","Arrival_Time_at_Scene","Arrival_Time_at_Hospital","Depart_Scene_Time"]:
-            if c in df.columns:
-                df = ensure_datetime(df, c)
-
-        # KPIs
-        k1,k2,k3,k4,k5 = st.columns(5)
-        k1.metric("Total Trips", f"{len(df):,}")
-        avg_resp = df["Response_Time_min"].dropna().mean() if "Response_Time_min" in df.columns else 0
-        k2.metric("Avg Response (min)", f"{avg_resp:.1f}")
-        avg_travel = df["Travel_Time_min"].dropna().mean() if "Travel_Time_min" in df.columns else 0
-        k3.metric("Avg Travel (min)", f"{avg_travel:.1f}")
-        total_cost = df["Trip_Cost_Rs"].sum() if "Trip_Cost_Rs" in df.columns else 0
-        k4.metric("Total Trip Cost", to_currency(total_cost))
-        transfer_rate = df["Is_Interfacility_Transfer"].mean()*100 if "Is_Interfacility_Transfer" in df.columns else 0
-        k5.metric("Interfacility Transfer %", f"{transfer_rate:.2f}%")
 
         st.markdown("### Busiest hospitals (by dropoffs)")
         if "Dropoff_Hospital" in df.columns:
             top_h = df["Dropoff_Hospital"].value_counts().reset_index()
             top_h.columns = ["Hospital", "Trips"]
-        
-            fig = px.bar(
-                top_h.head(10),
-                x="Hospital",
-                y="Trips",
-                text="Trips",
-                title="Top 10 Dropoff Hospitals"
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            # guard empty
+            if len(top_h) > 0:
+                fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No dropoff hospital data available.")
         else:
             st.info("Dropoff_Hospital column missing in dataset.")
 
         st.markdown("### Response time distribution")
-        if "Response_Time_min" in df.columns:
-            fig = px.histogram(df, x="Response_Time_min", nbins=40, title="Response Time (min)")
+        if "Response_Time_min" in df.columns and df["Response_Time_min"].dropna().shape[0] > 0:
+            fig = px.histogram(df.dropna(subset=["Response_Time_min"]), x="Response_Time_min", nbins=40, title="Response Time (min)")
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("Response_Time_min not available.")
 
         st.markdown("### Map view (Incident locations)")
-        if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)):
+        if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
             mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
             st.map(mdf)
         else:
@@ -217,13 +331,12 @@ with tabs[1]:
     df = None
 
     if mode == "Default dataset":
-        # tries to load a file in working dir; user: drop your generated csv as 'ambulance_dataset.csv'
         DEFAULT_PATH = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/ambulance_dataset.csv"
         try:
             df = pd.read_csv(DEFAULT_PATH)
             df.columns = df.columns.str.strip()
             df = auto_map_columns(df)
-            st.success(f"Default dataset loaded from `{DEFAULT_PATH}`")
+            st.success("Default dataset loaded")
             st.dataframe(df.head())
             st.session_state.df = df
         except Exception as e:
@@ -277,18 +390,15 @@ with tabs[1]:
     # -------------------------
     # Clean & ensure columns
     # -------------------------
-    # ensure datetimes
     for col in ["Dispatch_Time","Arrival_Time_at_Scene","Depart_Scene_Time","Arrival_Time_at_Hospital"]:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")
 
-    # ensure numeric
     numeric_cols = ["Nearest_Hospital_Distance_km","Dropoff_Hospital_Distance_km","Distance_km","Travel_Time_min","Response_Time_min","Crew_Count","Fuel_Consumed_Ltrs","Trip_Cost_Rs","Dropoff_Hospital_Beds","Dropoff_Hospital_Occupancy_pct"]
     for c in numeric_cols:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # boolean normalize
     if "Is_Interfacility_Transfer" in df.columns:
         df["Is_Interfacility_Transfer"] = df["Is_Interfacility_Transfer"].apply(lambda x: 1 if str(x).lower() in ["1","true","yes","y","t"] else 0)
 
@@ -302,7 +412,6 @@ with tabs[1]:
     with c2:
         sel_hosp = st.multiselect("Dropoff Hospital", options=sorted(hospitals), default=sorted(hospitals)[:5] if hospitals else [])
     with c3:
-        # date pickers if dispatch time exists
         if "Dispatch_Time" in df.columns and df["Dispatch_Time"].notna().any():
             min_d = df["Dispatch_Time"].min().date()
             max_d = df["Dispatch_Time"].max().date()
@@ -346,32 +455,36 @@ with tabs[1]:
     st.markdown("### Visuals")
     if "Dropoff_Hospital" in filt.columns:
         agg = filt.groupby("Dropoff_Hospital").agg({"Record_ID":"count","Trip_Cost_Rs":"sum"}).rename(columns={"Record_ID":"Trips"}).reset_index()
-        fig = px.bar(agg.sort_values("Trips", ascending=False).head(10), x="Dropoff_Hospital", y="Trips", title="Top dropoff hospitals")
-        st.plotly_chart(fig, use_container_width=True)
+        if agg.shape[0] > 0:
+            agg = agg.sort_values("Trips", ascending=False)
+            fig = px.bar(agg.head(10), x="Dropoff_Hospital", y="Trips", title="Top dropoff hospitals")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No dropoff hospital records to display.")
 
     if {"Incident_Lat","Incident_Lon"}.issubset(set(filt.columns)):
         st.markdown("### Incident density map")
         map_df = filt.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon","Response_Time_min"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
-        st.map(map_df)
+        if map_df.shape[0] > 0:
+            st.map(map_df)
+        else:
+            st.info("No incident lat/lon points to map.")
 
-    if "Response_Time_min" in filt.columns:
+    if "Response_Time_min" in filt.columns and "Distance_km" in filt.columns:
         st.markdown("### Response vs Distance scatter")
-        if "Distance_km" in filt.columns:
-            fig = px.scatter(filt, x="Distance_km", y="Response_Time_min", color="Patient_Severity", title="Response time vs distance")
-            st.plotly_chart(fig, use_container_width=True)
+        fig = px.scatter(filt.dropna(subset=["Distance_km","Response_Time_min"]), x="Distance_km", y="Response_Time_min", color="Patient_Severity", title="Response time vs distance")
+        st.plotly_chart(fig, use_container_width=True)
 
     # -------------------------
-    # ML Models
+    # ML Models (unchanged from your original)
     # -------------------------
     st.markdown("### ML: Predict Response Time (Regression) & Transfer (Classification)")
     with st.expander("ML settings & train", expanded=False):
-        # Regression target: Response_Time_min
         can_train_reg = "Response_Time_min" in filt.columns and len(filt.dropna(subset=["Response_Time_min"])) > 30
         can_train_clf = "Is_Interfacility_Transfer" in filt.columns and filt["Is_Interfacility_Transfer"].nunique() > 1 and len(filt.dropna(subset=["Is_Interfacility_Transfer"])) > 30
 
         st.write(f"Regression available: {can_train_reg}  |  Classification available: {can_train_clf}")
 
-        # common feature selection UI
         possible_features = [c for c in filt.columns if c not in ["Record_ID","Dispatch_Time","Arrival_Time_at_Scene","Depart_Scene_Time","Arrival_Time_at_Hospital","Outcome"]]
         features = st.multiselect("Features to use (ML)", options=possible_features, default=["Distance_km","Travel_Time_min","Crew_Count","Patient_Severity","Transport_Mode"] if "Distance_km" in possible_features else possible_features[:6])
 
@@ -380,15 +493,12 @@ with tabs[1]:
                 st.error("Choose at least 1 feature.")
             else:
                 X = filt[features].copy()
-                # basic encoding
                 cat_cols = X.select_dtypes(exclude=[np.number]).columns.tolist()
                 num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
 
-                # fill numeric NaNs
                 for nc in num_cols:
                     X[nc] = pd.to_numeric(X[nc], errors="coerce").fillna(X[nc].median())
 
-                # fill categorical
                 for cc in cat_cols:
                     X[cc] = X[cc].astype(str).fillna("NA")
 
@@ -437,23 +547,11 @@ with tabs[1]:
                         st.success(f"Classifier trained — Accuracy: {acc:.3f}")
                         st.session_state.pipeline_clf = pipe_clf
 
-    # -------------------------
-    # Quick Predict Single Row
-    # -------------------------
+    # Quick predict and export (unchanged)
     st.markdown("### Quick Predict (single row)")
     if st.session_state.pipeline_reg is None and st.session_state.pipeline_clf is None:
         st.info("Train models first (use the ML panel above).")
     else:
-        # build inputs from available features used in trained pipelines
-        # we'll attempt to infer feature names from the pipeline's preprocessing step
-        feat_example = []
-        if st.session_state.pipeline_reg is not None:
-            try:
-                prep = st.session_state.pipeline_reg.named_steps["prep"]
-                # numeric + categorical names we used during training are embedded — hard to recover perfectly.
-            except Exception:
-                pass
-        # fallback: let user supply core inputs
         col1, col2, col3 = st.columns(3)
         with col1:
             inp_distance = st.number_input("Distance_km", value=float(filt["Distance_km"].median() if "Distance_km" in filt.columns else 5.0))
@@ -498,7 +596,4 @@ with tabs[1]:
     if st.button("Download filtered CSV (1000 rows max)"):
         download_df(filt.head(1000), "ambulance_filtered.csv")
 
-    st.success("Application ready. Tip: drop your `ambulance_dataset.csv` next to this app or upload it in the Upload CSV option.")
-
-# End of app
-
+    st.success("Application ready. Tip: upload your ambulance dataset or load the default sample.")
