@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 from io import BytesIO
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
@@ -130,60 +129,75 @@ def to_currency(x):
     except:
         return x
 
-def ensure_datetime(df, col):
-    try:
+def safe_to_datetime(df, col):
+    if col in df.columns:
         df[col] = pd.to_datetime(df[col], errors="coerce")
-    except Exception:
-        pass
     return df
 
+def normalize_name(s: str) -> str:
+    return str(s).strip().lower().replace(" ", "_")
+
 def auto_map_columns(df):
-    rename = {}
-    cols = [c.strip() for c in df.columns]
-    lower_map = {c.lower().replace(" ","_"): c for c in cols}
-    candidates = {
-        "Record_ID":["record","id","record_id"],
-        "Ambulance_ID":["ambulance","ambulance_id","amb_id"],
-        "Driver_ID":["driver","driver_id"],
-        "Incident_Type":["incident_type","incident"],
-        "Patient_Severity":["severity","patient_severity"],
-        "Dispatch_Time":["dispatch_time","dispatch"],
-        "Arrival_Time_at_Scene":["arrival_time_at_scene","arrival_scene","arrival_scene_time"],
-        "Depart_Scene_Time":["depart_scene_time","depart_scene"],
-        "Arrival_Time_at_Hospital":["arrival_time_at_hospital","arrival_hospital"],
-        "Incident_Lat":["incident_lat","lat"],
-        "Incident_Lon":["incident_lon","lon","lng","long"],
-        "Nearest_Hospital":["nearest_hospital"],
-        "Nearest_Hospital_Distance_km":["nearest_hospital_distance_km","dist_km_to_incident","nearest_dist_km"],
-        "Dropoff_Hospital":["dropoff_hospital","dropoff"],
-        "Dropoff_Hospital_Distance_km":["dropoff_hospital_distance_km","dropoff_dist_km"],
-        "Distance_km":["distance_km","distance_km_total","distance"],
-        "Travel_Time_min":["travel_time_min","travel_time","travel_minutes"],
-        "Response_Time_min":["response_time_min","response_time","response_minutes"],
-        "Crew_Count":["crew_count"],
-        "Transport_Mode":["transport_mode","transport"],
-        "Fuel_Consumed_Ltrs":["fuel_consumed_ltrs","fuel_consumed","fuel_ltrs"],
-        "Trip_Cost_Rs":["trip_cost_rs","trip_cost","cost"],
-        "Weather":["weather"],
-        "Road_Condition":["road_condition"],
-        "Is_Interfacility_Transfer":["is_interfacility_transfer","interfacility_transfer","is_transfer"],
-        "Outcome":["outcome"],
-        "Dropoff_Hospital_Beds":["dropoff_hospital_beds","beds"],
-        "Dropoff_Hospital_Occupancy_pct":["dropoff_hospital_occupancy_pct","occupancy_pct"]
+    # simpler robust mapping by normalized names
+    orig_cols = df.columns.tolist()
+    norm_map = {normalize_name(c): c for c in orig_cols}
+
+    desired_map = {
+        "record_id": ["record","id","record_id"],
+        "ambulance_id": ["ambulance","ambulance_id","amb_id"],
+        "driver_id": ["driver","driver_id"],
+        "incident_type": ["incident_type","incident"],
+        "patient_severity": ["severity","patient_severity"],
+        "dispatch_time": ["dispatch_time","dispatch"],
+        "arrival_time_at_scene": ["arrival_time_at_scene","arrival_scene","arrival_scene_time"],
+        "depart_scene_time": ["depart_scene_time","depart_scene"],
+        "arrival_time_at_hospital": ["arrival_time_at_hospital","arrival_hospital"],
+        "incident_lat": ["incident_lat","lat","latitude"],
+        "incident_lon": ["incident_lon","lon","lng","long","longitude"],
+        "nearest_hospital": ["nearest_hospital"],
+        "nearest_hospital_distance_km": ["nearest_hospital_distance_km","dist_km_to_incident","nearest_dist_km","nearest_distance_km"],
+        "dropoff_hospital": ["dropoff_hospital","dropoff"],
+        "dropoff_hospital_distance_km": ["dropoff_hospital_distance_km","dropoff_dist_km"],
+        "distance_km": ["distance_km","distance_km_total","distance"],
+        "travel_time_min": ["travel_time_min","travel_time","travel_minutes"],
+        "response_time_min": ["response_time_min","response_time","response_minutes"],
+        "crew_count": ["crew_count","crew"],
+        "transport_mode": ["transport_mode","transport"],
+        "fuel_consumed_ltrs": ["fuel_consumed_ltrs","fuel_consumed","fuel_ltrs"],
+        "trip_cost_rs": ["trip_cost_rs","trip_cost","cost"],
+        "weather": ["weather"],
+        "road_condition": ["road_condition"],
+        "is_interfacility_transfer": ["is_interfacility_transfer","interfacility_transfer","is_transfer"],
+        "outcome": ["outcome"],
+        "dropoff_hospital_beds": ["dropoff_hospital_beds","beds"],
+        "dropoff_hospital_occupancy_pct": ["dropoff_hospital_occupancy_pct","occupancy_pct","occupancy"]
     }
-    for target, cand_list in candidates.items():
-        for cand in cand_list:
-            if cand in lower_map:
-                rename[lower_map[cand]] = target
+
+    rename = {}
+    for target_std, candidates in desired_map.items():
+        for cand in candidates:
+            cand_norm = cand.lower().replace(" ", "_")
+            if cand_norm in norm_map:
+                rename[norm_map[cand_norm]] = target_std.title().replace("_", "_")  # will be replaced by final mapping below
                 break
-            for orig in cols:
-                if cand in orig.lower().replace(" ", "_"):
-                    rename[orig] = target
+            # also try substring match
+            for orig in orig_cols:
+                if cand_norm in normalize_name(orig):
+                    rename[orig] = target_std.title().replace("_", "_")
                     break
-            if target in rename.values():
+            if any(v == target_std.title().replace("_", "_") for v in rename.values()):
                 break
-    if rename:
-        df = df.rename(columns=rename)
+
+    # final mapping: convert our target_std back to the canonical keys in REQUIRED_COLS (title-cased)
+    # We'll map to the canonical REQUIRED_COLS names directly where possible:
+    canonical = {normalize_name(x): x for x in REQUIRED_COLS}
+    final_rename = {}
+    for orig, mapped in rename.items():
+        mapped_norm = normalize_name(mapped)
+        if mapped_norm in canonical:
+            final_rename[orig] = canonical[mapped_norm]
+    if final_rename:
+        df = df.rename(columns=final_rename)
     return df
 
 # -------------------------
@@ -304,8 +318,7 @@ with tabs[1]:
     # Clean & ensure columns
     # -------------------------
     for col in ["Dispatch_Time","Arrival_Time_at_Scene","Depart_Scene_Time","Arrival_Time_at_Hospital"]:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col], errors="coerce")
+        df = safe_to_datetime(df, col)
 
     numeric_cols = ["Nearest_Hospital_Distance_km","Dropoff_Hospital_Distance_km","Distance_km","Travel_Time_min","Response_Time_min","Crew_Count","Fuel_Consumed_Ltrs","Trip_Cost_Rs","Dropoff_Hospital_Beds","Dropoff_Hospital_Occupancy_pct"]
     for c in numeric_cols:
@@ -321,7 +334,7 @@ with tabs[1]:
     campaigns = df["Incident_Type"].dropna().unique().tolist() if "Incident_Type" in df.columns else []
     hospitals = df["Dropoff_Hospital"].dropna().unique().tolist() if "Dropoff_Hospital" in df.columns else []
     with c1:
-        sel_incidents = st.multiselect("Incident Type", options=sorted(campaigns), default=sorted(campaigns)[:5])
+        sel_incidents = st.multiselect("Incident Type", options=sorted(campaigns), default=sorted(campaigns)[:5] if campaigns else [])
     with c2:
         sel_hosp = st.multiselect("Dropoff Hospital", options=sorted(hospitals), default=sorted(hospitals)[:5] if hospitals else [])
     with c3:
@@ -337,10 +350,9 @@ with tabs[1]:
         filt = filt[filt["Incident_Type"].isin(sel_incidents)]
     if sel_hosp:
         filt = filt[filt["Dropoff_Hospital"].isin(sel_hosp)]
-    if date_range is not None:
-        start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
-        if "Dispatch_Time" in filt.columns:
-            filt = filt[(filt["Dispatch_Time"] >= start) & (filt["Dispatch_Time"] <= end)]
+    if date_range is not None and "Dispatch_Time" in filt.columns:
+        start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
+        filt = filt[(filt["Dispatch_Time"] >= start) & (filt["Dispatch_Time"] <= end)]
 
     st.markdown("Filtered preview (first 10 rows)")
     st.dataframe(filt.head(10), use_container_width=True)
@@ -352,16 +364,17 @@ with tabs[1]:
     st.markdown("### Key Metrics")
     m1,m2,m3,m4 = st.columns(4)
     m1.metric("Filtered Trips", f"{len(filt):,}")
-    if "Response_Time_min" in filt.columns:
+    if "Response_Time_min" in filt.columns and filt["Response_Time_min"].dropna().shape[0] > 0:
         m2.metric("Avg Response (min)", f"{filt['Response_Time_min'].mean():.1f}")
     else:
         m2.metric("Avg Response (min)", "N/A")
-    if "Travel_Time_min" in filt.columns:
+    if "Travel_Time_min" in filt.columns and filt["Travel_Time_min"].dropna().shape[0] > 0:
         m3.metric("Avg Travel (min)", f"{filt['Travel_Time_min'].mean():.1f}")
     else:
         m3.metric("Avg Travel (min)", "N/A")
     if "Trip_Cost_Rs" in filt.columns:
-        m4.metric("Total Trip Cost", to_currency(filt["Trip_Cost_Rs"].sum()))
+        total_cost = filt["Trip_Cost_Rs"].sum(min_count=1)
+        m4.metric("Total Trip Cost", to_currency(total_cost) if not pd.isna(total_cost) else "N/A")
     else:
         m4.metric("Total Trip Cost", "N/A")
 
@@ -385,41 +398,42 @@ with tabs[1]:
 
     if "Response_Time_min" in filt.columns and "Distance_km" in filt.columns:
         st.markdown("### Response vs Distance scatter")
-        fig = px.scatter(filt.dropna(subset=["Distance_km","Response_Time_min"]), x="Distance_km", y="Response_Time_min", color="Patient_Severity", title="Response time vs distance")
-        st.plotly_chart(fig, use_container_width=True)
-
-
-        st.markdown("### Busiest hospitals (by dropoffs)")
-        if "Dropoff_Hospital" in df.columns:
-            top_h = df["Dropoff_Hospital"].value_counts().reset_index()
-            top_h.columns = ["Hospital", "Trips"]
-            # guard empty
-            if len(top_h) > 0:
-                fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No dropoff hospital data available.")
-        else:
-            st.info("Dropoff_Hospital column missing in dataset.")
-
-        st.markdown("### Response time distribution")
-        if "Response_Time_min" in df.columns and df["Response_Time_min"].dropna().shape[0] > 0:
-            fig = px.histogram(df.dropna(subset=["Response_Time_min"]), x="Response_Time_min", nbins=40, title="Response Time (min)")
+        valid = filt.dropna(subset=["Distance_km","Response_Time_min"])
+        if valid.shape[0] > 0:
+            color_col = "Patient_Severity" if "Patient_Severity" in valid.columns else None
+            fig = px.scatter(valid, x="Distance_km", y="Response_Time_min", color=color_col, title="Response time vs distance")
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Response_Time_min not available.")
+            st.info("Not enough data for Response vs Distance scatter.")
 
-        st.markdown("### Map view (Incident locations)")
-        if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
-            mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
-            st.map(mdf)
+    st.markdown("### Busiest hospitals (by dropoffs)")
+    if "Dropoff_Hospital" in df.columns:
+        top_h = df["Dropoff_Hospital"].value_counts().reset_index()
+        top_h.columns = ["Hospital", "Trips"]
+        if len(top_h) > 0:
+            fig = px.bar(top_h.head(10), x="Hospital", y="Trips", text="Trips", title="Top 10 Dropoff Hospitals")
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Incident latitude/longitude not available.")
+            st.info("No dropoff hospital data available.")
+    else:
+        st.info("Dropoff_Hospital column missing in dataset.")
 
+    st.markdown("### Response time distribution")
+    if "Response_Time_min" in df.columns and df["Response_Time_min"].dropna().shape[0] > 0:
+        fig = px.histogram(df.dropna(subset=["Response_Time_min"]), x="Response_Time_min", nbins=40, title="Response Time (min)")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Response_Time_min not available.")
 
-    
+    st.markdown("### Map view (Incident locations)")
+    if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
+        mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
+        st.map(mdf)
+    else:
+        st.info("Incident latitude/longitude not available.")
+
     # -------------------------
-    # ML Models (unchanged from your original)
+    # ML Models
     # -------------------------
     st.markdown("### ML: Predict Response Time (Regression) & Transfer (Classification)")
     with st.expander("ML settings & train", expanded=False):
@@ -429,36 +443,48 @@ with tabs[1]:
         st.write(f"Regression available: {can_train_reg}  |  Classification available: {can_train_clf}")
 
         possible_features = [c for c in filt.columns if c not in ["Record_ID","Dispatch_Time","Arrival_Time_at_Scene","Depart_Scene_Time","Arrival_Time_at_Hospital","Outcome"]]
-        features = st.multiselect("Features to use (ML)", options=possible_features, default=["Distance_km","Travel_Time_min","Crew_Count","Patient_Severity","Transport_Mode"] if "Distance_km" in possible_features else possible_features[:6])
+        default_features = ["Distance_km","Travel_Time_min","Crew_Count","Patient_Severity","Transport_Mode"]
+        features = st.multiselect("Features to use (ML)", options=possible_features, default=[f for f in default_features if f in possible_features][:6] or possible_features[:6])
 
         if st.button("Train ML models"):
             if len(features) < 1:
                 st.error("Choose at least 1 feature.")
             else:
                 X = filt[features].copy()
-                cat_cols = X.select_dtypes(exclude=[np.number]).columns.tolist()
-                num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
 
+                # identify numeric and categorical features robustly
+                num_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
+                cat_cols = [c for c in X.columns if c not in num_cols]
+
+                # fill numeric NAs
                 for nc in num_cols:
                     X[nc] = pd.to_numeric(X[nc], errors="coerce").fillna(X[nc].median())
 
+                # ensure categorical as string
                 for cc in cat_cols:
                     X[cc] = X[cc].astype(str).fillna("NA")
 
                 # Regression
                 if can_train_reg:
                     y_reg = pd.to_numeric(filt["Response_Time_min"], errors="coerce")
-                    Xr = X.loc[y_reg.dropna().index]
+                    Xr = X.loc[y_reg.dropna().index].copy()
                     yr = y_reg.dropna()
                     if len(Xr) < 10:
                         st.error("Not enough rows for regression after cleaning.")
                     else:
-                        preproc = ColumnTransformer([
-                            ("num", StandardScaler(), num_cols),
-                            ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
-                        ], remainder="drop")
+                        transformers = []
+                        if len(num_cols) > 0:
+                            transformers.append(("num", StandardScaler(), num_cols))
+                        if len(cat_cols) > 0:
+                            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols))
+
+                        preproc = ColumnTransformer(transformers, remainder="drop") if transformers else None
                         reg = RandomForestRegressor(n_estimators=150, random_state=42)
-                        pipe_reg = Pipeline([("prep", preproc), ("model", reg)])
+                        if preproc is not None:
+                            pipe_reg = Pipeline([("prep", preproc), ("model", reg)])
+                        else:
+                            pipe_reg = Pipeline([("model", reg)])  # should not generally happen but safe
+
                         X_train_r, X_test_r, y_train_r, y_test_r = train_test_split(Xr, yr, test_size=0.2, random_state=42)
                         with st.spinner("Training regression..."):
                             pipe_reg.fit(X_train_r, y_train_r)
@@ -471,17 +497,24 @@ with tabs[1]:
                 # Classification
                 if can_train_clf:
                     y_clf = filt["Is_Interfacility_Transfer"].astype(int)
-                    Xc = X.loc[y_clf.dropna().index]
+                    Xc = X.loc[y_clf.dropna().index].copy()
                     yc = y_clf.dropna()
                     if yc.nunique() < 2 or len(Xc) < 10:
                         st.error("Not enough class variety or rows for classification.")
                     else:
-                        preproc_c = ColumnTransformer([
-                            ("num", StandardScaler(), num_cols),
-                            ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
-                        ], remainder="drop")
+                        transformers_c = []
+                        if len(num_cols) > 0:
+                            transformers_c.append(("num", StandardScaler(), num_cols))
+                        if len(cat_cols) > 0:
+                            transformers_c.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols))
+
+                        preproc_c = ColumnTransformer(transformers_c, remainder="drop") if transformers_c else None
                         clf = RandomForestClassifier(n_estimators=150, random_state=42)
-                        pipe_clf = Pipeline([("prep", preproc_c), ("model", clf)])
+                        if preproc_c is not None:
+                            pipe_clf = Pipeline([("prep", preproc_c), ("model", clf)])
+                        else:
+                            pipe_clf = Pipeline([("model", clf)])
+
                         X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(Xc, yc, test_size=0.2, random_state=42)
                         with st.spinner("Training classifier..."):
                             pipe_clf.fit(X_train_c, y_train_c)
@@ -490,45 +523,54 @@ with tabs[1]:
                         st.success(f"Classifier trained — Accuracy: {acc:.3f}")
                         st.session_state.pipeline_clf = pipe_clf
 
-    # Quick predict and export (unchanged)
+    # Quick predict and export
     st.markdown("### Quick Predict (single row)")
     if st.session_state.pipeline_reg is None and st.session_state.pipeline_clf is None:
         st.info("Train models first (use the ML panel above).")
     else:
         col1, col2, col3 = st.columns(3)
         with col1:
-            inp_distance = st.number_input("Distance_km", value=float(filt["Distance_km"].median() if "Distance_km" in filt.columns else 5.0))
-            inp_travel = st.number_input("Travel_Time_min", value=float(filt["Travel_Time_min"].median() if "Travel_Time_min" in filt.columns else 10.0))
+            inp_distance = st.number_input("Distance_km", value=float(filt["Distance_km"].median() if "Distance_km" in filt.columns and filt["Distance_km"].dropna().shape[0] else 5.0))
+            inp_travel = st.number_input("Travel_Time_min", value=float(filt["Travel_Time_min"].median() if "Travel_Time_min" in filt.columns and filt["Travel_Time_min"].dropna().shape[0] else 10.0))
         with col2:
-            inp_crew = st.number_input("Crew_Count", value=int(filt["Crew_Count"].median() if "Crew_Count" in filt.columns else 2))
+            inp_crew = st.number_input("Crew_Count", value=int(filt["Crew_Count"].median() if "Crew_Count" in filt.columns and filt["Crew_Count"].dropna().shape[0] else 2))
             if "Patient_Severity" in filt.columns:
-                inp_sev = st.selectbox("Patient_Severity", options=sorted(filt["Patient_Severity"].dropna().unique().tolist()))
+                sev_options = sorted(filt["Patient_Severity"].dropna().unique().tolist())
+                inp_sev = st.selectbox("Patient_Severity", options=sev_options, index=0 if sev_options else None)
             else:
                 inp_sev = st.text_input("Patient_Severity", "Medium")
         with col3:
             if "Transport_Mode" in filt.columns:
-                inp_mode = st.selectbox("Transport_Mode", options=sorted(filt["Transport_Mode"].dropna().unique().tolist()))
+                mode_options = sorted(filt["Transport_Mode"].dropna().unique().tolist())
+                inp_mode = st.selectbox("Transport_Mode", options=mode_options, index=0 if mode_options else None)
             else:
                 inp_mode = st.text_input("Transport_Mode", "Basic Life Support")
 
         if st.button("Predict (single)"):
-            row = pd.DataFrame([{
-                "Distance_km": inp_distance,
-                "Travel_Time_min": inp_travel,
-                "Crew_Count": inp_crew,
-                "Patient_Severity": inp_sev,
-                "Transport_Mode": inp_mode
-            }])
+            # Build the row with keys matching what pipelines were trained on (best-effort)
+            row = {}
+            if "Distance_km" in filt.columns:
+                row["Distance_km"] = inp_distance
+            if "Travel_Time_min" in filt.columns:
+                row["Travel_Time_min"] = inp_travel
+            if "Crew_Count" in filt.columns:
+                row["Crew_Count"] = inp_crew
+            if "Patient_Severity" in filt.columns:
+                row["Patient_Severity"] = inp_sev
+            if "Transport_Mode" in filt.columns:
+                row["Transport_Mode"] = inp_mode
+
+            row_df = pd.DataFrame([row])
             out_msgs = []
             if st.session_state.pipeline_reg is not None:
                 try:
-                    pred_r = st.session_state.pipeline_reg.predict(row)[0]
+                    pred_r = st.session_state.pipeline_reg.predict(row_df)[0]
                     out_msgs.append(f"Predicted Response_Time_min: {pred_r:.1f}")
                 except Exception as e:
                     out_msgs.append(f"Regression predict failed: {e}")
             if st.session_state.pipeline_clf is not None:
                 try:
-                    pred_c = st.session_state.pipeline_clf.predict(row)[0]
+                    pred_c = st.session_state.pipeline_clf.predict(row_df)[0]
                     out_msgs.append(f"Predicted Is_Interfacility_Transfer: {'Yes' if int(pred_c)==1 else 'No'}")
                 except Exception as e:
                     out_msgs.append(f"Classifier predict failed: {e}")
@@ -538,5 +580,3 @@ with tabs[1]:
     st.markdown("### Export filtered data / save models")
     if st.button("Download filtered CSV (1000 rows max)"):
         download_df(filt.head(1000), "ambulance_filtered.csv")
-
-    st.success("Application ready. Tip: upload your ambulance dataset or load the default sample.")
