@@ -75,38 +75,49 @@ tabs = st.tabs(["Overview", "Application", "Predictions"])
 # Overview Tab
 # -------------------------
 with tabs[0]:
-    st.markdown("## Overview")
+    st.markdown("### Overview / Business Impact")
+    
     st.markdown("""
-    **Purpose:** Track patient trends, treatment efficiency, readmissions, and cost forecasting.  
-    **Business Impact:** Helps hospitals reduce readmission rates, optimize costs, and improve patient outcomes.  
-    **Capabilities:** Patient-level KPIs, treatment outcome analytics, predictive modeling, risk assessment.
-    """)
+    <div style='background:#f0f0f0;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.15)'>
+    <h3>Healthcare Analytics App</h3>
+    <p>Track patient trends, treatment efficiency, costs, readmissions, and predict outcomes.</p>
+    <p><strong>Purpose:</strong> Enable hospitals and clinics to identify at-risk patients and optimize treatment costs.</p>
+    <p><strong>Business Impact:</strong> Reduce readmissions, improve patient outcomes, and optimize resource allocation.</p>
+    <p><strong>Capabilities:</strong> KPI dashboards, trend analysis, predictive modeling for readmission and cost forecasting.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Load default dataset only for computing KPIs
-    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_3.csv"
-    try:
-        df_default = pd.read_csv(DEFAULT_URL)
-        df_default = auto_map_health_columns(df_default)
-        
-        # Derived metrics
-        df_default["Length_of_Stay"] = (pd.to_datetime(df_default["Discharge_Date"]) - pd.to_datetime(df_default["Admission_Date"])).dt.days.fillna(0)
-        df_default["Readmission_Flag"] = df_default["Readmission"].apply(lambda x: 1 if str(x).lower() in ["yes","1","true"] else 0)
+    # Static KPI cards (sample numbers for design)
+    st.markdown("### Key Metrics (Example)")
+    st.markdown("""
+    <style>
+    .metric-card {
+        background: rgba(255,255,255,0.10);
+        padding: 20px;
+        border-radius: 14px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.30);
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+        margin: 10px;
+    }
+    .metric-card:hover {
+        background: rgba(255,255,255,0.20);
+        border: 1px solid rgba(255,255,255,0.55);
+        box-shadow: 0 0 18px rgba(255,255,255,0.4);
+        transform: scale(1.04);
+        cursor: pointer;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-        # KPIs
-        k1, k2, k3, k4, k5 = st.columns(5)
-        k1.metric("Total Patients", f"{df_default['Patient_ID'].nunique():,}")
-        k2.metric("Average Age", f"{df_default['Age'].mean():.1f}")
-        k3.metric("Avg Length of Stay (days)", f"{df_default['Length_of_Stay'].mean():.1f}")
-        k4.metric("Total Treatment Cost", to_currency(df_default['Treatment_Cost'].sum()))
-        k5.metric("Readmission Rate", f"{df_default['Readmission_Flag'].mean()*100:.2f}%")
-        
-        # Example chart: Treatment Outcomes
-        if "Outcome" in df_default.columns:
-            fig_outcome = px.pie(df_default, names="Outcome", title="Treatment Outcomes Overview")
-            st.plotly_chart(fig_outcome, use_container_width=True)
-    except Exception as e:
-        st.warning("Unable to compute KPIs from default dataset: " + str(e))
-
+    k1, k2, k3, k4 = st.columns(4)
+    k1.markdown("<div class='metric-card'>Total Patients<br>~1200</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Avg Age<br>~45</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card'>Avg Length of Stay<br>~7 days</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Readmission Rate<br>~12%</div>", unsafe_allow_html=True)
 # -------------------------
 # Application Tab
 # -------------------------
