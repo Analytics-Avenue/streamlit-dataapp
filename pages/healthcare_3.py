@@ -13,8 +13,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # --- Page Setup ---
-st.set_page_config(page_title="Healthcare Analytics & Insights", layout="wide")
-st.markdown("<h1 style='margin-bottom:0.2rem'>Healthcare Analytics & Insights</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="PatientFlow Navigator", layout="wide")
+st.markdown("<h1 style='margin-bottom:0.2rem'>PatientFlow Navigator</h1>", unsafe_allow_html=True)
 st.markdown("Enterprise-capable healthcare analytics: patient trends, treatment efficiency, readmission prediction, and cost forecasting.")
 
 # -------------------------
