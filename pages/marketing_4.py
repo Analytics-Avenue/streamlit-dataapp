@@ -323,6 +323,3 @@ with tabs[1]:
         worst = channel_perf.sort_values("Revenue_per_Rs").iloc[0]
         st.markdown(f"**Best Channel ROI:** {best['Channel']} (~{best['Revenue_per_Rs']:.2f} per ₹)")
         st.markdown(f"**Lowest Channel ROI:** {worst['Channel']} (~{worst['Revenue_per_Rs']:.2f} per ₹)")
-
-st.markdown("App 4 ready — similar polished layout as App 3, focused on Revenue, ROI & Audience Insights.")
-
