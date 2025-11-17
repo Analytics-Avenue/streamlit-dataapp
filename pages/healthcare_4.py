@@ -425,12 +425,7 @@ with tabs[1]:
     else:
         st.info("Response_Time_min not available.")
 
-    st.markdown("### Map view (Incident locations)")
-    if {"Incident_Lat","Incident_Lon"}.issubset(set(df.columns)) and df[["Incident_Lat","Incident_Lon"]].dropna().shape[0] > 0:
-        mdf = df.dropna(subset=["Incident_Lat","Incident_Lon"])[["Incident_Lat","Incident_Lon"]].rename(columns={"Incident_Lat":"lat","Incident_Lon":"lon"})
-        st.map(mdf)
-    else:
-        st.info("Incident latitude/longitude not available.")
+
 
     # -------------------------
     # ML Models
