@@ -16,8 +16,8 @@ sectors = {
     "Marketing Analytics": [
         {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
         {"name": "Marketing Intelligence & Forecasting Lab", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
-        {"name": "Marketing Spend vs ROI Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
-        {"name": "Lead Scoring & Conversion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
+        {"name": "Click & Convertion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
+        {"name": "Marketing Performance Analysis", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
         {"name": "Social Media Engagement Tracker", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
         {"name": "Email Campaign Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
         {"name": "Content Performance & SEO Insights", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
