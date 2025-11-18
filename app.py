@@ -1,195 +1,133 @@
 import streamlit as st
-import os
+from PIL import Image
 
-# -------------------------
-# Streamlit page setup
-# -------------------------
-st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+st.set_page_config(layout="wide")
 
-# -------------------------
-# Company Logo + Name
-# -------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div style="display: flex; align-items: center; margin-bottom:20px;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Advanced Analytics</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# -------------------------
-# DIRECTORIES
-# -------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ASSETS_DIR = os.path.join(BASE_DIR, "assets")
-
-# -------------------------
-# OVERVIEW TEXT (Add Yours)
-# -------------------------
-sector_overview = {
-    "Marketing Analytics": "Get insights into consumer behavior, campaign ROI, brand performance, funnels, and retention.",
-    "Real Estate Analytics": "Analyze pricing, investment opportunities, market trends, buyer sentiment, and locality insights.",
-    "Health Care Analytics": "Improve patient outcomes, hospital performance, routing efficiency, and clinical decision making."
-}
-
-# -------------------------
-# TOOLS FOR EACH SECTOR
-# -------------------------
-sector_tools = {
-    "Marketing Analytics": ["Python", "SQL", "Power BI", "Tableau", "Machine Learning", "Forecasting", "Marketing Mix Modelling"],
-    "Real Estate Analytics": ["Python", "SQL", "GIS", "Power BI", "ML Models", "Valuation Models", "Regression"],
-    "Health Care Analytics": ["Python", "SQL", "Power BI", "Predictive Analytics", "Routing Algorithms", "NLP"]
-}
-
-# -------------------------
-# SECTORS + UseCases
-# -------------------------
-sectors = {
-    "Marketing Analytics": [
-        {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
-        {"name": "Marketing Intelligence & Forecasting Lab", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
-        {"name": "Click & Convertion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
-        {"name": "Marketing Performance Analysis", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
-        {"name": "Content & SEO Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
-        {"name": "Customer Retention & Churn Analysis", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
-        {"name": "Customer Journey & Funnel Insights", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
-        {"name": "Google Ads Performance Analytics", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
-        {"name": "Email & WhatsApp Marketing Forecast Lab", "image": "marketing_thumb.jpg", "page": "marketing_9.py"},
-    ],
-
-    "Real Estate Analytics": [
-        {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
-        {"name": "Real Estate Demand Forecasting System", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_2.py"},
-        {"name": "Price vs Property Features Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_3.py"},
-        {"name": "Agent & Market Insights Dashboard", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_4.py"},
-        {"name": "Real Estate Investment Opportunity Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_5.py"},
-        {"name": "Tenant Risk & Market Trend Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_6.py"},
-        {"name": "Rental Yield & Investment Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_7.py"},
-        {"name": "Real Estate Buyer Sentiment Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_8.py"},
-        {"name": "Neighborhood Lifestyle & Risk Aware Analyzer", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_9.py"},
-        {"name": "Real Estate Intelligence — Hybrid Dashboard", "image": "real_estate_thumb.jpg", "page": "realestate.py"},
-    ],
-
-    "Health Care Analytics": [
-        {"name": "Healthscope Insights", "image": "healthcare_thumb.jpg", "page": "healthcare_1.py"},
-        {"name": "Patient Visit Analytics & Hospital Performance", "image": "healthcare_thumb.jpg", "page": "healthcare_2.py"},
-        {"name": "PatientFlow Navigator", "image": "healthcare_thumb.jpg", "page": "healthcare_3.py"},
-        {"name": "Ambulance Ops & Routing Lab", "image": "healthcare_thumb.jpg", "page": "healthcare_4.py"},
-        {"name": "Health Care Analytics 1", "image": "healthcare_thumb.jpg", "page": "healthcare_5.py"},
-        {"name": "Health Care Analytics 2", "image": "healthcare_thumb.jpg", "page": "healthcare_6.py"},
-    ],
-}
-
-home_thumbs = {
-    "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
-    "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
-    "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
-}
-
-# -------------------------
-# SESSION STATE
-# -------------------------
-if "sector" not in st.session_state:
-    st.session_state["sector"] = None
-
-# -------------------------
-# GLOBAL CSS (Card UI)
-# -------------------------
+# Simple styling
 st.markdown("""
-<style>
+    <style>
+        .sector-box {
+            border: 2px solid #dddddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #f9f9f9;
+        }
 
-.card {
-    border: 2px solid #064b86;
-    border-radius: 14px;
-    padding: 15px;
-    background: white;
-    transition: 0.3s;
-    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
-}
+        .thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
 
-.card:hover {
-    box-shadow: 0 0 25px rgba(6, 75, 134, 0.4);
-    transform: translateY(-3px);
-}
+        .tool-card {
+            border: 1px solid #cfcfcf;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            font-size: 15px;
+            background: white;
+        }
 
-.tool-tag {
-    display: inline-block;
-    background: #e8f1ff;
-    border: 1px solid #bcd4ff;
-    padding: 4px 8px;
-    margin: 3px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #064b86;
-}
-
-</style>
+        .usecase-card {
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+    </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# HOME PAGE (3 Card Grid)
-# -------------------------
-if st.session_state["sector"] is None:
+# ----------------------------------------------------------
+# DATA MODEL
+# ----------------------------------------------------------
 
-    st.title("Data Analytics Solutions")
-    st.write("Choose a sector to explore:")
+sectors = [
+    {
+        "title": "Marketing Analytics",
+        "thumbnail": "https://via.placeholder.com/600x300.png?text=Marketing",
+        "overview": "Analytics solutions for campaign performance, forecasting, segmentation and digital optimization.",
+        "tools": [
+            "Campaign Analyzer", "Forecasting Lab", "SEO Dashboard", "Churn Predictor",
+            "Lead Funnel Analyzer", "Customer Insight Tool", "Attribution Modeler"
+        ],
+        "use_cases": [
+            "Campaign Spend Optimization",
+            "Customer Segmentation Engine",
+            "A/B Testing Intelligence",
+            "Social Media Analytics"
+        ]
+    },
+    {
+        "title": "Retail Analytics",
+        "thumbnail": "https://via.placeholder.com/600x300.png?text=Retail",
+        "overview": "Offline retail intelligence including footfall analytics, consumer journey tracking and conversion improvement.",
+        "tools": [
+            "Footfall Tracker", "Heatmap Viewer", "Sales Predictor", "Inventory Forecaster",
+            "POS Analyzer", "Store Ops Dashboard"
+        ],
+        "use_cases": [
+            "Shelf Optimization",
+            "Conversion Rate Benchmarking",
+            "Queue Management Analytics"
+        ]
+    },
+    {
+        "title": "Healthcare Analytics",
+        "thumbnail": "https://via.placeholder.com/600x300.png?text=Healthcare",
+        "overview": "Patient analytics, hospital optimization, disease prediction models and operational insights.",
+        "tools": [
+            "Patient Flow Analyzer", "Diagnosis Predictor", "Bed Utilization Tracker",
+            "Hospital Ops Dashboard", "Lab Report Analyzer"
+        ],
+        "use_cases": [
+            "Disease Trend Prediction",
+            "Patient Journey Mapping",
+            "Doctor Efficiency Analysis",
+            "Prescription Pattern Mining"
+        ]
+    }
+]
 
-    sector_list = list(sectors.keys())
-    rows = [sector_list[i:i+3] for i in range(0, len(sector_list), 3)]
 
-    for row in rows:
-        cols = st.columns(3)
-        for col, sector_name in zip(cols, row):
-            with col:
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
+# ----------------------------------------------------------
+# LAYOUT
+# ----------------------------------------------------------
 
-                thumb = home_thumbs.get(sector_name)
-                if os.path.exists(thumb):
-                    st.image(thumb, use_container_width=True)
+st.title("Data Solutions Dashboard")
 
-                st.markdown(f"<h3 style='color:#064b86;'>{sector_name}</h3>", unsafe_allow_html=True)
+for sector in sectors:
+    st.markdown(f"<div class='sector-box'>", unsafe_allow_html=True)
 
-                st.markdown(f"<p>{sector_overview[sector_name]}</p>", unsafe_allow_html=True)
+    # Thumbnail
+    st.image(sector["thumbnail"], use_column_width=True)
 
-                st.markdown("<p><strong>Tools & Tech:</strong></p>", unsafe_allow_html=True)
+    # Title
+    st.subheader(sector["title"])
 
-                # Tools grid inside card
-                for tool in sector_tools[sector_name]:
-                    st.markdown(f"<span class='tool-tag'>{tool}</span>", unsafe_allow_html=True)
+    # Overview
+    st.write(sector["overview"])
 
-                if st.button(f"Explore {sector_name}", key=f"go_{sector_name}"):
-                    st.session_state["sector"] = sector_name
+    st.write("### Tools & Technologies")
 
-                st.markdown("</div>", unsafe_allow_html=True)
+    tools = sector["tools"]
+    cols = st.columns(5)
 
-# -------------------------
-# SECTOR PAGE (Usecase Grid)
-# -------------------------
-else:
-    sector_name = st.session_state["sector"]
-    st.header(f"{sector_name} Use Cases")
+    for i, tool in enumerate(tools):
+        with cols[i % 5]:
+            st.markdown(f"<div class='tool-card'>{tool}</div>", unsafe_allow_html=True)
 
-    usecases = sectors[sector_name]
+    # Explore button
+    st.button(f"Explore {sector['title']}", key=sector["title"])
 
-    for i in range(0, len(usecases), 3):
-        cols = st.columns(3)
+    st.write("### Use Case Grid")
 
-        for j, uc in enumerate(usecases[i:i+3]):
-            with cols[j]:
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
+    uc_cols = st.columns(2)
+    for i, uc in enumerate(sector["use_cases"]):
+        with uc_cols[i % 2]:
+            st.markdown(f"<div class='usecase-card'>{uc}</div>", unsafe_allow_html=True)
 
-                img = os.path.join(ASSETS_DIR, uc["image"])
-                if os.path.exists(img):
-                    st.image(img, use_container_width=True)
-
-                st.markdown(f"### {uc['name']}")
-
-                if st.button("Open", key=uc["name"]):
-                    st.switch_page(f"pages/{uc['page']}")
-
-                st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
