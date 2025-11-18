@@ -33,7 +33,7 @@ st.markdown("""
     border-radius: 14px;
     padding: 15px;
     background: #ffffff;
-    min-height: 550px;
+    min-height: 5px;
     transition: 0.25s ease-in-out;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin-bottom: 25px;
