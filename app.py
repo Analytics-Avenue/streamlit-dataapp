@@ -1,6 +1,22 @@
 import streamlit as st
 import os
 
+
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+
 # --- Streamlit setup ---
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 
