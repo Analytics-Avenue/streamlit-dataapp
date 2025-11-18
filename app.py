@@ -74,6 +74,7 @@ st.markdown("""
     background: #d9e7ff;
     transform: scale(1.05);
 }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -157,7 +158,7 @@ sectors = {
 }
 
 # -------------------------
-# RAW Thumbnail URLs
+# Thumbnail URLs
 # -------------------------
 thumb_urls = {
     "Marketing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/marketing_thumb.jpg",
@@ -166,15 +167,17 @@ thumb_urls = {
 }
 
 # -------------------------
-# Session State
+# SESSION STATE
 # -------------------------
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
+if "project" not in st.session_state:
+    st.session_state["project"] = None
 
 # ============================================================
 # HOME PAGE
 # ============================================================
-if st.session_state["sector"] is None:
+if st.session_state["sector"] is None and st.session_state["project"] is None:
     st.title("Data Analytics Solutions")
     st.write("Choose a sector to explore:")
 
@@ -186,31 +189,20 @@ if st.session_state["sector"] is None:
         for col, sector in zip(cols, row):
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
-
-                # Thumbnail
                 st.image(thumb_urls[sector], use_container_width=True)
-
-                # Title
                 st.markdown(f"<h3 style='color:#064b86; margin-top:12px;'>{sector}</h3>", unsafe_allow_html=True)
-
-                # Overview
                 st.markdown(f"<p style='font-size:14.5px; color:#444; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
-
-                # Tools
                 st.markdown("<b>Tools & Tech:</b><br>", unsafe_allow_html=True)
-                tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
-                st.markdown(tool_html, unsafe_allow_html=True)
+                st.markdown("".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]]), unsafe_allow_html=True)
 
-                # Button
                 if st.button(f"Explore {sector}", key=f"btn_{sector}"):
                     st.session_state["sector"] = sector
-
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SECTOR PAGE (All Projects)
+# SECTOR PAGE (Projects Grid)
 # ============================================================
-else:
+elif st.session_state["sector"] and st.session_state["project"] is None:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} – Projects / Use Cases")
 
@@ -222,19 +214,31 @@ else:
         for col, uc in zip(cols, row):
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
-
-                # Image
-                img_url = os.path.join("assets", uc["image"])
-                st.image(img_url, use_container_width=True)
-
-                # Title
+                st.image(os.path.join("assets", uc["image"]), use_container_width=True)
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
-
-                # Open button
                 if st.button("Open", key=f"{sector_name}_{uc['name']}"):
-                    st.info(f"Navigate to: {uc['page']}")  # Replace with st.switch_page in multi-page setup
-
+                    st.session_state["project"] = uc
                 st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
+        st.session_state["project"] = None
+
+# ============================================================
+# PROJECT PAGE
+# ============================================================
+elif st.session_state["project"]:
+    project = st.session_state["project"]
+    st.header(f"{project['name']} – Project Details")
+
+    # Placeholder for project details; you can replace with your actual content
+    st.image(os.path.join("assets", project["image"]), width=400)
+    st.markdown(f"""
+    <p style='font-size:15px; text-align:justify; color:#444;'>
+    This is a placeholder for <b>{project['name']}</b> content.<br>
+    You can embed charts, tables, insights, or analytics results here.
+    </p>
+    """, unsafe_allow_html=True)
+
+    if st.button("Back to Projects"):
+        st.session_state["project"] = None
