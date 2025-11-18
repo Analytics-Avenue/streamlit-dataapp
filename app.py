@@ -11,8 +11,8 @@ st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", un
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div style="display:flex; align-items:center; margin-bottom:20px;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
+<div style="display:flex; align-items:center; margin-bottom:25px;">
+    <img src="{logo_url}" width="60" style="margin-right:15px;">
     <div style="line-height:1;">
         <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Analytics Avenue &</div>
         <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Advanced Analytics</div>
@@ -21,7 +21,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Global CSS
+# Global CSS (Polished Grid)
 # -------------------------
 st.markdown("""
 <style>
@@ -31,8 +31,8 @@ st.markdown("""
     padding:15px;
     background:#fff;
     transition:0.25s ease-in-out;
-    min-height:5px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    min-height:280px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);
     margin-bottom:25px;
     display:flex;
     flex-direction:column;
@@ -40,8 +40,8 @@ st.markdown("""
     justify-content:flex-start;
 }
 .card-box:hover {
-    transform:translateY(-6px);
-    box-shadow:0 6px 22px rgba(0,0,0,0.18);
+    transform:translateY(-8px);
+    box-shadow:0 8px 28px rgba(0,0,0,0.18);
     border-color:#7fa8ff;
     background:#f9fbff;
 }
@@ -51,10 +51,11 @@ st.markdown("""
     transition:0.25s ease-in-out;
     max-height:120px;
     object-fit:cover;
+    width:100%;
 }
 .card-box:hover img {
     outline-color:#7fa8ff;
-    box-shadow:0px 0px 10px rgba(130,160,255,0.5);
+    box-shadow:0px 0px 12px rgba(130,160,255,0.5);
     transform:scale(1.02);
 }
 .tool-btn {
@@ -147,7 +148,7 @@ if st.session_state["sector"] is None:
     rows = [sectors_list[i:i+3] for i in range(0, len(sectors_list), 3)]
 
     for row in rows:
-        cols = st.columns(3)
+        cols = st.columns(3, gap="medium")
         for col, sector in zip(cols, row):
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
@@ -185,7 +186,7 @@ else:
     usecases = sectors[sector_name]
 
     for row_idx in range(0, len(usecases), 3):
-        cols = st.columns(3)
+        cols = st.columns(3, gap="medium")
         for col_idx, col in enumerate(cols):
             if row_idx + col_idx < len(usecases):
                 uc = usecases[row_idx + col_idx]
