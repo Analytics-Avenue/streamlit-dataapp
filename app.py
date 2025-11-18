@@ -233,10 +233,8 @@ else:
                 # Project title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Construct deployed page URL
-                # Streamlit converts pages to slugs: spaces -> _, special chars removed
-                page_slug = uc['name'].replace(" ", "_").replace("&", "and").replace("-", "_")
-                deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
+                # Use 'page' field as slug directly (no .py)
+                deployed_url = f"https://analytics-avenue.streamlit.app/{uc['page']}"
 
                 # Open button as HTML link (new tab)
                 st.markdown(f"""
@@ -254,6 +252,3 @@ else:
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
-
-
-
