@@ -304,8 +304,9 @@ with tabs[1]:
             fig.update_traces(textposition="outside")
             st.plotly_chart(fig, use_container_width=True)
 
+
     # -------------------------
-    # ML: Revenue prediction
+    # ML: Revenue prediction + Download
     # -------------------------
     st.markdown("### ML: Predict Revenue (RandomForest)")
     ml_df = filt.copy().dropna(subset=["Revenue"])
@@ -331,15 +332,27 @@ with tabs[1]:
         rmse = math.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
         st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
-
+    
+        # Create downloadable dataframe
+        X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
+        X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
+        X_test_df["Predicted_Revenue"] = preds
+        st.dataframe(X_test_df.head())
+        download_df(X_test_df, "ml_revenue_predictions.csv")
+    
     # -------------------------
-    # Automated insights
+    # Automated Insights (Table + Download)
     # -------------------------
-    st.markdown("### Automated Insights")
-    channel_perf = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
-    channel_perf["Revenue_per_Rs"] = np.where(channel_perf["Spend"]>0, channel_perf["Revenue"]/channel_perf["Spend"],0)
-    if not channel_perf.empty:
-        best = channel_perf.sort_values("Revenue_per_Rs", ascending=False).iloc[0]
-        worst = channel_perf.sort_values("Revenue_per_Rs").iloc[0]
-        st.markdown(f"**Best Channel ROI:** {best['Channel']} (~{best['Revenue_per_Rs']:.2f} per ₹)")
-        st.markdown(f"**Lowest Channel ROI:** {worst['Channel']} (~{worst['Revenue_per_Rs']:.2f} per ₹)")
+    st.markdown("### Automated Insights (Table + Download)")
+    insights_list = []
+    if "Channel" in filt.columns and "Revenue" in filt.columns and "Spend" in filt.columns:
+        ch_perf = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
+        ch_perf["Revenue_per_Rs"] = np.where(ch_perf["Spend"]>0, ch_perf["Revenue"]/ch_perf["Spend"],0)
+        best = ch_perf.sort_values("Revenue_per_Rs", ascending=False).iloc[0]
+        worst = ch_perf.sort_values("Revenue_per_Rs", ascending=True).iloc[0]
+        insights_list.append({"Insight":"Best Channel ROI","Channel":best['Channel'], "Revenue_per_Rs":best['Revenue_per_Rs']})
+        insights_list.append({"Insight":"Lowest Channel ROI","Channel":worst['Channel'], "Revenue_per_Rs":worst['Revenue_per_Rs']})
+    
+    insights_df = pd.DataFrame(insights_list)
+    st.dataframe(insights_df)
+    download_df(insights_df, "automated_insights.csv")
