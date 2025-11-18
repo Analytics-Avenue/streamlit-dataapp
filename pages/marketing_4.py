@@ -271,13 +271,6 @@ with tabs[1]:
         if file:
             df = pd.read_csv(file)
     
-        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
-        if uploaded is not None:
-            df = pd.read_csv(uploaded)
-            df.columns = df.columns.str.strip()
-            df = auto_map_columns(df)
-            st.success("File uploaded.")
-            st.dataframe(df.head())
 
     else:  # Upload + mapping
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
