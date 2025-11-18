@@ -208,6 +208,7 @@ if st.session_state["sector"] is None:
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
+# ============================================================
 # SECTOR PAGE (Projects / Use Cases)
 # ============================================================
 else:
@@ -229,8 +230,15 @@ else:
                 # Title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Open button: just instruct user to use sidebar navigation
-                st.markdown(f"<a href='#{uc['name']}' style='text-decoration:none;'>Open → Use sidebar navigation</a>", unsafe_allow_html=True)
+                # Open button: dynamically run the page script
+                if st.button("Open", key=f"{sector_name}_{uc['name']}"):
+                    import runpy
+                    page_path = os.path.join("pages", uc['page'])
+                    if os.path.exists(page_path):
+                        runpy.run_path(page_path)
+                        st.stop()
+                    else:
+                        st.error(f"Page not found: {page_path}")
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
