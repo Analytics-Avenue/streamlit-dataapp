@@ -21,8 +21,7 @@ st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
 # -------------------------
 # Company Logo + Name
 # -------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"  # Replace with your logo
-
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
 <div style="display: flex; align-items: center;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
@@ -32,8 +31,6 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-
 
 # -------------------------
 # Header
@@ -150,7 +147,7 @@ with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-        It tracks content & SEO performance across pages, keywords, devices, and countries.
+        Tracks content & SEO performance across pages, keywords, devices, and countries.
         Provides engagement, conversion, and revenue insights, along with ML-driven predictions.
     </div>
     """, unsafe_allow_html=True)
@@ -183,6 +180,7 @@ with tabs[1]:
     st.markdown("### Step 1 — Load dataset")
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
+    raw = None
 
     if mode == "Default dataset":
         DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/content_seo_dataset.csv"
@@ -197,30 +195,21 @@ with tabs[1]:
             st.stop()
 
     elif mode == "Upload CSV":
-        st.markdown("#### Download Sample CSV for Reference")
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/content_seo_dataset.csv"
-        try:
-            # Load default dataset
-            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
-            sample_csv = sample_df.to_csv(index=False)
-            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
-        except Exception as e:
-            st.info(f"Sample CSV unavailable: {e}")
+        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
+        if uploaded is not None:
+            df = pd.read_csv(uploaded)
+            df.columns = df.columns.str.strip()
+            df = auto_map_columns(df)
+            st.success("File uploaded.")
+            st.dataframe(df.head())
 
-        # Upload actual CSV
-        file = st.file_uploader("Upload your dataset", type=["csv"])
-        if file:
-            df = pd.read_csv(file)
-        
-        else:
-            uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
-            if uploaded is not None:
-                raw = pd.read_csv(uploaded)
-                raw.columns = raw.columns.str.strip()
-                st.write("Preview (first 5 rows):")
-                st.dataframe(raw.head())
-             
-        elif mode == "Upload CSV + Column mapping":
+    elif mode == "Upload CSV + Column mapping":
+        uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+        if uploaded is not None:
+            raw = pd.read_csv(uploaded)
+            raw.columns = raw.columns.str.strip()
+            st.write("Preview (first 5 rows):")
+            st.dataframe(raw.head())
             st.markdown("Map your columns to required fields.")
             mapping = {}
             for req in REQUIRED_CONTENT_COLS:
@@ -279,75 +268,62 @@ with tabs[1]:
     st.markdown("### Revenue & Conversions per Page")
     page_agg = filt.groupby("Page")[["Revenue","Conversions"]].sum().reset_index()
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=page_agg["Page"], 
-        y=page_agg["Revenue"], 
-        name="Revenue",
-        text=page_agg["Revenue"],
-        textposition="outside"
-    ))
-    fig.add_trace(go.Bar(
-        x=page_agg["Page"], 
-        y=page_agg["Conversions"], 
-        name="Conversions",
-        text=page_agg["Conversions"],
-        textposition="outside"
-    ))
-    fig.update_layout(
-        barmode="group", 
-        xaxis_title="Page", 
-        yaxis_title="Value",
-        uniformtext_minsize=8,
-        uniformtext_mode='hide'
-    )
+    fig.add_trace(go.Bar(x=page_agg["Page"], y=page_agg["Revenue"], name="Revenue", text=page_agg["Revenue"], textposition="outside"))
+    fig.add_trace(go.Bar(x=page_agg["Page"], y=page_agg["Conversions"], name="Conversions", text=page_agg["Conversions"], textposition="outside"))
+    fig.update_layout(barmode="group", xaxis_title="Page", yaxis_title="Value", uniformtext_minsize=8, uniformtext_mode='hide')
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### Device / Country Performance")
+    # Device / Country / Content_Type Performance
+    st.markdown("### Device / Country / Content_Type Performance")
     group_cols = ["Device","Country","Content_Type"]
     for g in group_cols:
         if g in filt.columns:
             grp = filt.groupby(g)[["Revenue","Conversions"]].sum().reset_index()
             fig = px.bar(grp, x=g, y="Revenue", text="Revenue", title=f"{g} Revenue")
             fig.update_traces(textposition="outside")
+            fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
             st.plotly_chart(fig, use_container_width=True)
 
-# ML Prediction
-st.markdown("### ML: Predict Revenue (RandomForest)")
-ml_df = filt.copy().dropna(subset=["Revenue"])
-feat_cols = ["Page","Content_Type","Device","Country","Impressions","Clicks","Time_on_Page_sec","Backlinks"]
-feat_cols = [c for c in feat_cols if c in ml_df.columns]
+    # -------------------------
+    # ML Prediction
+    # -------------------------
+    st.markdown("### ML: Predict Revenue (RandomForest)")
+    ml_df = filt.copy().dropna(subset=["Revenue"])
+    feat_cols = ["Page","Content_Type","Device","Country","Impressions","Clicks","Time_on_Page_sec","Backlinks"]
+    feat_cols = [c for c in feat_cols if c in ml_df.columns]
 
-if len(ml_df) < 30 or len(feat_cols)<2:
-    st.info("Not enough data to train ML model (>=30 rows needed)")
-else:
-    X = ml_df[feat_cols]
-    y = ml_df["Revenue"]
-    cat_cols = [c for c in X.columns if X[c].dtype=="object"]
-    num_cols = [c for c in X.columns if c not in cat_cols]
-    preprocessor = ColumnTransformer([
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-        ("num", StandardScaler(), num_cols)
-    ], remainder="drop")
-    X_t = preprocessor.fit_transform(X)
-    X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
-    rf = RandomForestRegressor(n_estimators=200, random_state=42)
-    with st.spinner("Training RandomForest..."):
-        rf.fit(X_train, y_train)
-    preds = rf.predict(X_test)
-    rmse = math.sqrt(mean_squared_error(y_test, preds))
-    r2 = r2_score(y_test, preds)
-    st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
+    if len(ml_df) < 30 or len(feat_cols)<2:
+        st.info("Not enough data to train ML model (>=30 rows needed)")
+    else:
+        X = ml_df[feat_cols]
+        y = ml_df["Revenue"]
+        cat_cols = [c for c in X.columns if X[c].dtype=="object"]
+        num_cols = [c for c in X.columns if c not in cat_cols]
+        preprocessor = ColumnTransformer([
+            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
+            ("num", StandardScaler(), num_cols)
+        ], remainder="drop")
+        X_t = preprocessor.fit_transform(X)
+        X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+        rf = RandomForestRegressor(n_estimators=200, random_state=42)
+        with st.spinner("Training RandomForest..."):
+            rf.fit(X_train, y_train)
+        preds = rf.predict(X_test)
+        rmse = math.sqrt(mean_squared_error(y_test, preds))
+        r2 = r2_score(y_test, preds)
+        st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
 
-    # Combine predictions with input features for download
-    X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
-    X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
-    X_test_df["Predicted_Revenue"] = preds
-    st.dataframe(X_test_df.head())
-    download_df(X_test_df, "ml_revenue_predictions.csv")
+        # Combine predictions with input features for download
+        X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
+        X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
+        X_test_df["Predicted_Revenue"] = preds
+        st.dataframe(X_test_df.head())
+        download_df(X_test_df, "ml_revenue_predictions.csv")
 
-    # Automated Insights (Table + Download)
+    # -------------------------
+    # Automated Insights
+    # -------------------------
     st.markdown("### Automated Insights")
-
     insights = []
     country_perf = filt.groupby("Country")[["Revenue","Conversions"]].sum().reset_index()
     country_perf["Revenue_per_Conversion"] = np.where(country_perf["Conversions"]>0,
