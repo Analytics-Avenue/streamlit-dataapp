@@ -190,9 +190,11 @@ else:
         
         for s in sector_overview.keys():
             if s != sector_name:
-                if st.button(f"➡ {s}", key=f"sidebar_{s}"):
+                clicked = st.button(f"➡ {s}", key=f"sidebar_{s}")
+                if clicked:
                     st.session_state["sector"] = s
-                    st.experimental_rerun()
+                    st.experimental_rerun()  # rerun immediately after setting state
+
 
     st.header(f"{sector_name} – Projects / Use Cases")
 
