@@ -129,7 +129,7 @@ if st.session_state["sector"] is None:
                 st.markdown(tool_html, unsafe_allow_html=True)
 
                 # Explore button
-                if st.button(f"Explore {sector_name}", key=f"explr_{sector_name}"):
+                if st.button(f"Explore", key=f"explr_{sector_name}"):
                     st.session_state["sector"] = sector_name
 
                 st.markdown("</div>", unsafe_allow_html=True)
