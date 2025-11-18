@@ -1,181 +1,122 @@
 import streamlit as st
 import os
 
-st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
+# Dummy data (replace with your actual dictionaries)
+sectors = {
+    "Retail Analytics": ["Usecase1", "Usecase2"],
+    "Marketing Analytics": ["Usecase1", "Usecase2"],
+    "Healthcare Analytics": ["Usecase1", "Usecase2"],
+    "Finance Analytics": ["Usecase1", "Usecase2"],
+    "Real Estate Analytics": ["Usecase1", "Usecase2"],
+    "Supply Chain Analytics": ["Usecase1", "Usecase2"],
+}
 
-# ==================================================================
-#                           CSS STYLES
-# ==================================================================
+sector_overview = {
+    "Retail Analytics": "Retail sector overview goes here.",
+    "Marketing Analytics": "Marketing overview goes here.",
+    "Healthcare Analytics": "Healthcare overview goes here.",
+    "Finance Analytics": "Finance overview goes here.",
+    "Real Estate Analytics": "Real Estate overview goes here.",
+    "Supply Chain Analytics": "Supply Chain overview goes here."
+}
 
+sector_tools = {
+    "Retail Analytics": ["Python", "SQL", "Power BI", "TensorFlow", "Excel", "Snowflake"],
+    "Marketing Analytics": ["Python", "SQL", "Google Analytics", "Power BI", "dbt"],
+    "Healthcare Analytics": ["R", "Python", "SQL", "Tableau"],
+    "Finance Analytics": ["Python", "SQL", "Power BI", "SAS"],
+    "Real Estate Analytics": ["Python", "SQL", "ArcGIS", "Power BI", "Excel"],
+    "Supply Chain Analytics": ["Python", "SQL", "Power BI", "SAP BI"]
+}
+
+home_thumbs = {
+    "Retail Analytics": "thumbs/retail.jpg",
+    "Marketing Analytics": "thumbs/marketing.jpg",
+    "Healthcare Analytics": "thumbs/healthcare.jpg",
+    "Finance Analytics": "thumbs/finance.jpg",
+    "Real Estate Analytics": "thumbs/realestate.jpg",
+    "Supply Chain Analytics": "thumbs/supply.jpg"
+}
+
+# ===================== CSS ======================
 st.markdown("""
 <style>
 
-.sector-box {
+.sector-card {
     border: 2px solid #064b86;
     border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 35px;
-    transition: 0.3s;
-    box-shadow: 0 0 10px rgba(6, 75, 134, 0.2);
-    background: white;
+    padding: 18px;
+    background: #ffffff;
+    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
+    transition: 0.25s;
+    height: 100%;
 }
 
-.sector-box:hover {
-    box-shadow: 0 0 25px rgba(6, 75, 134, 0.55);
-    transform: translateY(-3px);
+.sector-card:hover {
+    box-shadow: 0 0 25px rgba(6, 75, 134, 0.45);
+    transform: translateY(-4px);
 }
 
-.tool-card {
+.tool-pill {
     background: #f4f8ff;
     border: 1px solid #c9dfff;
-    padding: 6px 0;
-    border-radius: 6px;
-    text-align: center;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
-    font-size: 12.5px;
-    box-shadow: 0 0 5px rgba(180, 200, 255, 0.35);
-    transition: 0.2s;
-    margin-bottom: 8px;
+    display: inline-block;
+    margin: 4px;
+    white-space: nowrap;
 }
 
-.tool-card:hover {
+.tool-pill:hover {
     background: #e7efff;
-    transform: scale(1.05);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ==================================================================
-#                        SECTOR DEFINITIONS
-# ==================================================================
+# ===================== HOME PAGE ======================
+st.title("Data Analytics Solutions")
+st.write("Choose a sector to explore insights:")
 
-sectors = {
-    "Marketing Analytics": [
-        {"name": "Customer Segmentation", "image": "sections/marketing/customer_segmentation.png"},
-        {"name": "Campaign Analysis", "image": "sections/marketing/campaign_analysis.png"},
-        {"name": "Sales Forecasting", "image": "sections/marketing/sales_forecast.png"}
-    ],
-    "Real Estate Analytics": [
-        {"name": "Market Price Prediction", "image": "sections/realestate/price_prediction.png"},
-        {"name": "Rental Yield Analysis", "image": "sections/realestate/rental_yield.png"},
-        {"name": "Location Scoring", "image": "sections/realestate/location_scoring.png"}
-    ],
-    "Health Care Analytics": [
-        {"name": "Patient Flow Optimization", "image": "sections/healthcare/patient_flow.png"},
-        {"name": "Hospital Operations Dashboard", "image": "sections/healthcare/hospital_ops.png"},
-        {"name": "Medical Outcome Prediction", "image": "sections/healthcare/outcome_prediction.png"}
-    ]
-}
+sector_list = list(sectors.keys())
 
-home_thumbs = {
-    "Marketing Analytics": "sections/marketing/thumbnail.png",
-    "Real Estate Analytics": "sections/realestate/thumbnail.png",
-    "Health Care Analytics": "sections/healthcare/thumbnail.png"
-}
+# 3 cards per row
+for i in range(0, len(sector_list), 3):
+    row = st.columns(3)
 
-sector_overview = {
-    "Marketing Analytics": "Unlock demand, optimize campaigns, decode buying behavior, and fuel ROI-driven decisions.",
-    "Real Estate Analytics": "Forecast prices, evaluate properties, detect investment patterns, and analyze city-wide housing trends.",
-    "Health Care Analytics": "Improve patient care, streamline hospital operations, and support medical decisions with data-driven insights."
-}
+    for idx, sector_name in enumerate(sector_list[i:i+3]):
+        with row[idx]:
+            with st.container():
+                st.markdown('<div class="sector-card">', unsafe_allow_html=True)
 
-sector_tools = {
-    "Marketing Analytics": ["SQL", "Python", "Power BI", "Machine Learning", "Forecasting", "GenAI", "Customer Segmentation"],
-    "Real Estate Analytics": ["SQL", "Python", "GIS", "Predictive Modeling", "Power BI", "Clustering", "GenAI"],
-    "Health Care Analytics": ["SQL", "Python", "Time-Series", "Dashboards", "ML", "GenAI", "Automation"]
-}
+                # Thumbnail
+                thumb = home_thumbs.get(sector_name, None)
+                if thumb and os.path.exists(thumb):
+                    st.image(thumb, use_container_width=True)
 
-# ==================================================================
-#                      SESSION INIT
-# ==================================================================
+                # Title
+                st.markdown(
+                    f"<h3 style='margin-top:10px; color:#064b86; text-align:center;'>{sector_name}</h3>",
+                    unsafe_allow_html=True
+                )
 
-if "sector" not in st.session_state:
-    st.session_state["sector"] = None
+                # Overview
+                st.markdown(
+                    f"<p style='font-size:14px; color:#444; text-align:center;'>{sector_overview[sector_name]}</p>",
+                    unsafe_allow_html=True
+                )
 
-# ==================================================================
-#                       HOME PAGE
-# ==================================================================
+                # Tools Section
+                st.markdown("<h5 style='margin-top:10px;'>Tools & Tech</h5>", unsafe_allow_html=True)
 
-if st.session_state["sector"] is None:
+                tool_list = sector_tools[sector_name]
+                tools_html = "".join([f"<span class='tool-pill'>{tool}</span>" for tool in tool_list])
+                st.markdown(tools_html, unsafe_allow_html=True)
 
-    st.title("Data Analytics Solutions")
-    st.write("Pick a sector and explore:")
+                # Explore Button
+                if st.button(f"Explore", key=f"btn_{sector_name}"):
+                    st.session_state["sector"] = sector_name
 
-    for sector_name in sectors.keys():
-
-        st.markdown('<div class="sector-box">', unsafe_allow_html=True)
-
-        # Thumbnail
-        thumb_path = home_thumbs.get(sector_name)
-        if os.path.exists(thumb_path):
-            st.image(thumb_path, use_container_width=True)
-
-        # Title
-        st.markdown(
-            f"<h2 style='margin-top:10px; color:#064b86;'>{sector_name}</h2>",
-            unsafe_allow_html=True
-        )
-
-        # Overview
-        st.markdown(
-            f"<p style='font-size:15px; color:#444;'>{sector_overview[sector_name]}</p>",
-            unsafe_allow_html=True
-        )
-
-        # Tools header
-        st.markdown("<h4 style='margin-top:15px;'>Tools & Tech</h4>",
-                    unsafe_allow_html=True)
-
-        # Tools grid (5 per row)
-        tools = sector_tools[sector_name]
-        rows = [tools[i:i+5] for i in range(0, len(tools), 5)]
-
-        for row in rows:
-            cols = st.columns(5)
-            for col, tool in zip(cols, row):
-                with col:
-                    st.markdown(
-                        f"<div class='tool-card'>{tool}</div>",
-                        unsafe_allow_html=True
-                    )
-
-        # Explore button
-        if st.button(f"Explore {sector_name}", key=f"btn_{sector_name}"):
-            st.session_state["sector"] = sector_name
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# ==================================================================
-#                  INDIVIDUAL SECTOR PAGES
-# ==================================================================
-
-else:
-    sector = st.session_state["sector"]
-
-    st.title(f"{sector}")
-    st.write("Choose a use case:")
-
-    usecases = sectors[sector]
-    cols = st.columns(3)
-
-    for idx, usecase in enumerate(usecases):
-        with cols[idx % 3]:
-
-            st.markdown("""
-            <div style="border: 2px solid #064b86; border-radius: 12px; padding: 15px;
-            box-shadow: 0 0 10px rgba(6,75,134,0.2); margin-bottom: 25px;">
-            """, unsafe_allow_html=True)
-
-            if os.path.exists(usecase["image"]):
-                st.image(usecase["image"], use_container_width=True)
-
-            st.subheader(usecase["name"])
-
-            if st.button(f"Get Solution for {usecase['name']}", key=f"usecase_{usecase['name']}"):
-                st.write(f"Generating tailored solution for **{usecase['name']}**...")
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-    if st.button("Back to Home"):
-        st.session_state["sector"] = None
+                st.markdown("</div>", unsafe_allow_html=True)
