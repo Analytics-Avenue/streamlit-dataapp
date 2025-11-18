@@ -1,31 +1,78 @@
 import streamlit as st
 import os
 
-
 # -------------------------
 # Company Logo + Name
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 
 # --- Streamlit setup ---
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 
-# Hide default sidebar navigation (optional)
+st.markdown(f"""
+<div style="display:flex; align-items:center; margin-bottom:20px;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Hide Streamlit sidebar nav
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+
+
+# --- CSS for glow, cards, layout ---
+st.markdown("""
+<style>
+
+.sector-box {
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    transition: 0.3s;
+}
+
+.sector-box:hover {
+    border: 1px solid #4fa3ff;
+    box-shadow: 0 0 20px rgba(79,163,255,0.45);
+}
+
+.tool-card {
+    text-align: center;
+    padding: 15px 10px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    font-weight: 600;
+    transition: 0.25s;
+    font-size: 15px;
+}
+
+.tool-card:hover {
+    background: #e9f3ff;
+    border-color: #4fa3ff;
+    box-shadow: 0 0 15px rgba(79,163,255,0.4);
+    transform: translateY(-4px);
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # --- Paths ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+
 
 # --- Hierarchy Data ---
 sectors = {
@@ -69,6 +116,28 @@ home_thumbs = {
     "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
 }
 
+# Overview text for sectors
+overview_text = {
+    "Marketing Analytics": """
+Marketing analytics transforms campaigns from guesswork into data-backed performance engines. 
+It tracks customer behavior, conversions, funnels, budgets, retention and forecasting to make 
+marketing teams more strategic & revenue-focused. This helps optimize spending, improve customer 
+targeting, refine content and build long-term loyalty.  
+""",
+
+    "Real Estate Analytics": """
+Real estate analytics powers pricing intelligence, demand forecasting, customer profiling, 
+market insights and investment performance measurement. Developers, agents and investors make 
+faster and sharper decisions by understanding micro-markets, locality scoring and buyer sentiment.  
+""",
+
+    "Health Care Analytics": """
+Healthcare analytics improves patient care, hospital performance, treatment efficiency, 
+resource planning, cost optimization and workflow automation. It enhances doctor productivity, 
+reduces wait times and strengthens decision-making across the entire medical ecosystem.  
+"""
+}
+
 # --- Session state ---
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
@@ -87,38 +156,75 @@ if sidebar_choice == "Home":
 else:
     st.session_state["sector"] = sidebar_choice
 
-# --- Home Page ---
+
+# -------------------------
+# HOME PAGE
+# -------------------------
 if st.session_state["sector"] is None:
     st.title("Data Analytics Solutions")
     st.markdown("Welcome! Choose a sector to explore its use cases:")
 
     cols = st.columns(len(sectors))
+
     for idx, (sector_name, usecases) in enumerate(sectors.items()):
         with cols[idx]:
-            thumb_path = home_thumbs.get(sector_name)
-            if os.path.exists(thumb_path):
-                st.image(thumb_path, use_container_width=True)
+            thumb = home_thumbs.get(sector_name)
+            if os.path.exists(thumb):
+                st.image(thumb, use_container_width=True)
+
             st.markdown(f"### {sector_name}")
             st.write(f"{len(usecases)} use cases available.")
+
             if st.button(f"Explore {sector_name}", key=sector_name):
                 st.session_state["sector"] = sector_name
 
-# --- Sector Page ---
+
+# -------------------------
+# SECTOR PAGE
+# -------------------------
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
-    st.markdown("Select a use case to go to its project page:")
+
+    # Overview + Tools Section
+    st.markdown(f"""
+    <div class="sector-box">
+        <h3 style="color:#064b86;">Overview</h3>
+        <p style="font-size:16px; line-height:1.6;">
+            {overview_text[sector_name]}
+        </p>
+
+        <h3 style="color:#064b86; margin-top:25px;">Tools & Technologies Used</h3>
+
+        <div class="tool-grid">
+            <div class="tool-card">SQL</div>
+            <div class="tool-card">Python</div>
+            <div class="tool-card">Pandas</div>
+            <div class="tool-card">NumPy</div>
+            <div class="tool-card">Power BI</div>
+            <div class="tool-card">Machine Learning</div>
+            <div class="tool-card">Deep Learning</div>
+            <div class="tool-card">GenAI</div>
+            <div class="tool-card">APIs</div>
+            <div class="tool-card">Cloud Compute</div>
+        </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("## Projects")
 
     usecases = sectors[sector_name]
 
-    # Grid: 3 columns
+    # 3-column grid
     for i in range(0, len(usecases), 3):
         cols = st.columns(3)
         for j, uc in enumerate(usecases[i:i+3]):
             with cols[j]:
-                thumb_path = os.path.join(ASSETS_DIR, uc["image"])
-                if os.path.exists(thumb_path):
-                    st.image(thumb_path, use_container_width=True)
+                thumb = os.path.join(ASSETS_DIR, uc["image"])
+                if os.path.exists(thumb):
+                    st.image(thumb, use_container_width=True)
+
                 st.markdown(f"### {uc['name']}")
                 st.write("Explore insights and dashboards.")
 
