@@ -2,11 +2,17 @@ import streamlit as st
 import os
 
 # -------------------------
+# Streamlit page setup
+# -------------------------
+st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+
+# -------------------------
 # Company Logo + Name
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div style="display: flex; align-items: center;">
+<div style="display: flex; align-items: center; margin-bottom:20px;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
     <div style="line-height:1;">
         <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Analytics Avenue &</div>
@@ -15,15 +21,33 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Streamlit setup ---
-st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
-
-# --- Directories ---
+# -------------------------
+# DIRECTORIES
+# -------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# --- Sector Data ---
+# -------------------------
+# OVERVIEW TEXT (Add Yours)
+# -------------------------
+sector_overview = {
+    "Marketing Analytics": "Get insights into consumer behavior, campaign ROI, brand performance, funnels, and retention.",
+    "Real Estate Analytics": "Analyze pricing, investment opportunities, market trends, buyer sentiment, and locality insights.",
+    "Health Care Analytics": "Improve patient outcomes, hospital performance, routing efficiency, and clinical decision making."
+}
+
+# -------------------------
+# TOOLS FOR EACH SECTOR
+# -------------------------
+sector_tools = {
+    "Marketing Analytics": ["Python", "SQL", "Power BI", "Tableau", "Machine Learning", "Forecasting", "Marketing Mix Modelling"],
+    "Real Estate Analytics": ["Python", "SQL", "GIS", "Power BI", "ML Models", "Valuation Models", "Regression"],
+    "Health Care Analytics": ["Python", "SQL", "Power BI", "Predictive Analytics", "Routing Algorithms", "NLP"]
+}
+
+# -------------------------
+# SECTORS + UseCases
+# -------------------------
 sectors = {
     "Marketing Analytics": [
         {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
@@ -60,64 +84,92 @@ sectors = {
     ],
 }
 
-# --- Thumbnails for home cards ---
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
     "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
 }
 
-# --- Session state ---
+# -------------------------
+# SESSION STATE
+# -------------------------
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
+# -------------------------
+# GLOBAL CSS (Card UI)
+# -------------------------
+st.markdown("""
+<style>
 
+.card {
+    border: 2px solid #064b86;
+    border-radius: 14px;
+    padding: 15px;
+    background: white;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
+}
+
+.card:hover {
+    box-shadow: 0 0 25px rgba(6, 75, 134, 0.4);
+    transform: translateY(-3px);
+}
+
+.tool-tag {
+    display: inline-block;
+    background: #e8f1ff;
+    border: 1px solid #bcd4ff;
+    padding: 4px 8px;
+    margin: 3px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #064b86;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------
-# HOME PAGE (3 Cards Grid)
+# HOME PAGE (3 Card Grid)
 # -------------------------
-
 if st.session_state["sector"] is None:
 
     st.title("Data Analytics Solutions")
     st.write("Choose a sector to explore:")
 
-    sector_names = list(sectors.keys())
-
-    # 3 card grid
-    rows = [sector_names[i:i+3] for i in range(0, len(sector_names), 3)]
+    sector_list = list(sectors.keys())
+    rows = [sector_list[i:i+3] for i in range(0, len(sector_list), 3)]
 
     for row in rows:
         cols = st.columns(3)
-
         for col, sector_name in zip(cols, row):
             with col:
-                st.markdown("<div class='card-box'>", unsafe_allow_html=True)
+                st.markdown("<div class='card'>", unsafe_allow_html=True)
 
-                # thumbnail
-                thumb_path = home_thumbs.get(sector_name)
-                if os.path.exists(thumb_path):
-                    st.image(thumb_path, use_container_width=True)
+                thumb = home_thumbs.get(sector_name)
+                if os.path.exists(thumb):
+                    st.image(thumb, use_container_width=True)
 
-                # title
-                st.markdown(
-                    f"<h3 style='color:#064b86; margin-top:10px;'>{sector_name}</h3>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<h3 style='color:#064b86;'>{sector_name}</h3>", unsafe_allow_html=True)
 
-                # usecase count
-                st.write(f"{len(sectors[sector_name])} use cases available.")
+                st.markdown(f"<p>{sector_overview[sector_name]}</p>", unsafe_allow_html=True)
 
-                # button
-                if st.button(f"Explore {sector_name}", key=f"home_{sector_name}"):
+                st.markdown("<p><strong>Tools & Tech:</strong></p>", unsafe_allow_html=True)
+
+                # Tools grid inside card
+                for tool in sector_tools[sector_name]:
+                    st.markdown(f"<span class='tool-tag'>{tool}</span>", unsafe_allow_html=True)
+
+                if st.button(f"Explore {sector_name}", key=f"go_{sector_name}"):
                     st.session_state["sector"] = sector_name
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------
-# SECTOR PAGE (Usecase grid)
+# SECTOR PAGE (Usecase Grid)
 # -------------------------
-
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
@@ -129,15 +181,15 @@ else:
 
         for j, uc in enumerate(usecases[i:i+3]):
             with cols[j]:
-                st.markdown("<div class='card-box'>", unsafe_allow_html=True)
+                st.markdown("<div class='card'>", unsafe_allow_html=True)
 
-                img_path = os.path.join(ASSETS_DIR, uc["image"])
-                if os.path.exists(img_path):
-                    st.image(img_path, use_container_width=True)
+                img = os.path.join(ASSETS_DIR, uc["image"])
+                if os.path.exists(img):
+                    st.image(img, use_container_width=True)
 
                 st.markdown(f"### {uc['name']}")
 
-                if st.button(f"Open", key=uc["name"]):
+                if st.button("Open", key=uc["name"]):
                     st.switch_page(f"pages/{uc['page']}")
 
                 st.markdown("</div>", unsafe_allow_html=True)
