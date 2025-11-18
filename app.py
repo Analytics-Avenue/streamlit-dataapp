@@ -230,18 +230,20 @@ else:
                 # Title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Open button: dynamically run the page script
-                if st.button("Open", key=f"{sector_name}_{uc['name']}"):
-                    import runpy
-                    page_path = os.path.join("pages", uc['page'])
-                    if os.path.exists(page_path):
-                        runpy.run_path(page_path)
-                        st.stop()
-                    else:
-                        st.error(f"Page not found: {page_path}")
+                # Open button as HTML link (new tab)
+                page_url = f"./pages/{uc['page']}"
+                st.markdown(f"""
+                    <a href="{page_url}" target="_blank" 
+                       style="text-decoration:none;">
+                       <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
+                           Open
+                       </div>
+                    </a>
+                """, unsafe_allow_html=True)
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
+
