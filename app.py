@@ -1,27 +1,15 @@
 import streamlit as st
 import os
 
-# -------------------------
-# Company Logo + Name
-# -------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Advanced Analytics</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# --- Streamlit setup ---
+# ----------------------------------------
+# Page Setup
+# ----------------------------------------
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
-# -------------------------
-# GLOBAL CSS
-# -------------------------
+# ----------------------------------------
+# Global CSS
+# ----------------------------------------
 st.markdown("""
 <style>
 
@@ -42,59 +30,119 @@ st.markdown("""
     transform: scale(1.05);
 }
 
-/* Card styles */
 .card-box {
     border: 1px solid #c9d7f0;
     border-radius: 12px;
     padding: 15px;
     background: #ffffff;
+    min-height: 540px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     transition: all 0.25s ease-in-out;
     margin-bottom: 25px;
 }
 
-/* Hover effect */
 .card-box:hover {
     transform: translateY(-6px);
     box-shadow: 0 4px 18px rgba(0,0,0,0.18);
     border-color: #8bb3ff;
 }
 
-/* Thumbnail styling */
 .card-box img {
     border-radius: 8px;
     outline: 1px solid #dce7ff;
     transition: 0.25s;
 }
 
-/* Thumbnail glow */
 .card-box:hover img {
     outline-color: #8bb3ff;
     box-shadow: 0 0 8px rgba(140,170,255,0.5);
 }
 
+.sector-title {
+    color: #064b86;
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.sector-overview {
+    font-size: 14.5px;
+    color: #444;
+    text-align: justify;
+    margin-bottom: 10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# Directories
-# -------------------------
+# ----------------------------------------
+# Logo and Company Header
+# ----------------------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ----------------------------------------
+# Directories for thumbnails
+# ----------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# -------------------------
-# Sector Data
-# -------------------------
+# ----------------------------------------
+# Detailed Sector Overviews
+# ----------------------------------------
 sector_overview = {
-    "Marketing Analytics": "Unlock customer insights, forecast trends, and track real-time campaign performance.",
-    "Real Estate Analytics": "Evaluate market trends, forecast pricing, and analyze property investment insights.",
-    "Health Care Analytics": "Enhance patient experience, streamline hospital operations, and increase care efficiency."
+    "Marketing Analytics": (
+        "Marketing analytics transforms raw customer interactions into actionable business insight. "
+        "It enables brands to understand patterns in campaign performance, optimize audience targeting, "
+        "improve ROI visibility, and strengthen customer retention strategies. Modern analytics also "
+        "combines automation, machine learning, and cross-channel attribution to deliver unified "
+        "performance dashboards. When implemented well, it becomes the backbone of scalable growth. "
+        "This helps businesses make informed decisions and win in competitive digital environments."
+    ),
+
+    "Real Estate Analytics": (
+        "Real estate analytics provides a deep understanding of market movement, buyer preferences, "
+        "and property valuation trends. It enables forecasting of price fluctuations, rental demand, "
+        "and investment viability using structured models. With geospatial intelligence, investors "
+        "can assess neighborhood growth and infrastructure impact. Developers benefit from sales "
+        "performance insights and customer segmentation. Ultimately, analytics helps de-risk decisions "
+        "and improve project profitability at every stage."
+    ),
+
+    "Health Care Analytics": (
+        "Healthcare analytics enhances patient outcomes by optimizing hospital operations and predicting "
+        "resource requirements. It uses structured and unstructured medical data to identify patterns "
+        "in diseases, patient flow, and treatment efficiency. Strong analytics systems support "
+        "emergency forecasting, readmission risk scoring, and cost reduction programs. Hospitals can "
+        "minimize bottlenecks, reduce wait time, and deploy staff effectively. This creates a more "
+        "efficient, patient-centric care ecosystem."
+    )
 }
 
+# ----------------------------------------
+# Tools (Filtered & Popular Only)
+# ----------------------------------------
 sector_tools = {
-    "Marketing Analytics": ["Python", "SQL", "Power BI", "Tableau", "ML Models", "Pandas", "NLP"],
-    "Real Estate Analytics": ["Python", "GIS", "Regression", "Time Series", "Power BI", "GeoSpatial", "ETL"],
-    "Health Care Analytics": ["Python", "R", "Power BI", "Forecasting", "ML Models", "NLP"]
+    "Marketing Analytics": [
+        "Python", "SQL", "Power BI", "Tableau", "Google Analytics 4",
+        "Google Ads", "Meta Ads", "CRM Data", "Pandas", "ML Models"
+    ],
+    "Real Estate Analytics": [
+        "Python", "Power BI", "SQL", "Regression Models", "GeoPandas",
+        "QGIS", "Time Series", "Forecasting", "ETL"
+    ],
+    "Health Care Analytics": [
+        "Python", "R", "SQL", "Power BI", "EMR/EHR Data",
+        "Forecasting Models", "ML Models", "NLP"
+    ]
 }
 
 home_thumbs = {
@@ -103,68 +151,52 @@ home_thumbs = {
     "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
 }
 
-# -------------------------
+# ----------------------------------------
 # Session State
-# -------------------------
+# ----------------------------------------
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
-# ============================================================
-# HOME PAGE (GRID OF 3 CARDS)
-# ============================================================
-
+# ----------------------------------------
+# HOME PAGE
+# ----------------------------------------
 if st.session_state["sector"] is None:
 
     st.title("Data Analytics Solutions")
     st.write("Choose a sector to explore:")
 
-    sector_names = list(sector_overview.keys())
-
-    # Make rows of 3 cards
-    rows = [sector_names[i:i+3] for i in range(0, len(sector_names), 3)]
+    sectors = list(sector_overview.keys())
+    rows = [sectors[i:i+3] for i in range(0, len(sectors), 3)]
 
     for row in rows:
         cols = st.columns(3)
-        for col, sector_name in zip(cols, row):
+        for col, sector in zip(cols, row):
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
 
-                # Thumbnail
-                thumb_path = home_thumbs.get(sector_name)
-                if os.path.exists(thumb_path):
-                    st.image(thumb_path, use_container_width=True)
+                thumb = home_thumbs.get(sector)
+                if os.path.exists(thumb):
+                    st.image(thumb, use_container_width=True)
 
-                # Title
-                st.markdown(
-                    f"<h3 style='color:#064b86; margin-top:10px;'>{sector_name}</h3>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<div class='sector-title'>{sector}</div>", unsafe_allow_html=True)
+                st.markdown(f"<p class='sector-overview'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
 
-                # Overview
-                st.markdown(
-                    f"<p style='font-size:14.5px; color:#444;'>{sector_overview[sector_name]}</p>",
-                    unsafe_allow_html=True
-                )
-
-                # Tools grid
                 st.markdown("<b>Tools & Tech:</b><br>", unsafe_allow_html=True)
-                tools = sector_tools[sector_name]
+                tools = sector_tools[sector]
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in tools])
                 st.markdown(tool_html, unsafe_allow_html=True)
 
-                # Explore button
-                if st.button(f"Explore {sector_name}", key=f"explr_{sector_name}"):
-                    st.session_state["sector"] = sector_name
+                if st.button(f"Explore {sector}", key=f"btn_{sector}"):
+                    st.session_state["sector"] = sector
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================================
+# ----------------------------------------
 # SECTOR PAGE
-# ============================================================
-
+# ----------------------------------------
 else:
-    sector_name = st.session_state["sector"]
-    st.header(f"{sector_name} – Use Cases Coming Soon")
+    sector = st.session_state["sector"]
+    st.header(f"{sector} – Use Cases Coming Soon")
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
