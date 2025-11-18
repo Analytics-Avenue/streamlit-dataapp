@@ -19,43 +19,6 @@ st.markdown(f"""
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
-# -------------------------
-# GLOBAL CSS
-# -------------------------
-st.markdown("""
-<style>
-.card-box {
-    border: 2px solid #064b86;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 25px;
-    background: #ffffff;
-    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
-    transition: 0.25s;
-}
-.card-box:hover {
-    box-shadow: 0 0 22px rgba(6, 75, 134, 0.45);
-    transform: translateY(-4px);
-}
-
-.tool-btn {
-    background: #e8f1ff;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 12px;
-    border: 1px solid #bcd2ff;
-    text-align: center;
-    font-weight: 600;
-    margin: 3px;
-    display: inline-block;
-    transition: 0.2s;
-}
-.tool-btn:hover {
-    background: #d8e8ff;
-    transform: scale(1.05);
-}
-</style>
-""", unsafe_allow_html=True)
 
 # -------------------------
 # Directories
