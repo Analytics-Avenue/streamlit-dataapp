@@ -126,16 +126,38 @@ with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
     <div class='metric-card'>
-        Track customer retention, predict churn probability, and identify at-risk segments for proactive engagement.
+        This app provides <b>end-to-end customer retention & churn analysis</b>. 
+        Track which customers stay, which churn, and identify at-risk segments for proactive engagement. 
+        Aggregate historical behavior, spending, and engagement metrics to gain actionable insights and forecast churn probability.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Capabilities")
+    st.markdown("""
+    <div class='metric-card'>
+        • Multi-dimensional retention analysis by Channel, Device, Country, AgeGroup, and Gender<br>
+        • Churn probability prediction using <b>RandomForest Classifier</b><br>
+        • Monthly retention trends and customer lifecycle insights<br>
+        • Automated identification of at-risk segments<br>
+        • Downloadable insights & ML predictions for reporting
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card'>Total Customers</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Churned Customers</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Retention Rate</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Avg Order Value</div>", unsafe_allow_html=True)
+    k1.markdown("<div class='metric-card' title='Total number of customers in the dataset'>Total Customers</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card' title='Number of churned customers'>Churned Customers</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card' title='Percentage of customers retained'>Retention Rate</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card' title='Average order value across customers'>Avg Order Value</div>", unsafe_allow_html=True)
+
+    st.markdown("### Automated Insights")
+    st.markdown("""
+    <div class='metric-card'>
+        • Identify top and bottom performing channels based on retention<br>
+        • Highlight segments (AgeGroup, Gender, Device, Country) with high churn<br>
+        • Downloadable insights table for executive reporting
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Application Tab
@@ -145,6 +167,7 @@ with tabs[1]:
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
 
+    # --- Dataset loading ---
     if mode == "Default dataset":
         DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/customer_retention.csv"
         try:
@@ -156,7 +179,6 @@ with tabs[1]:
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
-
     elif mode == "Upload CSV":
         uploaded = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded is not None:
@@ -165,8 +187,7 @@ with tabs[1]:
             df = auto_map_columns(df)
             st.success("File uploaded")
             st.dataframe(df.head())
-
-    else:  # Upload + mapping
+    else:
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
         if uploaded is not None:
             raw = pd.read_csv(uploaded)
@@ -186,20 +207,18 @@ with tabs[1]:
                     st.success("Mapping applied.")
                     st.dataframe(df.head())
 
-    if df is None:
-        st.stop()
+    if df is None: st.stop()
 
-    # Type conversions
+    # --- Type conversions ---
     df = ensure_datetime(df, "SignUp_Date")
     df = ensure_datetime(df, "Last_Active_Date")
-    for col in ["Total_Spend", "Total_Orders", "Avg_Order_Value"]:
+    for col in ["Total_Spend","Total_Orders","Avg_Order_Value"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
     if "Churn_Flag" in df.columns:
         df["Churn_Flag"] = df["Churn_Flag"].astype(int)
 
-    # Filters
-    st.markdown("### Filters")
+    # --- Filters ---
     channels = sorted(df["Channel"].dropna().unique()) if "Channel" in df.columns else []
     countries = sorted(df["Country"].dropna().unique()) if "Country" in df.columns else []
     devices = sorted(df["Device"].dropna().unique()) if "Device" in df.columns else []
@@ -217,7 +236,7 @@ with tabs[1]:
     st.dataframe(filt.head(5))
     download_df(filt.head(5), "filtered_customers.csv")
 
-    # KPIs
+    # --- KPIs ---
     st.markdown("### Key Metrics")
     k1,k2,k3,k4 = st.columns(4)
     k1.metric("Total Customers", len(filt))
@@ -225,29 +244,24 @@ with tabs[1]:
     k3.metric("Retention Rate", f"{100*(1-filt['Churn_Flag'].mean()):.2f}%" if "Churn_Flag" in filt.columns else "N/A")
     k4.metric("Avg Order Value", f"₹ {filt['Avg_Order_Value'].mean():,.2f}" if "Avg_Order_Value" in filt.columns else "N/A")
 
-
-    # Retention chart
+    # --- Retention Chart ---
     if "SignUp_Date" in filt.columns and "Churn_Flag" in filt.columns:
         retention = filt.groupby(filt["SignUp_Date"].dt.to_period("M")).agg(
             Total_Customers=("Customer_ID","count"),
             Churned=("Churn_Flag","sum")
         ).reset_index()
-        
-        # Convert Period to Timestamp
         retention["SignUp_Date"] = retention["SignUp_Date"].dt.to_timestamp()
-        
         retention["Retention_Rate"] = 1 - retention["Churned"]/retention["Total_Customers"]
         fig = px.line(retention, x="SignUp_Date", y="Retention_Rate", title="Monthly Retention Rate", markers=True)
         st.plotly_chart(fig, use_container_width=True)
-    
-    
-    # ML: Churn prediction
-    st.markdown("### ML: Predict churn probability")
+
+    # --- ML: Churn Prediction + Downloadable ---
+    st.markdown("### ML: Predict Churn Probability")
     if len(filt) > 40:
         feat_cols = ["Total_Spend","Total_Orders","Avg_Order_Value","Channel","Device","Country","AgeGroup","Gender"]
         feat_cols = [c for c in feat_cols if c in filt.columns]
         X = filt[feat_cols].copy()
-        y = filt["Churn_Flag"] if "Churn_Flag" in filt.columns else None
+        y = filt["Churn_Flag"]
         cat_cols = [c for c in X.columns if X[c].dtype == "object"]
         num_cols = [c for c in X.columns if c not in cat_cols]
         preprocessor = ColumnTransformer(transformers=[
@@ -260,8 +274,23 @@ with tabs[1]:
         with st.spinner("Training RandomForest for churn prediction..."):
             rf.fit(X_train, y_train)
         preds = rf.predict_proba(X_test)[:,1]
-        st.write("Sample predicted churn probabilities (first 10 rows):")
-        st.dataframe(pd.DataFrame({"Customer_ID":filt["Customer_ID"].iloc[:len(preds)], "Churn_Prob":preds}).head(10))
+
+        df_preds = pd.DataFrame({
+            "Customer_ID": filt["Customer_ID"].iloc[:len(preds)],
+            "Churn_Prob": preds
+        })
+        st.dataframe(df_preds.head(10))
+        download_df(df_preds, "churn_predictions.csv")
     else:
         st.info("Not enough data to train ML model (min 40 rows).")
 
+    # --- Automated Insights Table + Download ---
+    st.markdown("### Automated Insights Table")
+    if "Churn_Flag" in filt.columns:
+        insights = filt.groupby(["Channel","Device","Country","AgeGroup","Gender"]).agg(
+            Total_Customers=("Customer_ID","count"),
+            Churned=("Churn_Flag","sum")
+        ).reset_index()
+        insights["Retention_Rate"] = 1 - insights["Churned"]/insights["Total_Customers"]
+        st.dataframe(insights)
+        download_df(insights, "automated_insights.csv")
