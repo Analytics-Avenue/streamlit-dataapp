@@ -71,24 +71,7 @@ home_thumbs = {
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
-# ------------------------
-# CLEAN CARD CSS
-# ------------------------
-st.markdown("""
-<style>
-.card-box {
-    border: 2px solid #064b86;
-    border-radius: 14px;
-    padding: 18px;
-    background: white;
-    margin-bottom: 30px;
-}
-.card-box:hover {
-    transform: translateY(-4px);
-    transition: 0.2s;
-}
-</style>
-""", unsafe_allow_html=True)
+
 
 # -------------------------
 # HOME PAGE (3 Cards Grid)
