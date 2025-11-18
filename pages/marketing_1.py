@@ -29,25 +29,18 @@ st.markdown(f"""
 # -------------------------------
 st.markdown("""
 <style>
-[data-testid="stSidebarNav"] {display: none;}
-section[data-testid="stSidebar"] {display: none;}
 .big-header {
-    font-size: 40px;
+    font-size: 36px;
     font-weight: 900;
-    background: linear-gradient(90deg,#FF6B6B,#FFD93D);
-    -webkit-background-clip: text; 
-    -webkit-text-fill-color: transparent;
+    color: black !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: unset !important;
 }
-.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center;}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-    "<div class='big-header' style='color:black; font-size:36px; font-weight:bold;'>Marketing Campaign Performance Analyzer</div>",
-    unsafe_allow_html=True
-)
+st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
 # -------------------------------
 # REQUIRED COLUMNS
