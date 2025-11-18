@@ -207,7 +207,9 @@ if st.session_state["sector"] is None:
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================================
+
+
+
 # ============================================================
 # SECTOR PAGE (Projects / Use Cases)
 # ============================================================
@@ -217,6 +219,9 @@ else:
 
     usecases = sectors[sector_name]
     rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
+
+    # Get current app URL
+    base_url = st.experimental_get_url().split('?')[0]
 
     for row in rows:
         cols = st.columns(3)
@@ -230,10 +235,11 @@ else:
                 # Title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Open button as HTML link (new tab)
-                page_url = f"./pages/{uc['page']}"
+                # Open button as HTML link with query param, opens in new tab
+                page_param = uc['page'].replace(".py", "")
+                open_url = f"{base_url}?page={page_param}"
                 st.markdown(f"""
-                    <a href="{page_url}" target="_blank" 
+                    <a href="{open_url}" target="_blank" 
                        style="text-decoration:none;">
                        <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
                            Open
@@ -246,4 +252,3 @@ else:
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
-
