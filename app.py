@@ -1,78 +1,89 @@
-# app.py
 import streamlit as st
 import os
 
 # -------------------------
-# Config / Assets
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+
+# Custom CSS for glow, hover, cards
+st.markdown("""
+<style>
+
+.sector-box {
+    border: 2px solid #064b86;
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
+    background: white;
+}
+
+.sector-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(6, 75, 134, 0.6);
+    border-color: #0a6cc4;
+}
+
+.tool-card {
+    background: #f7faff;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #dce6f5;
+    box-shadow: 0 0 5px rgba(6, 75, 134, 0.15);
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.tool-card:hover {
+    background: #e9f1ff;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Streamlit Setup
 # -------------------------
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+# Hide default sidebar navigation
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""",
+            unsafe_allow_html=True)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+# Logo + Title
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Paths
+# -------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# make sure assets dir exists (no crash)
-if not os.path.isdir(ASSETS_DIR):
-    # no big deal — we'll just use the logo_url instead of local thumbs
-    os.makedirs(ASSETS_DIR, exist_ok=True)
-
 # -------------------------
-# CSS (glow + cards)
-# -------------------------
-st.markdown(
-    """
-<style>
-.header-row { display:flex; align-items:center; margin-bottom:18px; }
-.header-row img { margin-right:10px; }
-.sector-box {
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e6e6e6;
-    transition: 0.3s;
-}
-.sector-box:hover {
-    border: 1px solid #4fa3ff;
-    box-shadow: 0 0 20px rgba(79,163,255,0.35);
-}
-.tool-card {
-    text-align: center;
-    padding: 12px 8px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
-    font-weight: 600;
-    transition: 0.2s;
-    font-size: 14px;
-}
-.tool-card:hover {
-    background: #e9f3ff;
-    border-color: #4fa3ff;
-    box-shadow: 0 0 12px rgba(79,163,255,0.28);
-    transform: translateY(-4px);
-}
-.tool-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; }
-.sector-thumb { border-radius: 8px; }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-# -------------------------
-# Data (hierarchy)
+# Sector + Usecase Data
 # -------------------------
 sectors = {
     "Marketing Analytics": [
         {"name": "Marketing Campaign Performance Analyzer", "image": "marketing_thumb.jpg", "page": "marketing_1.py"},
         {"name": "Marketing Intelligence & Forecasting Lab", "image": "marketing_thumb.jpg", "page": "marketing_2.py"},
-        {"name": "Click & Conversion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
+        {"name": "Click & Convertion Analytics", "image": "marketing_thumb.jpg", "page": "marketing_3.py"},
         {"name": "Marketing Performance Analysis", "image": "marketing_thumb.jpg", "page": "marketing_4.py"},
         {"name": "Content & SEO Performance Dashboard", "image": "marketing_thumb.jpg", "page": "marketing_5.py"},
         {"name": "Customer Retention & Churn Analysis", "image": "marketing_thumb.jpg", "page": "marketing_6.py"},
-        {"name": "Customer Journey & Funnel Insights", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
-        {"name": "Google Ads Performance Analytics", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
-        {"name": "Email & WhatsApp Marketing Forecast Lab", "image": "marketing_thumb.jpg", "page": "marketing_9.py"},
+        {"name": "Customer Journey & Funnel Insights,", "image": "marketing_thumb.jpg", "page": "marketing_7.py"},
+        {"name": "Google Ads Performance Analytics.", "image": "marketing_thumb.jpg", "page": "marketing_8.py"},
+        {"name": "Email & WhatsApp Marketing Forecast Lab", "image": "marketing_thumb.jpg", "page": "marketing_9.py"}, 
     ],
     "Real Estate Analytics": [
         {"name": "Real Estate Intelligence Suite", "image": "real_estate_thumb.jpg", "page": "usecase_real_estate_1.py"},
@@ -87,56 +98,55 @@ sectors = {
         {"name": "Real Estate Intelligence — Hybrid Dashboard (Property + CRM)", "image": "real_estate_thumb.jpg", "page": "realestate.py"},
     ],
     "Health Care Analytics": [
-        {"name": "Healthscope Insights", "image": "healthcare_thumb.jpg", "page": "healthcare_1.py"},
-        {"name": "Patient Visit Analytics & Hospital Performance", "image": "healthcare_thumb.jpg", "page": "healthcare_2.py"},
-        {"name": "PatientFlow Navigator", "image": "healthcare_thumb.jpg", "page": "healthcare_3.py"},
-        {"name": "Ambulance Ops & Routing Lab", "image": "healthcare_thumb.jpg", "page": "healthcare_4.py"},
-        {"name": "Health Care Analytics1", "image": "healthcare_thumb.jpg", "page": "healthcare_5.py"},
-        {"name": "Health Care Analytics2", "image": "healthcare_thumb.jpg", "page": "healthcare_6.py"},
+        {"name": "Healthscope Insights", "image": "real_estate_thumb.jpg", "page": "healthcare_1.py"},
+        {"name": "Patient Visit Analytics & Hospital Performance", "image": "real_estate_thumb.jpg", "page": "healthcare_2.py"},
+        {"name": "PatientFlow Navigator", "image": "real_estate_thumb.jpg", "page": "healthcare_3.py"},
+        {"name": "Ambulance Ops & Routing Lab", "image": "real_estate_thumb.jpg", "page": "healthcare_4.py"},
+        {"name": "Health Care Analytics1", "image": "real_estate_thumb.jpg", "page": "healthcare_5.py"},
+        {"name": "Health Care Analytics2", "image": "real_estate_thumb.jpg", "page": "healthcare_6.py"},
     ],
 }
 
-# Local thumbnails mapping (if local file exists)
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
     "Health Care Analytics": os.path.join(ASSETS_DIR, "healthcare_thumb.jpg"),
 }
 
-overview_text = {
-    "Marketing Analytics": (
-        "Marketing analytics transforms campaigns from guesswork into data-backed performance engines. "
-        "It tracks customer behavior, conversions, funnels, budgets, retention and forecasting to make "
-        "marketing teams more strategic & revenue-focused. This helps optimize spending, improve customer "
-        "targeting, refine content and build long-term loyalty."
-    ),
-    "Real Estate Analytics": (
-        "Real estate analytics powers pricing intelligence, demand forecasting, customer profiling, "
-        "market insights and investment performance measurement. Developers, agents and investors make "
-        "faster and sharper decisions by understanding micro-markets, locality scoring and buyer sentiment."
-    ),
-    "Health Care Analytics": (
-        "Healthcare analytics improves patient care, hospital performance, treatment efficiency, "
-        "resource planning, cost optimization and workflow automation. It enhances doctor productivity, "
-        "reduces wait times and strengthens decision-making across the entire medical ecosystem."
-    ),
+# -------------------------
+# Sector Overview Text
+# -------------------------
+sector_overview = {
+    "Marketing Analytics": "Unlock demand, optimize campaigns, decode customer intent, and drive measurable brand outcomes.",
+    "Real Estate Analytics": "Forecast prices, analyze micro-markets, evaluate ROI, and uncover investment-ready opportunities.",
+    "Health Care Analytics": "Improve patient care, optimize hospital operations, and drive data-backed medical decisions."
 }
 
 # -------------------------
-# Session state + Sidebar
+# Tools for Each Sector
+# -------------------------
+sector_tools = {
+    "Marketing Analytics": ["SQL", "Python", "Power BI", "Machine Learning", "Forecasting Models", "Customer Segmentation", "GenAI"],
+    "Real Estate Analytics": ["SQL", "Python", "Predictive Modeling", "GIS Mapping", "Clustering Models", "Power BI", "GenAI"],
+    "Health Care Analytics": ["SQL", "Python", "Time-Series Models", "Operational Dashboards", "ML", "Power BI", "GenAI"]
+}
+
+# -------------------------
+# Session State
 # -------------------------
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
+# -------------------------
+# Sidebar Navigation
+# -------------------------
 st.sidebar.title("Navigation")
-all_options = ["Home"] + list(sectors.keys())
-# ensure index calculation is safe
-try:
-    default_index = all_options.index("Home") if st.session_state["sector"] is None else all_options.index(st.session_state["sector"])
-except ValueError:
-    default_index = 0
 
-sidebar_choice = st.sidebar.radio("Go to:", all_options, index=default_index)
+sidebar_choice = st.sidebar.radio(
+    "Go to:",
+    ["Home"] + list(sectors.keys()),
+    index=0 if st.session_state["sector"] is None else list(sectors.keys()).index(st.session_state["sector"]) + 1
+)
 
 if sidebar_choice == "Home":
     st.session_state["sector"] = None
@@ -144,112 +154,58 @@ else:
     st.session_state["sector"] = sidebar_choice
 
 # -------------------------
-# Header (common)
-# -------------------------
-st.markdown(
-    f"""
-<div class="header-row">
-    <img src="{logo_url}" width="60" />
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:30px; font-weight:700;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:30px; font-weight:700;">Advanced Analytics</div>
-    </div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-# -------------------------
-# HOME PAGE: show only MAIN SECTORS
+# HOME PAGE
 # -------------------------
 if st.session_state["sector"] is None:
     st.title("Data Analytics Solutions")
-    st.markdown("Welcome — pick a sector to explore its use cases:")
+    st.write("Pick a sector and explore:")
 
-    sector_names = list(sectors.keys())
-    # show sectors in columns (responsive-ish)
-    cols = st.columns(len(sector_names))
-    for idx, name in enumerate(sector_names):
+    cols = st.columns(len(sectors))
+
+    for idx, (sector_name, usecases) in enumerate(sectors.items()):
         with cols[idx]:
-            thumb_path = home_thumbs.get(name)
-            # if local thumb exists, use it; otherwise fallback to logo_url
-            if thumb_path and os.path.exists(thumb_path):
-                st.image(thumb_path, use_column_width="always", caption=name, output_format="auto")
-            else:
-                # fallback image
-                st.image(logo_url, use_column_width="always", caption=name)
-            st.markdown(f"### {name}")
-            st.write(f"{len(sectors[name])} use cases available.")
-            # clicking sets session state and re-renders to sector page
-            if st.button(f"Explore {name}", key=f"explore_{name}"):
-                st.session_state["sector"] = name
-                # force rerun so sidebar reflects change
-                st.experimental_rerun()
+            st.markdown('<div class="sector-box">', unsafe_allow_html=True)
 
+            thumb_path = home_thumbs.get(sector_name)
+            if os.path.exists(thumb_path):
+                st.image(thumb_path, use_container_width=True)
+
+            st.markdown(f"### {sector_name}")
+
+            st.markdown(
+                f"<p style='font-size:14px; color:#333;'>{sector_overview[sector_name]}</p>",
+                unsafe_allow_html=True
+            )
+
+            st.markdown("**Tools & Tech:**")
+
+            for tool in sector_tools[sector_name]:
+                st.markdown(f"<div class='tool-card'>{tool}</div>", unsafe_allow_html=True)
+
+            if st.button(f"Explore {sector_name}", key=f"btn_{sector_name}"):
+                st.session_state["sector"] = sector_name
+
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------
-# SECTOR PAGE: list projects for chosen sector
+# SECTOR PAGE
 # -------------------------
 else:
     sector_name = st.session_state["sector"]
     st.header(f"{sector_name} Use Cases")
+    st.markdown("Select a use case to open its dashboard:")
 
-    # Overview box
-    desc = overview_text.get(sector_name, "Overview not available for this sector.")
-    st.markdown(
-        f"""
-    <div class="sector-box">
-        <h3 style="color:#064b86; margin-bottom:6px;">Overview</h3>
-        <p style="font-size:15px; line-height:1.6; margin-top:0;">{desc}</p>
+    usecases = sectors[sector_name]
 
-        <h4 style="color:#064b86; margin-top:18px;">Tools & Technologies Used</h4>
-        <div class="tool-grid">
-            <div class="tool-card">SQL</div>
-            <div class="tool-card">Python</div>
-            <div class="tool-card">Pandas</div>
-            <div class="tool-card">NumPy</div>
-            <div class="tool-card">Power BI</div>
-            <div class="tool-card">Machine Learning</div>
-            <div class="tool-card">Deep Learning</div>
-            <div class="tool-card">GenAI</div>
-            <div class="tool-card">APIs</div>
-            <div class="tool-card">Cloud Compute</div>
-        </div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("---")
-    st.markdown("## Projects")
-
-    usecases = sectors.get(sector_name, [])
-
-    # show projects in 3-column rows
     for i in range(0, len(usecases), 3):
-        row = usecases[i : i + 3]
         cols = st.columns(3)
-        for j, uc in enumerate(row):
+        for j, uc in enumerate(usecases[i:i+3]):
             with cols[j]:
-                thumb = os.path.join(ASSETS_DIR, uc.get("image", ""))
-                if uc.get("image") and os.path.exists(thumb):
-                    st.image(thumb, use_column_width=True)
-                else:
-                    # small fallback image
-                    st.image(logo_url, width=150)
+                thumb_path = os.path.join(ASSETS_DIR, uc["image"])
+                if os.path.exists(thumb_path):
+                    st.image(thumb_path, use_container_width=True)
                 st.markdown(f"### {uc['name']}")
                 st.write("Explore insights and dashboards.")
 
-                # attempt to switch page if supported; otherwise show intended page path
-                if st.button(f"Open {uc['name']}", key=f"open_{sector_name}_{j}"):
-                    try:
-                        # newer Streamlit has st.switch_page
-                        st.switch_page(f"pages/{uc['page']}")
-                    except Exception:
-                        st.warning(
-                            "Your Streamlit version doesn't support programmatic page switching. "
-                            f"Intended page: pages/{uc['page']}. You can navigate manually or upgrade Streamlit."
-                        )
-
-# footer (small)
-st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
+                if st.button(f"Go to {uc['name']}", key=uc["name"]):
+                    st.switch_page(f"pages/{uc['page']}")
