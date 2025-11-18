@@ -12,6 +12,20 @@ section[data-testid="stSidebar"] {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 REQUIRED_COLS = [
     "City", "Property_Type", "Price", "Latitude", "Longitude", "Buyer_Sentiment"
 ]
