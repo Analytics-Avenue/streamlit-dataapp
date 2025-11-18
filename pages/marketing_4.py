@@ -164,10 +164,10 @@ with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-        This app delivers **end-to-end marketing performance tracking**, across campaigns, channels, creatives, and audience segments. 
-        It aggregates campaign data, measures effectiveness, predicts revenue and conversions using **machine learning**, 
-        and provides **forecasting** for short- and medium-term decision-making. 
-        Built for **data-driven marketing teams**, the app gives actionable insights at a glance.
+        This app delivers <b>end-to-end marketing performance tracking</b>, across campaigns, channels, creatives, and audience segments. 
+        It aggregates campaign data, measures effectiveness, predicts revenue and conversions using <b>machine learning</b>, 
+        and provides <b>forecasting</b> for short- and medium-term decision-making. 
+        Built for <b>data-driven marketing teams</b>, the app gives actionable insights at a glance.
     </div>
     """, unsafe_allow_html=True)
 
@@ -177,7 +177,7 @@ with tabs[0]:
         • Multi-channel campaign tracking with breakdowns by channel, device, audience segment<br>
         • Audience analysis by Age, Gender, Device, and other demographic segments<br>
         • Creative performance insights: AdSet & Creative level ROI<br>
-        • Predictive analytics: Revenue & Conversion forecasting using RandomForest & Linear Regression<br>
+        • Predictive analytics: Revenue & Conversion forecasting using <b>RandomForest</b> & <b>Linear Regression</b><br>
         • Campaign optimization suggestions & ROI comparisons<br>
         • Automated insights highlighting best and worst-performing segments
     </div>
@@ -186,7 +186,7 @@ with tabs[0]:
     st.markdown("### Impact")
     st.markdown("""
     <div class='card'>
-        • Make **data-driven marketing decisions** faster<br>
+        • Make <b>data-driven marketing decisions</b> faster<br>
         • Identify high-ROI campaigns & avoid wasted spend<br>
         • Prioritize channels, creatives, and audience segments based on predicted performance<br>
         • Improve conversion efficiency and revenue per spend unit<br>
@@ -204,8 +204,8 @@ with tabs[0]:
     st.markdown("### Forecasting & ML Capabilities")
     st.markdown("""
     <div class='card'>
-        • Revenue & Conversion predictions using **RandomForest Regression**<br>
-        • Trend forecasting for next 30 days with **linear regression fallback** if Prophet is unavailable<br>
+        • Revenue & Conversion predictions using <b>RandomForest Regression</b><br>
+        • Trend forecasting for next 30 days with <b>linear regression fallback</b> if Prophet is unavailable<br>
         • Automatic identification of top-performing campaigns, channels, and audience segments<br>
         • Model performance metrics (R², RMSE) displayed for transparency and trust<br>
         • Downloadable ML predictions for further analysis
@@ -225,12 +225,13 @@ with tabs[0]:
     st.markdown("### Who Should Use This App?")
     st.markdown("""
     <div class='card'>
-        • **Marketing Analysts** who want predictive insights and campaign breakdowns<br>
-        • **CMOs / Marketing Heads** needing executive-ready dashboards<br>
-        • **Digital Marketing Teams** optimizing ad spend across channels<br>
-        • **Growth Teams** tracking conversion efficiency and revenue trends
+        • <b>Marketing Analysts</b> who want predictive insights and campaign breakdowns<br>
+        • <b>CMOs / Marketing Heads</b> needing executive-ready dashboards<br>
+        • <b>Digital Marketing Teams</b> optimizing ad spend across channels<br>
+        • <b>Growth Teams</b> tracking conversion efficiency and revenue trends
     </div>
     """, unsafe_allow_html=True)
+
 
 with tabs[1]:
     st.header("Application")
