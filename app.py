@@ -227,17 +227,20 @@ else:
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
 
-                # Image (generic thumbnail)
+                # Thumbnail image
                 st.image(thumb_urls[sector_name], use_container_width=True)
 
-                # Title
+                # Project title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Open button as HTML link with query param, opens in new tab
-                page_param = uc['page'].replace(".py", "")
-                open_url = f"?page={page_param}"  # relative link
+                # Construct deployed page URL
+                # Streamlit converts pages to slugs: spaces -> _, special chars removed
+                page_slug = uc['name'].replace(" ", "_").replace("&", "and").replace("-", "_")
+                deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
+
+                # Open button as HTML link (new tab)
                 st.markdown(f"""
-                    <a href="{open_url}" target="_blank" 
+                    <a href="{deployed_url}" target="_blank" 
                        style="text-decoration:none;">
                        <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
                            Open
@@ -247,8 +250,10 @@ else:
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
+    # Back button to home page
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
+
 
 
