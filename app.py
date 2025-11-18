@@ -233,7 +233,7 @@ else:
                 # Project title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Use 'page' field as slug directly (no .py)
+                # Use 'page' directly as deployed URL (no .py)
                 deployed_url = f"https://analytics-avenue.streamlit.app/{uc['page']}"
 
                 # Open button as HTML link (new tab)
