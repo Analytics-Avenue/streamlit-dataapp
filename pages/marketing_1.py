@@ -31,9 +31,13 @@ st.markdown("""
 <style>
 [data-testid="stSidebarNav"] {display: none;}
 section[data-testid="stSidebar"] {display: none;}
-.big-header {font-size: 40px; font-weight: 900;
-background: linear-gradient(90deg,#FF6B6B,#FFD93D);
--webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+.big-header {
+    font-size: 40px;
+    font-weight: 900;
+    background: linear-gradient(90deg,#FF6B6B,#FFD93D);
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+}
 .card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
 box-shadow:0 4px 20px rgba(0,0,0,0.08);}
 .metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center;}
