@@ -181,19 +181,38 @@ else:
     sector_name = st.session_state["sector"]
 
     # Sidebar
+    # -------------------------
+    # Sidebar Navigation
+    # -------------------------
+    if "navigate_to" not in st.session_state:
+        st.session_state["navigate_to"] = None
+    
     with st.sidebar:
         st.markdown(f"## {sector_name} Navigation")
         
         if st.button("🏠 Home", key="sidebar_home"):
-            st.session_state["sector"] = None
-            st.experimental_rerun()
+            st.session_state["navigate_to"] = "home"
         
         for s in sector_overview.keys():
             if s != sector_name:
-                clicked = st.button(f"➡ {s}", key=f"sidebar_{s}")
-                if clicked:
-                    st.session_state["sector"] = s
-                    st.experimental_rerun()  # rerun immediately after setting state
+                if st.button(f"➡ {s}", key=f"sidebar_{s}"):
+                    st.session_state["navigate_to"] = s
+    
+    # -------------------------
+    # Handle Navigation AFTER sidebar
+    # -------------------------
+    if st.session_state["navigate_to"] is not None:
+        # Update sector only once
+        if st.session_state["navigate_to"] == "home":
+            st.session_state["sector"] = None
+        else:
+            st.session_state["sector"] = st.session_state["navigate_to"]
+        
+        # Reset flag
+        st.session_state["navigate_to"] = None
+    
+        # Safe rerun at the very end
+        st.experimental_rerun()
 
 
     st.header(f"{sector_name} – Projects / Use Cases")
