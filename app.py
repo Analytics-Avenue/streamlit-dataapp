@@ -31,6 +31,7 @@ st.markdown("""
     padding:15px;
     background:#fff;
     transition:0.25s ease-in-out;
+    min-height:5px;
     box-shadow:0 2px 10px rgba(0,0,0,0.08);
     margin-bottom:25px;
     display:flex;
@@ -84,15 +85,43 @@ sector_overview = {
 }
 
 sector_tools = {
-    "Marketing Analytics": ["Python","SQL","Excel","Power BI","Tableau","GA4","Pandas","NumPy","Scikit-Learn"],
-    "Real Estate Analytics": ["Python","SQL","Excel","Power BI","Tableau","QGIS","GeoPandas","Regression Models"],
-    "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting"]
+    "Marketing Analytics": ["Python","SQL","Excel","Power BI","Tableau","Google Analytics 4","Pandas","NumPy","Scikit-Learn","A/B Testing","Attribution Models","Segmentation Models"],
+    "Real Estate Analytics": ["Python","SQL","Excel","Power BI","Tableau","QGIS","GeoPandas","Google Maps API","Regression Models","Time Series","Clustering","Price Prediction","Rental Yield Models"],
+    "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting","Classification Models","NLP","Patient Flow Forecasting"]
 }
 
 sectors = {
-    "Marketing Analytics": [{"name":"Marketing Campaign Performance Analyzer","page":"marketing_1.py"}],
-    "Real Estate Analytics": [{"name":"Real Estate Intelligence Suite","page":"usecase_real_estate_1.py"}],
-    "Health Care Analytics": [{"name":"Healthscope Insights","page":"healthcare_1.py"}]
+    "Marketing Analytics": [
+        {"name":"Marketing Campaign Performance Analyzer","page":"marketing_1.py"},
+        {"name":"Marketing Intelligence & Forecasting Lab","page":"marketing_2.py"},
+        {"name":"Click & Convertion Analytics","page":"marketing_3.py"},
+        {"name":"Marketing Performance Analysis","page":"marketing_4.py"},
+        {"name":"Content & SEO Performance Dashboard","page":"marketing_5.py"},
+        {"name":"Customer Retention & Churn Analysis","page":"marketing_6.py"},
+        {"name":"Customer Journey & Funnel Insights","page":"marketing_7.py"},
+        {"name":"Google Ads Performance Analytics","page":"marketing_8.py"},
+        {"name":"Email & WhatsApp Marketing Forecast Lab","page":"marketing_9.py"},
+    ],
+    "Real Estate Analytics": [
+        {"name":"Real Estate Intelligence Suite","page":"usecase_real_estate_1.py"},
+        {"name":"Real Estate Demand Forecasting System","page":"usecase_real_estate_2.py"},
+        {"name":"Price vs Property Features Analyzer","page":"usecase_real_estate_3.py"},
+        {"name":"Agent & Market Insights Dashboard","page":"usecase_real_estate_4.py"},
+        {"name":"Real Estate Investment Opportunity Analyzer","page":"usecase_real_estate_5.py"},
+        {"name":"Tenant Risk & Market Trend Analyzer","page":"usecase_real_estate_6.py"},
+        {"name":"Rental Yield & Investment Analyzer","page":"usecase_real_estate_7.py"},
+        {"name":"Real Estate Buyer Sentiment Analyzer","page":"usecase_real_estate_8.py"},
+        {"name":"Neighborhood Lifestyle & Risk Aware Analyzer","page":"usecase_real_estate_9.py"},
+        {"name":"Real Estate Intelligence — Hybrid Dashboard (Property + CRM)","page":"realestate.py"},
+    ],
+    "Health Care Analytics": [
+        {"name":"Healthscope Insights","page":"healthcare_1.py"},
+        {"name":"Patient Visit Analytics & Hospital Performance","page":"healthcare_2.py"},
+        {"name":"PatientFlow Navigator","page":"healthcare_3.py"},
+        {"name":"Ambulance Ops & Routing Lab","page":"healthcare_4.py"},
+        {"name":"Health Care Analytics1","page":"healthcare_5.py"},
+        {"name":"Health Care Analytics2","page":"healthcare_6.py"},
+    ]
 }
 
 thumb_urls = {
@@ -124,7 +153,8 @@ if st.session_state["sector"] is None:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
                 st.image(thumb_urls[sector], use_container_width=True)
                 st.markdown(f"<h3 style='color:#064b86; margin-top:12px;'>{sector}</h3>", unsafe_allow_html=True)
-                st.markdown(f"<p style='font-size:14px; color:#444; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
+                st.markdown(f"<p style='font-size:14.5px; color:#444; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
+                
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
 
@@ -138,9 +168,8 @@ if st.session_state["sector"] is None:
 # -------------------------
 else:
     sector_name = st.session_state["sector"]
-    st.header(f"{sector_name} – Projects / Use Cases")
-
-    # Sidebar navigation
+    
+    # Sidebar
     with st.sidebar:
         st.markdown(f"## {sector_name} Navigation")
         if st.button("🏠 Home"):
@@ -152,19 +181,30 @@ else:
                     st.session_state["sector"] = s
                     st.experimental_rerun()
 
-    # Display projects
-    for uc in sectors[sector_name]:
-        st.markdown("<div class='card-box'>", unsafe_allow_html=True)
-        st.image(thumb_urls[sector_name], use_container_width=True)
-        st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size:14px; color:#444;'>Project overview goes here...</p>", unsafe_allow_html=True)
-        page_slug = uc['page'].replace(".py","")
-        deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
-        st.markdown(f"""
-            <a href="{deployed_url}" target="_blank" style="text-decoration:none;">
-                <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
-                    Open
-                </div>
-            </a>
-        """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.header(f"{sector_name} – Projects / Use Cases")
+    usecases = sectors[sector_name]
+
+    for row_idx in range(0, len(usecases), 3):
+        cols = st.columns(3)
+        for col_idx, col in enumerate(cols):
+            if row_idx + col_idx < len(usecases):
+                uc = usecases[row_idx + col_idx]
+                st.markdown("<div class='card-box'>", unsafe_allow_html=True)
+                st.image(thumb_urls[sector_name], use_container_width=True)
+                st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
+                
+                # Open button
+                page_slug = uc['page'][:-3] if uc['page'].endswith(".py") else uc['page']
+                deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
+                st.markdown(f"""
+                    <a href="{deployed_url}" target="_blank" style="text-decoration:none;">
+                        <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
+                            Open
+                        </div>
+                    </a>
+                """, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    if st.button("Back to Home"):
+        st.session_state["sector"] = None
+        st.experimental_rerun()
