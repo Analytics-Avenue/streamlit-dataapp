@@ -230,8 +230,9 @@ with tabs[1]:
         st.plotly_chart(fig3, use_container_width=True)
     else: st.info("Not enough date data.")
 
+
     # -------------------------
-    # ML: Clicks Regression
+    # ML: Clicks Regression + Download
     # -------------------------
     st.markdown("### ML: Clicks Regression")
     ml_df = filt.copy().dropna(subset=["Clicks","Impressions","Spend"])
@@ -253,6 +254,13 @@ with tabs[1]:
             rf.fit(X_train,y_train)
         preds = rf.predict(X_test)
         st.write(f"RMSE: {math.sqrt(mean_squared_error(y_test,preds)):.2f}, R²: {r2_score(y_test,preds):.3f}")
+    
+        # Combine predictions with original input features for download
+        X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
+        X_test_df["Actual_Clicks"] = y_test.reset_index(drop=True)
+        X_test_df["Predicted_Clicks"] = preds
+        st.dataframe(X_test_df.head())
+        download_df(X_test_df, "ml_clicks_predictions.csv")
 
     # -------------------------
     # Forecasting (linear fallback if Prophet not installed)
@@ -283,16 +291,23 @@ with tabs[1]:
                               go.Scatter(x=fut_dates, y=preds, name="Forecast")])
             st.plotly_chart(figf, use_container_width=True)
 
-    # -------------------------
-    # Automated Insights
-    # -------------------------
-    st.markdown("### Automated Insights")
-    insights = []
-    if "Channel" in filt.columns and "Leads" in filt.columns and "Spend" in filt.columns:
-        ch_perf = filt.groupby("Channel").agg({"Leads":"sum","Spend":"sum"}).reset_index()
-        ch_perf["Leads_per_Rs"] = np.where(ch_perf["Spend"]>0,ch_perf["Leads"]/ch_perf["Spend"],0)
-        best = ch_perf.sort_values("Leads_per_Rs",ascending=False).iloc[0]
-        worst = ch_perf.sort_values("Leads_per_Rs",ascending=True).iloc[0]
-        insights.append(f"Best channel: {best['Channel']} ({best['Leads_per_Rs']:.4f} leads/₹)")
-        insights.append(f"Worst channel: {worst['Channel']} ({worst['Leads_per_Rs']:.4f} leads/₹)")
-    for i,ins in enumerate(insights): st.markdown(f"**Insight {i+1}:** {ins}")
+
+    
+        # -------------------------
+        # Automated Insights (Table + Download)
+        # -------------------------
+        st.markdown("### Automated Insights (Table + Download)")
+        insights_list = []
+        if "Channel" in filt.columns and "Leads" in filt.columns and "Spend" in filt.columns:
+            ch_perf = filt.groupby("Channel").agg({"Leads":"sum","Spend":"sum"}).reset_index()
+            ch_perf["Leads_per_Rs"] = np.where(ch_perf["Spend"]>0,ch_perf["Leads"]/ch_perf["Spend"],0)
+            best = ch_perf.sort_values("Leads_per_Rs",ascending=False).iloc[0]
+            worst = ch_perf.sort_values("Leads_per_Rs",ascending=True).iloc[0]
+            insights_list.append({"Insight":"Best Channel", "Channel":best['Channel'], "Leads_per_Rs":best['Leads_per_Rs']})
+            insights_list.append({"Insight":"Worst Channel", "Channel":worst['Channel'], "Leads_per_Rs":worst['Leads_per_Rs']})
+        
+        insights_df = pd.DataFrame(insights_list)
+        st.dataframe(insights_df)
+        download_df(insights_df, "automated_insights.csv")
+    
+        
