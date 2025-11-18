@@ -1,44 +1,51 @@
 import streamlit as st
 import os
 
-# Dummy data (replace with your actual dictionaries)
-sectors = {
-    "Retail Analytics": ["Usecase1", "Usecase2"],
-    "Marketing Analytics": ["Usecase1", "Usecase2"],
-    "Healthcare Analytics": ["Usecase1", "Usecase2"],
-    "Finance Analytics": ["Usecase1", "Usecase2"],
-    "Real Estate Analytics": ["Usecase1", "Usecase2"],
-    "Supply Chain Analytics": ["Usecase1", "Usecase2"],
-}
+# -------------------------------
+# YOUR DATA (Replace these)
+# -------------------------------
 
-sector_overview = {
-    "Retail Analytics": "Retail sector overview goes here.",
-    "Marketing Analytics": "Marketing overview goes here.",
-    "Healthcare Analytics": "Healthcare overview goes here.",
-    "Finance Analytics": "Finance overview goes here.",
-    "Real Estate Analytics": "Real Estate overview goes here.",
-    "Supply Chain Analytics": "Supply Chain overview goes here."
-}
-
-sector_tools = {
-    "Retail Analytics": ["Python", "SQL", "Power BI", "TensorFlow", "Excel", "Snowflake"],
-    "Marketing Analytics": ["Python", "SQL", "Google Analytics", "Power BI", "dbt"],
-    "Healthcare Analytics": ["R", "Python", "SQL", "Tableau"],
-    "Finance Analytics": ["Python", "SQL", "Power BI", "SAS"],
-    "Real Estate Analytics": ["Python", "SQL", "ArcGIS", "Power BI", "Excel"],
-    "Supply Chain Analytics": ["Python", "SQL", "Power BI", "SAP BI"]
-}
-
+# Example thumbnails
 home_thumbs = {
-    "Retail Analytics": "thumbs/retail.jpg",
     "Marketing Analytics": "thumbs/marketing.jpg",
-    "Healthcare Analytics": "thumbs/healthcare.jpg",
-    "Finance Analytics": "thumbs/finance.jpg",
-    "Real Estate Analytics": "thumbs/realestate.jpg",
-    "Supply Chain Analytics": "thumbs/supply.jpg"
+    "Retail Analytics": "thumbs/retail.jpg",
+    "Healthcare Analytics": "thumbs/health.jpg",
 }
 
-# ===================== CSS ======================
+# Example overview
+sector_overview = {
+    "Marketing Analytics": "Turn raw marketing data into insights that drive conversions.",
+    "Retail Analytics": "Track your store operations, customer behavior, and revenue flows.",
+    "Healthcare Analytics": "Leverage analytics for diagnosis, optimization and efficiency."
+}
+
+# Example tools
+sector_tools = {
+    "Marketing Analytics": ["Python", "SQL", "Tableau", "Power BI", "ML Models", "NLP", "Excel"],
+    "Retail Analytics": ["Python", "SQL", "Power BI", "Tableau", "Forecasting", "Excel"],
+    "Healthcare Analytics": ["Python", "R", "Tableau", "ML Models", "Deep Learning"]
+}
+
+# Example usecases (You already have these in your app)
+sectors = {
+    "Marketing Analytics": {
+        "Campaign Analyzer": "app_marketing_campaign",
+        "Churn Prediction": "app_churn"
+    },
+    "Retail Analytics": {
+        "Inventory Forecaster": "app_inventory",
+        "Sales Tracker": "app_sales"
+    },
+    "Healthcare Analytics": {
+        "Patient Diagnosis ML": "app_patient",
+        "Hospital Analytics": "app_hospital"
+    }
+}
+
+# -------------------------------
+# STYLES
+# -------------------------------
+
 st.markdown("""
 <style>
 
@@ -46,77 +53,121 @@ st.markdown("""
     border: 2px solid #064b86;
     border-radius: 14px;
     padding: 18px;
-    background: #ffffff;
-    box-shadow: 0 0 10px rgba(6, 75, 134, 0.15);
+    margin-bottom: 25px;
+    box-shadow: 0 0 14px rgba(6,75,134,0.18);
     transition: 0.25s;
-    height: 100%;
+    background: #ffffff;
 }
 
 .sector-card:hover {
-    box-shadow: 0 0 25px rgba(6, 75, 134, 0.45);
+    box-shadow: 0 0 25px rgba(6,75,134,0.45);
     transform: translateY(-4px);
 }
 
-.tool-pill {
-    background: #f4f8ff;
-    border: 1px solid #c9dfff;
+.tool-chip {
+    background: #f2f6ff;
     padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid #d5e3ff;
+    text-align: center;
+    font-size: 12.5px;
     font-weight: 600;
-    display: inline-block;
-    margin: 4px;
-    white-space: nowrap;
+    margin-bottom: 8px;
+    box-shadow: 0 0 6px rgba(180,200,255,0.35);
+    transition: 0.2s;
 }
 
-.tool-pill:hover {
-    background: #e7efff;
+.tool-chip:hover {
+    background: #e8eeff;
+    transform: scale(1.05);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ===================== HOME PAGE ======================
-st.title("Data Analytics Solutions")
-st.write("Choose a sector to explore insights:")
 
-sector_list = list(sectors.keys())
+# -------------------------------
+# SESSION STATE
+# -------------------------------
 
-# 3 cards per row
-for i in range(0, len(sector_list), 3):
-    row = st.columns(3)
+if "sector" not in st.session_state:
+    st.session_state["sector"] = None
 
-    for idx, sector_name in enumerate(sector_list[i:i+3]):
-        with row[idx]:
-            with st.container():
-                st.markdown('<div class="sector-card">', unsafe_allow_html=True)
+
+# -------------------------------
+# HOME PAGE (3 CARDS/ROW)
+# -------------------------------
+
+if st.session_state["sector"] is None:
+
+    st.title("Data Analytics Solutions")
+    st.write("Choose a sector below")
+
+    sector_list = list(sectors.keys())
+    rows = [sector_list[i:i+3] for i in range(0, len(sector_list), 3)]
+
+    for row in rows:
+        cols = st.columns(3)
+
+        for col, sector_name in zip(cols, row):
+            with col:
+                st.markdown("<div class='sector-card'>", unsafe_allow_html=True)
 
                 # Thumbnail
-                thumb = home_thumbs.get(sector_name, None)
+                thumb = home_thumbs.get(sector_name)
                 if thumb and os.path.exists(thumb):
                     st.image(thumb, use_container_width=True)
 
                 # Title
                 st.markdown(
-                    f"<h3 style='margin-top:10px; color:#064b86; text-align:center;'>{sector_name}</h3>",
+                    f"<h3 style='margin-top:10px; color:#064b86;'>{sector_name}</h3>",
                     unsafe_allow_html=True
                 )
 
                 # Overview
                 st.markdown(
-                    f"<p style='font-size:14px; color:#444; text-align:center;'>{sector_overview[sector_name]}</p>",
+                    f"<p style='font-size:14px; color:#333;'>{sector_overview[sector_name]}</p>",
                     unsafe_allow_html=True
                 )
 
-                # Tools Section
-                st.markdown("<h5 style='margin-top:10px;'>Tools & Tech</h5>", unsafe_allow_html=True)
+                # Tools heading
+                st.markdown("<h5 style='margin-top:8px;'>Tools & Tech</h5>",
+                            unsafe_allow_html=True)
 
-                tool_list = sector_tools[sector_name]
-                tools_html = "".join([f"<span class='tool-pill'>{tool}</span>" for tool in tool_list])
-                st.markdown(tools_html, unsafe_allow_html=True)
+                # Tools grid
+                tools = sector_tools[sector_name]
+                tool_rows = [tools[i:i+5] for i in range(0, len(tools), 5)]
 
-                # Explore Button
-                if st.button(f"Explore", key=f"btn_{sector_name}"):
+                for tr in tool_rows:
+                    tool_cols = st.columns(5)
+                    for tc, tool in zip(tool_cols, tr):
+                        with tc:
+                            st.markdown(
+                                f"<div class='tool-chip'>{tool}</div>",
+                                unsafe_allow_html=True
+                            )
+
+                # Explore button
+                if st.button(f"Explore {sector_name}", key=f"btn_{sector_name}"):
                     st.session_state["sector"] = sector_name
 
                 st.markdown("</div>", unsafe_allow_html=True)
+
+
+# -------------------------------
+# SECTOR PAGE
+# -------------------------------
+
+else:
+    sector_name = st.session_state["sector"]
+
+    st.title(sector_name)
+    st.write("Select a use case:")
+
+    usecases = sectors[sector_name]
+    for uc_name, app_file in usecases.items():
+        if st.button(uc_name):
+            st.write(f"Launching {uc_name}... (this is where you load {app_file}.py)")
+
+    if st.button("Back to Home"):
+        st.session_state["sector"] = None
