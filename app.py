@@ -231,12 +231,11 @@ else:
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
                 # Open button
-
                 if st.button("Open", key=f"{sector_name}_{uc['name']}"):
-                    import importlib.util
-                    spec = importlib.util.spec_from_file_location("module.name", f"./{uc['page']}")
-                    foo = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(foo)
+                    # Switch to another Streamlit page
+                    import streamlit as st_page
+                    st.experimental_set_query_params(page=uc['page'])
+
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
