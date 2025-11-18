@@ -283,31 +283,39 @@ with tabs[1]:
             fig.update_traces(textposition="outside")
             st.plotly_chart(fig, use_container_width=True)
 
-    # ML Prediction
-    st.markdown("### ML: Predict Revenue (RandomForest)")
-    ml_df = filt.copy().dropna(subset=["Revenue"])
-    feat_cols = ["Page","Content_Type","Device","Country","Impressions","Clicks","Time_on_Page_sec","Backlinks"]
-    feat_cols = [c for c in feat_cols if c in ml_df.columns]
-    if len(ml_df) < 30 or len(feat_cols)<2:
-        st.info("Not enough data to train ML model (>=30 rows needed)")
-    else:
-        X = ml_df[feat_cols]
-        y = ml_df["Revenue"]
-        cat_cols = [c for c in X.columns if X[c].dtype=="object"]
-        num_cols = [c for c in X.columns if c not in cat_cols]
-        preprocessor = ColumnTransformer([
-            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-            ("num", StandardScaler(), num_cols)
-        ], remainder="drop")
-        X_t = preprocessor.fit_transform(X)
-        X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
-        rf = RandomForestRegressor(n_estimators=200, random_state=42)
-        with st.spinner("Training RandomForest..."):
-            rf.fit(X_train, y_train)
-        preds = rf.predict(X_test)
-        rmse = math.sqrt(mean_squared_error(y_test, preds))
-        r2 = r2_score(y_test, preds)
-        st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
+# ML Prediction
+st.markdown("### ML: Predict Revenue (RandomForest)")
+ml_df = filt.copy().dropna(subset=["Revenue"])
+feat_cols = ["Page","Content_Type","Device","Country","Impressions","Clicks","Time_on_Page_sec","Backlinks"]
+feat_cols = [c for c in feat_cols if c in ml_df.columns]
+
+if len(ml_df) < 30 or len(feat_cols)<2:
+    st.info("Not enough data to train ML model (>=30 rows needed)")
+else:
+    X = ml_df[feat_cols]
+    y = ml_df["Revenue"]
+    cat_cols = [c for c in X.columns if X[c].dtype=="object"]
+    num_cols = [c for c in X.columns if c not in cat_cols]
+    preprocessor = ColumnTransformer([
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
+        ("num", StandardScaler(), num_cols)
+    ], remainder="drop")
+    X_t = preprocessor.fit_transform(X)
+    X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+    rf = RandomForestRegressor(n_estimators=200, random_state=42)
+    with st.spinner("Training RandomForest..."):
+        rf.fit(X_train, y_train)
+    preds = rf.predict(X_test)
+    rmse = math.sqrt(mean_squared_error(y_test, preds))
+    r2 = r2_score(y_test, preds)
+    st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
+
+    # Combine predictions with input features for download
+    X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
+    X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
+    X_test_df["Predicted_Revenue"] = preds
+    st.dataframe(X_test_df.head())
+    download_df(X_test_df, "ml_revenue_predictions.csv")
 
     # Automated Insights (Table + Download)
     st.markdown("### Automated Insights (Table + Download)")
