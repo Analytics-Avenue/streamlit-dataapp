@@ -74,7 +74,6 @@ st.markdown("""
     background: #d9e7ff;
     transform: scale(1.05);
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -158,7 +157,7 @@ sectors = {
 }
 
 # -------------------------
-# Thumbnail URLs
+# RAW Thumbnail URLs
 # -------------------------
 thumb_urls = {
     "Marketing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/marketing_thumb.jpg",
@@ -167,62 +166,77 @@ thumb_urls = {
 }
 
 # -------------------------
-# Session state
+# Session State
 # -------------------------
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
 
-# -------------------------
-# Home Page
-# -------------------------
+# ============================================================
+# HOME PAGE
+# ============================================================
 if st.session_state["sector"] is None:
     st.title("Data Analytics Solutions")
     st.write("Choose a sector to explore:")
 
-    cols = st.columns(len(sectors))
-    for idx, (sector_name, usecases) in enumerate(sectors.items()):
-        with cols[idx]:
-            thumb_path = home_thumbs.get(sector_name)
-            if os.path.exists(thumb_path):
-                st.image(thumb_path, use_container_width=True)
-            st.markdown(f"### {sector_name}")
-            st.write(f"{len(usecases)} use cases available.")
-            if st.button(f"Explore {sector_name}", key=sector_name):
-                st.session_state["sector"] = sector_name
+    sector_list = list(sector_overview.keys())
+    rows = [sector_list[i:i+3] for i in range(0, len(sector_list), 3)]
 
-# -------------------------
-# Sector Page
-# -------------------------
+    for row in rows:
+        cols = st.columns(3)
+        for col, sector in zip(cols, row):
+            with col:
+                st.markdown("<div class='card-box'>", unsafe_allow_html=True)
+
+                # Thumbnail
+                st.image(thumb_urls[sector], use_container_width=True)
+
+                # Title
+                st.markdown(f"<h3 style='color:#064b86; margin-top:12px;'>{sector}</h3>", unsafe_allow_html=True)
+
+                # Overview
+                st.markdown(f"<p style='font-size:14.5px; color:#444; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
+
+                # Tools
+                st.markdown("<b>Tools & Tech:</b><br>", unsafe_allow_html=True)
+                tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
+                st.markdown(tool_html, unsafe_allow_html=True)
+
+                # Button
+                if st.button(f"Explore {sector}", key=f"btn_{sector}"):
+                    st.session_state["sector"] = sector
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+# ============================================================
+# SECTOR PAGE (All Projects)
+# ============================================================
 else:
     sector_name = st.session_state["sector"]
-    st.header(f"{sector_name} Use Cases")
+    st.header(f"{sector_name} – Projects / Use Cases")
 
     usecases = sectors[sector_name]
+    rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
 
-    # Grid of projects (3 per row)
-    for i in range(0, len(usecases), 3):
+    for row in rows:
         cols = st.columns(3)
-        for j, uc in enumerate(usecases[i:i+3]):
-            with cols[j]:
-                img_path = os.path.join(ASSETS_DIR, uc["image"])
-                if os.path.exists(img_path):
-                    st.image(img_path, use_container_width=True)
-                st.markdown(f"### {uc['name']}")
-                st.write("Explore insights and dashboards.")
+        for col, uc in zip(cols, row):
+            with col:
+                st.markdown("<div class='card-box'>", unsafe_allow_html=True)
 
-                # Navigate to page
-                if st.button(f"Open {uc['name']}", key=f"{sector_name}_{uc['name']}"):
-                    st.session_state["selected_page"] = uc["page"]
-                    st.experimental_rerun()  # triggers page switch
+                # Image
+                img_url = os.path.join("assets", uc["image"])
+                st.image(img_url, use_container_width=True)
 
-    # Back button
+                # Title
+                st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
+
+                # Open button
+
+                if st.button("Open", key=f"{sector_name}_{uc['name']}"):
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location("module.name", f"./{uc['page']}")
+                    foo = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(foo)
+
     if st.button("Back to Home"):
         st.session_state["sector"] = None
-        st.experimental_rerun()
-
-# -------------------------
-# Page navigation
-# -------------------------
-if "selected_page" in st.session_state:
-    page = st.session_state.pop("selected_page")
-    st.switch_page(f"pages/{page}")
