@@ -19,6 +19,22 @@ warnings.filterwarnings("ignore")
 st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
 
 # -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"  # Replace with your logo
+col1, col2 = st.columns([1,4])
+with col1:
+    st.image(logo_url, width=180)
+with col2:
+    st.markdown("<h2 style='color:#0d47a1; margin-top:30px;'>Analytics Avenue</h2>", unsafe_allow_html=True)
+
+# -------------------------
+# Header
+# -------------------------
+st.markdown("<h1 style='margin-top:0.5rem; margin-bottom:0.2rem'>Content & SEO Performance Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("Track page performance, keyword ROI, audience engagement & conversions for SEO & content strategy.")
+
+# -------------------------
 # Required columns
 # -------------------------
 REQUIRED_CONTENT_COLS = [
@@ -116,13 +132,13 @@ div[data-testid="stMarkdownContainer"] .metric-card:hover {
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Header + tabs
+# Tabs
 # -------------------------
-st.markdown("<h1 style='margin-bottom:0.2rem'>Content & SEO Performance Dashboard</h1>", unsafe_allow_html=True)
-st.markdown("Track page performance, keyword ROI, audience engagement & conversions for SEO & content strategy.")
-
 tabs = st.tabs(["Overview", "Application"])
 
+# -------------------------
+# Overview Tab
+# -------------------------
 with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
@@ -150,12 +166,13 @@ with tabs[0]:
     k3.markdown("<div class='metric-card'>Average CTR</div>", unsafe_allow_html=True)
     k4.markdown("<div class='metric-card'>Average Bounce Rate</div>", unsafe_allow_html=True)
 
+# -------------------------
+# Application Tab
+# -------------------------
 with tabs[1]:
     st.header("Application")
-    
-    # -------------------------
-    # Dataset input: all 3 modes
-    # -------------------------
+
+    # Step 1 — Load Dataset
     st.markdown("### Step 1 — Load dataset")
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
@@ -210,9 +227,7 @@ with tabs[1]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-    # -------------------------
-    # Filters
-    # -------------------------
+    # Step 2 — Filters
     st.markdown("### Step 2 — Filters & preview")
     c1,c2,c3 = st.columns([2,2,1])
     pages = sorted(df["Page"].dropna().unique())
@@ -235,9 +250,7 @@ with tabs[1]:
     st.dataframe(filt.head(5), use_container_width=True)
     download_df(filt.head(5), "filtered_preview_content.csv")
 
-    # -------------------------
     # Key metrics
-    # -------------------------
     st.markdown("### Key Metrics")
     k1,k2,k3,k4 = st.columns(4)
     k1.metric("Total Revenue", to_currency(filt["Revenue"].sum()))
@@ -245,9 +258,7 @@ with tabs[1]:
     k3.metric("Average CTR", f"{filt['CTR'].mean():.2%}")
     k4.metric("Avg Bounce Rate", f"{filt['Bounce_Rate'].mean():.2%}")
 
-    # -------------------------
     # Charts
-    # -------------------------
     st.markdown("### Revenue & Conversions per Page")
     page_agg = filt.groupby("Page")[["Revenue","Conversions"]].sum().reset_index()
     fig = go.Figure()
@@ -265,9 +276,7 @@ with tabs[1]:
             fig.update_traces(textposition="outside")
             st.plotly_chart(fig, use_container_width=True)
 
-    # -------------------------
-    # ML: Revenue prediction
-    # -------------------------
+    # ML Prediction
     st.markdown("### ML: Predict Revenue (RandomForest)")
     ml_df = filt.copy().dropna(subset=["Revenue"])
     feat_cols = ["Page","Content_Type","Device","Country","Impressions","Clicks","Time_on_Page_sec","Backlinks"]
@@ -293,17 +302,19 @@ with tabs[1]:
         r2 = r2_score(y_test, preds)
         st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
 
-    # -------------------------
-    # Automated Insights
-    # -------------------------
-    st.markdown("### Automated Insights")
+    # Automated Insights (Table + Download)
+    st.markdown("### Automated Insights (Table + Download)")
+
+    insights = []
     country_perf = filt.groupby("Country")[["Revenue","Conversions"]].sum().reset_index()
-    country_perf["Revenue_per_Conversion"] = np.where(country_perf["Conversions"]>0, country_perf["Revenue"]/country_perf["Conversions"],0)
+    country_perf["Revenue_per_Conversion"] = np.where(country_perf["Conversions"]>0,
+                                                     country_perf["Revenue"]/country_perf["Conversions"],0)
     if not country_perf.empty:
         best = country_perf.sort_values("Revenue_per_Conversion", ascending=False).iloc[0]
         worst = country_perf.sort_values("Revenue_per_Conversion").iloc[0]
-        st.markdown(f"**Best Country ROI:** {best['Country']} (~{best['Revenue_per_Conversion']:.2f} per conversion)")
-        st.markdown(f"**Lowest Country ROI:** {worst['Country']} (~{worst['Revenue_per_Conversion']:.2f} per conversion)")
+        insights.append({"Insight":"Best Country ROI", "Country":best['Country'], "Revenue_per_Conversion":best['Revenue_per_Conversion']})
+        insights.append({"Insight":"Lowest Country ROI", "Country":worst['Country'], "Revenue_per_Conversion":worst['Revenue_per_Conversion']})
 
-st.markdown("App 5 ready — Content & SEO insights with polished metrics, ML predictions & filters.")
-
+    insights_df = pd.DataFrame(insights)
+    st.dataframe(insights_df)
+    download_df(insights_df, "automated_insights.csv")
