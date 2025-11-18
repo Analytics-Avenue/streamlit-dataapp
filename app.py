@@ -219,6 +219,49 @@ else:
     st.header(f"{sector_name} – Projects / Use Cases")
 
     usecases = sectors[sector_name]
+
+    # Example project overviews & tools (customize per project if needed)
+    project_overview = {
+        # Marketing Analytics
+        "Marketing Campaign Performance Analyzer": "Track campaigns, analyze ad spend, optimize ROI and measure conversions in real-time.",
+        "Marketing Intelligence & Forecasting Lab": "Forecast campaign performance, segment customers, and gain actionable insights for planning.",
+        "Click & Convertion Analytics": "Monitor click-throughs, conversion rates, and customer engagement metrics across channels.",
+        "Marketing Performance Analysis": "Analyze campaign KPIs, track funnel effectiveness, and optimize marketing spends efficiently.",
+        "Content & SEO Performance Dashboard": "Evaluate content performance, track SEO metrics, and improve website visibility.",
+        "Customer Retention & Churn Analysis": "Identify churn patterns, segment customers, and increase retention strategies.",
+        "Customer Journey & Funnel Insights,": "Visualize customer journeys, detect drop-offs, and optimize conversion paths.",
+        "Google Ads Performance Analytics.": "Analyze Google Ads data, optimize bids, and improve ROI using performance metrics.",
+        "Email & WhatsApp Marketing Forecast Lab": "Plan campaigns, forecast engagement, and analyze messaging effectiveness.",
+
+        # Real Estate Analytics
+        "Real Estate Intelligence Suite": "Analyze market trends, property prices, and generate actionable investment insights.",
+        "Real Estate Demand Forecasting System": "Predict demand for properties, identify growth micro-markets, and optimize investments.",
+        "Price vs Property Features Analyzer": "Assess property features against pricing trends to inform investment decisions.",
+        "Agent & Market Insights Dashboard": "Track agent performance and gain visibility into market activity and opportunities.",
+        "Real Estate Investment Opportunity Analyzer": "Identify high ROI properties and evaluate investment opportunities with data-driven models.",
+        "Tenant Risk & Market Trend Analyzer": "Analyze tenant profiles and market trends to mitigate risk and maximize returns.",
+        "Rental Yield & Investment Analyzer": "Forecast rental yields and compare investment scenarios for smarter property decisions.",
+        "Real Estate Buyer Sentiment Analyzer": "Capture buyer sentiment to predict demand and pricing dynamics.",
+        "Neighborhood Lifestyle & Risk Aware Analyzer": "Assess neighborhood risk, lifestyle factors, and property investment suitability.",
+        "Real Estate Intelligence — Hybrid Dashboard (Property + CRM)": "Combine property data with CRM insights for holistic investment analysis.",
+
+        # Health Care Analytics
+        "Healthscope Insights": "Track hospital KPIs, patient flow, and operational efficiency across departments.",
+        "Patient Visit Analytics & Hospital Performance": "Analyze patient visits, optimize staff allocation, and improve hospital performance.",
+        "PatientFlow Navigator": "Forecast patient flow and optimize hospital logistics for better care delivery.",
+        "Ambulance Ops & Routing Lab": "Optimize ambulance routes and emergency response using data-driven insights.",
+        "Health Care Analytics1": "Analyze clinical and operational data to improve care quality and resource allocation.",
+        "Health Care Analytics2": "Leverage predictive analytics to enhance patient outcomes and reduce operational costs.",
+    }
+
+    project_tools = {
+        # Use subset of popular tools for all projects
+        "Marketing Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Pandas", "Scikit-Learn", "A/B Testing"],
+        "Real Estate Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "QGIS", "GeoPandas", "Regression Models", "Time Series"],
+        "Health Care Analytics": ["Python", "R", "SQL", "Excel", "Power BI", "Tableau", "Time Series Forecasting", "Classification Models", "NLP"],
+    }
+
+    # Create rows of 3 projects
     rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
 
     for row in rows:
@@ -227,19 +270,25 @@ else:
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
 
-                # Thumbnail image
+                # Thumbnail
                 st.image(thumb_urls[sector_name], use_container_width=True)
 
                 # Project title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Remove last 3 chars if .py exists
+                # Project Overview (3 lines)
+                overview_text = project_overview.get(uc['name'], "Detailed insights for this project coming soon.")
+                st.markdown(f"<p style='font-size:14px; color:#444; text-align:justify;'>{overview_text}</p>", unsafe_allow_html=True)
+
+                # Project Tools
+                st.markdown("<b>Tools & Tech:</b><br>", unsafe_allow_html=True)
+                tools = project_tools[sector_name]
+                tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in tools])
+                st.markdown(tool_html, unsafe_allow_html=True)
+
+                # Open button (link to deployed app)
                 page_slug = uc['page'][:-3] if uc['page'].endswith(".py") else uc['page']
-
-                # Construct deployed URL
                 deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
-
-                # Open button as HTML link (new tab)
                 st.markdown(f"""
                     <a href="{deployed_url}" target="_blank" 
                        style="text-decoration:none;">
@@ -251,9 +300,7 @@ else:
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # Back button to home page
+    # Back button
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
-
-
