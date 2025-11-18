@@ -40,7 +40,10 @@ box-shadow:0 4px 20px rgba(0,0,0,0.08);}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='big-header' style='color:black; font-size:36px; font-weight:bold;'>Marketing Campaign Performance Analyzer</div>",
+    unsafe_allow_html=True
+)
 
 # -------------------------------
 # REQUIRED COLUMNS
