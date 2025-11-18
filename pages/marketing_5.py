@@ -22,11 +22,13 @@ st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
 # Company Logo + Name
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"  # Replace with your logo
-col1, col2 = st.columns([1,4])
-with col1:
-    st.image(logo_url, width=60)
-with col2:
-    st.markdown("<h2 style='color:#0d47a1; margin-top:30px;'>Analytics Avenue</h2>", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <h2 style="color:#0073e6; margin:0;">Analytics Avenue</h2>
+</div>
+""", unsafe_allow_html=True)
 
 # -------------------------
 # Header
