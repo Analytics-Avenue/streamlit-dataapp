@@ -4,10 +4,7 @@ import streamlit as st
 # Page Config
 # -------------------------
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
-if st.session_state["sector"] is not None:
-    st.markdown("""<style>[data-testid="stSidebarNav"]{display:block;}</style>""", unsafe_allow_html=True)
-else:
-    st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # -------------------------
 # Company Logo + Name
