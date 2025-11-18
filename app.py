@@ -211,6 +211,7 @@ if st.session_state["sector"] is None:
 
 
 # ============================================================
+# ============================================================
 # SECTOR PAGE (Projects / Use Cases)
 # ============================================================
 else:
@@ -219,9 +220,6 @@ else:
 
     usecases = sectors[sector_name]
     rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
-
-    # Get current app URL
-    base_url = st.experimental_get_url().split('?')[0]
 
     for row in rows:
         cols = st.columns(3)
@@ -237,7 +235,7 @@ else:
 
                 # Open button as HTML link with query param, opens in new tab
                 page_param = uc['page'].replace(".py", "")
-                open_url = f"{base_url}?page={page_param}"
+                open_url = f"?page={page_param}"  # relative link
                 st.markdown(f"""
                     <a href="{open_url}" target="_blank" 
                        style="text-decoration:none;">
@@ -252,3 +250,5 @@ else:
     if st.button("Back to Home"):
         st.session_state["sector"] = None
         st.experimental_rerun()
+
+
