@@ -175,6 +175,28 @@ if st.session_state["sector"] is None:
 
 # -------------------------
 # -------------------------
+
+# -------------------------
+# Sidebar Navigation for Sector Page
+# -------------------------
+sector_name = st.session_state["sector"]
+
+with st.sidebar:
+    st.markdown(f"## {sector_name} Navigation")
+    
+    # Button to go back to home
+    if st.button("🏠 Home"):
+        st.session_state["sector"] = None
+        st.experimental_rerun()
+    
+    # Buttons to switch to another sector directly
+    for s in sector_overview.keys():
+        if s != sector_name:
+            if st.button(f"➡ {s}"):
+                st.session_state["sector"] = s
+                st.experimental_rerun()
+
+# -------------
 # SECTOR PAGE
 # -------------------------
 else:
@@ -277,62 +299,9 @@ else:
                 """, unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
 
+    if st.button("Back to Home"):
+        st.session_state["sector"] = None
+        st.experimental_rerun()
 
 
-        # -------------------------
-    # SECTOR PAGE
-    # -------------------------
-    else:
-        sector_name = st.session_state["sector"]
-        
-        # -------------------------
-        # Sector Navigation Buttons with Highlight
-        # -------------------------
-        st.markdown("<div style='display:flex; gap:10px; margin-bottom:20px;'>", unsafe_allow_html=True)
-        for sn in sector_overview.keys():
-            # Highlight the active sector
-            if sn == sector_name:
-                btn_style = "background:#064b86; color:#fff; font-weight:bold;"
-            else:
-                btn_style = "background:#eef4ff; color:#064b86; font-weight:600;"
-            
-            if st.button(sn, key=f"nav_{sn}"):
-                st.session_state["sector"] = sn
-                st.experimental_rerun()
-            # Wrap in div to style
-            st.markdown(f"""
-                <div style="flex:1; text-align:center; padding:3px; border-radius:6px; {btn_style}">
-                    {sn}
-                </div>
-            """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.header(f"{sector_name} – Projects / Use Cases")
-    
-        usecases = sectors[sector_name]
-        rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
-    
-        for row in rows:
-            cols = st.columns(3)
-            for col, uc in zip(cols, row):
-                with col:
-                    st.markdown("<div class='card-box'>", unsafe_allow_html=True)
-                    st.image(thumb_urls[sector_name], use_container_width=True)
-                    st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
-    
-                    page_slug = uc['page'][:-3] if uc['page'].endswith(".py") else uc['page']
-                    deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
-    
-                    st.markdown(f"""
-                        <a href="{deployed_url}" target="_blank" style="text-decoration:none;">
-                            <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
-                                Open
-                            </div>
-                        </a>
-                    """, unsafe_allow_html=True)
-                    st.markdown("</div>", unsafe_allow_html=True)
-    
-        if st.button("Back to Home"):
-            st.session_state["sector"] = None
-            st.experimental_rerun()
-    
+       
