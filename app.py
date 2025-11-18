@@ -5,28 +5,24 @@ import os
 # YOUR DATA (Replace these)
 # -------------------------------
 
-# Example thumbnails
 home_thumbs = {
     "Marketing Analytics": "thumbs/marketing.jpg",
     "Retail Analytics": "thumbs/retail.jpg",
     "Healthcare Analytics": "thumbs/health.jpg",
 }
 
-# Example overview
 sector_overview = {
     "Marketing Analytics": "Turn raw marketing data into insights that drive conversions.",
     "Retail Analytics": "Track your store operations, customer behavior, and revenue flows.",
     "Healthcare Analytics": "Leverage analytics for diagnosis, optimization and efficiency."
 }
 
-# Example tools
 sector_tools = {
     "Marketing Analytics": ["Python", "SQL", "Tableau", "Power BI", "ML Models", "NLP", "Excel"],
     "Retail Analytics": ["Python", "SQL", "Power BI", "Tableau", "Forecasting", "Excel"],
     "Healthcare Analytics": ["Python", "R", "Tableau", "ML Models", "Deep Learning"]
 }
 
-# Example usecases (You already have these in your app)
 sectors = {
     "Marketing Analytics": {
         "Campaign Analyzer": "app_marketing_campaign",
@@ -51,40 +47,30 @@ st.markdown("""
 
 .sector-card {
     border: 2px solid #064b86;
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 18px;
     margin-bottom: 25px;
-    box-shadow: 0 0 14px rgba(6,75,134,0.18);
-    transition: 0.25s;
     background: #ffffff;
-}
-
-.sector-card:hover {
-    box-shadow: 0 0 25px rgba(6,75,134,0.45);
-    transform: translateY(-4px);
-}
-
-.tool-chip {
-    background: #f2f6ff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #d5e3ff;
-    text-align: center;
-    font-size: 12.5px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    box-shadow: 0 0 6px rgba(180,200,255,0.35);
     transition: 0.2s;
 }
 
-.tool-chip:hover {
-    background: #e8eeff;
-    transform: scale(1.05);
+.sector-card:hover {
+    transform: translateY(-3px);
+}
+
+.tool-chip {
+    background: #f3f6fb;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #d0d7e6;
+    text-align: center;
+    font-size: 12.3px;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 
 # -------------------------------
 # SESSION STATE
@@ -92,7 +78,6 @@ st.markdown("""
 
 if "sector" not in st.session_state:
     st.session_state["sector"] = None
-
 
 # -------------------------------
 # HOME PAGE (3 CARDS/ROW)
@@ -147,12 +132,11 @@ if st.session_state["sector"] is None:
                                 unsafe_allow_html=True
                             )
 
-                # Explore button
+                # Button
                 if st.button(f"Explore {sector_name}", key=f"btn_{sector_name}"):
                     st.session_state["sector"] = sector_name
 
                 st.markdown("</div>", unsafe_allow_html=True)
-
 
 # -------------------------------
 # SECTOR PAGE
@@ -167,7 +151,7 @@ else:
     usecases = sectors[sector_name]
     for uc_name, app_file in usecases.items():
         if st.button(uc_name):
-            st.write(f"Launching {uc_name}... (this is where you load {app_file}.py)")
+            st.write(f"Launching {uc_name}...")
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
