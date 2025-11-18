@@ -20,10 +20,31 @@ st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # -------------------------
-# GLOBAL CSS
+# GLOBAL CSS (UPDATED FOR CARD OUTLINE)
 # -------------------------
 st.markdown("""
 <style>
+
+.card-box {
+    border: 1px solid #d0d7e4;
+    border-radius: 12px;
+    padding: 15px;
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
+    transition: 0.2s ease-in-out;
+}
+
+.card-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 14px rgba(0,0,0,0.12);
+}
+
+.card-box img {
+    border-radius: 10px;
+    border: 1px solid #e5ecf5;
+}
+
 .tool-btn {
     background: #e8f1ff;
     border-radius: 6px;
@@ -41,20 +62,6 @@ st.markdown("""
     transform: scale(1.05);
 }
 
-/* Card Box CSS */
-.card-box {
-    border: 2px solid #cdddf5;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-    background: #ffffff;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-    transition: 0.2s ease-in-out;
-}
-.card-box:hover {
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.10);
-    transform: scale(1.02);
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -150,7 +157,7 @@ if st.session_state["sector"] is None:
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SECTOR PAGE (PLACEHOLDER)
+# SECTOR PAGE (COMING SOON)
 # ============================================================
 
 else:
