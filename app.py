@@ -192,7 +192,7 @@ else:
     with st.sidebar:
         st.markdown(f"## {sector_name} Navigation")
         
-        if st.button("🏠 Home", key="sidebar_home"):
+        if st.button("Home", key="sidebar_home"):
             st.session_state["navigate_to"] = "home"
         
         for s in sector_overview.keys():
