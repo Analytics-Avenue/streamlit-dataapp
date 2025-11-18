@@ -208,7 +208,7 @@ if st.session_state["sector"] is None:
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SECTOR PAGE (All Projects)
+# SECTOR PAGE (Projects / Use Cases)
 # ============================================================
 else:
     sector_name = st.session_state["sector"]
@@ -223,19 +223,17 @@ else:
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
 
-                # Image
-                img_url = os.path.join("assets", uc["image"])
-                st.image(img_url, use_container_width=True)
+                # Image (generic thumbnail)
+                st.image(thumb_urls[sector_name], use_container_width=True)
 
                 # Title
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
-                # Open button
-                if st.button("Open", key=f"{sector_name}_{uc['name']}"):
-                    # Switch to another Streamlit page
-                    import streamlit as st_page
-                    st.experimental_set_query_params(page=uc['page'])
+                # Open button: just instruct user to use sidebar navigation
+                st.markdown(f"<a href='#{uc['name']}' style='text-decoration:none;'>Open → Use sidebar navigation</a>", unsafe_allow_html=True)
 
+                st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("Back to Home"):
         st.session_state["sector"] = None
+        st.experimental_rerun()
