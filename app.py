@@ -19,6 +19,29 @@ st.markdown(f"""
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
+# -------------------------
+# GLOBAL CSS
+# -------------------------
+st.markdown("""
+<style>
+.tool-btn {
+    background: #e8f1ff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid #bcd2ff;
+    text-align: center;
+    font-weight: 600;
+    margin: 3px;
+    display: inline-block;
+    transition: 0.2s;
+}
+.tool-btn:hover {
+    background: #d8e8ff;
+    transform: scale(1.05);
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------
 # Directories
