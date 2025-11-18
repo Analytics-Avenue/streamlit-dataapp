@@ -18,6 +18,27 @@ warnings.filterwarnings("ignore")
 # Page setup
 # -------------------------
 st.set_page_config(page_title="Email & WhatsApp Marketing Forecast Lab", layout="wide")
+
+# Hide default sidebar navigation (optional)
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+
+
+
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+
 st.markdown("<h1>Email & WhatsApp Marketing Forecast Lab</h1>", unsafe_allow_html=True)
 st.markdown("Analyze campaign performance, predict future engagement and revenue, and forecast trends for better marketing strategy.")
 
