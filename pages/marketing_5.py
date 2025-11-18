@@ -13,14 +13,15 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
-# Hide default sidebar navigation (optional)
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
-
 
 # -------------------------
 # App Config
 # -------------------------
 st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
+# Hide default sidebar navigation (optional)
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+
+
 
 # -------------------------
 # Company Logo + Name
