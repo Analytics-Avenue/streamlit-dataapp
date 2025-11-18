@@ -182,6 +182,8 @@ else:
 
     # Sidebar
     # -------------------------
+    
+    # -------------------------
     # Sidebar Navigation
     # -------------------------
     if "navigate_to" not in st.session_state:
@@ -199,20 +201,26 @@ else:
                     st.session_state["navigate_to"] = s
     
     # -------------------------
-    # Handle Navigation AFTER sidebar
+    # Handle navigation safely
     # -------------------------
-    if st.session_state["navigate_to"] is not None:
-        # Update sector only once
-        if st.session_state["navigate_to"] == "home":
+    if st.session_state.get("navigate_to") is not None:
+        target = st.session_state["navigate_to"]
+        st.session_state["navigate_to"] = None
+        
+        if target == "home":
             st.session_state["sector"] = None
         else:
-            st.session_state["sector"] = st.session_state["navigate_to"]
-        
-        # Reset flag
-        st.session_state["navigate_to"] = None
+            st.session_state["sector"] = target
     
-        # Safe rerun at the very end
-        st.experimental_rerun()
+        # Hide potential rerun errors
+        try:
+            st.experimental_rerun()
+        except Exception:
+            pass
+
+
+
+ # -------------------
 
 
     st.header(f"{sector_name} – Projects / Use Cases")
