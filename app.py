@@ -169,9 +169,14 @@ if st.session_state["sector"] is None:
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
 
-                if st.button(f"Explore {sector}", key=f"btn_home_{sector}"):
+
+                if st.button(f"Explore {sector}", key=f"btn_{sector}"):
                     st.session_state["sector"] = sector
-                    st.experimental_rerun()
+                    try:
+                        st.experimental_rerun()
+                    except Exception:
+                        pass
+
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------
