@@ -40,6 +40,21 @@ st.markdown("""
     background: #d8e8ff;
     transform: scale(1.05);
 }
+
+/* Card Box CSS */
+.card-box {
+    border: 2px solid #cdddf5;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+    background: #ffffff;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+    transition: 0.2s ease-in-out;
+}
+.card-box:hover {
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.10);
+    transform: scale(1.02);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -129,13 +144,13 @@ if st.session_state["sector"] is None:
                 st.markdown(tool_html, unsafe_allow_html=True)
 
                 # Explore button
-                if st.button(f"Explore", key=f"explr_{sector_name}"):
+                if st.button(f"Explore {sector_name}", key=f"explr_{sector_name}"):
                     st.session_state["sector"] = sector_name
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SECTOR PAGE (YOU CAN ADD YOUR USE CASE CODE HERE)
+# SECTOR PAGE (PLACEHOLDER)
 # ============================================================
 
 else:
