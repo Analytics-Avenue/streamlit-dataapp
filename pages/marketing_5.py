@@ -266,12 +266,31 @@ with tabs[1]:
     k4.metric("Avg Bounce Rate", f"{filt['Bounce_Rate'].mean():.2%}")
 
     # Charts
+    # Revenue & Conversions per Page
     st.markdown("### Revenue & Conversions per Page")
     page_agg = filt.groupby("Page")[["Revenue","Conversions"]].sum().reset_index()
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=page_agg["Page"], y=page_agg["Revenue"], name="Revenue"))
-    fig.add_trace(go.Bar(x=page_agg["Page"], y=page_agg["Conversions"], name="Conversions"))
-    fig.update_layout(barmode="group", xaxis_title="Page", yaxis_title="Value")
+    fig.add_trace(go.Bar(
+        x=page_agg["Page"], 
+        y=page_agg["Revenue"], 
+        name="Revenue",
+        text=page_agg["Revenue"],
+        textposition="outside"
+    ))
+    fig.add_trace(go.Bar(
+        x=page_agg["Page"], 
+        y=page_agg["Conversions"], 
+        name="Conversions",
+        text=page_agg["Conversions"],
+        textposition="outside"
+    ))
+    fig.update_layout(
+        barmode="group", 
+        xaxis_title="Page", 
+        yaxis_title="Value",
+        uniformtext_minsize=8,
+        uniformtext_mode='hide'
+    )
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("### Device / Country Performance")
