@@ -14,6 +14,21 @@ warnings.filterwarnings("ignore")
 
 # --- Page Setup ---
 st.set_page_config(page_title="PatientFlow Navigator", layout="wide")
+
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+# ---------------------
 st.markdown("<h1 style='margin-bottom:0.2rem'>PatientFlow Navigator</h1>", unsafe_allow_html=True)
 st.markdown("Enterprise-capable healthcare analytics: patient trends, treatment efficiency, readmission prediction, and cost forecasting.")
 
