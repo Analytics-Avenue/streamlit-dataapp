@@ -13,6 +13,10 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
+# Hide default sidebar navigation (optional)
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+
+
 # -------------------------
 # App Config
 # -------------------------
