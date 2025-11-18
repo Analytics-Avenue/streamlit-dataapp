@@ -207,18 +207,20 @@ with tabs[1]:
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
 
-    # Upload actual CSV
-    file = st.file_uploader("Upload your dataset", type=["csv"])
-    if file:
-        df = pd.read_csv(file)
-    
-    else:
-        uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
-        if uploaded is not None:
-            raw = pd.read_csv(uploaded)
-            raw.columns = raw.columns.str.strip()
-            st.write("Preview (first 5 rows):")
-            st.dataframe(raw.head())
+        # Upload actual CSV
+        file = st.file_uploader("Upload your dataset", type=["csv"])
+        if file:
+            df = pd.read_csv(file)
+        
+        else:
+            uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+            if uploaded is not None:
+                raw = pd.read_csv(uploaded)
+                raw.columns = raw.columns.str.strip()
+                st.write("Preview (first 5 rows):")
+                st.dataframe(raw.head())
+             
+        elif mode == "Upload CSV + Column mapping":
             st.markdown("Map your columns to required fields.")
             mapping = {}
             for req in REQUIRED_CONTENT_COLS:
