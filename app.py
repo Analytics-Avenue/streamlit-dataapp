@@ -20,30 +20,10 @@ st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # -------------------------
-# GLOBAL CSS (UPDATED FOR CARD OUTLINE)
+# GLOBAL CSS
 # -------------------------
 st.markdown("""
 <style>
-
-.card-box {
-    border: 1px solid #d0d7e4;
-    border-radius: 12px;
-    padding: 15px;
-    background: #ffffff;
-    box-shadow: 0 0 6px rgba(0,0,0,0.06);
-    margin-bottom: 25px;
-    transition: 0.2s ease-in-out;
-}
-
-.card-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 14px rgba(0,0,0,0.12);
-}
-
-.card-box img {
-    border-radius: 10px;
-    border: 1px solid #e5ecf5;
-}
 
 .tool-btn {
     background: #e8f1ff;
@@ -60,6 +40,37 @@ st.markdown("""
 .tool-btn:hover {
     background: #d8e8ff;
     transform: scale(1.05);
+}
+
+/* Card styles */
+.card-box {
+    border: 1px solid #c9d7f0;
+    border-radius: 12px;
+    padding: 15px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.25s ease-in-out;
+    margin-bottom: 25px;
+}
+
+/* Hover effect */
+.card-box:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    border-color: #8bb3ff;
+}
+
+/* Thumbnail styling */
+.card-box img {
+    border-radius: 8px;
+    outline: 1px solid #dce7ff;
+    transition: 0.25s;
+}
+
+/* Thumbnail glow */
+.card-box:hover img {
+    outline-color: #8bb3ff;
+    box-shadow: 0 0 8px rgba(140,170,255,0.5);
 }
 
 </style>
@@ -86,13 +97,6 @@ sector_tools = {
     "Health Care Analytics": ["Python", "R", "Power BI", "Forecasting", "ML Models", "NLP"]
 }
 
-sectors = {
-    "Marketing Analytics": [],
-    "Real Estate Analytics": [],
-    "Health Care Analytics": [],
-}
-
-# thumbnails
 home_thumbs = {
     "Marketing Analytics": os.path.join(ASSETS_DIR, "marketing_thumb.jpg"),
     "Real Estate Analytics": os.path.join(ASSETS_DIR, "real_estate_thumb.jpg"),
@@ -116,12 +120,11 @@ if st.session_state["sector"] is None:
 
     sector_names = list(sector_overview.keys())
 
-    # Split into rows of 3
+    # Make rows of 3 cards
     rows = [sector_names[i:i+3] for i in range(0, len(sector_names), 3)]
 
     for row in rows:
         cols = st.columns(3)
-
         for col, sector_name in zip(cols, row):
             with col:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
@@ -145,7 +148,6 @@ if st.session_state["sector"] is None:
 
                 # Tools grid
                 st.markdown("<b>Tools & Tech:</b><br>", unsafe_allow_html=True)
-
                 tools = sector_tools[sector_name]
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in tools])
                 st.markdown(tool_html, unsafe_allow_html=True)
@@ -157,7 +159,7 @@ if st.session_state["sector"] is None:
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ============================================================
-# SECTOR PAGE (COMING SOON)
+# SECTOR PAGE
 # ============================================================
 
 else:
