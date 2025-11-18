@@ -343,7 +343,7 @@ with tabs[1]:
     # -------------------------
     # Automated Insights (Table + Download)
     # -------------------------
-    st.markdown("### Automated Insights (Table + Download)")
+    st.markdown("### Automated Insights")
     insights_list = []
     if "Channel" in filt.columns and "Revenue" in filt.columns and "Spend" in filt.columns:
         ch_perf = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
