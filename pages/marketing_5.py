@@ -26,9 +26,13 @@ logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp
 st.markdown(f"""
 <div style="display: flex; align-items: center;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <h2 style="color:#0073e6; margin:0;">Analytics Avenue</h2>
+    <div style="line-height:1;">
+        <h2 style="color:#0073e6; margin:0;">Analytics Avenue</h2>
+        <h4 style="color:#555555; margin:0;">Advanced Analytics</h4>
+    </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # -------------------------
 # Header
