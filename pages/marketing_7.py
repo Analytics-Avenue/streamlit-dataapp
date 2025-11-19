@@ -112,30 +112,78 @@ tabs = st.tabs(["Overview","Application"])
 # -------------------------
 with tabs[0]:
     st.markdown("### Overview")
+
+    # Use columns to align cards properly
+    col1, col2 = st.columns([2, 3])
+    with col1:
+        st.markdown("""
+        <div class='card' style='text-align:left'>
+            <b>End-to-End Retention Tracking:</b><br>
+            Track which customers stay, churn, and identify at-risk segments for proactive engagement.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class='card' style='text-align:left'>
+            <b>Predictive Analytics:</b><br>
+            Forecast churn probability using <b>RandomForest Classifier</b> and identify key churn drivers.
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown("""
+        <div class='card' style='text-align:left'>
+            <b>Automated Insights:</b><br>
+            Highlight high-churn segments by Channel, Device, Country, AgeGroup, and Gender.
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class='card' style='text-align:left'>
+            <b>Actionable Metrics:</b><br>
+            Monthly retention trends, retention rate KPIs, and downloadable tables for reporting.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Key Metrics in center with spacing
+    st.markdown("### Key Metrics")
+    k1, k2, k3, k4 = st.columns(4)
+    k1.markdown("<div class='metric-card' title='Total number of customers'>Total Customers</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card' title='Number of churned customers'>Churned Customers</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card' title='Percentage of customers retained'>Retention Rate</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card' title='Average order value'>Avg Order Value</div>", unsafe_allow_html=True)
+
+    # Automated Insights in table format
+    st.markdown("### Automated Insights")
     st.markdown("""
-    <div class='card'>
-    Monitor your customer journey across campaigns and channels. Analyze conversions, funnel stages, revenue, and video engagement. Identify drop-offs and optimize ad spend.
+    <div class='card' style='text-align:left'>
+        • Identify top and bottom performing Channels based on retention<br>
+        • Highlight at-risk segments by AgeGroup, Gender, Device, Country<br>
+        • Downloadable insights table for executive reporting
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Purpose")
+    # Forecasting & ML capabilities
+    st.markdown("### Forecasting & ML Capabilities")
     st.markdown("""
-    <div class='card'>
-    • Analyze multi-channel funnels<br>
-    • Track conversions and revenue<br>
-    • Evaluate video engagement metrics<br>
-    • Identify drop-offs and improve campaign performance<br>
-    • Predict future clicks, leads, and revenue
+    <div class='card' style='text-align:left'>
+        • Churn probability prediction using <b>RandomForest Classifier</b><br>
+        • Monthly retention trends and lifecycle analysis<br>
+        • Downloadable ML predictions with features and predicted churn<br>
+        • Model performance metrics (accuracy, AUC, RMSE) displayed for transparency
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### KPIs")
-    k1,k2,k3,k4,k5 = st.columns(5)
-    k1.markdown("<div class='metric-card'>Total Impressions</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Total Clicks</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Total Leads</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Conversion Rate</div>", unsafe_allow_html=True)
-    k5.markdown("<div class='metric-card'>Revenue</div>", unsafe_allow_html=True)
+    # Who Should Use This App
+    st.markdown("### Who Should Use This App?")
+    st.markdown("""
+    <div class='card' style='text-align:left'>
+        • <b>Marketing Analysts</b> – Want predictive insights and segment breakdowns<br>
+        • <b>CMOs / Marketing Heads</b> – Need executive-ready dashboards<br>
+        • <b>Digital Marketing Teams</b> – Optimize ad spend & reduce churn<br>
+        • <b>Growth Teams</b> – Track retention efficiency and revenue trends
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Application tab
