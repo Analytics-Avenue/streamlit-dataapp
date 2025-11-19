@@ -129,7 +129,7 @@ with tabs[0]:
     k1.markdown("<div class='kpi'>Machines Tracked</div>", unsafe_allow_html=True)
     k2.markdown("<div class='kpi'>Avg Temperature</div>", unsafe_allow_html=True)
     k3.markdown("<div class='kpi'>Avg Vibration</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>Failure Events</div>", unsafe_allow_html=True
+    k4.markdown("<div class='kpi'>Failure Events</div>", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
