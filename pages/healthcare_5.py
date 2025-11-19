@@ -104,11 +104,12 @@ with tab_overview:
     # -------------------------
     # KPIs Placeholder (Blank)
     # -------------------------
-    st.markdown('<div class="kpi-row">', unsafe_allow_html=True)
+    st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
     kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
     for title in kpi_titles:
         st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700">--</div></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 # -------------------------
