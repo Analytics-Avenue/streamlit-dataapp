@@ -97,17 +97,24 @@ with tab_overview:
     # Intended Users
     st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrative staff, finance & procurement teams looking for actionable insights to streamline operations.</p></div>', unsafe_allow_html=True)
 
-    # KPIs Single Row
-    st.markdown('<div class="kpi-row">', unsafe_allow_html=True)
+    # -------------------------
+    # KPIs Single Row (Scrollable)
+    # -------------------------
+    st.markdown("""
+    <div style="display:flex; overflow-x:auto; gap:14px; padding-bottom:12px;">
+    """, unsafe_allow_html=True)
+    
     kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
     for title in kpi_titles:
         st.markdown(f'''
-            <div class="kpi">
+            <div class="kpi" style="flex:0 0 auto;">
                 <div style="font-size:12px;color:#333">{title}</div>
                 <div style="font-size:20px;font-weight:700">--</div>
             </div>
         ''', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # -------------------------
 # Application Tab
