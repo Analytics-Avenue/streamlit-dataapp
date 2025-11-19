@@ -15,11 +15,47 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------
 st.set_page_config(page_title="Production Downtime & Machine Failure Analytics", layout="wide")
 
-# Hide sidebar navigation
+# Hide sidebar
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Logo + Header
+# Card Glow CSS
+# ---------------------------------------------------------
+st.markdown("""
+<style>
+.card {
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #d9d9d9;
+    transition: 0.3s;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 18px rgba(6,75,134,0.35);
+    border-color: #064b86;
+}
+.kpi {
+    padding: 30px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #ccc;
+    font-size: 26px;
+    font-weight: bold;
+    color: #064b86;
+    text-align: center;
+    transition: 0.3s;
+}
+.kpi:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 4px 15px rgba(6,75,134,0.30);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Header + Logo
 # ---------------------------------------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
@@ -33,9 +69,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-
 # ---------------------------------------------------------
-# Helper: CSV download
+# Helper for CSV download
 # ---------------------------------------------------------
 def download_df(df, filename):
     b = BytesIO()
@@ -43,33 +78,31 @@ def download_df(df, filename):
     b.seek(0)
     st.download_button("Download CSV", b, file_name=filename, mime="text/csv")
 
-
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
 tabs = st.tabs(["Overview", "Application"])
 
-
 # ---------------------------------------------------------
-# OVERVIEW PAGE
+# OVERVIEW TAB
 # ---------------------------------------------------------
 with tabs[0]:
 
     st.markdown("## Overview")
 
     st.markdown("""
-    <div style='padding:15px; border-radius:10px; background:#f7f7f7; border:1px solid #ddd;'>
+    <div class='card'>
         This application monitors machine behavior, detects early failure patterns,
         predicts breakdown likelihood, and provides actionable insights to reduce downtime.
     </div>
     """, unsafe_allow_html=True)
 
-    # GRID: Capabilities (left) | Impact (right)
+    # Capabilities / Impact
     c1, c2 = st.columns(2)
 
     c1.markdown("### Capabilities")
     c1.markdown("""
-    <div style='padding:15px; border-radius:10px; background:#fafafa; border:1px solid #ccc;'>
+    <div class='card'>
         • Sensor anomaly detection (Temperature, Vibration, RPM, Load)<br>
         • Predictive maintenance using ML<br>
         • Failure probability scoring per machine<br>
@@ -80,36 +113,23 @@ with tabs[0]:
 
     c2.markdown("### Business Impact")
     c2.markdown("""
-    <div style='padding:15px; border-radius:10px; background:#fafafa; border:1px solid #ccc;'>
+    <div class='card'>
         • Reduced unplanned downtime<br>
-        • Increased machine lifespan & performance<br>
-        • Optimized preventive maintenance scheduling<br>
-        • Avoid high-cost emergency repairs<br>
-        • Real-time risk monitoring of production assets
+        • Increased machine lifespan<br>
+        • Optimized preventive maintenance<br>
+        • Avoid costly breakdowns<br>
+        • Real-time monitoring
     </div>
     """, unsafe_allow_html=True)
 
-    # KPI cards
-    # Clean label-only KPI cards (Overview)
-    
+    # KPI CARDS
     st.markdown("## KPIs")
-    k1, k2, k3, k4 = st.columns(4)
-    
-    k1.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Machines Tracked</div>", unsafe_allow_html=True)
-    k2.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Avg Temperature</div>", unsafe_allow_html=True)
-    k3.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Avg Vibration</div>", unsafe_allow_html=True)
-    k4.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Failure Events</div>", unsafe_allow_html=True)
 
-    # Who should use
-    st.markdown("### Who Should Use This App?")
-    st.markdown("""
-    <div style='padding:15px; border-radius:10px; background:#fafafa; border:1px solid #ccc;'>
-        • Plant Managers monitoring machine health<br>
-        • Maintenance Engineers planning predictive service<br>
-        • Operations Teams avoiding production shocks<br>
-        • Data Analysts analyzing large-scale sensor data
-    </div>
-    """, unsafe_allow_html=True)
+    k1,k2,k3,k4 = st.columns(4)
+    k1.markdown("<div class='kpi'>Machines Tracked</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Avg Temperature</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Avg Vibration</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Failure Events</div>", unsafe_allow_html=True
 
 
 # ---------------------------------------------------------
