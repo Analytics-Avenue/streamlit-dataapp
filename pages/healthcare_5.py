@@ -89,12 +89,12 @@ with tab_overview:
     st.markdown('<div class="glow-card"><h3>Business Impact</h3><p>Faster triage, targeted procurement, reduced bed shortages, data-driven expansion and planning.</p></div>',unsafe_allow_html=True)
     st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrators, finance and procurement teams.</p></div>',unsafe_allow_html=True)
 
-    # KPIs
+    # KPIs — EMPTY
     st.markdown('<div class="kpi-row">',unsafe_allow_html=True)
     kpis = ["High-Risk Hospitals","Avg Bed Occupancy","Ventilators","Avg Staff/Hospital"]
     for title in kpis:
         st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700"></div></div>',unsafe_allow_html=True)
-    st.markdown('</div>',unsafe_allow_html=True
+    st.markdown('</div>',unsafe_allow_html=True)
 
 # -------------------------
 # Application Tab
