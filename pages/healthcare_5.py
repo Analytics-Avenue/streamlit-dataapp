@@ -114,7 +114,7 @@ st.markdown('<div class="glow-card"><h3>Intended Users</h3>'
             '</div>', unsafe_allow_html=True)
 
 # -------------------------
-# KPIs Row (placeholders)
+# KPIs Row (5 in single line)
 # -------------------------
 st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
 kpi_titles = ["High Patient Load", "Avg Beds Occupancy", "Equipment Shortage Score", "Patients per Staff", "Facility Deficit Score"]
