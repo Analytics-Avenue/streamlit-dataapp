@@ -92,10 +92,10 @@ with tabs[0]:
     # KPI cards
     st.markdown("### Key Metrics")
     k1,k2,k3,k4 = st.columns(4)
-    k1.metric("Machines Tracked", "Dynamic")
-    k2.metric("Avg Temperature", "Dynamic")
-    k3.metric("Avg Vibration", "Dynamic")
-    k4.metric("Failure Events", "Dynamic")
+    k1.metric("Machines Tracked")
+    k2.metric("Avg Temperature")
+    k3.metric("Avg Vibration")
+    k4.metric("Failure Events")
 
     # Who should use
     st.markdown("### Who Should Use This App?")
