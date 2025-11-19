@@ -255,32 +255,55 @@ with tab2:
         st.dataframe(out)
         download_df(out, "ml_predictions.csv")
 
-    # ----------------------------------------------------------
-    # AUTOMATED INSIGHTS
-    # ----------------------------------------------------------
+    # ------------------------------------------------------
+    # Automated Insights (Robust)
+    # ------------------------------------------------------
     st.subheader("Automated Insights")
-
+    
+    df_clean = df.copy()
+    
+    # Normalize column names
+    df_clean.columns = (
+        df_clean.columns.astype(str)
+        .str.strip()
+        .str.lower()
+        .str.replace(" ", "_")
+    )
+    
     insights = []
-
-    # Top hospitals based on metrics
-    if "monthly_patients" in df_clean.columns:
-        top = df_clean.nlargest(3, "monthly_patients")
-        for _, r in top.iterrows():
-            insights.append(f"{r['hospital_name']} handles {r['monthly_patients']} monthly patients.")
-
-    if "equipment_shortage_score" in df_clean.columns:
-        top = df_clean.nlargest(3, "equipment_shortage_score")
-        for _, r in top.iterrows():
-            insights.append(f"{r['hospital_name']} has the highest equipment shortage score: {r['equipment_shortage_score']}.")
-
-    if "patients_per_staff" in df_clean.columns:
-        top = df_clean.nlargest(3, "patients_per_staff")
-        for _, r in top.iterrows():
-            insights.append(f"{r['hospital_name']} has heavy staff load: {r['patients_per_staff']} patients/staff.")
-
+    
+    # Helper function
+    def safe_top(df, col, n=3):
+        return df.dropna(subset=[col]).nlargest(n, col) if col in df.columns else pd.DataFrame()
+    
+    # 1. Monthly Patients
+    top_patients = safe_top(df_clean, "monthly_patients")
+    if not top_patients.empty and "hospital_name" in df_clean.columns:
+        for _, r in top_patients.iterrows():
+            insights.append(
+                f"🏥 **{r['hospital_name']}** handles **{int(r['monthly_patients'])} patients per month**, among the highest."
+            )
+    
+    # 2. Equipment Shortage Score
+    top_equipment = safe_top(df_clean, "equipment_shortage_score")
+    if not top_equipment.empty and "hospital_name" in df_clean.columns:
+        for _, r in top_equipment.iterrows():
+            insights.append(
+                f"⚠️ **{r['hospital_name']}** has a high equipment shortage score of **{r['equipment_shortage_score']}**."
+            )
+    
+    # 3. Patients Per Staff
+    top_load = safe_top(df_clean, "patients_per_staff")
+    if not top_load.empty and "hospital_name" in df_clean.columns:
+        for _, r in top_load.iterrows():
+            insights.append(
+                f"👥 **{r['hospital_name']}** has a heavy load with **{r['patients_per_staff']:.2f} patients per staff member**."
+            )
+    
+    # Display insights
     if insights:
-        ins_df = pd.DataFrame({"Insights": insights})
-        st.dataframe(ins_df)
-        download_df(ins_df, "automated_insights.csv")
+        df_ins = pd.DataFrame({"Insights": insights})
+        st.dataframe(df_ins)
+        download_df(df_ins, "automated_insights.csv")
     else:
-        st.info("No insights found for available columns.")
+        st.warning("No insights generated. Some required columns may be missing.")
