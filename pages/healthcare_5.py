@@ -469,50 +469,88 @@ with tab2:
             download_df(out_df, f"{target_col}_predictions.csv")
 
     # -------------------------
-    # Automated Insights (dynamic with filters)
+    # Automated Insights (dynamic + ML-driven)
     # -------------------------
     st.subheader("Automated Insights")
-
+    
     insights = []
-    # operate on df_filtered (columns already normalized)
     df_i = df_filtered.copy()
-
-    # ensure normalized columns set
+    
+    # Normalize again for safety
     df_i.columns = df_i.columns.astype(str)
-
+    
     # 1. Top hospitals by monthly patients
-    top_patients = safe_top(df_i, "monthly_patients", n=5)
-    if not top_patients.empty and "hospital_name" in df_i.columns:
-        for _, row in top_patients.iterrows():
-            insights.append(f"{row['hospital_name']} handles {int(row['monthly_patients'])} monthly patients (filtered view).")
-
+    if "monthly_patients" in df_i.columns and "hospital_name" in df_i.columns:
+        top_pat = df_i.dropna(subset=["monthly_patients"]).nlargest(5, "monthly_patients")
+        for _, r in top_pat.iterrows():
+            insights.append(
+                f"{r['hospital_name']} reports {int(r['monthly_patients'])} monthly patients."
+            )
+    
     # 2. Highest equipment shortage
-    top_equipment = safe_top(df_i, "equipment_shortage_score", n=5)
-    if not top_equipment.empty and "hospital_name" in df_i.columns:
-        for _, row in top_equipment.iterrows():
-            insights.append(f"{row['hospital_name']} shows equipment shortage score {row['equipment_shortage_score']} (filtered view).")
-
+    if "equipment_shortage_score" in df_i.columns and "hospital_name" in df_i.columns:
+        top_eq = df_i.dropna(subset=["equipment_shortage_score"]).nlargest(5, "equipment_shortage_score")
+        for _, r in top_eq.iterrows():
+            insights.append(
+                f"{r['hospital_name']} has an equipment shortage score of {round(r['equipment_shortage_score'],2)}."
+            )
+    
     # 3. Highest patients per staff
-    top_pps = safe_top(df_i, "patients_per_staff", n=5)
-    if not top_pps.empty and "hospital_name" in df_i.columns:
-        for _, row in top_pps.iterrows():
-            insights.append(f"{row['hospital_name']} has {row['patients_per_staff']:.2f} patients per staff (filtered view).")
-
-    # 4. Highest overall risk
-    top_risk = safe_top(df_i, "overall_risk_score", n=5)
-    if not top_risk.empty and "hospital_name" in df_i.columns:
-        for _, row in top_risk.iterrows():
-            insights.append(f"{row['hospital_name']} has overall risk score {row['overall_risk_score']} (filtered view).")
-
-    # 5. Equipment totals summary (if ventilators_count present)
-    if "ventilators_count" in df_i.columns and pd.api.types.is_numeric_dtype(df_i["ventilators_count"]):
-        total_vents = int(df_i["ventilators_count"].sum())
-        insights.append(f"Total ventilators in filtered view: {total_vents}")
-
-    # Display insights
-    if insights:
-        ins_df = pd.DataFrame({"Insights": insights})
-        st.dataframe(ins_df)
-        download_df(ins_df, "automated_insights.csv")
+    if "patients_per_staff" in df_i.columns and "hospital_name" in df_i.columns:
+        top_pps = df_i.dropna(subset=["patients_per_staff"]).nlargest(5, "patients_per_staff")
+        for _, r in top_pps.iterrows():
+            insights.append(
+                f"{r['hospital_name']} operates at {round(r['patients_per_staff'],2)} patients per staff."
+            )
+    
+    # 4. Highest overall risk score
+    if "overall_risk_score" in df_i.columns and "hospital_name" in df_i.columns:
+        top_risk = df_i.dropna(subset=["overall_risk_score"]).nlargest(5, "overall_risk_score")
+        for _, r in top_risk.iterrows():
+            insights.append(
+                f"{r['hospital_name']} has a risk score of {round(r['overall_risk_score'],2)}."
+            )
+    
+    # -----------------------
+    # ML-BASED INSIGHTS
+    # -----------------------
+    if "reg_pipe" in st.session_state:
+        try:
+            model = st.session_state["reg_pipe"]
+    
+            # same feature list as training
+            pred = model.predict(df_filtered[model.feature_names_in_])
+    
+            df_pred_temp = df_filtered.copy()
+            df_pred_temp["ML_Prediction"] = pred
+    
+            # 5. ML: highest predicted values
+            top_pred = df_pred_temp.nlargest(5, "ML_Prediction")
+            if "hospital_name" in df_pred_temp.columns:
+                for _, r in top_pred.iterrows():
+                    insights.append(
+                        f"ML predicts {round(r['ML_Prediction'],2)} for {r['hospital_name']}."
+                    )
+            else:
+                insights.append("ML predictions calculated (hospital_name missing for ranking).")
+    
+            # 6. ML: prediction summary
+            insights.append(
+                f"ML forecasts range from {round(df_pred_temp['ML_Prediction'].min(),2)} to {round(df_pred_temp['ML_Prediction'].max(),2)} in the filtered view."
+            )
+    
+        except Exception as e:
+            st.warning(f"ML insights unavailable: {e}")
+    
+    # -----------------------
+    # DISPLAY
+    # -----------------------
+    if len(insights) > 0:
+        df_ins = pd.DataFrame({"Insights": insights})
+        st.dataframe(df_ins)
+        download_df(df_ins, "automated_insights.csv")
     else:
-        st.warning("No insights could be generated for the current filtered dataset. Make sure dataset contains expected columns (hospital_name, monthly_patients, equipment_shortage_score, patients_per_staff, overall_risk_score).")
+        st.warning("No insights generated. Dataset is missing expected columns.")
+
+
+    
