@@ -105,7 +105,7 @@ st.markdown("""
 # -------------------------
 # Default dataset URL (replace if needed)
 # -------------------------
-DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/blob/main/datasets/manufacturing/machine_failure_data.csv"
+DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/machine_failure_data.csv"
 
 @st.cache_data
 def load_default_data(url=DEFAULT_URL):
