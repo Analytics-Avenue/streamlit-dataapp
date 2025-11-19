@@ -66,7 +66,7 @@ with tab1:
     st.markdown("### Business Impact")
     st.markdown("<div class='card'>• Optimized investment decisions<br>• Portfolio risk mitigation<br>• Resource allocation for high-demand neighborhoods<br>• Targeted marketing strategies</div>", unsafe_allow_html=True)
 
-    st.markdown("### KPIs (Hover Glow)")
+    st.markdown("### KPIs")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>Top Lifestyle Neighborhoods<br><small>Investment Managers</small></div>", unsafe_allow_html=True)
     k2.markdown("<div class='metric-card'>Safest Neighborhoods<br><small>Risk Analysts</small></div>", unsafe_allow_html=True)
