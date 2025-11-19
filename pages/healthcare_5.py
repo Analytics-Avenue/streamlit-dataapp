@@ -189,17 +189,28 @@ with tab_app:
         st.plotly_chart(fig, use_container_width=True)
 
     # -------------------------
+    # -------------------------
     # ML Revenue Prediction
     # -------------------------
     st.subheader("ML Revenue Prediction (Regression)")
-    if "Revenue" not in df.columns:
-        st.info("Ensure 'Revenue' numeric column exists to train ML model.")
+    
+    df = st.session_state.get("hospital_master")
+    if df is None:
+        st.info("Load a dataset first to use ML features.")
+        st.stop()
+    
+    # Check if 'Revenue' exists and is numeric
+    if "Revenue" not in df.columns or not np.issubdtype(df["Revenue"].dtype, np.number):
+        st.warning(
+            "'Revenue' numeric column is required to train the ML model.\n"
+            f"Available numeric columns: {', '.join(df.select_dtypes(include=[np.number]).columns)}"
+        )
     else:
         features = [c for c in df.columns if c not in ["Revenue","Hospital_Name"]]
         X = df[features]
         y = df["Revenue"]
         test_size = st.slider("Test size", 0.1, 0.4, 0.2)
-
+    
         if st.button("Train Revenue Regressor"):
             ct = []
             numc = X.select_dtypes(include=[np.number]).columns.tolist()
@@ -212,12 +223,12 @@ with tab_app:
             pipe.fit(X_tr, y_tr)
             st.session_state["reg_pipe"] = pipe
             y_pred = pipe.predict(X_te)
-            st.success(f"Regression trained — RMSE: {math.sqrt(np.mean((y_te-y_pred)**2)):.2f} | R2: {np.corrcoef(y_te,y_pred)[0,1]**2:.2f}")
+            st.success(f"Regression trained — RMSE: {math.sqrt(np.mean((y_te-y_pred)**2)):.2f} | R²: {np.corrcoef(y_te,y_pred)[0,1]**2:.2f}")
             df_result = X_te.copy()
             df_result["Actual_Revenue"] = y_te.values
             df_result["Predicted_Revenue"] = y_pred
             st.dataframe(df_result)
-            download_df(df_result,"revenue_prediction.csv")
+            download_df(df_result, "revenue_prediction.csv")
 
     # -------------------------
     # Automated Insights
