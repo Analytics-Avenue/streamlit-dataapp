@@ -66,7 +66,7 @@ st.markdown("""
 
 # -------------------------
 
-DEFAULT_DATA_URL = "[https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv](https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv)"
+DEFAULT_DATA_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv](https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv"
 
 def remove_duplicate_columns(df: pd.DataFrame) -> pd.DataFrame:
 df = df.loc[:, ~df.columns.duplicated()].copy()
@@ -149,6 +149,7 @@ with tab_ds:
         except Exception as e: st.error(f"Failed to load: {e}")
     elif mode=="Upload CSV":
         st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv](https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/healthcare/healthcare_syn.csv"
         try:
             # Load default dataset
             sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
