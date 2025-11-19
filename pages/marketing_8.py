@@ -158,12 +158,21 @@ with tabs[1]:
             st.stop()
 
     elif mode == "Upload CSV":
-        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
-        if uploaded is not None:
-            df = pd.read_csv(uploaded)
-            df.columns = df.columns.str.strip()
-            st.success("File uploaded.")
-            st.dataframe(df.head())
+        st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/google_ads_seo_performance.csv"
+        try:
+            # Load default dataset
+            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+        except Exception as e:
+            st.info(f"Sample CSV unavailable: {e}")
+    
+        # Upload actual CSV
+        file = st.file_uploader("Upload your dataset", type=["csv"])
+        if file:
+            df = pd.read_csv(file)
+        
     else:  # Upload + mapping
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
         if uploaded is not None:
