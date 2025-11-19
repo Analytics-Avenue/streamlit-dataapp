@@ -259,39 +259,35 @@ with tab2:
 
     # --------------------------
     # Automated Insights
-    # ==========================================================
-    st.markdown("### Automated Insights")
+    # ==========================================================    
+    # Create a sample automated insights DataFrame
+    insights = pd.DataFrame({
+        "Insight_Type": [
+            "Top City by Expected ROI",
+            "Top Property Type by ROI",
+            "Top Agent by Conversion",
+            "Highest ROI Property",
+            "Most Active City"
+        ],
+        "Value": [
+            filt.groupby("City")["Expected_ROI"].mean().sort_values(ascending=False).head(1).index[0] if not filt.empty else "N/A",
+            filt.groupby("Property_Type")["Expected_ROI"].mean().sort_values(ascending=False).head(1).index[0] if not filt.empty else "N/A",
+            filt.groupby("Agent_Name")["Conversion_Probability"].mean().sort_values(ascending=False).head(1).index[0] if not filt.empty else "N/A",
+            filt.sort_values("Expected_ROI", ascending=False).head(1)["Property_Type"].values[0] if not filt.empty else "N/A",
+            filt["City"].value_counts().head(1).index[0] if not filt.empty else "N/A"
+        ],
+        "Description": [
+            "City with highest average expected ROI",
+            "Property type generating highest ROI",
+            "Agent with best conversion probability",
+            "Property with maximum expected ROI",
+            "City with most active listings"
+        ]
+    })
     
-    insights = []
-    
-    if filt.empty:
-        insights.append("No data available after filtering.")
-    else:
-        # Top city by Expected ROI
-        top_city = filt.groupby("City")["Expected_ROI"].mean().idxmax()
-        insights.append(f"🏙 Top city by expected ROI: {top_city}")
-    
-        # Top property type by ROI
-        top_ptype = filt.groupby("Property_Type")["Expected_ROI"].mean().idxmax()
-        insights.append(f"🏘 Top property type by ROI: {top_ptype}")
-    
-        # Top agent
-        top_agent = filt.groupby("Agent_Name")["Expected_ROI"].mean().idxmax()
-        insights.append(f"💼 Top performing agent: {top_agent}")
-    
-        # Average conversion probability
-        avg_conv = filt["Conversion_Probability"].mean()
-        insights.append(f"📈 Average conversion probability: {avg_conv:.2f}")
-    
-        # Hotspot properties
-        hotspot_count = len(filt[filt["Conversion_Probability"] > 0.7])
-        insights.append(f"🔥 Properties with high conversion probability (>0.7): {hotspot_count}")
-    
-    # Convert to DataFrame for display & download
-    insights_df = pd.DataFrame({"Insight": insights})
-    
-    st.table(insights_df)
+    # Display table
+    st.dataframe(insights)
     
     # Download button
-    csv_insights = insights_df.to_csv(index=False)
+    csv_insights = insights.to_csv(index=False)
     st.download_button("Download Automated Insights", csv_insights, "automated_insights.csv", "text/csv")
