@@ -91,10 +91,10 @@ with tab_overview:
 
     # KPIs
     st.markdown('<div class="kpi-row">',unsafe_allow_html=True)
-    kpis=[("Hospitals","120"),("High-Risk Hospitals","18"),("Avg Bed Occupancy","72%"),("Ventilators","1240"),("Avg Staff/Hospital","68")]
-    for title,value in kpis:
-        st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700">{value}</div></div>',unsafe_allow_html=True)
-    st.markdown('</div>',unsafe_allow_html=True)
+    kpis = ["High-Risk Hospitals","Avg Bed Occupancy","Ventilators","Avg Staff/Hospital"]
+    for title in kpis:
+        st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700"></div></div>',unsafe_allow_html=True)
+    st.markdown('</div>',unsafe_allow_html=True
 
 # -------------------------
 # Application Tab
