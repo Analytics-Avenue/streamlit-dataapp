@@ -91,6 +91,8 @@ with tabs[0]:
 
     # KPI cards
     # Clean label-only KPI cards (Overview)
+    
+    st.markdown("## KPIs")
     k1, k2, k3, k4 = st.columns(4)
     
     k1.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Machines Tracked</div>", unsafe_allow_html=True)
