@@ -207,12 +207,16 @@ if st.button("Train ML Regressor"):
 
 # -------------------------
 # Automated Insights
-# -------------------------
 st.subheader("Automated Insights")
-insights=[]
-if "Overall Risk Score" in df.columns:
-    top5 = df.nlargest(5, "Overall Risk Score")[["Hospital_Name","Overall Risk Score"]]
-    for _,r in top5.iterrows():
-        insights.append(f"Top high-risk hospital: {r['Hospital_Name']} → Risk Score: {r['Overall Risk Score']:.2f}")
-st.dataframe(pd.DataFrame({"Insights":insights}))
-download_df(pd.DataFrame({"Insights":insights}),"automated_insights.csv")
+insights = []
+
+if "overall_risk_score" in df.columns:
+    top5 = df.nlargest(5, "overall_risk_score")[["hospital_name", "overall_risk_score"]]
+    for _, r in top5.iterrows():
+        insights.append(f"Top high-risk hospital: {r['hospital_name']} → Risk Score: {r['overall_risk_score']:.2f}")
+
+if insights:
+    st.dataframe(pd.DataFrame({"Insights": insights}))
+    download_df(pd.DataFrame({"Insights": insights}), "automated_insights.csv")
+else:
+    st.info("No high-risk hospitals found or column missing.")
