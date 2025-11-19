@@ -209,16 +209,29 @@ if st.button("Train ML Regressor"):
     st.subheader("Automated Insights")
     insights = []
     
-    if "overall_risk_score" in df.columns:
-        # Only include hospitals with a non-null risk score
-        risk_df = df[df["overall_risk_score"].notna()]
-        if not risk_df.empty:
-            top5 = risk_df.nlargest(5, "overall_risk_score")[["hospital_name", "overall_risk_score"]]
-            for _, r in top5.iterrows():
-                insights.append(f"Top high-risk hospital: {r['hospital_name']} → Risk Score: {r['overall_risk_score']:.2f}")
+    df_clean = df.copy()
+    df_clean.columns = df_clean.columns.str.strip().str.lower().str.replace(" ", "_")
+    
+    # 1️⃣ Top hospitals by monthly patients
+    if "monthly_patients" in df_clean.columns:
+        top_patients = df_clean.nlargest(3, "monthly_patients")[["hospital_name", "monthly_patients"]]
+        for _, r in top_patients.iterrows():
+            insights.append(f"High patient load: {r['hospital_name']} → {r['monthly_patients']} patients/month")
+    
+    # 2️⃣ Hospitals with high equipment shortage
+    if "equipment_shortage_score" in df_clean.columns:
+        top_shortage = df_clean.nlargest(3, "equipment_shortage_score")[["hospital_name", "equipment_shortage_score"]]
+        for _, r in top_shortage.iterrows():
+            insights.append(f"Equipment shortage alert: {r['hospital_name']} → Score {r['equipment_shortage_score']}")
+    
+    # 3️⃣ Hospitals with highest patients per staff
+    if "patients_per_staff" in df_clean.columns:
+        top_ratio = df_clean.nlargest(3, "patients_per_staff")[["hospital_name", "patients_per_staff"]]
+        for _, r in top_ratio.iterrows():
+            insights.append(f"High patients per staff: {r['hospital_name']} → {r['patients_per_staff']:.2f}")
     
     if insights:
         st.dataframe(pd.DataFrame({"Insights": insights}))
         download_df(pd.DataFrame({"Insights": insights}), "automated_insights.csv")
     else:
-        st.info("No high-risk hospitals found or column missing.")
+        st.info("No insights could be generated from the dataset.")
