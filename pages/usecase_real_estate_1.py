@@ -35,6 +35,8 @@ st.markdown(f"""
 # ----------------------------------------------------------
 # REQUIRED COLUMNS ONLY FOR THIS APPLICATION
 # ----------------------------------------------------------
+
+# ----------------------------------------------------------
 REQUIRED_COLS = [
     "City",
     "Property_Type",
@@ -53,11 +55,14 @@ st.markdown("""
     font-size: 40px; font-weight: 900;
     color:black;
 }
-.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:left;
-transition: all 0.25s ease; font-weight:600;}
-.metric-card:hover {box-shadow:0 0 18px rgba(0,0,0,0.4); transform:scale(1.03);}
+.card, .metric-card, .hover-card {
+    background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.08); transition: all 0.25s ease; text-align:left;
+}
+.card:hover, .metric-card:hover, .hover-card:hover {box-shadow:0 0 18px rgba(0,0,0,0.4); transform:scale(1.03);}
+.metric-card {font-weight:600;}
+.grid-container {display:flex; gap:20px; flex-wrap:wrap;}
+.grid-item {flex:1;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -77,7 +82,7 @@ tab1, tab2 = st.tabs(["Overview", "Application"])
 with tab1:
     st.markdown("### Overview")
     st.markdown("""
-    <div class='card'>
+    <div class='hover-card'>
     This platform provides an enterprise-grade real estate intelligence framework covering valuation, 
     forecasting, performance analytics, and city-level dashboards.
     </div>
@@ -85,7 +90,7 @@ with tab1:
 
     st.markdown("### Purpose")
     st.markdown("""
-    <div class='card'>
+    <div class='hover-card'>
     • Standardize property pricing<br>
     • Improve valuation accuracy<br>
     • Support investors, developers, agencies<br>
@@ -93,22 +98,29 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Capabilities")
-    st.markdown("""
-    <div class='card'>
-    <b>Technical</b><br>
-    • Machine learning valuation<br>
-    • Interactive dashboards<br>
-    • Geo intelligence<br>
-    • NLP Search<br>
-    • Region-wise segmentation<br><br>
-    <b>Business</b><br>
-    • Faster deal closures<br>
-    • Transparent pricing<br>
-    • Better negotiations<br>
-    • Predictable demand mapping
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### Capabilities & Business Impact")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        <div class='hover-card'>
+        <b>Capabilities</b><br>
+        • Machine learning valuation<br>
+        • Interactive dashboards<br>
+        • Geo intelligence<br>
+        • NLP Search<br>
+        • Region-wise segmentation
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class='hover-card'>
+        <b>Business Impact</b><br>
+        • Faster deal closures<br>
+        • Transparent pricing<br>
+        • Better negotiations<br>
+        • Predictable demand mapping
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("### Key KPIs")
     k1, k2, k3, k4 = st.columns(4)
@@ -119,7 +131,7 @@ with tab1:
 
     st.markdown("### Use of App")
     st.markdown("""
-    <div class='card'>
+    <div class='hover-card'>
     • Monitor property pricing trends<br>
     • Forecast property valuations<br>
     • Compare city-wise and property-type trends
@@ -128,7 +140,7 @@ with tab1:
 
     st.markdown("### Who Should Use")
     st.markdown("""
-    <div class='card'>
+    <div class='hover-card'>
     • Real estate investors<br>
     • Property developers<br>
     • Market analysts<br>
