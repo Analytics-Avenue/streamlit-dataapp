@@ -104,13 +104,19 @@ with tab_overview:
     st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrative staff, finance & procurement teams looking for actionable insights to streamline operations.</p></div>', unsafe_allow_html=True)
 
     # -------------------------
-    # KPIs Placeholder (Blank)
-    # -------------------------
-    st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
-    kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
-    for title in kpi_titles:
-        st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700">--</div></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+# KPIs Placeholder (Single Row)
+# -------------------------
+st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
+kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
+for title in kpi_titles:
+    st.markdown(f'''
+        <div class="kpi">
+            <div style="font-size:12px;color:#333">{title}</div>
+            <div style="font-size:20px;font-weight:700">--</div>
+        </div>
+    ''', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
@@ -119,13 +125,6 @@ with tab_overview:
 # -------------------------
 with tab_app:
     st.header("Application")
-    tab_ds, tab_charts, tab_ml, tab_insights = st.tabs(["Dataset Setup","Charts","ML Revenue Prediction","Automated Insights"])
-
-    # -------------------------
-    # Dataset Setup
-    # -------------------------
-    with tab_ds:
-        st.subheader("Dataset Setup")
         mode = st.radio("Dataset mode", ["Default (URL)","Upload CSV","Upload + Mapping"],horizontal=True)
 
         if mode=="Default (URL)":
@@ -176,8 +175,8 @@ with tab_app:
     # -------------------------
     # Charts
     # -------------------------
-    with tab_charts:
-        st.subheader("Charts")
+            st.markdown("ML Revenue Prediction (Regression)")
+
         df = st.session_state.get("hospital_master")
         if df is None: st.info("Load dataset first."); st.stop()
         num_cols=df.select_dtypes(include=[np.number]).columns.tolist()
@@ -197,8 +196,7 @@ with tab_app:
     # -------------------------
     # ML Revenue Prediction
     # -------------------------
-    with tab_ml:
-        st.subheader("ML Revenue Prediction (Regression)")
+        st.markdown("ML Revenue Prediction (Regression)")
         df = st.session_state.get("hospital_master")
         if df is None or "Revenue" not in df.columns: st.info("Ensure 'Revenue' numeric column exists."); st.stop()
         features=[c for c in df.columns if c not in ["Revenue","Hospital_Name"]]
@@ -226,9 +224,8 @@ with tab_app:
 
     # -------------------------
     # Automated Insights
-    # -------------------------
-    with tab_insights:
-        st.subheader("Automated Insights")
+    # ----------------
+        st.markdown("Automated Insights")
         df = st.session_state.get("hospital_master")
         if df is None: st.info("Load dataset first."); st.stop()
         insights=[]
