@@ -107,6 +107,48 @@ div[data-testid="stMarkdownContainer"] .card h3 {
 # Overview Tab
 # -------------------------
 with tabs[0]:
+    # -------------------------
+    # CSS for left-aligned cards and center metrics
+    # -------------------------
+    st.markdown("""
+    <style>
+    /* Left-align text inside cards */
+    div[data-testid="stMarkdownContainer"] .card {
+        text-align: left !important;
+        padding: 18px 20px;
+        border-radius: 14px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,0.25);
+        box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+        backdrop-filter: blur(4px);
+    }
+
+    /* Center metrics cards but keep content readable */
+    div[data-testid="stMarkdownContainer"] .metric-card {
+        margin: auto;
+        text-align: center !important;
+        background: rgba(255,255,255,0.10);
+        padding: 20px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+        backdrop-filter: blur(4px);
+    }
+    div[data-testid="stMarkdownContainer"] .metric-card:hover {
+        background: rgba(255,255,255,0.20);
+        border: 1px solid rgba(255,255,255,0.55);
+        box-shadow: 0 0 18px rgba(255,255,255,0.4);
+        transform: scale(1.04);
+        cursor: pointer;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # -------------------------
+    # Overview Section
+    # -------------------------
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
@@ -115,8 +157,11 @@ with tabs[0]:
         and provides **forecasting** for short- and medium-term decision-making. 
         Built for **data-driven marketing teams**, the app gives actionable insights at a glance.
     </div>
-    """ , unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+    # -------------------------
+    # Capabilities
+    # -------------------------
     st.markdown("### Capabilities")
     st.markdown("""
     <div class='card'>
@@ -129,6 +174,9 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
+    # -------------------------
+    # Impact
+    # -------------------------
     st.markdown("### Impact")
     st.markdown("""
     <div class='card'>
@@ -140,6 +188,9 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
+    # -------------------------
+    # Key Metrics
+    # -------------------------
     st.markdown("### Key Metrics")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card' title='Total revenue generated across campaigns and channels'>Total Revenue</div>", unsafe_allow_html=True)
@@ -147,6 +198,9 @@ with tabs[0]:
     k3.markdown("<div class='metric-card' title='Total leads generated'>Total Leads</div>", unsafe_allow_html=True)
     k4.markdown("<div class='metric-card' title='Overall conversion rate (Conversions / Clicks)'>Conversion Rate</div>", unsafe_allow_html=True)
 
+    # -------------------------
+    # Forecasting & ML Capabilities
+    # -------------------------
     st.markdown("### Forecasting & ML Capabilities")
     st.markdown("""
     <div class='card'>
@@ -154,10 +208,13 @@ with tabs[0]:
         • Trend forecasting for next 30 days with **linear regression fallback** if Prophet is unavailable<br>
         • Automatic identification of top-performing campaigns, channels, and audience segments<br>
         • Model performance metrics (R², RMSE) displayed for transparency and trust<br>
-        • Downloadable ML predictions for further analysis
+        • Downloadable ML predictions (Actual vs Predicted + features) for further analysis
     </div>
     """, unsafe_allow_html=True)
 
+    # -------------------------
+    # Automated Insights
+    # -------------------------
     st.markdown("### Automated Insights")
     st.markdown("""
     <div class='card'>
@@ -168,6 +225,9 @@ with tabs[0]:
     </div>
     """, unsafe_allow_html=True)
 
+    # -------------------------
+    # Who Should Use
+    # -------------------------
     st.markdown("### Who Should Use This App?")
     st.markdown("""
     <div class='card'>
@@ -177,7 +237,6 @@ with tabs[0]:
         • **Growth Teams** tracking conversion efficiency and revenue trends
     </div>
     """, unsafe_allow_html=True)
-
 
 # -------------------------
 # Application tab
