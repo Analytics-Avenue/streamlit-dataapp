@@ -89,6 +89,10 @@ Support investment decisions using rental yield and accurate price prediction an
 
     "Health Care Analytics": """Improve patient flow, predict OPD/ER volumes, enhance doctor allocation, and reduce waiting times.
 Use forecasting, classification, and EMR/EHR data to optimize hospital operations.
+Boost care quality with real-time monitoring and clinical performance analytics.""",
+ 
+    "Manufacturing Analytics": """Improve patient flow, predict OPD/ER volumes, enhance doctor allocation, and reduce waiting times.
+Use forecasting, classification, and EMR/EHR data to optimize hospital operations.
 Boost care quality with real-time monitoring and clinical performance analytics."""
 }
 
@@ -98,6 +102,8 @@ sector_tools = {
     "Real Estate Analytics": ["Python","SQL","Excel","Power BI","Tableau","QGIS","GeoPandas","Google Maps API",
                               "Regression Models","Time Series","Clustering","Price Prediction","Rental Yield Models"],
     "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
+                              "Classification Models","NLP","Patient Flow Forecasting"],
+    "Manufacturing Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
                               "Classification Models","NLP","Patient Flow Forecasting"]
 }
 
@@ -135,7 +141,7 @@ sectors = {
     "Manufacturing Analytics": [
         {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
         {"name":"Patient Visit Analytics & Hospital Performance","page":"manufacturing_2.py"},
-        {"name":"PatientFlow Navigator","page":"manufacturing_3.py"}
+        {"name":"PatientFlow Navigator","page":"manufacturing_3.py"},
     ]
 }
 
