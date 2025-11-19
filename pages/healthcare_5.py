@@ -83,7 +83,7 @@ for key in ["hospital_master", "reg_pipe"]:
 # -------------------------------------------------------------------
 # TABS
 # -------------------------------------------------------------------
-tab1, tab2 = st.tabs(["📌 Overview", "🧪 Application"])
+tab1, tab2 = st.tabs(["Overview", "Application"])
 
 # -------------------------------------------------------------------
 # TAB 1: OVERVIEW
@@ -128,8 +128,13 @@ with tab1:
                 '<p>Hospital administrators, operations teams, finance, and procurement departments.</p>'
                 '</div>', unsafe_allow_html=True)
     # -------------------------
-    # KPI Style (Matches Your Reference)
     # -------------------------
+    # KPI SECTION WITH HOVER-GLOW STYLE
+    # -------------------------
+    
+    import streamlit as st
+    
+    # KPI Card CSS
     st.markdown("""
     <style>
     .metric-card {
@@ -141,21 +146,28 @@ with tab1:
         font-size: 16px;
         border: 1px solid rgba(0,0,0,0.1);
         box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+        transition: 0.25s ease-in-out;
+    }
+    
+    .metric-card:hover {
+        box-shadow: 0 0 18px rgba(0, 120, 255, 0.45);
+        transform: translateY(-3px) scale(1.02);
+        border-color: rgba(0,120,255,0.35);
     }
     </style>
     """, unsafe_allow_html=True)
     
     st.markdown("### KPIs")
     
-    # 5 KPI cards in a single row
+    # Create 5 KPI columns
     c1, c2, c3, c4, c5 = st.columns(5)
     
+    # Static placeholders – swap with your real computed values as needed
     c1.markdown("<div class='metric-card'>High Patient Load</div>", unsafe_allow_html=True)
     c2.markdown("<div class='metric-card'>Avg Beds Availability</div>", unsafe_allow_html=True)
     c3.markdown("<div class='metric-card'>Equipment Shortage Score</div>", unsafe_allow_html=True)
     c4.markdown("<div class='metric-card'>Patients per Staff</div>", unsafe_allow_html=True)
     c5.markdown("<div class='metric-card'>Facility Deficit Score</div>", unsafe_allow_html=True)
-
 
 
 # -------------------------------------------------------------------
