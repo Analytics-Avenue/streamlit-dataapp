@@ -227,6 +227,7 @@ with tabs[1]:
     
     elif mode=="Upload CSV":
         st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/customer_journey_funnel_video.csv"   
         try:
             # Load default dataset
             sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
@@ -325,7 +326,8 @@ with tabs[1]:
     st.plotly_chart(fig_video,use_container_width=True)
 
     # -------------------------
-    # Predictive ML (Revenue)
+    # -------------------------
+    # Predictive ML (Revenue) with download
     # -------------------------
     st.markdown("### ML: Predict Revenue")
     ml_df = filt.copy().dropna(subset=["Revenue"])
@@ -337,16 +339,46 @@ with tabs[1]:
         y = ml_df["Revenue"]
         cat_cols = [c for c in X.columns if X[c].dtype=="object"]
         num_cols = [c for c in X.columns if c not in cat_cols]
+    
         preprocessor = ColumnTransformer([
-            ("cat",OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-            ("num",StandardScaler(), num_cols)
+            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
+            ("num", StandardScaler(), num_cols)
         ])
         X_t = preprocessor.fit_transform(X)
-        X_train,X_test,y_train,y_test = train_test_split(X_t,y,test_size=0.2,random_state=42)
-        rf = RandomForestRegressor(n_estimators=200,random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+    
+        rf = RandomForestRegressor(n_estimators=200, random_state=42)
         with st.spinner("Training RandomForest for Revenue..."):
-            rf.fit(X_train,y_train)
+            rf.fit(X_train, y_train)
         preds = rf.predict(X_test)
         rmse = math.sqrt(np.mean((y_test-preds)**2))
-        r2 = rf.score(X_test,y_test)
+        r2 = rf.score(X_test, y_test)
         st.write(f"Revenue Prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
+    
+        # Prepare downloadable dataframe
+        X_test_df = pd.DataFrame(X_test, columns=[f'feat_{i}' for i in range(X_test.shape[1])])
+        ml_result_df = pd.DataFrame({
+            "Actual Revenue": y_test.values,
+            "Predicted Revenue": preds
+        }).reset_index(drop=True)
+        ml_result_df = pd.concat([ml_result_df, X_test_df.reset_index(drop=True)], axis=1)
+    
+        st.markdown("#### Download ML Predictions")
+        download_df(ml_result_df, "ml_revenue_predictions.csv")
+    
+    
+    # -------------------------
+    # Automated Insights table with download
+    # -------------------------
+    st.markdown("### Automated Insights Table")
+    # Example insights: modify logic as needed
+    insights_df = filt.groupby(["Channel", "Campaign"]).agg({
+        "Leads": "sum",
+        "Revenue": "sum",
+        "Conversion_Rate": "mean"
+    }).reset_index()
+    insights_df = insights_df.sort_values("Revenue", ascending=False)
+    st.dataframe(insights_df, use_container_width=True)
+    
+    st.markdown("#### Download Automated Insights")
+    download_df(insights_df, "automated_insights.csv")
