@@ -19,10 +19,8 @@ warnings.filterwarnings("ignore")
 # -------------------------
 st.set_page_config(page_title="Email & WhatsApp Marketing Forecast Lab", layout="wide")
 
-# Hide default sidebar navigation (optional)
+# Hide sidebar
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
-
-
 
 # -------------------------
 # Company Logo + Name
@@ -38,9 +36,32 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-
-st.markdown("<h1>Email & WhatsApp Marketing Forecast Lab</h1>", unsafe_allow_html=True)
-st.markdown("Analyze campaign performance, predict future engagement and revenue, and forecast trends for better marketing strategy.")
+# -------------------------
+# Custom CSS for left-aligned cards
+# -------------------------
+st.markdown("""
+<style>
+div[data-testid="stMarkdownContainer"] .metric-card {
+    background: rgba(255,255,255,0.10);
+    padding: 20px;
+    border-radius: 14px;
+    text-align: left !important;
+    border: 1px solid rgba(255,255,255,0.30);
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    backdrop-filter: blur(4px);
+}
+div[data-testid="stMarkdownContainer"] .metric-card:hover {
+    background: rgba(255,255,255,0.20);
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 0 18px rgba(255,255,255,0.4);
+    transform: scale(1.04);
+    cursor: pointer;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------
 # Constants
@@ -93,74 +114,69 @@ else:  # Upload + mapping
                 st.success("Mapping applied.")
                 st.dataframe(df.head())
 
-# -------------------------
-# Stop if no data
-# -------------------------
 if df is None:
     st.stop()
 
 # -------------------------
-# Convert Date column
+# Convert Date
 # -------------------------
 df["Date"] = pd.to_datetime(df["Date"], errors='coerce')
 
 # -------------------------
-# Tabs: Overview & Application
+# Tabs
 # -------------------------
 tabs = st.tabs(["Overview", "Application"])
 
+# -------------------------
+# Overview tab
+# -------------------------
 with tabs[0]:
     st.markdown("### Overview")
     st.markdown("""
-    Analyze Email & WhatsApp campaigns, track open/click/conversion rates, bounce and reply rates, revenue, engagement over time, and forecast future trends.
-    """)
+    <div class='metric-card'>
+    Analyze Email & WhatsApp campaigns, track open/click/conversion rates, bounce & reply rates, revenue, engagement over time, and forecast future trends.
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("### Key Metrics")
     k1,k2,k3,k4 = st.columns(4)
-    k1.metric("Total Recipients", f"{df['Recipients'].sum():,}")
-    k2.metric("Total Delivered", f"{df['Delivered'].sum():,}")
-    k3.metric("Total Opens", f"{df['Opened'].sum():,}")
-    k4.metric("Total Clicks", f"{df['Clicked'].sum():,}")
+    k1.markdown(f"<div class='metric-card'>Total Recipients: {df['Recipients'].sum():,}</div>", unsafe_allow_html=True)
+    k2.markdown(f"<div class='metric-card'>Total Delivered: {df['Delivered'].sum():,}</div>", unsafe_allow_html=True)
+    k3.markdown(f"<div class='metric-card'>Total Opens: {df['Opened'].sum():,}</div>", unsafe_allow_html=True)
+    k4.markdown(f"<div class='metric-card'>Total Clicks: {df['Clicked'].sum():,}</div>", unsafe_allow_html=True)
     k1,k2,k3,k4 = st.columns(4)
-    k1.metric("Open Rate (%)", f"{df['Open_Rate'].mean():.2f}")
-    k2.metric("Click Rate (%)", f"{df['Click_Rate'].mean():.2f}")
-    k3.metric("Conversion Rate (%)", f"{df['Conversion_Rate'].mean():.2f}")
-    k4.metric("Revenue", f"₹ {df['Revenue'].sum():,.2f}")
+    k1.markdown(f"<div class='metric-card'>Open Rate (%): {df['Open_Rate'].mean():.2f}</div>", unsafe_allow_html=True)
+    k2.markdown(f"<div class='metric-card'>Click Rate (%): {df['Click_Rate'].mean():.2f}</div>", unsafe_allow_html=True)
+    k3.markdown(f"<div class='metric-card'>Conversion Rate (%): {df['Conversion_Rate'].mean():.2f}</div>", unsafe_allow_html=True)
+    k4.markdown(f"<div class='metric-card'>Revenue: ₹ {df['Revenue'].sum():,.2f}</div>", unsafe_allow_html=True)
 
-    # -------------------------
-    # Time-series Forecast
-    # -------------------------
+    # Forecast
     st.markdown("### Forecast Daily Opens, Clicks, Revenue (Next 30 Days)")
     ts_cols = ["Opened","Clicked","Revenue"]
-    st.write("Select metric to forecast:")
     ts_metric = st.selectbox("Metric", ts_cols)
-
     ts_df = df.groupby("Date")[ts_metric].sum().reset_index().rename(columns={"Date":"ds", ts_metric:"y"})
     m = Prophet(daily_seasonality=True)
     m.fit(ts_df)
     future = m.make_future_dataframe(periods=30)
     forecast = m.predict(future)
-
     fig = px.line(forecast, x='ds', y='yhat', title=f"{ts_metric} Forecast", labels={"ds":"Date","yhat":ts_metric})
     st.plotly_chart(fig, use_container_width=True)
 
+# -------------------------
+# Application tab
+# -------------------------
 with tabs[1]:
     st.header("Application")
     
-    # -------------------------
     # Filters
-    # -------------------------
     st.markdown("### Filters")
     c1,c2,c3 = st.columns(3)
     campaign_types = sorted(df["Campaign_Type"].dropna().unique().tolist())
     countries = sorted(df["Country"].dropna().unique().tolist())
     devices = sorted(df["Device"].dropna().unique().tolist())
-    with c1:
-        sel_campaign = st.multiselect("Campaign Type", options=campaign_types, default=campaign_types)
-    with c2:
-        sel_country = st.multiselect("Country", options=countries, default=countries)
-    with c3:
-        sel_device = st.multiselect("Device", options=devices, default=devices)
+    with c1: sel_campaign = st.multiselect("Campaign Type", options=campaign_types, default=campaign_types)
+    with c2: sel_country = st.multiselect("Country", options=countries, default=countries)
+    with c3: sel_device = st.multiselect("Device", options=devices, default=devices)
     
     filt = df.copy()
     filt = filt[filt["Campaign_Type"].isin(sel_campaign)]
@@ -170,9 +186,7 @@ with tabs[1]:
     st.markdown("Filtered preview")
     st.dataframe(filt.head(10), use_container_width=True)
     
-    # -------------------------
     # Charts
-    # -------------------------
     st.markdown("### Campaign Performance")
     agg = filt.groupby("Campaign_Name").agg({
         "Recipients":"sum","Delivered":"sum","Opened":"sum","Clicked":"sum","Revenue":"sum"
@@ -185,63 +199,49 @@ with tabs[1]:
     st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("### Revenue & Conversion Rate per Campaign")
-    fig2 = px.scatter(agg, x="Revenue", y=filt.groupby('Campaign_Name')['Conversion_Rate'].mean().reindex(agg['Campaign_Name']),
-                      size="Clicked", hover_name="Campaign_Name", color="Campaign_Name", template="plotly_white")
+    conv_rate = filt.groupby('Campaign_Name')['Conversion_Rate'].mean().reindex(agg['Campaign_Name'])
+    fig2 = px.scatter(agg, x="Revenue", y=conv_rate, size="Clicked", hover_name="Campaign_Name", color="Campaign_Name", template="plotly_white")
     st.plotly_chart(fig2, use_container_width=True)
     
-    # -------------------------
-    # ML: Predict future Opens, Clicks, Revenue
-    # -------------------------
-    st.markdown("### Predictive Modeling")
-    ml_df = filt.copy()
-    ml_df = ml_df.dropna(subset=["Recipients","Delivered","Opened","Clicked","Revenue"])
-    
+    # ML Revenue Predictions
+    st.markdown("### ML Revenue Predictions")
+    ml_df = filt.dropna(subset=["Revenue","Recipients","Delivered"])
     if len(ml_df) < 30:
-        st.info("Not enough data to train ML model (need at least 30 rows).")
+        st.info("Not enough data for ML model (need at least 30 rows).")
     else:
         feat_cols = ["Campaign_Type","Country","Device","Recipients","Delivered"]
-        target_cols = ["Opened","Clicked","Revenue"]
-        
+        target_col = "Revenue"
         X = ml_df[feat_cols].copy()
-        y = ml_df[target_cols].copy()
-        
+        y = ml_df[target_col].copy()
         cat_cols = ["Campaign_Type","Country","Device"]
         num_cols = ["Recipients","Delivered"]
-        
         preprocessor = ColumnTransformer(transformers=[
             ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
             ("num", StandardScaler(), num_cols)
         ])
-        
         X_t = preprocessor.fit_transform(X)
         X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
-        
         rf = RandomForestRegressor(n_estimators=200, random_state=42)
-        with st.spinner("Training RandomForest models..."):
+        with st.spinner("Training RandomForest for Revenue..."):
             rf.fit(X_train, y_train)
-        
         preds = rf.predict(X_test)
-        for i, target in enumerate(target_cols):
-            rmse = math.sqrt(mean_squared_error(y_test.iloc[:,i], preds[:,i]))
-            r2 = r2_score(y_test.iloc[:,i], preds[:,i])
-            st.write(f"{target} — RMSE: {rmse:.2f}, R²: {r2:.3f}")
-        
-        st.markdown("### Quick Prediction for a Campaign")
-        sel_type = st.selectbox("Campaign Type", options=ml_df["Campaign_Type"].unique())
-        sel_country = st.selectbox("Country", options=ml_df["Country"].unique())
-        sel_device = st.selectbox("Device", options=ml_df["Device"].unique())
-        inp_rec = st.number_input("Recipients", value=int(ml_df["Recipients"].median()))
-        inp_del = st.number_input("Delivered", value=int(ml_df["Delivered"].median()))
-        
-        if st.button("Predict"):
-            row = pd.DataFrame([{
-                "Campaign_Type": sel_type,
-                "Country": sel_country,
-                "Device": sel_device,
-                "Recipients": inp_rec,
-                "Delivered": inp_del
-            }])
-            row_t = preprocessor.transform(row)
-            pred_vals = rf.predict(row_t)[0]
-            st.success(f"Predicted Opens: {int(pred_vals[0])}, Clicks: {int(pred_vals[1])}, Revenue: ₹ {pred_vals[2]:.2f}")
+        ml_result_df = pd.DataFrame(X_test, columns=preprocessor.get_feature_names_out())
+        ml_result_df[target_col+"_Actual"] = y_test.values
+        ml_result_df[target_col+"_Predicted"] = preds
+        ml_result_df = ml_result_df[[*ml_result_df.columns[-2:], *ml_result_df.columns[:-2]]]
+        st.dataframe(ml_result_df.head(), use_container_width=True)
+        b = BytesIO()
+        b.write(ml_result_df.to_csv(index=False).encode("utf-8"))
+        b.seek(0)
+        st.download_button("Download ML Revenue Predictions", b, file_name="ml_revenue_predictions.csv", mime="text/csv")
 
+    # Automated Insights
+    st.markdown("### Automated Insights")
+    insights_df = filt.groupby(["Campaign_Name","Campaign_Type"]).agg({
+        "Revenue":"sum","Opened":"sum","Clicked":"sum","Conversion_Rate":"mean"
+    }).reset_index().sort_values("Revenue", ascending=False)
+    st.dataframe(insights_df, use_container_width=True)
+    b2 = BytesIO()
+    b2.write(insights_df.to_csv(index=False).encode("utf-8"))
+    b2.seek(0)
+    st.download_button("Download Automated Insights", b2, file_name="automated_insights.csv", mime="text/csv")
