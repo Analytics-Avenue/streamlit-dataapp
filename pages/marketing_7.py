@@ -380,5 +380,4 @@ with tabs[1]:
     insights_df = insights_df.sort_values("Revenue", ascending=False)
     st.dataframe(insights_df, use_container_width=True)
     
-    st.markdown("#### Download Automated Insights")
     download_df(insights_df, "automated_insights.csv")
