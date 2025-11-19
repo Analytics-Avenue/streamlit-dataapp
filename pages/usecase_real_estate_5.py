@@ -260,6 +260,8 @@ with tab2:
     # --------------------------
     # Automated Insights
     # ==========================================================    
+    st.markdown("### Automated Insights")
+
     # Create a sample automated insights DataFrame
     insights = pd.DataFrame({
         "Insight_Type": [
