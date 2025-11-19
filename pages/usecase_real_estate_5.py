@@ -258,14 +258,40 @@ with tab2:
     st.download_button("Download ML Revenue Predictions",buf.getvalue(),"ml_revenue_predictions.csv","text/csv")
 
     # --------------------------
-    # Automated Insights (generic)
-    # --------------------------
+    # Automated Insights
+    # ==========================================================
     st.markdown("### Automated Insights")
-    insights=filt[["City","Property_Type"]].drop_duplicates()
-    insights["Avg_Revenue"]="Value"
-    insights["Max_Revenue"]="Value"
-    insights["Min_Revenue"]="Value"
-    st.dataframe(insights,use_container_width=True)
-    buf2=BytesIO()
-    insights.to_csv(buf2,index=False)
-    st.download_button("Download Automated Insights",buf2.getvalue(),"automated_insights.csv","text/csv")
+    
+    insights = []
+    
+    if filt.empty:
+        insights.append("No data available after filtering.")
+    else:
+        # Top city by Expected ROI
+        top_city = filt.groupby("City")["Expected_ROI"].mean().idxmax()
+        insights.append(f"🏙 Top city by expected ROI: {top_city}")
+    
+        # Top property type by ROI
+        top_ptype = filt.groupby("Property_Type")["Expected_ROI"].mean().idxmax()
+        insights.append(f"🏘 Top property type by ROI: {top_ptype}")
+    
+        # Top agent
+        top_agent = filt.groupby("Agent_Name")["Expected_ROI"].mean().idxmax()
+        insights.append(f"💼 Top performing agent: {top_agent}")
+    
+        # Average conversion probability
+        avg_conv = filt["Conversion_Probability"].mean()
+        insights.append(f"📈 Average conversion probability: {avg_conv:.2f}")
+    
+        # Hotspot properties
+        hotspot_count = len(filt[filt["Conversion_Probability"] > 0.7])
+        insights.append(f"🔥 Properties with high conversion probability (>0.7): {hotspot_count}")
+    
+    # Convert to DataFrame for display & download
+    insights_df = pd.DataFrame({"Insight": insights})
+    
+    st.table(insights_df)
+    
+    # Download button
+    csv_insights = insights_df.to_csv(index=False)
+    st.download_button("Download Automated Insights", csv_insights, "automated_insights.csv", "text/csv")
