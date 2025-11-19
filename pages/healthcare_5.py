@@ -320,20 +320,7 @@ with tab2:
                 types = ["All"]
             selected_type = st.selectbox("Hospital Type", types)
 
-        # numeric filters with safe defaults
-        def numeric_slider_for(col, label):
-            if col in df_internal.columns and pd.api.types.is_numeric_dtype(df_internal[col]):
-                mn = float(np.nanmin(df_internal[col].values))
-                mx = float(np.nanmax(df_internal[col].values))
-                if np.isfinite(mn) and np.isfinite(mx) and mn != mx:
-                    return st.slider(label, mn, mx, (mn, mx))
-            return None
-
-        eq_range = numeric_slider_for("equipment_shortage_score", "Equipment Shortage Score range")
-        risk_range = numeric_slider_for("overall_risk_score", "Overall Risk Score range")
-        pps_range = numeric_slider_for("patients_per_staff", "Patients Per Staff range")
-        ventilator_range = numeric_slider_for("ventilators_count", "Ventilators Count range")
-
+        
     # apply filters to working dataframe
     df_filtered = df_internal.copy()
     if selected_location != "All":
@@ -342,23 +329,7 @@ with tab2:
     if selected_type != "All":
         if "hospital_type" in df_filtered.columns:
             df_filtered = df_filtered[df_filtered["hospital_type"] == selected_type]
-    if eq_range is not None:
-        df_filtered = df_filtered[
-            (df_filtered["equipment_shortage_score"] >= eq_range[0]) & (df_filtered["equipment_shortage_score"] <= eq_range[1])
-        ]
-    if risk_range is not None:
-        df_filtered = df_filtered[
-            (df_filtered["overall_risk_score"] >= risk_range[0]) & (df_filtered["overall_risk_score"] <= risk_range[1])
-        ]
-    if pps_range is not None:
-        df_filtered = df_filtered[
-            (df_filtered["patients_per_staff"] >= pps_range[0]) & (df_filtered["patients_per_staff"] <= pps_range[1])
-        ]
-    if ventilator_range is not None:
-        df_filtered = df_filtered[
-            (df_filtered["ventilators_count"] >= ventilator_range[0]) & (df_filtered["ventilators_count"] <= ventilator_range[1])
-        ]
-
+    
     st.write("Filtered preview", df_filtered.head())
 
     # -------------------------
