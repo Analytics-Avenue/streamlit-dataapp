@@ -28,7 +28,8 @@ st.markdown(f"""
 st.title("HospitalOps")
 
 # -------------------------
-# CSS Styles
+# -------------------------
+# CSS for cards and KPIs
 # -------------------------
 st.markdown("""
 <style>
@@ -37,7 +38,7 @@ st.markdown("""
 .glow-card:hover{box-shadow:0 0 25px #0078ff;transform:translateY(-3px);}
 .glow-card p,.glow-card h2,h3{text-align:left !important;}
 .kpi-row{display:flex;gap:14px;flex-wrap:nowrap;margin-bottom:16px;}
-.kpi{background:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.04);width:220px;transition:0.3s;}
+.kpi{background:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.04);width:220px;transition:0.3s;text-align:center;}
 .kpi:hover{box-shadow:0 0 20px #0078ff;transform:translateY(-2px);}
 [data-testid="stSidebarNav"]{display:none;}
 </style>
@@ -70,25 +71,53 @@ for key in ["hospital_master","reg_pipe"]:
         st.session_state[key] = None
 
 # -------------------------
-# Overview Section
 # -------------------------
-st.markdown('<div class="glow-card"><h2>About this Application</h2><p>HospitalOps provides full operational visibility into hospital operations: patient trends, equipment management, risk scoring, dashboards, and decision support tools to drive smarter operational choices.</p></div>', unsafe_allow_html=True)
+# About Application
+# -------------------------
+st.markdown('<div class="glow-card"><h2>About this Application</h2>'
+            '<p>HospitalOps provides full operational visibility into hospital operations: patient trends, equipment management, risk scoring, and dashboards to support smarter operational decisions.</p>'
+            '</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="glow-card"><h3>Purpose</h3><p>Enable hospitals to optimize bed allocation, track equipment usage, identify high-risk patients, and facilitate rapid data-driven decisions across operational and administrative teams.</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="glow-card"><h3>Purpose</h3>'
+            '<p>Enable hospitals to optimize bed allocation, track equipment usage, identify high-risk areas, and facilitate rapid, data-driven decisions for operational and administrative teams.</p>'
+            '</div>', unsafe_allow_html=True)
 
+# -------------------------
+# Capabilities & Business Impact Side by Side
+# -------------------------
 cols = st.columns(2)
 with cols[0]:
-    st.markdown('<div class="glow-card"><h3>Capabilities</h3><ul style="padding-left:16px;"><li>Dataset ingestion (default, upload, mapping)</li><li>Key Performance Indicators (KPIs) tracking</li><li>Clustering & segmentation analysis</li><li>ML predictions (regression)</li><li>Model explainability & interpretability</li><li>Automated insights generation</li></ul></div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-card"><h3>Capabilities</h3>'
+                '<ul style="padding-left:16px;">'
+                '<li>Dataset ingestion (default, upload, mapping)</li>'
+                '<li>Key Performance Indicators (KPIs) tracking</li>'
+                '<li>Clustering & segmentation analysis</li>'
+                '<li>ML predictions (e.g., Equipment Shortage, Patients Per Staff)</li>'
+                '<li>Model explainability & interpretability</li>'
+                '<li>Automated insights generation</li>'
+                '</ul></div>', unsafe_allow_html=True)
 with cols[1]:
-    st.markdown('<div class="glow-card"><h3>Business Impact</h3><ul style="padding-left:16px;"><li>Faster triage and patient management</li><li>Targeted equipment procurement</li><li>Reduced bed shortages & improved allocation</li><li>Data-driven expansion and strategic planning</li><li>Enhanced operational efficiency across departments</li></ul></div>', unsafe_allow_html=True)
-
-st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrative staff, finance & procurement teams looking for actionable insights to streamline operations.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="glow-card"><h3>Business Impact</h3>'
+                '<ul style="padding-left:16px;">'
+                '<li>Faster triage and patient management</li>'
+                '<li>Targeted equipment procurement</li>'
+                '<li>Reduced bed shortages & improved allocation</li>'
+                '<li>Data-driven expansion and strategic planning</li>'
+                '<li>Enhanced operational efficiency across departments</li>'
+                '</ul></div>', unsafe_allow_html=True)
 
 # -------------------------
-# KPIs Placeholder
+# Intended Users
+# -------------------------
+st.markdown('<div class="glow-card"><h3>Intended Users</h3>'
+            '<p>Hospital managers, operational analysts, administrative staff, and finance/procurement teams seeking actionable insights to streamline operations.</p>'
+            '</div>', unsafe_allow_html=True)
+
+# -------------------------
+# KPIs Row (placeholders)
 # -------------------------
 st.markdown('<div class="kpi-row">', unsafe_allow_html=True)
-kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
+kpi_titles = ["High Patient Load", "Avg Beds Occupancy", "Equipment Shortage Score", "Patients per Staff"]
 for title in kpi_titles:
     st.markdown(f'''
         <div class="kpi">
@@ -97,6 +126,7 @@ for title in kpi_titles:
         </div>
     ''', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -------------------------
 # Dataset Setup
