@@ -305,6 +305,7 @@ else:
          "tools": ["R","Python","Tableau","Forecasting Models"]},
         {"overview": "Visualize patient journey, resource utilization, and treatment pathways to improve efficiency.",
          "tools": ["Python","Power BI","EMR/EHR Data","Excel"]},
+         ]
     }
 
     usecases = sectors[sector_name]
