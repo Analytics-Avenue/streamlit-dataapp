@@ -116,8 +116,8 @@ st.markdown('<div class="glow-card"><h3>Intended Users</h3>'
 # -------------------------
 # KPIs Row (placeholders)
 # -------------------------
-st.markdown('<div class="kpi-row">', unsafe_allow_html=True)
-kpi_titles = ["High Patient Load", "Avg Beds Occupancy", "Equipment Shortage Score", "Patients per Staff"]
+st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
+kpi_titles = ["High Patient Load", "Avg Beds Occupancy", "Equipment Shortage Score", "Patients per Staff", "Facility Deficit Score"]
 for title in kpi_titles:
     st.markdown(f'''
         <div class="kpi">
@@ -126,6 +126,7 @@ for title in kpi_titles:
         </div>
     ''', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 # -------------------------
