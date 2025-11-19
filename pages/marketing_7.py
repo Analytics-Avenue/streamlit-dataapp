@@ -103,6 +103,8 @@ div[data-testid="stMarkdownContainer"] .card h3 {
 </style>
 """, unsafe_allow_html=True)
 
+tabs = st.tabs(["Overview", "Application"])
+
 # -------------------------
 # Overview Tab
 # -------------------------
