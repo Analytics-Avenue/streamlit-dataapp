@@ -187,34 +187,58 @@ with tab2:
     st.plotly_chart(fig2,use_container_width=True)
 
     st.markdown("### Market Hotspot Map")
-    # Ensure numeric lat/lon
-    filt = filt.dropna(subset=["Latitude", "Longitude", "Expected_ROI", "Conversion_Normalized"])
-    filt["Latitude"] = pd.to_numeric(filt["Latitude"], errors='coerce')
-    filt["Longitude"] = pd.to_numeric(filt["Longitude"], errors='coerce')
-    filt["Expected_ROI"] = pd.to_numeric(filt["Expected_ROI"], errors='coerce')
-    filt["Conversion_Normalized"] = pd.to_numeric(filt["Conversion_Normalized"], errors='coerce')
-    filt = filt.dropna(subset=["Latitude","Longitude","Expected_ROI","Conversion_Normalized"])
     
-    fig3 = px.scatter_mapbox(
-        filt,
-        lat="Latitude",
-        lon="Longitude",
-        size="Expected_ROI",
-        color="Conversion_Normalized",
-        hover_name="Property_Type",
-        hover_data={"City":True,"Price":True,"Agent_Name":True,"Conversion_Probability":True,"Expected_ROI":True},
-        color_continuous_scale=px.colors.sequential.Viridis,
-        size_max=20,
-        zoom=10
-    )
-    fig3.update_layout(
-        mapbox_style="open-street-map",
-        coloraxis_colorbar=dict(title="Conversion Probability"),
-        margin={"r":0,"t":0,"l":0,"b":0}
-    )
-    st.plotly_chart(fig3, use_container_width=True)
-
-
+    # Check required columns exist
+    required_map_cols = ["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability", "Property_Type", "City", "Price", "Agent_Name"]
+    existing_cols = [col for col in required_map_cols if col in filt.columns]
+    
+    if len(existing_cols) < 4:  # Need at least lat, lon, ROI, conversion
+        st.info("Market Hotspot Map cannot be displayed because some required columns are missing.")
+    else:
+        # Ensure numeric for mapping
+        for col in ["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability"]:
+            if col in filt.columns:
+                filt[col] = pd.to_numeric(filt[col], errors='coerce')
+    
+        # Drop rows with NaN in critical columns
+        filt_map = filt.dropna(subset=["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability"])
+    
+        if filt_map.empty:
+            st.info("No valid data available to display the Market Hotspot Map after filtering.")
+        else:
+            # Normalize Conversion Probability for color scale
+            if filt_map["Conversion_Probability"].nunique() > 1:
+                filt_map["Conversion_Normalized"] = (
+                    (filt_map["Conversion_Probability"] - filt_map["Conversion_Probability"].min())
+                    / (filt_map["Conversion_Probability"].max() - filt_map["Conversion_Probability"].min())
+                )
+            else:
+                filt_map["Conversion_Normalized"] = 0.5
+    
+            # Plot Map
+            fig3 = px.scatter_mapbox(
+                filt_map,
+                lat="Latitude",
+                lon="Longitude",
+                size="Expected_ROI",
+                color="Conversion_Normalized",
+                hover_name="Property_Type",
+                hover_data={col: True for col in ["City", "Price", "Agent_Name", "Conversion_Probability", "Expected_ROI"]},
+                color_continuous_scale=px.colors.sequential.Viridis,
+                size_max=20,
+                zoom=10
+            )
+            fig3.update_layout(
+                mapbox_style="open-street-map",
+                coloraxis_colorbar=dict(title="Conversion Probability"),
+                margin={"r":0,"t":0,"l":0,"b":0}
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+            st.markdown("**Purpose:** Visualize market hotspots by ROI and conversion probability. Identify priority investment clusters.")
+            st.markdown("**Quick Tip:** Green areas indicate high-conversion properties, ideal for investment.")
+    
+    
+    
 
     st.markdown("### Top Investment Properties")
     top_inv=filt.sort_values("Expected_ROI",ascending=False).head(10)
