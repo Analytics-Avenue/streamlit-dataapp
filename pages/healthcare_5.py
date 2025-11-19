@@ -127,24 +127,35 @@ with tab1:
     st.markdown('<div class="glow-card"><h3>Intended Users</h3>'
                 '<p>Hospital administrators, operations teams, finance, and procurement departments.</p>'
                 '</div>', unsafe_allow_html=True)
+    # -------------------------
+    # KPI Style (Matches Your Reference)
+    # -------------------------
+    st.markdown("""
+    <style>
+    .metric-card {
+        background: #ffffff;
+        padding: 14px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 16px;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### KPIs")
+    
+    # 5 KPI cards in a single row
+    c1, c2, c3, c4, c5 = st.columns(5)
+    
+    c1.markdown("<div class='metric-card'>High Patient Load</div>", unsafe_allow_html=True)
+    c2.markdown("<div class='metric-card'>Avg Beds Availability</div>", unsafe_allow_html=True)
+    c3.markdown("<div class='metric-card'>Equipment Shortage Score</div>", unsafe_allow_html=True)
+    c4.markdown("<div class='metric-card'>Patients per Staff</div>", unsafe_allow_html=True)
+    c5.markdown("<div class='metric-card'>Facility Deficit Score</div>", unsafe_allow_html=True)
 
-    # 5 KPI Cards in Single Line
-    st.markdown('<div class="kpi-row" style="flex-wrap:nowrap;">', unsafe_allow_html=True)
-    kpi_titles = [
-        "High Patient Load",
-        "Avg Bed Occupancy",
-        "Equipment Shortage Score",
-        "Patients Per Staff",
-        "Facility Deficit Score"
-    ]
-    for title in kpi_titles:
-        st.markdown(f"""
-            <div class="kpi">
-                <div style="font-size:12px;color:#333">{title}</div>
-                <div style="font-size:20px;font-weight:700">--</div>
-            </div>
-        """, unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # -------------------------------------------------------------------
