@@ -12,11 +12,7 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
-# -------------------------
-# Page config
-# -------------------------
-st.set_page_config(page_title="HospitalOps — Full Dashboard", layout="wide")
-st.title("🏥 HospitalOps — Full Dashboard")
+
 
 # -------------------------
 # Logo + Company Name
@@ -30,6 +26,12 @@ st.markdown(f"""
 <div style="color:#064b86;font-size:36px;font-weight:bold;margin:0;padding:0;">Advanced Analytics</div>
 </div></div>
 """, unsafe_allow_html=True)
+
+# -------------------------
+# Page config
+# -------------------------
+st.set_page_config(page_title="HospitalOps — Full Dashboard", layout="wide")
+st.title("HospitalOps")
 
 # -------------------------
 # CSS (hover glow, left-align text)
