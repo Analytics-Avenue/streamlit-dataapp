@@ -6,18 +6,18 @@ import plotly.graph_objects as go
 from io import BytesIO
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler
 import math
 import warnings
 warnings.filterwarnings("ignore")
 
+# -------------------------
+# Page config
+# -------------------------
 st.set_page_config(page_title="Google Ads & SEO Performance Lab", layout="wide")
 
-# Hide default sidebar navigation (optional)
+# Hide default sidebar navigation
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
-
-
 
 # -------------------------
 # Company Logo + Name
@@ -33,9 +33,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-
 # -------------------------
-# Helper utils
+# Required columns
 # -------------------------
 REQUIRED_COLS = [
     "Date","Campaign","AdGroup","Keyword","Device","Country",
@@ -44,6 +43,9 @@ REQUIRED_COLS = [
     "Page_Position","Backlinks"
 ]
 
+# -------------------------
+# Helper functions
+# -------------------------
 def to_currency(x):
     try:
         return "₹ " + f"{float(x):,.2f}"
@@ -95,34 +97,53 @@ div[data-testid="stMarkdownContainer"] .metric-card:hover {
 # -------------------------
 tabs = st.tabs(["Overview", "Application"])
 
+# -------------------------
+# Overview tab
+# -------------------------
 with tabs[0]:
     st.markdown("<h1 style='margin-bottom:0.2rem'>Google Ads & SEO Performance Lab</h1>", unsafe_allow_html=True)
     st.markdown("Analyze paid search campaigns along with SEO performance to optimize clicks, conversions, and revenue.")
 
-    st.markdown("### Key Metrics")
-    k1,k2,k3,k4 = st.columns(4)
-    k1.markdown("<div class='metric-card' title='Total clicks on paid campaigns'>Paid Clicks</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card' title='Total clicks on organic content'>Organic Clicks</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card' title='Total revenue from all campaigns'>Revenue</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card' title='Overall ROAS (Revenue/Cost)'>ROAS</div>", unsafe_allow_html=True)
-
-    st.markdown("### Purpose")
+    # Capabilities
+    st.markdown("### Capabilities")
     st.markdown("""
     <div class='metric-card'>
-    • Compare Google Ads and SEO performance<br>
-    • Identify high-ROI keywords & campaigns<br>
-    • Track bounce rate and time on page<br>
-    • Optimize ad spend and content strategy<br>
-    • Monitor SERP positions and backlinks
+    • Multi-channel paid + organic performance tracking<br>
+    • Keyword-level CTR, conversion, revenue & ROAS analysis<br>
+    • Bounce rate & average time on page insights<br>
+    • SERP position & backlink monitoring<br>
+    • ML-driven revenue prediction & automated insights<br>
+    • Exportable tables for executive reporting
     </div>
     """, unsafe_allow_html=True)
 
+    # Impact
+    st.markdown("### Impact")
+    st.markdown("""
+    <div class='metric-card'>
+    • Identify high-ROI campaigns & keywords<br>
+    • Optimize ad spend and content strategy<br>
+    • Improve conversion efficiency across channels<br>
+    • Forecast revenue & ROI using ML models<br>
+    • Download insights for leadership dashboards
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Key Metrics (placeholders)
+    st.markdown("### Key Metrics")
+    k1,k2,k3,k4 = st.columns(4)
+    k1.markdown("<div class='metric-card'>Paid Clicks</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Organic Clicks</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card'>Revenue</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>ROAS</div>", unsafe_allow_html=True)
+
+# -------------------------
+# Application tab
+# -------------------------
 with tabs[1]:
     st.header("Application")
 
-    # -------------------------
-    # Dataset input
-    # -------------------------
+    # Step 1 — Dataset input
     st.markdown("### Step 1 — Load dataset")
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
@@ -137,7 +158,6 @@ with tabs[1]:
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
-
     elif mode == "Upload CSV":
         uploaded = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded is not None:
@@ -145,7 +165,6 @@ with tabs[1]:
             df.columns = df.columns.str.strip()
             st.success("File uploaded.")
             st.dataframe(df.head())
-
     else:  # Upload + mapping
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
         if uploaded is not None:
@@ -169,9 +188,7 @@ with tabs[1]:
     if df is None:
         st.stop()
 
-    # -------------------------
-    # Type conversions
-    # -------------------------
+    # Step 2 — Type conversions
     df = ensure_datetime(df, "Date")
     numeric_cols = [
         "Impressions","Clicks","CTR","CPC","Cost","Conversions","ConversionRate","Revenue","ROAS",
@@ -182,9 +199,7 @@ with tabs[1]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-    # -------------------------
-    # Filters
-    # -------------------------
+    # Step 3 — Filters
     st.markdown("### Step 2 — Filters & preview")
     c1,c2,c3 = st.columns([2,2,1])
     campaigns = sorted(df["Campaign"].dropna().unique().tolist())
@@ -213,9 +228,7 @@ with tabs[1]:
     st.dataframe(filt.head(5), use_container_width=True)
     download_df(filt.head(5), "filtered_preview.csv")
 
-    # -------------------------
-    # KPIs
-    # -------------------------
+    # Step 4 — Key Metrics
     st.markdown("### Key Metrics")
     k1,k2,k3,k4,k5,k6 = st.columns(6)
     k1.metric("Paid Clicks", int(filt["Clicks"].sum()))
@@ -225,9 +238,7 @@ with tabs[1]:
     k5.metric("Bounce Rate", f"{round(filt['Bounce_Rate'].mean()*100,2)}%")
     k6.metric("Avg Time/Page (s)", round(filt['Avg_Time_on_Page_sec'].mean(),2))
 
-    # -------------------------
-    # Charts
-    # -------------------------
+    # Step 5 — Charts
     st.markdown("### Paid vs Organic Clicks per Campaign")
     agg = filt.groupby("Campaign").agg({
         "Clicks":"sum","Organic_Clicks":"sum","Revenue":"sum"
@@ -256,9 +267,46 @@ with tabs[1]:
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    # -------------------------
-    # Download filtered data
-    # -------------------------
+    # Step 6 — ML Revenue Prediction
+    st.markdown("### ML: Predict Revenue")
+    ml_df = filt.copy().dropna(subset=["Revenue"])
+    if len(ml_df) < 30:
+        st.info("Not enough data for ML model.")
+    else:
+        feat_cols = ["Clicks","Impressions","Organic_Clicks","Conversions","CPC","CTR"]
+        X = ml_df[feat_cols]
+        y = ml_df["Revenue"]
+        preprocessor = StandardScaler()
+        X_t = preprocessor.fit_transform(X)
+        X_train,X_test,y_train,y_test = train_test_split(X_t,y,test_size=0.2,random_state=42)
+        rf = RandomForestRegressor(n_estimators=200, random_state=42)
+        with st.spinner("Training RandomForest for Revenue..."):
+            rf.fit(X_train,y_train)
+        preds = rf.predict(X_test)
+        rmse = math.sqrt(np.mean((y_test - preds)**2))
+        r2 = rf.score(X_test,y_test)
+        st.write(f"Revenue Prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
+
+        # ML predictions table
+        ml_result_df = pd.DataFrame({
+            "Actual Revenue": y_test.values,
+            "Predicted Revenue": preds
+        })
+        ml_result_df = pd.concat([ml_result_df.reset_index(drop=True), pd.DataFrame(X_test, columns=feat_cols).reset_index(drop=True)], axis=1)
+        st.dataframe(ml_result_df.head(), use_container_width=True)
+        download_df(ml_result_df, "ml_revenue_predictions.csv")
+
+    # Step 7 — Automated Insights
+    st.markdown("### Automated Insights")
+    insights_df = df.groupby(["Campaign","Keyword"]).agg({
+        "Revenue":"sum",
+        "Clicks":"sum",
+        "Conversions":"sum",
+        "ROAS":"mean"
+    }).reset_index().sort_values("Revenue", ascending=False)
+    st.dataframe(insights_df, use_container_width=True)
+    download_df(insights_df, "automated_insights.csv")
+
+    # Step 8 — Export filtered data
     st.markdown("### Export filtered data")
     download_df(filt, "google_ads_seo_filtered.csv")
-
