@@ -197,11 +197,11 @@ with tab1:
 
     # KPI placeholders (values will be computed in Application tab using filtered data)
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.markdown("<div class='metric-card'>High Patient Load<div class='kpi-value'>--</div></div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Avg Bed Availability<div class='kpi-value'>--</div></div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>Equipment Shortage Score<div class='kpi-value'>--</div></div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Patients per Staff<div class='kpi-value'>--</div></div>", unsafe_allow_html=True)
-    k5.markdown("<div class='metric-card'>Overall Risk Score<div class='kpi-value'>--</div></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='metric-card'>High Patient Load</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='metric-card'>Avg Bed Availability</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='metric-card'>Equipment Shortage Score</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Patients per Staff</div>", unsafe_allow_html=True)
+    k5.markdown("<div class='metric-card'>Overall Risk Score</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------------------
 # TAB 2: Application
