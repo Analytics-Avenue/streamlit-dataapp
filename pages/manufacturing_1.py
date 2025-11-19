@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore")
 # -------------------------
 st.set_page_config(page_title="Predictive Maintenance App", layout="wide", page_icon="⚙️")
 
-# Logo + company
+# Logo + company name (small logo; adjust width if needed)
 LOGO_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(
     f"""
@@ -39,7 +39,7 @@ st.markdown("<h1 style='margin-top:8px; margin-bottom:6px;'>Production Downtime 
 st.markdown("Predict failures, detect anomalies, and schedule maintenance using sensor & historical data.")
 
 # -------------------------
-# Utilities
+# Utilities / config
 # -------------------------
 REQUIRED_COLS = [
     "Timestamp", "Machine_ID", "Machine_Type", "Temperature", "Vibration",
@@ -47,7 +47,7 @@ REQUIRED_COLS = [
 ]
 
 AUTO_MAPS = {
-    "Timestamp": ["timestamp", "time", "ts", "date"],
+    "Timestamp": ["timestamp", "time", "ts", "date", "datetime"],
     "Machine_ID": ["machine_id", "id", "machine"],
     "Machine_Type": ["machine_type", "type"],
     "Temperature": ["temperature", "temp", "t"],
@@ -55,7 +55,7 @@ AUTO_MAPS = {
     "RPM": ["rpm", "speed"],
     "Load": ["load", "utilization", "usage"],
     "Run_Hours": ["run_hours", "hours", "runtime"],
-    "Failure_Flag": ["failure_flag", "failure", "failed", "breakdown", "failure"]
+    "Failure_Flag": ["failure_flag", "failure", "failed", "breakdown"]
 }
 
 def auto_map_columns(df):
@@ -91,6 +91,24 @@ def safe_mean(x):
     except:
         return None
 
+def fix_duplicate_columns(df):
+    """
+    Append suffixes to duplicate column names:
+      Temperature, Temperature -> Temperature, Temperature_2
+    """
+    cols = list(df.columns)
+    counts = {}
+    new_cols = []
+    for c in cols:
+        if c not in counts:
+            counts[c] = 0
+            new_cols.append(c)
+        else:
+            counts[c] += 1
+            new_cols.append(f"{c}_{counts[c]+1}")  # _2, _3...
+    df.columns = new_cols
+    return df
+
 # -------------------------
 # CSS
 # -------------------------
@@ -103,17 +121,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Default dataset URL (replace if needed)
+# Default dataset URL (raw)
 # -------------------------
 DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/machine_failure_data.csv"
 
 @st.cache_data
 def load_default_data(url=DEFAULT_URL):
+    """
+    Load default CSV and fix duplicate columns automatically.
+    """
     df = pd.read_csv(url)
+    # fix duplicates
+    df = fix_duplicate_columns(df)
+    df.columns = df.columns.str.strip()
+    df = auto_map_columns(df)
     return df
 
 # -------------------------
-# Page navigation (tabs)
+# Tabs
 # -------------------------
 tabs = st.tabs(["Overview", "Application"])
 
@@ -181,8 +206,6 @@ with tabs[1]:
     if mode == "Default dataset":
         try:
             df = load_default_data()
-            df.columns = df.columns.str.strip()
-            df = auto_map_columns(df)
             st.success("Default dataset loaded.")
             st.dataframe(df.head())
         except Exception as e:
@@ -194,11 +217,12 @@ with tabs[1]:
         try:
             sample = load_default_data().head(100)
             download_df(sample, "sample_machine_data.csv", key="sample_download", label="Download Sample CSV")
-        except:
+        except Exception:
             st.info("No sample available from the default source.")
         uploaded = st.file_uploader("Upload CSV file", type=["csv"], key="upload1")
         if uploaded:
             df = pd.read_csv(uploaded)
+            df = fix_duplicate_columns(df)
             df.columns = df.columns.str.strip()
             df = auto_map_columns(df)
             st.success("File uploaded and auto-mapped (best effort).")
@@ -210,6 +234,7 @@ with tabs[1]:
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"], key="upload2")
         if uploaded:
             raw = pd.read_csv(uploaded)
+            raw = fix_duplicate_columns(raw)
             raw.columns = raw.columns.str.strip()
             st.write("Preview (first 5 rows):")
             st.dataframe(raw.head())
@@ -233,6 +258,7 @@ with tabs[1]:
 
     # Standardize column names & ensure timestamp
     df = auto_map_columns(df)
+    # keep required order first (if present) then the rest
     df = df[[c for c in REQUIRED_COLS if c in df.columns] + [c for c in df.columns if c not in REQUIRED_COLS]]
     df = ensure_datetime(df, "Timestamp")
 
@@ -344,7 +370,7 @@ with tabs[1]:
     model_feats = [c for c in model_feats if c in filt.columns]
 
     if ("Failure_Flag" in filt.columns) and len(filt) >= 50 and len(model_feats) >= 2:
-        X = filt[model_feats].copy()
+        X = filt[model_feats].copy().reset_index(drop=True)
         y = filt["Failure_Flag"].astype(int).reset_index(drop=True)
 
         # preprocessing
@@ -375,7 +401,7 @@ with tabs[1]:
         # Metrics
         try:
             auc = roc_auc_score(y_test, preds_prob)
-        except:
+        except Exception:
             auc = None
         acc = accuracy_score(y_test, preds_label)
         st.write(f"Classifier — Accuracy: {acc:.3f}" + (f", ROC AUC: {auc:.3f}" if auc is not None else ""))
