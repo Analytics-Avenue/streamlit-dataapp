@@ -187,58 +187,62 @@ with tab2:
     st.plotly_chart(fig2,use_container_width=True)
 
     st.markdown("### Market Hotspot Map")
+    # Copy filtered data
+    filt_map = filt.copy()
     
-    # Check required columns exist
-    required_map_cols = ["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability", "Property_Type", "City", "Price", "Agent_Name"]
-    existing_cols = [col for col in required_map_cols if col in filt.columns]
+    # Remove rows with missing lat/lon or ROI/Conversion
+    filt_map = filt_map.dropna(subset=["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability"])
     
-    if len(existing_cols) < 4:  # Need at least lat, lon, ROI, conversion
-        st.info("Market Hotspot Map cannot be displayed because some required columns are missing.")
+    # If no rows remain after dropna, show info and skip map
+    if filt_map.empty:
+        st.info("No data available for map visualization after filtering.")
     else:
-        # Ensure numeric for mapping
-        for col in ["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability"]:
-            if col in filt.columns:
-                filt[col] = pd.to_numeric(filt[col], errors='coerce')
-    
-        # Drop rows with NaN in critical columns
-        filt_map = filt.dropna(subset=["Latitude", "Longitude", "Expected_ROI", "Conversion_Probability"])
-    
-        if filt_map.empty:
-            st.info("No valid data available to display the Market Hotspot Map after filtering.")
+        # Normalize Conversion Probability for color scale (0-1)
+        if filt_map["Conversion_Probability"].nunique() > 1:
+            filt_map["Conversion_Normalized"] = (
+                filt_map["Conversion_Probability"] - filt_map["Conversion_Probability"].min()
+            ) / (filt_map["Conversion_Probability"].max() - filt_map["Conversion_Probability"].min())
         else:
-            # Normalize Conversion Probability for color scale
-            if filt_map["Conversion_Probability"].nunique() > 1:
-                filt_map["Conversion_Normalized"] = (
-                    (filt_map["Conversion_Probability"] - filt_map["Conversion_Probability"].min())
-                    / (filt_map["Conversion_Probability"].max() - filt_map["Conversion_Probability"].min())
-                )
-            else:
-                filt_map["Conversion_Normalized"] = 0.5
+            filt_map["Conversion_Normalized"] = 0.5
     
-            # Plot Map
-            fig3 = px.scatter_mapbox(
-                filt_map,
-                lat="Latitude",
-                lon="Longitude",
-                size="Expected_ROI",
-                color="Conversion_Normalized",
-                hover_name="Property_Type",
-                hover_data={col: True for col in ["City", "Price", "Agent_Name", "Conversion_Probability", "Expected_ROI"]},
-                color_continuous_scale=px.colors.sequential.Viridis,
-                size_max=20,
-                zoom=10
-            )
-            fig3.update_layout(
-                mapbox_style="open-street-map",
-                coloraxis_colorbar=dict(title="Conversion Probability"),
-                margin={"r":0,"t":0,"l":0,"b":0}
-            )
-            st.plotly_chart(fig3, use_container_width=True)
-            st.markdown("**Purpose:** Visualize market hotspots by ROI and conversion probability. Identify priority investment clusters.")
-            st.markdown("**Quick Tip:** Green areas indicate high-conversion properties, ideal for investment.")
+        # Add tiny jitter if multiple points have same coordinates
+        filt_map["Latitude"] += np.random.uniform(-0.0005, 0.0005, size=len(filt_map))
+        filt_map["Longitude"] += np.random.uniform(-0.0005, 0.0005, size=len(filt_map))
     
+        # Scatter map
+        fig3 = px.scatter_mapbox(
+            filt_map,
+            lat="Latitude",
+            lon="Longitude",
+            size="Expected_ROI",
+            color="Conversion_Normalized",
+            hover_name="Property_Type",
+            hover_data={
+                "City": True,
+                "Price": True,
+                "Agent_Name": True,
+                "Conversion_Probability": True,
+                "Expected_ROI": True,
+                "Latitude": False,
+                "Longitude": False,
+                "Conversion_Normalized": False
+            },
+            color_continuous_scale=px.colors.sequential.Viridis,
+            size_max=25,
+            zoom=10
+        )
     
+        fig3.update_layout(
+            mapbox_style="open-street-map",  # free tiles, no token needed
+            coloraxis_colorbar=dict(title="Conversion Probability"),
+            margin={"r":0,"t":0,"l":0,"b":0}
+        )
     
+        st.plotly_chart(fig3, use_container_width=True)
+        st.markdown("**Purpose:** Visualize market hotspots by ROI and conversion probability. Identify investment clusters quickly.")
+        st.markdown("**Quick Tip:** Green areas indicate high-conversion properties, ideal for priority investment.")
+    
+        
 
     st.markdown("### Top Investment Properties")
     top_inv=filt.sort_values("Expected_ROI",ascending=False).head(10)
