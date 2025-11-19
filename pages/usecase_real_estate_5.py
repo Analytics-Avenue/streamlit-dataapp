@@ -187,15 +187,34 @@ with tab2:
     st.plotly_chart(fig2,use_container_width=True)
 
     st.markdown("### Market Hotspot Map")
-    if filt["Conversion_Probability"].nunique()>1:
-        filt["Conversion_Normalized"]=(filt["Conversion_Probability"]-filt["Conversion_Probability"].min())/(filt["Conversion_Probability"].max()-filt["Conversion_Probability"].min())
-    else: filt["Conversion_Normalized"]=0.5
+    # Ensure numeric lat/lon
+    filt = filt.dropna(subset=["Latitude", "Longitude", "Expected_ROI", "Conversion_Normalized"])
+    filt["Latitude"] = pd.to_numeric(filt["Latitude"], errors='coerce')
+    filt["Longitude"] = pd.to_numeric(filt["Longitude"], errors='coerce')
+    filt["Expected_ROI"] = pd.to_numeric(filt["Expected_ROI"], errors='coerce')
+    filt["Conversion_Normalized"] = pd.to_numeric(filt["Conversion_Normalized"], errors='coerce')
+    filt = filt.dropna(subset=["Latitude","Longitude","Expected_ROI","Conversion_Normalized"])
+    
+    fig3 = px.scatter_mapbox(
+        filt,
+        lat="Latitude",
+        lon="Longitude",
+        size="Expected_ROI",
+        color="Conversion_Normalized",
+        hover_name="Property_Type",
+        hover_data={"City":True,"Price":True,"Agent_Name":True,"Conversion_Probability":True,"Expected_ROI":True},
+        color_continuous_scale=px.colors.sequential.Viridis,
+        size_max=20,
+        zoom=10
+    )
+    fig3.update_layout(
+        mapbox_style="open-street-map",
+        coloraxis_colorbar=dict(title="Conversion Probability"),
+        margin={"r":0,"t":0,"l":0,"b":0}
+    )
+    st.plotly_chart(fig3, use_container_width=True)
 
-    fig3=px.scatter_mapbox(filt,lat="Latitude",lon="Longitude",size="Expected_ROI",color="Conversion_Normalized",
-                           hover_name="Property_Type",hover_data={"City":True,"Price":True,"Agent_Name":True,"Conversion_Probability":True,"Expected_ROI":True},
-                           color_continuous_scale=px.colors.sequential.Viridis,size_max=20,zoom=10)
-    fig3.update_layout(mapbox_style="open-street-map",coloraxis_colorbar=dict(title="Conversion Probability"),margin={"r":0,"t":0,"l":0,"b":0})
-    st.plotly_chart(fig3,use_container_width=True)
+
 
     st.markdown("### Top Investment Properties")
     top_inv=filt.sort_values("Expected_ROI",ascending=False).head(10)
@@ -205,7 +224,7 @@ with tab2:
     # --------------------------
     # ML Revenue Predictions (generic)
     # --------------------------
-    st.markdown("### ML Revenue Predictions (Generic)")
+    st.markdown("### ML Revenue Predictions")
     results=filt.copy()
     results["Predicted_Revenue"]="Value"
     st.dataframe(results,use_container_width=True)
@@ -216,7 +235,7 @@ with tab2:
     # --------------------------
     # Automated Insights (generic)
     # --------------------------
-    st.markdown("### Automated Insights (Generic)")
+    st.markdown("### Automated Insights")
     insights=filt[["City","Property_Type"]].drop_duplicates()
     insights["Avg_Revenue"]="Value"
     insights["Max_Revenue"]="Value"
