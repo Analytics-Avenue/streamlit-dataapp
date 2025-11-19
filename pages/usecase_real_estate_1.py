@@ -6,6 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import plotly.express as px
+from io import BytesIO
 
 st.set_page_config(layout="wide")
 
@@ -50,12 +51,13 @@ st.markdown("""
 <style>
 .big-header {
     font-size: 40px; font-weight: 900;
-    background: linear-gradient(90deg,#0A5EB0,#2E82FF);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    color:black;
 }
 .card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
 box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center;}
+.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:left;
+transition: all 0.25s ease; font-weight:600;}
+.metric-card:hover {box-shadow:0 0 18px rgba(0,0,0,0.4); transform:scale(1.03);}
 </style>
 """, unsafe_allow_html=True)
 
@@ -92,37 +94,48 @@ with tab1:
     """, unsafe_allow_html=True)
 
     st.markdown("### Capabilities")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("""
-        <div class='card'>
-        <b>Technical</b><br>
-        • Machine learning valuation<br>
-        • Interactive dashboards<br>
-        • Geo intelligence<br>
-        • NLP Search<br>
-        • Region-wise segmentation
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class='card'>
-        <b>Business</b><br>
-        • Faster deal closures<br>
-        • Transparent pricing<br>
-        • Better negotiations<br>
-        • Predictable demand mapping
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class='card'>
+    <b>Technical</b><br>
+    • Machine learning valuation<br>
+    • Interactive dashboards<br>
+    • Geo intelligence<br>
+    • NLP Search<br>
+    • Region-wise segmentation<br><br>
+    <b>Business</b><br>
+    • Faster deal closures<br>
+    • Transparent pricing<br>
+    • Better negotiations<br>
+    • Predictable demand mapping
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("### KPIs")
+    st.markdown("### Key KPIs")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>Model RMSE</div>", unsafe_allow_html=True)
     k2.markdown("<div class='metric-card'>Avg Price Deviation%</div>", unsafe_allow_html=True)
     k3.markdown("<div class='metric-card'>Lead Score Efficiency</div>", unsafe_allow_html=True)
     k4.markdown("<div class='metric-card'>Market Alignment Score</div>", unsafe_allow_html=True)
 
-# ==========================================================
+    st.markdown("### Use of App")
+    st.markdown("""
+    <div class='card'>
+    • Monitor property pricing trends<br>
+    • Forecast property valuations<br>
+    • Compare city-wise and property-type trends
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Who Should Use")
+    st.markdown("""
+    <div class='card'>
+    • Real estate investors<br>
+    • Property developers<br>
+    • Market analysts<br>
+    • Agencies handling property transactions
+    </div>
+    """, unsafe_allow_html=True)
+
 # ==========================================================
 # TAB 2 - APPLICATION
 # ==========================================================
@@ -156,14 +169,11 @@ with tab2:
         st.markdown("#### Download Sample CSV for Reference")
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
         try:
-            # Load default dataset
-            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_df = pd.read_csv(URL).head(5)
             sample_csv = sample_df.to_csv(index=False)
             st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
-    
-        # Upload actual CSV
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
@@ -173,25 +183,18 @@ with tab2:
     # --------------------------------------------------------------
     if mode == "Upload CSV + Column Mapping":
         file = st.file_uploader("Upload dataset", type=["csv"])
-        
         if file:
             raw = pd.read_csv(file)
             st.write("Uploaded Data", raw.head())
-
             st.markdown("### Map Required Columns Only")
-
             mapping = {}
-
-            # Ask mapping ONLY for required cols
             for col in REQUIRED_COLS:
                 mapping[col] = st.selectbox(
                     f"Map your column to: {col}",
                     options=["-- Select --"] + list(raw.columns)
                 )
-
             if st.button("Apply Mapping"):
                 missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
-
                 if missing:
                     st.error(f"Please map all required columns: {missing}")
                 else:
@@ -199,16 +202,7 @@ with tab2:
                     st.success("Mapping applied successfully.")
                     st.dataframe(df.head())
 
-    # --------------------------------------------------------------
-    # PROCEED ONLY IF DATA LOADED
-    # --------------------------------------------------------------
     if df is None:
-        st.stop()
-
-    # Ensure required columns exist
-    if not all(col in df.columns for col in REQUIRED_COLS):
-        st.error("Dataset missing required columns.")
-        st.write("Required columns:", REQUIRED_COLS)
         st.stop()
 
     df = df.dropna()
@@ -217,7 +211,6 @@ with tab2:
     # FILTERS
     # ==========================================================
     st.markdown("### Step 2: Dashboard Filters")
-
     f1, f2 = st.columns(2)
     with f1:
         city = st.multiselect("City", df["City"].unique())
@@ -242,85 +235,29 @@ with tab2:
     k2.metric("Avg Price", f"₹ {filt['Price'].mean():,.0f}")
     k3.metric("Avg Area", f"{filt['Area_sqft'].mean():,.0f} sqft")
 
-
-    
     # ==========================================================
     # CHARTS
     # ==========================================================
-
-    # ==========================================================
-    # PRICE DISTRIBUTION WITH DATA LABELS
-    # ==========================================================
-    import numpy as np
-
     st.markdown("### Price Distribution")
-
-    # compute histogram data for labels
     counts, bins = np.histogram(filt["Price"], bins=40)
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
-
-    hist_df = pd.DataFrame({
-        "bin_center": bin_centers,
-        "count": counts
-    })
-
-    fig = px.bar(
-        hist_df,
-        x="bin_center",
-        y="count",
-        text="count",
-        color_discrete_sequence=px.colors.qualitative.Vivid
-    )
-
-    fig.update_traces(
-        textposition="outside",
-        marker=dict(line=dict(width=1, color="black")),
-        opacity=0.9
-    )
-
-    fig.update_layout(
-        xaxis_title="<b>Price</b>",
-        yaxis_title="<b>Count</b>",
-        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
-        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
-    )
-
+    hist_df = pd.DataFrame({"bin_center": bin_centers, "count": counts})
+    fig = px.bar(hist_df, x="bin_center", y="count", text="count", color_discrete_sequence=px.colors.qualitative.Vivid)
+    fig.update_traces(textposition="outside", marker=dict(line=dict(width=1, color="black")), opacity=0.9)
+    fig.update_layout(xaxis_title="<b>Price</b>", yaxis_title="<b>Count</b>", xaxis=dict(showline=True, linewidth=2, linecolor="black"), yaxis=dict(showline=True, linewidth=2, linecolor="black"))
     st.plotly_chart(fig, use_container_width=True)
-    # ----------------------------------------------------------
+
     st.markdown("### City-wise Average Price")
-
     city_avg = filt.groupby("City")["Price"].mean().reset_index()
-
-    fig2 = px.bar(
-        city_avg,
-        x="City",
-        y="Price",
-        text="Price",
-        color="City",
-        color_discrete_sequence=px.colors.qualitative.Bold
-    )
-
-    fig2.update_layout(
-        xaxis_title="<b>City</b>",
-        yaxis_title="<b>Average Price</b>",
-        xaxis=dict(showline=True, linewidth=2, linecolor="black"),
-        yaxis=dict(showline=True, linewidth=2, linecolor="black"),
-    )
-
-    fig2.update_traces(
-        texttemplate="₹ %{text:,.0f}",
-        textposition="outside",
-        marker=dict(line=dict(width=1, color="black")),
-        opacity=0.9
-    )
-
+    fig2 = px.bar(city_avg, x="City", y="Price", text="Price", color="City", color_discrete_sequence=px.colors.qualitative.Bold)
+    fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside", marker=dict(line=dict(width=1, color="black")), opacity=0.9)
+    fig2.update_layout(xaxis_title="<b>City</b>", yaxis_title="<b>Average Price</b>", xaxis=dict(showline=True, linewidth=2, linecolor="black"), yaxis=dict(showline=True, linewidth=2, linecolor="black"))
     st.plotly_chart(fig2, use_container_width=True)
-
 
     # ==========================================================
     # MACHINE LEARNING - PRICE PREDICTION
     # ==========================================================
-    st.markdown("### Step 3: ML Price Prediction")
+    st.markdown("### Step 3: ML Price Prediction (Actual vs Predicted Table & Download)")
 
     X = df[["City", "Property_Type", "Area_sqft"]]
     y = df["Price"]
@@ -329,24 +266,32 @@ with tab2:
         ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["City", "Property_Type"]),
         ("num", StandardScaler(), ["Area_sqft"])
     ])
-
     X_trans = transformer.fit_transform(X)
-
-    X_train, X_test, y_train, y_test = train_test_split(X_trans, y, test_size=0.2)
-    model = RandomForestRegressor()
+    X_train, X_test, y_train, y_test = train_test_split(X_trans, y, test_size=0.2, random_state=42)
+    model = RandomForestRegressor(n_estimators=200, random_state=42)
     model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        p_city = st.selectbox("City", df["City"].unique())
-    with c2:
-        p_ptype = st.selectbox("Property Type", df["Property_Type"].unique())
-    with c3:
-        p_area = st.number_input("Area (sqft)", min_value=300, max_value=10000, value=1200)
+    # Create table with features, actual, predicted
+    test_df = pd.DataFrame(X_test, columns=transformer.get_feature_names_out())
+    test_df["Price_Actual"] = y_test.values
+    test_df["Price_Predicted"] = y_pred
+    st.dataframe(test_df.head(), use_container_width=True)
 
-    pred = transformer.transform(pd.DataFrame([[p_city, p_ptype, p_area]],
-                     columns=["City","Property_Type","Area_sqft"]))
+    # Download button
+    b = BytesIO()
+    b.write(test_df.to_csv(index=False).encode("utf-8"))
+    b.seek(0)
+    st.download_button("Download ML Predictions CSV", b, file_name="ml_predictions.csv", mime="text/csv")
 
-    price_pred = model.predict(pred)[0]
-
-    st.metric("Estimated Price", f"₹ {price_pred:,.0f}")
+    # ==========================================================
+    # AUTOMATED INSIGHTS
+    # ==========================================================
+    st.markdown("### Automated Insights Table & Download")
+    insights = filt.groupby(["City", "Property_Type"]).agg({"Price":["mean","max","min"]}).reset_index()
+    insights.columns = ["City","Property_Type","Avg_Price","Max_Price","Min_Price"]
+    st.dataframe(insights, use_container_width=True)
+    b2 = BytesIO()
+    b2.write(insights.to_csv(index=False).encode("utf-8"))
+    b2.seek(0)
+    st.download_button("Download Automated Insights CSV", b2, file_name="automated_insights.csv", mime="text/csv")
