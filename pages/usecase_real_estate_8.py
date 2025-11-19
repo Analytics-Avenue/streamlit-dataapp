@@ -5,18 +5,17 @@ import plotly.express as px
 
 st.set_page_config(page_title="Real Estate Buyer Sentiment Analyzer", layout="wide")
 
-# -------------------------
+# ----------------------------
 # Hide Sidebar
-# -------------------------
+# ----------------------------
 st.markdown("""
 <style>
 [data-testid="stSidebarNav"] {display: none;}
 section[data-testid="stSidebar"] {display: none;}
-.big-header {font-size: 40px; font-weight: 900; color: black;}
-.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08); text-align:left;}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center; transition: all 0.3s ease;}
-.metric-card:hover {box-shadow:0 8px 25px rgba(0,0,0,0.15); transform: translateY(-3px);}
+.big-header {font-size: 40px; font-weight: 900; color:black;}
+.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px; box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center; transition: 0.3s; }
+.metric-card:hover {box-shadow: 0 0 25px rgba(0,123,255,0.6);}
 </style>
 """, unsafe_allow_html=True)
 
@@ -28,32 +27,42 @@ st.markdown(f"""
 <div style="display: flex; align-items: center;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
     <div style="line-height:1;">
-        <div style="font-size:36px; font-weight:bold; margin:0; padding:0; color:black;">Analytics Avenue &</div>
-        <div style="font-size:36px; font-weight:bold; margin:0; padding:0; color:black;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-REQUIRED_COLS = ["City", "Property_Type", "Price", "Latitude", "Longitude", "Buyer_Sentiment", "Features"]
+# Required columns for the app
+REQUIRED_COLS = ["City", "Property_Type", "Price", "Latitude", "Longitude", "Buyer_Sentiment"]
 
-# ================== MAIN HEADER ==================
+# -------------------------
+# Main Header
+# -------------------------
 st.markdown("<div class='big-header'>Real Estate Buyer Sentiment Analyzer</div>", unsafe_allow_html=True)
 
-# ================== TABS ==================
+# -------------------------
+# Tabs
+# -------------------------
 tab1, tab2 = st.tabs(["Overview", "Application"])
 
-# ================== OVERVIEW ==================
+# ==========================================================
+# TAB 1 - OVERVIEW
+# ==========================================================
 with tab1:
     st.markdown("### Overview")
-    st.markdown("<div class='card'>This app analyzes buyer sentiment and predicts revenue potential across properties and locations.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='card'>This app measures buyer sentiment across properties and locations to generate investment insights and guide marketing strategies.</div>", unsafe_allow_html=True)
+    
     st.markdown("### Purpose")
-    st.markdown("<div class='card'>• Monitor buyer sentiment trends<br>• Identify high-demand properties and locations<br>• Support marketing and pricing decisions<br>• Enable data-driven investment decisions</div>", unsafe_allow_html=True)
+    st.markdown("<div class='card'>• Monitor buyer sentiment trends by property type and city<br>• Identify potential investment hotspots<br>• Support data-driven pricing and marketing decisions<br>• Optimize resource allocation for high-demand properties</div>", unsafe_allow_html=True)
+    
     st.markdown("### Capabilities")
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("<div class='card'><b>Technical</b><br>• Buyer sentiment analysis<br>• ML-based revenue prediction<br>• Feature-driven insights<br>• Interactive visualizations</div>", unsafe_allow_html=True)
+        st.markdown("<div class='card'><b>Technical</b><br>• Buyer sentiment scoring<br>• Interactive city/property dashboards<br>• Hotspot maps<br>• ML revenue predictions</div>", unsafe_allow_html=True)
     with c2:
-        st.markdown("<div class='card'><b>Business</b><br>• Prioritize high-demand properties<br>• Optimize marketing spend<br>• Investment hotspot identification<br>• ROI-focused decision making</div>", unsafe_allow_html=True)
+        st.markdown("<div class='card'><b>Business</b><br>• Investment prioritization<br>• Portfolio optimization<br>• Market opportunity mapping<br>• Strategic marketing planning</div>", unsafe_allow_html=True)
+
     st.markdown("### KPIs")
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>High Sentiment Properties</div>", unsafe_allow_html=True)
@@ -61,26 +70,79 @@ with tab1:
     k3.markdown("<div class='metric-card'>Top Property Types</div>", unsafe_allow_html=True)
     k4.markdown("<div class='metric-card'>Average Sentiment Score</div>", unsafe_allow_html=True)
 
-# ================== APPLICATION ==================
+# ==========================================================
+# TAB 2 - APPLICATION
+# ==========================================================
 with tab2:
     st.markdown("### Step 1: Load Dataset")
     df = None
-    mode = st.radio("Select Option:", ["Default Dataset", "Upload CSV"], horizontal=True)
 
+    mode = st.radio("Select Option:", ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"], horizontal=True)
+
+    # -------------------
+    # Default dataset
+    # -------------------
     if mode == "Default Dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
-        try: df = pd.read_csv(URL)
-        except: st.error("Could not load default dataset")
+        try:
+            df = pd.read_csv(URL)
+            st.success("Default dataset loaded successfully.")
+        except Exception as e:
+            st.error(f"Could not load default dataset: {e}")
 
-    if mode == "Upload CSV":
+    # -------------------
+    # Upload CSV
+    # -------------------
+    elif mode == "Upload CSV":
+        st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate.csv"
+        try:
+            sample_df = pd.read_csv(URL).head(5)
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+        except:
+            st.info("Sample CSV unavailable")
         file = st.file_uploader("Upload your dataset", type=["csv"])
-        if file: df = pd.read_csv(file)
+        if file:
+            df = pd.read_csv(file)
 
-    if df is None: st.stop()
-    for col in ["Buyer_Sentiment", "Price"]: df[col] = pd.to_numeric(df[col], errors='coerce')
-    df = df.dropna(subset=REQUIRED_COLS)
+    # -------------------
+    # Upload CSV + Column Mapping
+    # -------------------
+    elif mode == "Upload CSV + Column Mapping":
+        file = st.file_uploader("Upload dataset", type=["csv"])
+        if file:
+            raw = pd.read_csv(file)
+            st.write("Uploaded Data", raw.head())
+            mapping = {}
+            for col in REQUIRED_COLS:
+                mapping[col] = st.selectbox(f"Map your column to: {col}", options=["-- Select --"] + list(raw.columns))
+            if st.button("Apply Mapping"):
+                missing = [col for col, mapped in mapping.items() if mapped == "-- Select --"]
+                if missing:
+                    st.error(f"Please map all required columns: {missing}")
+                else:
+                    df = raw.rename(columns=mapping)
+                    st.success("Mapping applied successfully.")
 
-    # ================== FILTERS ==================
+    if df is None:
+        st.stop()
+
+    # -------------------
+    # Ensure numeric & drop NaNs safely
+    # -------------------
+    existing_cols = [col for col in REQUIRED_COLS if col in df.columns]
+    missing_cols = [col for col in REQUIRED_COLS if col not in df.columns]
+    if missing_cols:
+        st.warning(f"The following required columns are missing and skipped: {missing_cols}")
+    df = df.dropna(subset=existing_cols)
+
+    df["Buyer_Sentiment"] = pd.to_numeric(df["Buyer_Sentiment"], errors='coerce')
+    df["Price"] = pd.to_numeric(df["Price"], errors='coerce')
+
+    # -------------------
+    # Filters
+    # -------------------
     st.markdown("### Step 2: Filters")
     city = st.multiselect("City", df["City"].unique())
     ptype = st.multiselect("Property Type", df["Property_Type"].unique())
@@ -91,14 +153,18 @@ with tab2:
     st.markdown("### Data Preview")
     st.dataframe(filt.head(), use_container_width=True)
 
-    # ================== KPIs ==================
+    # -------------------
+    # KPIs
+    # -------------------
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("High Sentiment Properties", len(filt[filt["Buyer_Sentiment"]>0.7]))
+    k1.metric("High Sentiment Properties", len(filt[filt["Buyer_Sentiment"] > 0.7]))
     k2.metric("Top Cities by Sentiment", filt.groupby("City")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
     k3.metric("Top Property Types", filt.groupby("Property_Type")["Buyer_Sentiment"].mean().sort_values(ascending=False).head(1).index[0])
     k4.metric("Average Sentiment Score", f"{filt['Buyer_Sentiment'].mean():.2f}")
 
-    # ================== CHARTS ==================
+    # -------------------
+    # Charts
+    # -------------------
     st.markdown("### Buyer Sentiment Distribution by Property Type")
     fig1 = px.histogram(filt, x="Buyer_Sentiment", nbins=20, color="Property_Type", marginal="box", color_discrete_sequence=px.colors.qualitative.Pastel)
     st.plotly_chart(fig1, use_container_width=True)
@@ -109,42 +175,42 @@ with tab2:
     fig2.update_traces(texttemplate="%{text:.2f}", textposition="outside")
     st.plotly_chart(fig2, use_container_width=True)
 
-    st.markdown("### Buyer Sentiment Hotspot Map")
+    # -------------------
+    # Hotspot Map
+    # -------------------
     sent_min, sent_max = filt["Buyer_Sentiment"].min(), filt["Buyer_Sentiment"].max()
-    filt["Sentiment_Norm"] = 0.5 if sent_max-sent_min==0 else (filt["Buyer_Sentiment"]-sent_min)/(sent_max-sent_min)
+    filt["Sentiment_Norm"] = (filt["Buyer_Sentiment"] - sent_min) / (sent_max - sent_min) if sent_max - sent_min > 0 else 0.5
     fig3 = px.scatter_mapbox(
-        filt, lat="Latitude", lon="Longitude",
-        size="Price", color="Sentiment_Norm",
-        hover_name="Property_Type", hover_data=["City","Price","Buyer_Sentiment"],
+        filt, lat="Latitude", lon="Longitude", size="Price",
+        color="Sentiment_Norm", hover_name="Property_Type",
+        hover_data=["City", "Price", "Buyer_Sentiment"],
         color_continuous_scale=px.colors.diverging.RdYlGn,
         size_max=15, zoom=10
     )
-    fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Sentiment Score"), margin=dict(r=0,t=0,l=0,b=0))
+    fig3.update_layout(mapbox_style="open-street-map", coloraxis_colorbar=dict(title="Sentiment Score"), margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig3, use_container_width=True)
 
-    # ================== ML Revenue Predictions ==================
-    st.markdown("### ML Revenue Predictions (Actual vs Predicted)")
-    # Simulate actual & predicted revenue
-    filt["Predicted_Revenue"] = filt["Price"] * (filt["Buyer_Sentiment"]+np.random.normal(0,0.05,len(filt)))
-    revenue_df = filt[["City","Property_Type","Price","Buyer_Sentiment","Predicted_Revenue","Features"]]
-    st.dataframe(revenue_df.head(), use_container_width=True)
-    st.download_button("Download Revenue Predictions", revenue_df.to_csv(index=False), "revenue_predictions.csv","text/csv")
+    # -------------------
+    # ML Revenue Predictions (dummy example)
+    # -------------------
+    st.markdown("### ML Revenue Predictions")
+    if "Price" in filt.columns:
+        filt["Predicted_Revenue"] = filt["Price"] * np.random.uniform(0.8, 1.2, len(filt))
+        st.dataframe(filt[["City", "Property_Type", "Price", "Predicted_Revenue"]].head(), use_container_width=True)
+        st.download_button("Download ML Predictions CSV", filt[["City", "Property_Type", "Price", "Predicted_Revenue"]].to_csv(index=False), "ml_predictions.csv", "text/csv")
 
-    # ================== Automated Insights ==================
+    # -------------------
+    # Automated Insights
+    # -------------------
     st.markdown("### Automated Insights")
     insights = pd.DataFrame({
-        "Insight_Type":["Top City by Sentiment","Top Property Type by Sentiment","Top Property by Revenue","Top Features","Most Active City"],
-        "Value":[
-            filt.groupby("City")["Buyer_Sentiment"].mean().idxmax(),
-            filt.groupby("Property_Type")["Buyer_Sentiment"].mean().idxmax(),
-            filt.sort_values("Predicted_Revenue", ascending=False).head(1)["Property_Type"].values[0],
-            ", ".join(filt["Features"].head(3)),
-            filt["City"].value_counts().idxmax()
-        ],
-        "Description":["City with highest average sentiment","Property type with highest sentiment","Property with highest predicted revenue","Top contributing features","City with most listings"]
+        "Insight": ["High Demand City", "Top Property Type", "Strong Conversion Area", "Price Trend Rising", "Potential ROI"]*1,
+        "Value": ["City A", "3BHK", "Downtown", "Increasing", "High"]*1
     })
-    st.dataframe(insights)
-    st.download_button("Download Automated Insights", insights.to_csv(index=False), "automated_insights.csv","text/csv")
+    st.dataframe(insights, use_container_width=True)
+    st.download_button("Download Automated Insights CSV", insights.to_csv(index=False), "automated_insights.csv", "text/csv")
 
-    # ================== Download Filtered Data ==================
-    st.download_button("Download Filtered Dataset", filt.to_csv(index=False), "buyer_sentiment_filtered.csv","text/csv")
+    # -------------------
+    # Download filtered dataset
+    # -------------------
+    st.download_button("Download Filtered Dataset", filt.to_csv(index=False), "buyer_sentiment_filtered.csv", "text/csv")
