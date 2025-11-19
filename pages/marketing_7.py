@@ -363,7 +363,6 @@ with tabs[1]:
         }).reset_index(drop=True)
         ml_result_df = pd.concat([ml_result_df, X_test_df.reset_index(drop=True)], axis=1)
     
-        st.markdown("#### Download ML Predictions")
         download_df(ml_result_df, "ml_revenue_predictions.csv")
     
     
