@@ -130,8 +130,12 @@ sectors = {
         {"name":"Patient Visit Analytics & Hospital Performance","page":"healthcare_2.py"},
         {"name":"PatientFlow Navigator","page":"healthcare_3.py"},
         {"name":"Ambulance Ops & Routing Lab","page":"healthcare_4.py"},
-        {"name":"Health Care Analytics1","page":"healthcare_5.py"},
-        {"name":"Health Care Analytics2","page":"healthcare_6.py"},
+        {"name":"HealthOps Dashboard","page":"healthcare_5.py"},
+    ],
+    "Manufacturing Analytics": [
+        {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
+        {"name":"Patient Visit Analytics & Hospital Performance","page":"manufacturing_2.py"},
+        {"name":"PatientFlow Navigator","page":"manufacturing_3.py"}
     ]
 }
 
@@ -139,6 +143,7 @@ thumb_urls = {
     "Marketing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/marketing_thumb.jpg",
     "Real Estate Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/real_estate_thumb.jpg",
     "Health Care Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/healthcare_thumb.jpg",
+    "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpg",
 }
 
 # -------------------------
@@ -286,7 +291,14 @@ else:
              "tools": ["Python","R","Power BI","Classification Models"]},
             {"overview": "Forecast patient visits and resource requirements to improve staffing and care quality.",
              "tools": ["Python","SQL","NLP","Patient Flow Forecasting"]},
-        ]
+        ],
+        "Manufacturing Analytics": [
+        {"overview": "Analyze patient visit data to optimize hospital operations and improve patient flow.",
+         "tools": ["Python","SQL","Power BI","Time Series Forecasting"]},
+        {"overview": "Predict patient volume, assess hospital performance metrics, and reduce wait times effectively.",
+         "tools": ["R","Python","Tableau","Forecasting Models"]},
+        {"overview": "Visualize patient journey, resource utilization, and treatment pathways to improve efficiency.",
+         "tools": ["Python","Power BI","EMR/EHR Data","Excel"]},
     }
 
     usecases = sectors[sector_name]
