@@ -83,18 +83,33 @@ tab_overview, tab_app = st.tabs(["Overview","Application"])
 # Overview
 # -------------------------
 with tab_overview:
-    st.markdown('<div class="glow-card"><h2>About this Application</h2><p>HospitalOps gives full operational visibility: patient trends, equipment, risk scoring, dashboards and decision support.</p></div>',unsafe_allow_html=True)
-    st.markdown('<div class="glow-card"><h3>Purpose</h3><p>Improve allocation of beds and equipment, identify high-risk patients, enable rapid operational decisions.</p></div>',unsafe_allow_html=True)
-    st.markdown('<div class="glow-card"><h3>Capabilities</h3><p>Dataset ingestion (default/upload/mapping), KPIs, clustering, ML predictions (regression), model explainability, automated insights.</p></div>',unsafe_allow_html=True)
-    st.markdown('<div class="glow-card"><h3>Business Impact</h3><p>Faster triage, targeted procurement, reduced bed shortages, data-driven expansion and planning.</p></div>',unsafe_allow_html=True)
-    st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrators, finance and procurement teams.</p></div>',unsafe_allow_html=True)
+    st.markdown('<div class="glow-card"><h2>About this Application</h2><p>HospitalOps provides full operational visibility into hospital operations: patient trends, equipment management, risk scoring, dashboards, and decision support tools to drive smarter operational choices.</p></div>', unsafe_allow_html=True)
 
-    # KPIs — EMPTY
-    st.markdown('<div class="kpi-row">',unsafe_allow_html=True)
-    kpis = ["High-Risk Hospitals","Avg Bed Occupancy","Ventilators","Avg Staff/Hospital"]
-    for title in kpis:
-        st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700"></div></div>',unsafe_allow_html=True)
-    st.markdown('</div>',unsafe_allow_html=True)
+    st.markdown('<div class="glow-card"><h3>Purpose</h3><p>Enable hospitals to optimize bed allocation, track equipment usage, identify high-risk patients, and facilitate rapid data-driven decisions across operational and administrative teams.</p></div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # Capabilities & Business Impact Side by Side
+    # -------------------------
+    cols = st.columns(2)
+    with cols[0]:
+        st.markdown('<div class="glow-card"><h3>Capabilities</h3><ul style="padding-left:16px;"><li>Dataset ingestion (default, upload, mapping)</li><li>Key Performance Indicators (KPIs) tracking</li><li>Clustering & segmentation analysis</li><li>ML predictions (regression)</li><li>Model explainability & interpretability</li><li>Automated insights generation</li></ul></div>', unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown('<div class="glow-card"><h3>Business Impact</h3><ul style="padding-left:16px;"><li>Faster triage and patient management</li><li>Targeted equipment procurement</li><li>Reduced bed shortages & improved allocation</li><li>Data-driven expansion and strategic planning</li><li>Enhanced operational efficiency across departments</li></ul></div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # Intended Users
+    # -------------------------
+    st.markdown('<div class="glow-card"><h3>Intended Users</h3><p>Hospital managers, operational analysts, administrative staff, finance & procurement teams looking for actionable insights to streamline operations.</p></div>', unsafe_allow_html=True)
+
+    # -------------------------
+    # KPIs Placeholder (Blank)
+    # -------------------------
+    st.markdown('<div class="kpi-row">', unsafe_allow_html=True)
+    kpi_titles = ["High-Risk Hospitals", "Avg Bed Occupancy", "Ventilators", "Avg Staff/Hospital"]
+    for title in kpi_titles:
+        st.markdown(f'<div class="kpi"><div style="font-size:12px;color:#333">{title}</div><div style="font-size:20px;font-weight:700">--</div></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # -------------------------
 # Application Tab
