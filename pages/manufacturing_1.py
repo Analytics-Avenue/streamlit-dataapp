@@ -90,12 +90,13 @@ with tabs[0]:
     """, unsafe_allow_html=True)
 
     # KPI cards
-    st.markdown("### Key Metrics")
-    k1,k2,k3,k4 = st.columns(4)
-    k1.metric("Machines Tracked")
-    k2.metric("Avg Temperature")
-    k3.metric("Avg Vibration")
-    k4.metric("Failure Events")
+    # Clean label-only KPI cards (Overview)
+    k1, k2, k3, k4 = st.columns(4)
+    
+    k1.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Machines Tracked</div>", unsafe_allow_html=True)
+    k2.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Avg Temperature</div>", unsafe_allow_html=True)
+    k3.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Avg Vibration</div>", unsafe_allow_html=True)
+    k4.markdown("<div style='font-size:24px; font-weight:bold; color:#064b86;'>Failure Events</div>", unsafe_allow_html=True)
 
     # Who should use
     st.markdown("### Who Should Use This App?")
