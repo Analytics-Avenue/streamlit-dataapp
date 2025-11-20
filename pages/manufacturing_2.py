@@ -72,7 +72,7 @@ st.markdown(f"""
 # ---------------------------------------------------------
 # Main App Title
 # ---------------------------------------------------------
-st.markdown("<h1 style='text-align:center; color:#064b86; font-size:40px; font-weight:bold; margin-bottom:20px;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:left; color:#064b86; font-size:40px; font-weight:bold; margin-bottom:20px;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
 
 
 # ------------------------------
