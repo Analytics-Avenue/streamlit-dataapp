@@ -93,7 +93,10 @@ Boost care quality with real-time monitoring and clinical performance analytics.
  
     "Manufacturing Analytics": """Improve patient flow, predict OPD/ER volumes, enhance doctor allocation, and reduce waiting times.
 Use forecasting, classification, and EMR/EHR data to optimize hospital operations.
-Boost care quality with real-time monitoring and clinical performance analytics."""
+Boost care quality with real-time monitoring and clinical performance analytics.""",
+
+    "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
+Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
 }
 
 sector_tools = {
@@ -104,7 +107,8 @@ sector_tools = {
     "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
                               "Classification Models","NLP","Patient Flow Forecasting"],
     "Manufacturing Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
-                              "Classification Models","NLP","Patient Flow Forecasting"]
+                              "Classification Models","NLP","Patient Flow Forecasting"],
+    "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
 sectors = {
@@ -142,7 +146,13 @@ sectors = {
         {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
         {"name":"Patient Visit Analytics & Hospital Performance","page":"manufacturing_2.py"},
         {"name":"PatientFlow Navigator","page":"manufacturing_3.py"},
-    ]
+    ],
+    "Gen AI": [
+        {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
+        {"name":"EduTech Gen-AI Assistant","page":"https://edutech-sw63app8ga27wxw4wghza3.streamlit.app/"},
+        {"name":"Sentiment & Tone Analyzer","page":"https://sentimentandtoneanalyzer-master-3lymcywxgkv5ecwfzyxayc.streamlit.app/"},
+        {"name":"Multimodal RAG Demo","page":"https://multimodalrag-master-qlv3gx8ntcfradnltky7qj.streamlit.app/"},
+    ],
 }
 
 thumb_urls = {
@@ -150,6 +160,7 @@ thumb_urls = {
     "Real Estate Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/real_estate_thumb.jpeg",
     "Health Care Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/healthcare_thumb.jpeg",
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
+    "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
 }
 
 # -------------------------
@@ -305,7 +316,20 @@ else:
          "tools": ["R","Python","Tableau","Forecasting Models"]},
         {"overview": "Visualize patient journey, resource utilization, and treatment pathways to improve efficiency.",
          "tools": ["Python","Power BI","EMR/EHR Data","Excel"]},
-         ]
+         ],
+        "Gen AI": [
+            {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
+             "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
+
+            {"overview": "Enable personalized learning, student assessment analysis, content generation, and LMS automation using generative AI.",
+             "tools": ["Python","LLMs","Streamlit","NLP","Prompt Engineering"]},
+
+            {"overview": "Analyze tone, sentiment, intent, emotion, and contextual cues using transformer-based NLP models.",
+             "tools": ["Python","NLP","Sentiment Models","Transformers"]},
+
+            {"overview": "Search, retrieve, and reason across text, images, and documents using multimodal RAG pipelines.",
+             "tools": ["Python","RAG","Vector DB","Multimodal Embeddings"]},
+        ]
     }
 
     usecases = sectors[sector_name]
@@ -327,8 +351,12 @@ else:
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in proj_tools])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
 
-                page_slug = uc['page'][:-3] if uc['page'].endswith(".py") else uc['page']
-                deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
+                if sector_name == "Gen AI":
+                    deployed_url = uc['page']
+                else:
+                    page_slug = uc['page'][:-3] if uc['page'].endswith(".py") else uc['page']
+                    deployed_url = f"https://analytics-avenue.streamlit.app/{page_slug}"
+
                 st.markdown(f"""
                     <a href="{deployed_url}" target="_blank" style="text-decoration:none;">
                         <div style="background:#eef4ff; color:#064b86; padding:6px 12px; border-radius:6px; text-align:center; font-weight:600; margin-top:5px;">
