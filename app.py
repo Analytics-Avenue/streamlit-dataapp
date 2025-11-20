@@ -94,6 +94,10 @@ Boost care quality with real-time monitoring and clinical performance analytics.
     "Manufacturing Analytics": """Optimize production lines, reduce machine downtime, and streamline factory operations with data-driven insights. 
 Use predictive models, IoT sensor data, and advanced planning analytics to enhance throughput, cut delays, and improve supply chain stability. Transform raw manufacturing data into actionable intelligence for 
 efficiency, quality improvement, and cost savings.""", 
+
+    "HR Analytics": """Optimize production lines, reduce machine downtime, and streamline factory operations with data-driven insights. 
+Use predictive models, IoT sensor data, and advanced planning analytics to enhance throughput, cut delays, and improve supply chain stability. Transform raw manufacturing data into actionable intelligence for 
+efficiency, quality improvement, and cost savings.""", 
     
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
@@ -107,6 +111,8 @@ sector_tools = {
     "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
                               "Classification Models","NLP","Patient Flow Forecasting"],
     "Manufacturing Analytics": ["Python","SQL","Excel","Power BI","Tableau","Machine Sensor/IoT Data","Predictive Maintenance Models",
+                                "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
+    "HR Analytics": ["Python","SQL","Excel","Power BI","Tableau","Machine Sensor/IoT Data","Predictive Maintenance Models",
                                 "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
@@ -148,6 +154,10 @@ sectors = {
         {"name":"Inventory Pileup & Shortage Analytics","page":"manufacturing_3.py"},
         {"name":"Energy, Fuel & Resource Wastage Analytics","page":"manufacturing_4.py"},
     ],
+    "HR Analytics": [
+        {"name":"Production Downtime & Predictive Maintenance","page":"hr_1.py"},
+        {"name":"Order-to-Delivery Analytics","page":"hr_2.py"},
+    ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
         {"name":"EduTech Gen-AI Assistant","page":"https://edutech-sw63app8ga27wxw4wghza3.streamlit.app/"},
@@ -162,6 +172,7 @@ thumb_urls = {
     "Real Estate Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/real_estate_thumb.jpeg",
     "Health Care Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/healthcare_thumb.jpeg",
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
+    "HR Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
     "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
@@ -330,7 +341,12 @@ else:
             shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
             "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]}
             ],        
-        
+        "HR Analytics": [
+            {"overview": "Analyze patient visit data to optimize hospital operations and improve patient flow.",
+             "tools": ["Python","SQL","Power BI","Time Series Forecasting"]},
+            {"overview": "Predict patient volume, assess hospital performance metrics, and reduce wait times effectively.",
+             "tools": ["R","Python","Tableau","Forecasting Models"]},
+            ],
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
