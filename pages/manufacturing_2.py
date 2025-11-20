@@ -53,22 +53,22 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------------------
-# Header
 # ------------------------------
 # Header + Title
 # ------------------------------
 st.markdown("<h1 style='text-align:center; color:#064b86; font-size:42px; font-weight:bold;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
-# ------------------------------
+
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div style="display:flex; align-items:center;">
+<div style="display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:34px; font-weight:bold;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:34px; font-weight:bold;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:28px; font-weight:bold;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:28px; font-weight:bold;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # ------------------------------
 # CSV Download Helper
