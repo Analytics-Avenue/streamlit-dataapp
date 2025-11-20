@@ -1,85 +1,96 @@
 # app_energy_wastage.py
+# Streamlit app for "Fuel, Power & Resource Wastage" analytics
+# Full single-file app. Loads default dataset (GitHub), supports file upload and column mapping,
+# provides EDA, several charts (no plotly trendline="ols"), 4 ML concepts, automated insights and downloads.
+#
+# Columns expected (example):
+# Timestamp,Machine_ID,Machine_Type,Fuel_Type,Shift,Operator_ID,Energy_Consumption_kWh,Energy_Predicted_kWh,
+# Baseload_Drift_kWh,Cooling_Load_kWh,Fuel_Consumption,Compressed_Air_CFM,Voltage_Instability,Power_Factor,
+# Ambient_Temp_C,Output_Units,Energy_Intensity_kWh_per_Unit,Peak_Load_Flag,Idle_Flag,Wastage_Severity,CO2_Emissions_kg
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO, StringIO
-from datetime import datetime, timedelta
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, IsolationForest
+from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, r2_score, roc_auc_score, accuracy_score
-from sklearn.ensemble import IsolationForest
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.decomposition import PCA
 import math
 import warnings
 warnings.filterwarnings("ignore")
 
-# ---------------------------------------------------------
-# Page Config & Title (left-aligned)
-# ---------------------------------------------------------
-st.set_page_config(page_title="Fuel, Power & Resource Wastage Analytics", layout="wide", page_icon="⚡")
-st.markdown(
-    """
-    <div style="text-align:left;">
-        <h1 style="margin-bottom:0.1rem;">Fuel, Power & Resource Wastage Analytics</h1>
-        <div style="color:#555; margin-top:0.2rem; margin-bottom:12px;">
-            Detect waste, predict energy consumption & fuel usage, reduce cost with targeted actions.
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# ----------------------------
+# Page config and CSS
+# ----------------------------
+st.set_page_config(page_title="Energy & Resource Wastage Analytics", layout="wide", page_icon="⚡")
 
-# ---------------------------------------------------------
-# CSS: hover glow for cards & KPI visuals
-# ---------------------------------------------------------
+# Left-aligned title and header styling, hover-glow for cards and KPI visuals
 st.markdown("""
 <style>
+/* left align header */
+.header-row { display:flex; align-items:center; gap:12px; justify-content:flex-start; }
+.header-title { font-size:28px; font-weight:700; color:#064b86; margin:0; padding:0; text-align:left; }
+.header-sub { font-size:14px; color:#444; margin:0; padding:0; text-align:left; }
+
+/* card + hover glow */
 .card {
     padding: 16px;
     border-radius: 12px;
-    background: white;
-    border: 1px solid #e6e6e6;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-    text-align:left;
+    background: #ffffff;
+    border: 1px solid #e6e9ee;
+    transition: all 0.22s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 .card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 10px 30px rgba(6,75,134,0.18);
+    box-shadow: 0 8px 30px rgba(6,75,134,0.14);
     border-color: #064b86;
 }
+
+/* KPI visual large labels */
 .kpi {
-    padding: 22px;
+    padding: 24px;
     border-radius: 12px;
-    background: white;
-    border: 1px solid #e0e0e0;
-    text-align:center;
-    font-size:18px;
+    background: #fff;
+    border: 1px solid rgba(6,75,134,0.10);
+    font-size:22px;
     font-weight:700;
     color:#064b86;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    text-align:center;
+    transition: all 0.18s ease;
 }
 .kpi:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 22px rgba(6,75,134,0.20);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 24px rgba(6,75,134,0.12);
 }
-.small { font-size:13px; color:#666; }
+
+/* left-aligned card text */
+.left-align { text-align: left !important; }
+
+/* small helper text */
+.small { font-size:12px; color:#666; }
+
+/* make streamlit default containers a bit more airy */
+.block-container { padding-top: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
+# ----------------------------
 # Helper functions
-# ---------------------------------------------------------
+# ----------------------------
+
 def read_csv_safe(url_or_file):
     """
-    Read CSV from a URL or uploaded file. If duplicate columns exist, make names unique.
+    Read CSV from URL or file-like. If duplicate columns exist, make them unique
+    by appending suffixes: col, col__dup1, col__dup2...
+    Returns pandas DataFrame.
     """
-    try:
-        df = pd.read_csv(url_or_file)
-    except Exception as e:
-        # try with python engine if weird separators
-        df = pd.read_csv(url_or_file, engine="python")
+    df = pd.read_csv(url_or_file)
     cols = list(df.columns)
     if len(cols) != len(set(cols)):
         # make unique
@@ -97,138 +108,109 @@ def read_csv_safe(url_or_file):
     df.columns = [str(c).strip() for c in df.columns]
     return df
 
-def download_df_button(df, filename, label="Download CSV"):
+def download_df(df: pd.DataFrame, filename: str, button_label: str = "Download CSV", key=None):
     b = BytesIO()
     b.write(df.to_csv(index=False).encode("utf-8"))
     b.seek(0)
-    st.download_button(label, b, file_name=filename, mime="text/csv")
+    st.download_button(button_label, b, file_name=filename, mime="text/csv", key=key)
 
-def safe_mean(val):
+def safe_mean(series):
     try:
-        return float(np.nanmean(val))
+        return float(np.nanmean(series))
     except:
         return None
 
-# ---------------------------------------------------------
-# Default dataset URL (replace with your raw CSV)
-# If not reachable, the app will fall back to a small synthetic sample.
-# ---------------------------------------------------------
-DEFAULT_URL = "https://raw.githubusercontent.com/your-org/your-repo/main/datasets/manufacturing/energy_wastage.csv"
+def add_linear_regression_trace(fig, x, y, name="Linear fit", color=None):
+    """
+    Add a linear regression line (numpy polyfit) to a plotly figure.
+    Avoids using statsmodels so no extra dependency.
+    """
+    # remove missing
+    mask = (~np.isnan(x)) & (~np.isnan(y))
+    if mask.sum() < 2:
+        return fig
+    xp = x[mask]
+    yp = y[mask]
+    coeffs = np.polyfit(xp, yp, deg=1)
+    slope, intercept = coeffs[0], coeffs[1]
+    x_line = np.linspace(np.min(xp), np.max(xp), 50)
+    y_line = slope * x_line + intercept
+    fig.add_trace(go.Scatter(x=x_line, y=y_line, mode="lines", name=name,
+                             line=dict(dash="dash", color=color or "black")))
+    return fig
 
-# ---------------------------------------------------------
-# Provide a small synthetic sample fallback
-# ---------------------------------------------------------
-def generate_sample_energy_df(n=500, seed=42):
-    rng = np.random.default_rng(seed)
-    base_time = datetime(2023,1,1)
-    timestamps = [base_time + timedelta(hours=int(i)) for i in range(n)]
-    machine_ids = rng.integers(1, 8, size=n)  # 1..7
-    machine_types = np.where(machine_ids % 2 == 0, "CNC", "Press")
-    fuel_types = np.where(machine_ids % 3 == 0, "Diesel", "Electric")
-    shifts = np.where((np.array([t.hour for t in timestamps]) < 8), "Night",
-                      np.where(np.array([t.hour for t in timestamps])<16, "Day","Evening"))
-    operator_ids = rng.integers(100, 110, size=n)
-    energy_consumption = np.abs(100 + machine_ids*5 + rng.normal(0, 20, n) + (np.array([t.hour for t in timestamps])>16)*20)
-    energy_pred = energy_consumption + rng.normal(0, 6, n)
-    baseload = rng.normal(2, 0.5, n)
-    cooling = np.abs(energy_consumption * rng.uniform(0.02, 0.08, n))
-    fuel_consumption = np.where(fuel_types=="Diesel", energy_consumption*0.25 + rng.normal(0,2,n), rng.normal(0.5,0.2,n))
-    compressed_air = np.abs(50 + rng.normal(0,10,n))
-    voltage_inst = np.clip(rng.normal(0,0.02,n), -0.1, 0.1)
-    power_factor = np.clip(rng.normal(0.95,0.03,n), 0.6, 1.0)
-    ambient_temp = 25 + rng.normal(0,4,n)
-    output_units = np.maximum(1, np.round(energy_consumption/5 + rng.normal(0,3,n))).astype(int)
-    energy_intensity = energy_consumption / np.maximum(1, output_units)
-    peak_flag = (energy_consumption > (np.mean(energy_consumption) + 1.5*np.std(energy_consumption))).astype(int)
-    idle_flag = (energy_consumption < (np.mean(energy_consumption) - 1.0*np.std(energy_consumption))).astype(int)
-    wastage_severity = np.clip((energy_intensity - np.mean(energy_intensity))/np.std(energy_intensity), -3, 6)
-    co2 = energy_consumption * 0.45  # approximate
+# ----------------------------
+# App header left-aligned
+# ----------------------------
+col_logo, col_title = st.columns([0.18, 3])
+with col_logo:
+    st.image("https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png", width=64)
+with col_title:
+    st.markdown("<div class='header-row'><div><p class='header-title'>Energy & Resource Wastage Analytics</p><p class='header-sub'>Detect energy waste, predict consumption, and prioritize efficiency actions.</p></div></div>", unsafe_allow_html=True)
 
-    df = pd.DataFrame({
-        "Timestamp": timestamps,
-        "Machine_ID": machine_ids,
-        "Machine_Type": machine_types,
-        "Fuel_Type": fuel_types,
-        "Shift": shifts,
-        "Operator_ID": operator_ids,
-        "Energy_Consumption_kWh": energy_consumption,
-        "Energy_Predicted_kWh": energy_pred,
-        "Baseload_Drift_kWh": baseload,
-        "Cooling_Load_kWh": cooling,
-        "Fuel_Consumption": fuel_consumption,
-        "Compressed_Air_CFM": compressed_air,
-        "Voltage_Instability": voltage_inst,
-        "Power_Factor": power_factor,
-        "Ambient_Temp_C": ambient_temp,
-        "Output_Units": output_units,
-        "Energy_Intensity_kWh_per_Unit": energy_intensity,
-        "Peak_Load_Flag": peak_flag,
-        "Idle_Flag": idle_flag,
-        "Wastage_Severity": wastage_severity,
-        "CO2_Emissions_kg": co2
-    })
-    return df
-
-# ---------------------------------------------------------
-# App tabs
-# ---------------------------------------------------------
+# ----------------------------
+# Tabs: Overview & Application
+# ----------------------------
 tabs = st.tabs(["Overview", "Application"])
 
-# -------------------------
-# Overview tab
-# -------------------------
+# ----------------------------
+# Overview Page
+# ----------------------------
 with tabs[0]:
-    st.markdown("<div class='card'><b>Purpose</b>: Reduce fuel/energy wastage and optimize scheduling by predicting energy needs, identifying peak events, and surfacing wasted runs.</div>", unsafe_allow_html=True)
+    st.markdown("### Overview")
+    st.markdown("""<div class='card left-align'>
+                    <b>Purpose</b>: Monitor fuel and power usage, identify wastage patterns, and recommend corrective actions at machine, shift and plant level.
+                   </div>""", unsafe_allow_html=True)
 
-    left, right = st.columns([1,1])
+    left, right = st.columns(2)
     with left:
         st.markdown("#### Capabilities")
         st.markdown("""
-        <div class='card'>
-        • Predict machine-level energy consumption (regression).<br>
-        • Classify peak-load events and idle states.<br>
-        • Predict fuel consumption per run.<br>
-        • Unsupervised anomaly detection for abnormal energy patterns.<br>
-        • Exportable prioritized maintenance / action lists.
-        </div>
+            <div class='card left-align'>
+            • Machine-level energy consumption monitoring<br>
+            • Energy prediction models (short-term & per-shift)<br>
+            • Anomaly detection for sudden spikes or baseload drift<br>
+            • Operational clustering (modes) to identify inefficient states<br>
+            • Downloadable predictions & prioritized action lists
+            </div>
         """, unsafe_allow_html=True)
     with right:
         st.markdown("#### Business impact")
         st.markdown("""
-        <div class='card'>
-        • 10–30% energy & fuel cost savings in large plants.<br>
-        • Reduced CO₂ footprint via optimized scheduling.<br>
-        • Improved equipment life by avoiding overstress periods.<br>
-        • Lower wasted output and fewer emergency shutdowns.
-        </div>
+            <div class='card left-align'>
+            • Reduce energy cost by ~10-30% across large units<br>
+            • Lower CO₂ emissions via targeted interventions<br>
+            • Avoid over-consumption due to idle/peak inefficiencies<br>
+            • Improve planning for fuel & electricity procurement
+            </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("#### KPIs")
-    # five KPI cards in a row
+    # KPI cards (5 in a row as requested)
+    st.markdown("### KPIs")
     kcols = st.columns(5)
-    kcols[0].markdown("<div class='kpi'>Total Energy Tracked</div>", unsafe_allow_html=True)
-    kcols[1].markdown("<div class='kpi'>Avg Energy / Shift</div>", unsafe_allow_html=True)
-    kcols[2].markdown("<div class='kpi'>Peak Events</div>", unsafe_allow_html=True)
-    kcols[3].markdown("<div class='kpi'>Fuel Usage</div>", unsafe_allow_html=True)
-    kcols[4].markdown("<div class='kpi'>CO₂ Emissions</div>", unsafe_allow_html=True)
+    klabels = ["Total Energy (kWh)", "Avg Energy/Unit", "Peak Load Events", "Idle Hours", "Estimated Savings"]
+    for kc, label in zip(kcols, klabels):
+        kc.markdown(f"<div class='kpi'>{label}</div>", unsafe_allow_html=True)
 
-    st.markdown("### Who should use & how")
-    st.markdown("""
-    <div class='card'>
-    <b>Who</b>: Energy managers, plant managers, reliability engineers, sustainability teams.<br><br>
-    <b>How</b>: 1) Load data (default / upload). 2) Filter by date/machine/shift. 3) Review anomalies & predicted high-consumption runs. 4) Export prioritized action lists for scheduling or operator retraining.
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### Who should use & How")
+    st.markdown("""<div class='card left-align'>
+                    <b>Who</b>: Energy managers, plant managers, sustainability teams, operations leads.<br><br>
+                    <b>How</b>: Load the plant sensor & meter data, filter by date/machine/shift, review anomaly and ML prediction outputs, export prioritized action lists for maintenance & scheduling.
+                   </div>""", unsafe_allow_html=True)
 
-# -------------------------
-# Application tab
-# -------------------------
+# ----------------------------
+# Application Page
+# ----------------------------
 with tabs[1]:
-    st.header("Application")
-    st.markdown("### Step 1 — Load dataset (choose one of three options)")
+    st.markdown("### Application")
+    st.markdown("Select data load option and proceed to EDA, ML and Automated Insights.")
 
-    load_mode = st.radio("Dataset option:", ["Default dataset (GitHub URL)", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
+    data_option = st.radio("Dataset option:", ["Default (GitHub URL)", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
+
+    # default dataset URL suggestion (user will provide actual dataset if needed)
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/energy_wastage.csv"
+    # NOTE: replace DEFAULT_URL with your actual raw GitHub CSV URL
 
     REQUIRED_COLS = [
         "Timestamp","Machine_ID","Machine_Type","Fuel_Type","Shift","Operator_ID",
@@ -237,101 +219,87 @@ with tabs[1]:
         "Output_Units","Energy_Intensity_kWh_per_Unit","Peak_Load_Flag","Idle_Flag","Wastage_Severity","CO2_Emissions_kg"
     ]
 
-    if load_mode == "Default dataset (GitHub URL)":
+    if data_option == "Default (GitHub URL)":
+        st.info("Loading default dataset from DEFAULT_URL. Replace DEFAULT_URL in the code if needed.")
         try:
             df = read_csv_safe(DEFAULT_URL)
-            st.success("Loaded default dataset from DEFAULT_URL.")
+            st.success("Default dataset loaded (from DEFAULT_URL).")
+            st.dataframe(df.head())
         except Exception as e:
-            st.warning("Failed to load DEFAULT_URL. Falling back to a generated sample dataset. (Edit DEFAULT_URL in script.)")
-            df = generate_sample_energy_df(1000)
+            st.error("Failed to load default dataset. Check DEFAULT_URL or your network. Error: " + str(e))
+            st.info("You can upload a CSV instead.")
+            df = None
 
-    elif load_mode == "Upload CSV":
-        uploaded_file = st.file_uploader("Upload CSV", type=["csv"], key="upload1")
-        if uploaded_file is not None:
+    elif data_option == "Upload CSV":
+        uploaded = st.file_uploader("Upload CSV file", type=["csv"], help="Upload CSV with columns like Timestamp, Machine_ID, Energy_Consumption_kWh ...")
+        if uploaded:
             try:
-                df = read_csv_safe(uploaded_file)
-                st.success("Uploaded file read.")
-            except Exception as e:
-                st.error("Failed to parse uploaded CSV: " + str(e))
-                st.stop()
-        else:
-            st.stop()
-
-    else:  # Upload + mapping
-        uploaded_file = st.file_uploader("Upload CSV for mapping", type=["csv"], key="upload2")
-        if uploaded_file is not None:
-            raw = read_csv_safe(uploaded_file)
-            st.write("Preview of uploaded file:")
-            st.dataframe(raw.head())
-            st.markdown("Map your columns (map at least those that exist in your file).")
-            mapping = {}
-            cols_list = list(raw.columns)
-            for req in REQUIRED_COLS:
-                mapping[req] = st.selectbox(f"Map → {req}", ["-- Skip --"] + cols_list, key=f"map_{req}")
-            if st.button("Apply mapping"):
-                # build rename dict using selected items that are not skip
-                rename = {mapping[k]: k for k in mapping if mapping[k] != "-- Skip --"}
-                df = raw.rename(columns=rename)
-                st.success("Mapping applied.")
+                df = read_csv_safe(uploaded)
+                st.success("File uploaded.")
                 st.dataframe(df.head())
-            else:
+            except Exception as e:
+                st.error("Failed to read uploaded CSV: " + str(e))
                 st.stop()
         else:
             st.stop()
 
-    # If df is still None, stop
+    else:  # mapping
+        uploaded = st.file_uploader("Upload CSV for mapping", type=["csv"])
+        if uploaded:
+            raw = read_csv_safe(uploaded)
+            st.write("Preview (first 5 rows):")
+            st.dataframe(raw.head())
+            st.markdown("Map your columns to the required fields below (map as many as available).")
+            cols = list(raw.columns)
+            mapping = {}
+            for req in REQUIRED_COLS:
+                mapping[req] = st.selectbox(f"Map → {req}", options=["-- None --"] + cols, index=0, key=f"map_{req}")
+            if st.button("Apply mapping"):
+                # build rename map (only for chosen)
+                rename_map = {}
+                for req, sel in mapping.items():
+                    if sel != "-- None --":
+                        rename_map[sel] = req
+                if rename_map:
+                    df = raw.rename(columns=rename_map)
+                    st.success("Mapping applied.")
+                    st.dataframe(df.head())
+                else:
+                    st.error("You must map at least one column.")
+        else:
+            st.stop()
+
     if df is None:
         st.stop()
 
-    # -------------------------
-    # Basic cleaning & canonicalization
-    # -------------------------
+    # ---------- Standardize & Clean ----------
+    # trim column names
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Prefer first duplicate column if duplicates exist
-    def prefer_col(cols, base):
-        for c in cols:
-            if c == base:
-                return c
-        for c in cols:
-            if c.startswith(base + "__dup"):
-                return c
-        return None
-
-    # Map duplicates to canonical
-    cols = list(df.columns)
-    canonical_map = {}
-    for base in ["Timestamp","Machine_ID","Machine_Type","Fuel_Type","Shift","Operator_ID",
-                 "Energy_Consumption_kWh","Energy_Predicted_kWh","Baseload_Drift_kWh","Cooling_Load_kWh",
-                 "Fuel_Consumption","Compressed_Air_CFM","Voltage_Instability","Power_Factor","Ambient_Temp_C",
-                 "Output_Units","Energy_Intensity_kWh_per_Unit","Peak_Load_Flag","Idle_Flag","Wastage_Severity","CO2_Emissions_kg"]:
-        found = prefer_col(cols, base)
-        if found and found != base:
-            canonical_map[found] = base
-    if canonical_map:
-        df = df.rename(columns=canonical_map)
-
-    # Ensure Timestamp
+    # Try to coerce Timestamp to datetime (many data sets use different formats)
     if "Timestamp" in df.columns:
-        df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
-    else:
-        # if no Timestamp, create index-based synthetic timestamps
-        df["Timestamp"] = pd.date_range(start=datetime.now()-timedelta(days=30), periods=len(df), freq='H')
+        try:
+            df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+        except Exception:
+            df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
-    # Ensure numeric columns exist and convert
+    # Numeric conversions for expected numeric columns
     numeric_cols = ["Energy_Consumption_kWh","Energy_Predicted_kWh","Baseload_Drift_kWh","Cooling_Load_kWh",
-                    "Fuel_Consumption","Compressed_Air_CFM","Voltage_Instability","Power_Factor","Ambient_Temp_C",
-                    "Output_Units","Energy_Intensity_kWh_per_Unit","Wastage_Severity","CO2_Emissions_kg"]
+                    "Fuel_Consumption","Compressed_Air_CFM","Voltage_Instability","Power_Factor",
+                    "Ambient_Temp_C","Output_Units","Energy_Intensity_kWh_per_Unit","CO2_Emissions_kg"]
     for c in numeric_cols:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # If Peak_Load_Flag or Idle_Flag missing, create default zeros
-    for flag in ["Peak_Load_Flag","Idle_Flag"]:
-        if flag not in df.columns:
-            df[flag] = 0
+    # Flags to numeric
+    for flag in ["Peak_Load_Flag","Idle_Flag","Wastage_Severity","Shortage_Flag"]:
+        if flag in df.columns:
+            try:
+                df[flag] = pd.to_numeric(df[flag], errors="coerce").fillna(0).astype(int)
+            except:
+                pass
 
-    # Fill missing numeric values with medians where reasonable
+    # Fill numeric NaNs with sensible defaults (median or 0)
     for c in numeric_cols:
         if c in df.columns:
             if df[c].notna().any():
@@ -339,365 +307,272 @@ with tabs[1]:
             else:
                 df[c] = df[c].fillna(0)
 
-    # -------------------------
-    # -------------------------
-    # Fix: Timestamp Cleaning
-    # -------------------------
-    if "Timestamp" not in df.columns:
-        st.error("Timestamp column missing. Cannot use date filter.")
-        st.stop()
-    
-    # Convert safely
-    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
-    
-    # Drop completely invalid timestamps
-    df = df.dropna(subset=["Timestamp"])
-    
-    if df.empty:
-        st.error("All Timestamp values are invalid. Please upload a correct dataset.")
-        st.stop()
-    
-    # Compute cleaned min/max
-    min_ts = df["Timestamp"].min()
-    max_ts = df["Timestamp"].max()
-    
-    # If still broken, force defaults
-    if pd.isna(min_ts) or pd.isna(max_ts):
-        min_ts = datetime.now() - timedelta(days=30)
-        max_ts = datetime.now()
-    
-    # -------------------------
-    # Date Range Slider (SAFE)
-    # -------------------------
-    st.markdown("### Date Filter")
-    
-    date_range = st.slider(
-        "Select date range",
-        min_value=min_ts.to_pydatetime(),
-        max_value=max_ts.to_pydatetime(),
-        value=(min_ts.to_pydatetime(), max_ts.to_pydatetime()),
-        format="YYYY-MM-DD HH:mm"
-    )
-    
-    start_dt, end_dt = date_range
-    
-    # Final filter
-    filt = df[(df["Timestamp"] >= start_dt) & (df["Timestamp"] <= end_dt)].copy()
-    
-    if filt.empty:
-        st.warning("No data in selected date range.")
+    # Basic EDA controls
+    st.markdown("### Filters & Preview")
+    left_col, right_col = st.columns([2,1])
 
+    # Date range filter: use date_input slicer (safer)
+    if "Timestamp" in df.columns:
+        min_ts = df["Timestamp"].min().date()
+        max_ts = df["Timestamp"].max().date()
+        date_range = left_col.date_input("Select date range", value=(min_ts, max_ts), min_value=min_ts, max_value=max_ts)
+        # Ensure date_range is a tuple
+        if isinstance(date_range, list) or isinstance(date_range, tuple):
+            start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+        else:
+            start_date, end_date = pd.to_datetime(date_range), pd.to_datetime(date_range)
+    else:
+        start_date, end_date = None, None
 
-    # Other filters
-    machine_ids = sorted(filt["Machine_ID"].unique().tolist()) if "Machine_ID" in filt.columns else []
-    machine_types = sorted(filt["Machine_Type"].unique().tolist()) if "Machine_Type" in filt.columns else []
-    shifts = sorted(filt["Shift"].unique().tolist()) if "Shift" in filt.columns else []
+    # Machine / Fuel / Shift filters
+    machine_list = sorted(df["Machine_ID"].dropna().unique().tolist()) if "Machine_ID" in df.columns else []
+    fuel_list = sorted(df["Fuel_Type"].dropna().unique().tolist()) if "Fuel_Type" in df.columns else []
+    shift_list = sorted(df["Shift"].dropna().unique().tolist()) if "Shift" in df.columns else []
 
-    col1, col2, col3 = st.columns([2,2,2])
-    with col1:
-        sel_machines = st.multiselect("Machine ID", machine_ids, default=machine_ids)
-    with col2:
-        sel_types = st.multiselect("Machine Type", machine_types, default=machine_types)
-    with col3:
-        sel_shifts = st.multiselect("Shift", shifts, default=shifts)
+    sel_machines = left_col.multiselect("Machine_ID", options=machine_list, default=machine_list[:10])
+    sel_fuel = left_col.multiselect("Fuel_Type", options=fuel_list, default=fuel_list)
+    sel_shift = left_col.multiselect("Shift", options=shift_list, default=shift_list)
 
+    # Preview after filtering
+    filt = df.copy()
+    if start_date is not None and end_date is not None and "Timestamp" in filt.columns:
+        filt = filt[(filt["Timestamp"] >= pd.to_datetime(start_date)) & (filt["Timestamp"] <= pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1))]
     if sel_machines:
-        filt = filt[filt["Machine_ID"].isin(sel_machines)]
-    if sel_types:
-        filt = filt[filt["Machine_Type"].isin(sel_types)]
-    if sel_shifts:
-        filt = filt[filt["Shift"].isin(sel_shifts)]
+        if "Machine_ID" in filt.columns:
+            filt = filt[filt["Machine_ID"].isin(sel_machines)]
+    if sel_fuel:
+        if "Fuel_Type" in filt.columns:
+            filt = filt[filt["Fuel_Type"].isin(sel_fuel)]
+    if sel_shift:
+        if "Shift" in filt.columns:
+            filt = filt[filt["Shift"].isin(sel_shift)]
 
-    st.markdown("#### Data preview (first 10 rows)")
-    st.dataframe(filt.head(10), use_container_width=True)
-    download_df_button(filt.head(200), "filtered_energy_preview.csv", "Download preview CSV")
+    right_col.markdown("#### Preview (first 10 rows)")
+    right_col.dataframe(filt.head(10), use_container_width=True)
+    download_df(filt.head(500), "filtered_energy_preview.csv", "Download sample preview", key="preview_download")
 
-    # -------------------------
-    # KPIs (dynamic) - show numbers now
-    # -------------------------
-    st.markdown("### KPIs (dynamic)")
+    # ---------- Dynamic KPIs ----------
+    st.markdown("### Key Metrics (Dynamic)")
     kcols = st.columns(5)
-    total_energy = float(filt["Energy_Consumption_kWh"].sum()) if "Energy_Consumption_kWh" in filt.columns else 0.0
-    avg_energy_shift = float(filt.groupby("Shift")["Energy_Consumption_kWh"].mean().mean()) if "Energy_Consumption_kWh" in filt.columns and "Shift" in filt.columns else 0.0
+
+    total_energy = filt["Energy_Consumption_kWh"].sum() if "Energy_Consumption_kWh" in filt.columns else 0
+    energy_per_unit = (filt["Energy_Intensity_kWh_per_Unit"].mean() if "Energy_Intensity_kWh_per_Unit" in filt.columns else None)
     peak_events = int(filt["Peak_Load_Flag"].sum()) if "Peak_Load_Flag" in filt.columns else 0
-    total_fuel = float(filt["Fuel_Consumption"].sum()) if "Fuel_Consumption" in filt.columns else 0.0
-    total_co2 = float(filt["CO2_Emissions_kg"].sum()) if "CO2_Emissions_kg" in filt.columns else 0.0
+    idle_hours = int(filt["Idle_Flag"].sum()) if "Idle_Flag" in filt.columns else 0
+    # crude estimated savings = sum of wastage severity * some factor (example)
+    est_savings = 0
+    if "Wastage_Severity" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
+        est_savings = (filt["Wastage_Severity"].sum() * 0.05 * filt["Energy_Consumption_kWh"].mean())  # illustrative
 
-    kcols[0].markdown(f"<div class='kpi'>Total Energy<br><div style='font-size:16px;font-weight:600'>{total_energy:,.0f} kWh</div></div>", unsafe_allow_html=True)
-    kcols[1].markdown(f"<div class='kpi'>Avg Energy / Shift<br><div style='font-size:16px;font-weight:600'>{avg_energy_shift:,.2f} kWh</div></div>", unsafe_allow_html=True)
-    kcols[2].markdown(f"<div class='kpi'>Peak Events<br><div style='font-size:16px;font-weight:600'>{peak_events}</div></div>", unsafe_allow_html=True)
-    kcols[3].markdown(f"<div class='kpi'>Fuel Usage<br><div style='font-size:16px;font-weight:600'>{total_fuel:,.1f}</div></div>", unsafe_allow_html=True)
-    kcols[4].markdown(f"<div class='kpi'>CO₂ Emissions<br><div style='font-size:16px;font-weight:600'>{total_co2:,.0f} kg</div></div>", unsafe_allow_html=True)
+    kvals = [f"{total_energy:,.0f} kWh" if total_energy else "N/A",
+             f"{energy_per_unit:.2f} kWh/unit" if energy_per_unit is not None else "N/A",
+             f"{peak_events}" if peak_events else "0",
+             f"{idle_hours}" if idle_hours else "0",
+             f"~₹{est_savings:,.0f}" if est_savings else "N/A"]
 
-    # -------------------------
-    # Charts (many, different than earlier)
-    # -------------------------
+    for kc, label, val in zip(kcols, ["Total Energy", "Avg Energy/Unit", "Peak Load Events", "Idle Hours", "Estimated Savings"], kvals):
+        kc.markdown(f"<div class='kpi'>{label}<div style='font-size:14px; font-weight:600; color:#444; margin-top:8px'>{val}</div></div>", unsafe_allow_html=True)
+
+    # ---------- Charts (a variety, not repeating previous ones) ----------
     st.markdown("### Visualizations")
 
-    # 1. Time series: total energy (aggregated by day)
+    # 1. Time series: total energy consumption per day (area)
     if "Timestamp" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        daily = filt.set_index("Timestamp").resample("D").agg({"Energy_Consumption_kWh":"sum"}).reset_index()
-        fig = px.line(daily, x="Timestamp", y="Energy_Consumption_kWh", title="Daily Total Energy Consumption")
-        st.plotly_chart(fig, use_container_width=True)
+        daily = filt.set_index("Timestamp").resample("D")["Energy_Consumption_kWh"].sum().reset_index()
+        fig_daily = px.area(daily, x="Timestamp", y="Energy_Consumption_kWh", title="Daily Energy Consumption (kWh)")
+        st.plotly_chart(fig_daily, use_container_width=True)
+    else:
+        st.info("Timestamp or Energy_Consumption_kWh missing - skipping daily time series.")
 
-    # 2. Rolling average energy per machine (line)
-    if "Timestamp" in filt.columns and "Energy_Consumption_kWh" in filt.columns and "Machine_ID" in filt.columns:
-        roll_df = filt.sort_values("Timestamp").groupby(["Machine_ID"]).apply(lambda d: d.set_index("Timestamp")["Energy_Consumption_kWh"].rolling("7D").mean().rename("rolling_7d")).reset_index()
-        fig2 = px.line(roll_df, x="Timestamp", y="rolling_7d", color="Machine_ID", title="7-day Rolling Avg Energy per Machine")
-        st.plotly_chart(fig2, use_container_width=True)
-
-    # 3. Scatter: Energy vs Output Units
-    if "Energy_Consumption_kWh" in filt.columns and "Output_Units" in filt.columns:
-        fig3 = px.scatter(filt, x="Output_Units", y="Energy_Consumption_kWh", color="Machine_Type", hover_data=["Operator_ID"], title="Energy vs Output Units")
-        st.plotly_chart(fig3, use_container_width=True)
-
-    # 4. Fuel consumption distribution by fuel type
-    if "Fuel_Consumption" in filt.columns and "Fuel_Type" in filt.columns:
-        fig4 = px.box(filt, x="Fuel_Type", y="Fuel_Consumption", title="Fuel Consumption by Fuel Type")
-        st.plotly_chart(fig4, use_container_width=True)
-
-    # 5. Heatmap: correlation among numeric features
-    num_for_corr = [c for c in numeric_cols if c in filt.columns]
-    if len(num_for_corr) >= 3:
-        corr = filt[num_for_corr].corr()
-        fig5 = go.Figure(data=go.Heatmap(z=corr.values, x=corr.columns, y=corr.columns, colorscale="Blues"))
-        fig5.update_layout(title="Correlation heatmap (numeric features)", height=500)
-        st.plotly_chart(fig5, use_container_width=True)
-
-    # 6. Bar: Peak counts by Machine_Type
-    if "Peak_Load_Flag" in filt.columns and "Machine_Type" in filt.columns:
-        peak_counts = filt[filt["Peak_Load_Flag"]==1].groupby("Machine_Type").size().reset_index(name="peak_count")
-        fig6 = px.bar(peak_counts, x="Machine_Type", y="peak_count", title="Peak Load Events by Machine Type")
-        st.plotly_chart(fig6, use_container_width=True)
-
-    # 7. Histogram - Energy intensity
-    if "Energy_Intensity_kWh_per_Unit" in filt.columns:
-        fig7 = px.histogram(filt, x="Energy_Intensity_kWh_per_Unit", nbins=40, title="Distribution: Energy Intensity (kWh per Unit)")
-        st.plotly_chart(fig7, use_container_width=True)
-
-    # 8. Time of day pattern: avg energy by hour
-    if "Timestamp" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        filt["hour"] = filt["Timestamp"].dt.hour
-        by_hour = filt.groupby("hour")["Energy_Consumption_kWh"].mean().reset_index()
-        fig8 = px.line(by_hour, x="hour", y="Energy_Consumption_kWh", title="Average Energy by Hour of Day")
-        st.plotly_chart(fig8, use_container_width=True)
-
-    # 9. Operator performance: energy intensity by operator
-    if "Operator_ID" in filt.columns and "Energy_Intensity_kWh_per_Unit" in filt.columns:
-        op_stats = filt.groupby("Operator_ID")["Energy_Intensity_kWh_per_Unit"].mean().reset_index().sort_values(by="Energy_Intensity_kWh_per_Unit")
-        fig9 = px.bar(op_stats.head(20), x="Operator_ID", y="Energy_Intensity_kWh_per_Unit", title="Operator Energy Intensity (top 20)")
-        st.plotly_chart(fig9, use_container_width=True)
-
-    # 10. Cumulative energy by machine (stacked)
-    if "Machine_ID" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        cum = filt.groupby(["Timestamp","Machine_ID"])["Energy_Consumption_kWh"].sum().reset_index()
-        cum_pivot = cum.pivot(index="Timestamp", columns="Machine_ID", values="Energy_Consumption_kWh").fillna(0)
-        cum_cum = cum_pivot.cumsum()
-        if cum_cum.shape[1] > 0:
-            fig10 = go.Figure()
-            for col in cum_cum.columns:
-                fig10.add_trace(go.Scatter(x=cum_cum.index, y=cum_cum[col], stackgroup='one', name=str(col)))
-            fig10.update_layout(title="Cumulative Energy by Machine (stacked)")
-            st.plotly_chart(fig10, use_container_width=True)
-
-    # 11. Peak vs non-peak energy box
-    if "Peak_Load_Flag" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        fig11 = px.box(filt, x="Peak_Load_Flag", y="Energy_Consumption_kWh", title="Energy: Peak vs Non-Peak")
-        st.plotly_chart(fig11, use_container_width=True)
-
-    # 12. Scatter: Cooling load vs Energy consumption
+    # 2. Heatmap: hourly average energy by machine (if timestamp present)
+    if "Timestamp" in filt.columns and "Machine_ID" in filt.columns:
+        temp = filt.copy()
+        temp["hour"] = temp["Timestamp"].dt.hour
+        heat = temp.groupby(["Machine_ID", "hour"])["Energy_Consumption_kWh"].mean().reset_index()
+        if not heat.empty:
+            heat_pivot = heat.pivot(index="Machine_ID", columns="hour", values="Energy_Consumption_kWh").fillna(0)
+            fig_heat = go.Figure(data=go.Heatmap(z=heat_pivot.values, x=heat_pivot.columns, y=heat_pivot.index,
+                                                 colorscale="Viridis"))
+            fig_heat.update_layout(title="Avg Energy by Machine (hourly)", xaxis_title="Hour of day", yaxis_title="Machine_ID")
+            st.plotly_chart(fig_heat, use_container_width=True)
+    # 3. Scatter: Cooling load vs energy with regression overlay (numpy)
     if "Cooling_Load_kWh" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        fig12 = px.scatter(filt, x="Cooling_Load_kWh", y="Energy_Consumption_kWh", trendline="ols", title="Cooling Load vs Energy")
-        st.plotly_chart(fig12, use_container_width=True)
+        fig_sc = px.scatter(filt, x="Cooling_Load_kWh", y="Energy_Consumption_kWh", hover_data=["Machine_ID"], title="Cooling Load vs Energy Consumption")
+        add_linear_regression_trace(fig_sc, filt["Cooling_Load_kWh"].values, filt["Energy_Consumption_kWh"].values, name="Lin fit", color="red")
+        st.plotly_chart(fig_sc, use_container_width=True)
 
-    # 13. Fuel vs Output scatter
-    if "Fuel_Consumption" in filt.columns and "Output_Units" in filt.columns:
-        fig13 = px.scatter(filt, x="Output_Units", y="Fuel_Consumption", color="Fuel_Type", title="Fuel Consumption vs Output Units")
-        st.plotly_chart(fig13, use_container_width=True)
-
-    # 14. Voltage Instability distribution by shift
-    if "Voltage_Instability" in filt.columns and "Shift" in filt.columns:
-        fig14 = px.violin(filt, x="Shift", y="Voltage_Instability", box=True, points="all", title="Voltage Instability by Shift")
-        st.plotly_chart(fig14, use_container_width=True)
-
-    # 15. Sankey-like simple flow: top machines -> peak events (approx using bar chart pairs)
-    if "Machine_ID" in filt.columns and "Peak_Load_Flag" in filt.columns:
-        top_machines = filt.groupby("Machine_ID")["Peak_Load_Flag"].sum().sort_values(ascending=False).head(10).reset_index()
-        fig15 = px.bar(top_machines, x="Machine_ID", y="Peak_Load_Flag", title="Top machines by peak events (top 10)")
-        st.plotly_chart(fig15, use_container_width=True)
-
-    # -------------------------
-    # Automated Insights (text + table)
-    # -------------------------
-    st.markdown("### Automated Insights (text highlights followed by table)")
-
-    # quick highlights
-    highlights = []
-    # top energy machines
-    if "Machine_ID" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        top_energy = filt.groupby("Machine_ID")["Energy_Consumption_kWh"].sum().sort_values(ascending=False).head(5)
-        highlights.append("Top energy-consuming machines: " + ", ".join([str(x) for x in top_energy.index.tolist()]))
-
-    # machines with highest wastage severity
-    if "Machine_ID" in filt.columns and "Wastage_Severity" in filt.columns:
-        top_waste = filt.groupby("Machine_ID")["Wastage_Severity"].mean().sort_values(ascending=False).head(5)
-        highlights.append("Machines with highest average wastage severity: " + ", ".join([str(x) for x in top_waste.index.tolist()]))
-
-    # shift with highest avg energy
+    # 4. Bar: Avg energy by shift
     if "Shift" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
-        shift_max = filt.groupby("Shift")["Energy_Consumption_kWh"].mean().idxmax()
-        highlights.append(f"Shift with highest avg energy: {shift_max}")
+        bar_shift = filt.groupby("Shift")["Energy_Consumption_kWh"].mean().reset_index().sort_values("Energy_Consumption_kWh", ascending=False)
+        fig_bar = px.bar(bar_shift, x="Shift", y="Energy_Consumption_kWh", title="Average Energy by Shift")
+        st.plotly_chart(fig_bar, use_container_width=True)
 
-    # display text highlights
-    for h in highlights:
-        st.markdown(f"- {h}")
+    # 5. Box: Energy distribution by Fuel_Type
+    if "Fuel_Type" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
+        fig_box = px.box(filt, x="Fuel_Type", y="Energy_Consumption_kWh", title="Energy Distribution by Fuel Type")
+        st.plotly_chart(fig_box, use_container_width=True)
 
-    # build insights table (structured)
-    insights_rows = []
-    if "Machine_ID" in filt.columns:
-        grp = filt.groupby("Machine_ID").agg(
-            total_energy=("Energy_Consumption_kWh","sum") if "Energy_Consumption_kWh" in filt.columns else ("Energy_Consumption_kWh", lambda x: 0),
-            avg_waste=("Wastage_Severity","mean") if "Wastage_Severity" in filt.columns else ("Wastage_Severity", lambda x: 0),
-            peak_events=("Peak_Load_Flag","sum") if "Peak_Load_Flag" in filt.columns else ("Peak_Load_Flag", lambda x: 0)
-        ).reset_index()
-        grp = grp.sort_values("total_energy", ascending=False).head(50)
-        for _, r in grp.iterrows():
-            insights_rows.append({
-                "Machine_ID": r["Machine_ID"],
-                "Total_Energy": round(float(r["total_energy"]),2),
-                "Avg_Wastage_Severity": round(float(r["avg_waste"]),3) if not pd.isna(r["avg_waste"]) else None,
-                "Peak_Events": int(r["peak_events"])
-            })
-    insights_df = pd.DataFrame(insights_rows)
-    if insights_df.empty:
-        st.info("No insights could be generated for filtered dataset.")
+    # 6. Scatter matrix (pairwise) for selected numeric columns (small sample)
+    numeric_for_matrix = [c for c in ["Energy_Consumption_kWh","Cooling_Load_kWh","Fuel_Consumption","Compressed_Air_CFM","Ambient_Temp_C"] if c in filt.columns]
+    if len(numeric_for_matrix) >= 2:
+        sample_df = filt[numeric_for_matrix].sample(n=min(500, len(filt)), random_state=42)
+        fig_mat = px.scatter_matrix(sample_df, dimensions=numeric_for_matrix, title="Pairwise relationships (sample)")
+        st.plotly_chart(fig_mat, use_container_width=True)
+
+    # 7. Sankey-ish: Energy distribution across Machine_Type -> Fuel_Type (aggregate)
+    if "Machine_Type" in filt.columns and "Fuel_Type" in filt.columns and "Energy_Consumption_kWh" in filt.columns:
+        agg = filt.groupby(["Machine_Type","Fuel_Type"])["Energy_Consumption_kWh"].sum().reset_index()
+        # construct simple sankey-like using treemap
+        fig_tree = px.treemap(agg, path=["Machine_Type","Fuel_Type"], values="Energy_Consumption_kWh", title="Energy by Machine Type and Fuel")
+        st.plotly_chart(fig_tree, use_container_width=True)
+
+    # Additional charts can be added similarly (histograms, cumulative area, etc.)
+
+    # ---------- ML Concepts (choose 4) ----------
+    st.markdown("### Machine Learning & Modeling")
+    st.markdown("We demonstrate 4 techniques: 1) RandomForest Regression (predict energy), 2) GradientBoosting Regression (predict), 3) IsolationForest (anomaly detection), 4) KMeans (operational clustering).")
+
+    # Shared setup: features selection
+    model_features = [c for c in ["Cooling_Load_kWh","Compressed_Air_CFM","Fuel_Consumption","Ambient_Temp_C","Output_Units","Energy_Intensity_kWh_per_Unit"] if c in filt.columns]
+    # If Output_Units missing, energy intensity may be present; allow flexible features
+    st.write(f"Using features: {model_features if model_features else 'No numeric model features found'}")
+
+    # Minimum rows guard
+    if len(filt) < 40 or len(model_features) < 1 or "Energy_Consumption_kWh" not in filt.columns:
+        st.info("Not enough data or not enough features for ML. Need >=40 rows, at least 1 numeric feature and target Energy_Consumption_kWh.")
     else:
-        st.dataframe(insights_df.head(200), use_container_width=True)
-        download_df_button(insights_df, "automated_insights_energy.csv", "Download insights")
+        X = filt[model_features].fillna(0)
+        y = filt["Energy_Consumption_kWh"].fillna(0)
 
-    # -------------------------
-    # Anomaly Detection (IsolationForest)
-    # -------------------------
-    st.markdown("### Unsupervised Anomaly Detection (IsolationForest)")
-    iso_features = [c for c in ["Energy_Consumption_kWh","Fuel_Consumption","Energy_Intensity_kWh_per_Unit","Cooling_Load_kWh","Voltage_Instability"] if c in filt.columns]
-    anomalies_df = pd.DataFrame()
-    if len(iso_features) >= 2 and len(filt) >= 30:
-        X_iso = filt[iso_features].fillna(0)
+        # Split train/test
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        # scale for some models
+        scaler = StandardScaler()
+        X_train_s = scaler.fit_transform(X_train)
+        X_test_s = scaler.transform(X_test)
+
+        # 1) RandomForestRegressor
+        rf = RandomForestRegressor(n_estimators=150, random_state=42)
+        with st.spinner("Training RandomForest..."):
+            rf.fit(X_train, y_train)
+        preds_rf = rf.predict(X_test)
+        rmse_rf = math.sqrt(mean_squared_error(y_test, preds_rf))
+        r2_rf = r2_score(y_test, preds_rf)
+        st.markdown(f"**RandomForest** — RMSE: {rmse_rf:.2f} | R²: {r2_rf:.3f}")
+
+        # 2) GradientBoostingRegressor
+        gbr = GradientBoostingRegressor(n_estimators=150, learning_rate=0.1, random_state=42)
+        with st.spinner("Training GradientBoosting..."):
+            gbr.fit(X_train, y_train)
+        preds_gbr = gbr.predict(X_test)
+        rmse_gbr = math.sqrt(mean_squared_error(y_test, preds_gbr))
+        r2_gbr = r2_score(y_test, preds_gbr)
+        st.markdown(f"**GradientBoosting** — RMSE: {rmse_gbr:.2f} | R²: {r2_gbr:.3f}")
+
+        # 3) IsolationForest for anomaly scoring (unsupervised)
+        iso_features = X.fillna(0)
         iso = IsolationForest(contamination=0.02, random_state=42)
-        filt["_iso_pred"] = iso.fit_predict(X_iso)
-        filt["_iso_score"] = iso.decision_function(X_iso)
-        anomalies_df = filt[filt["_iso_pred"] == -1].sort_values("_iso_score").copy()
-        st.markdown(f"Detected anomalies: {len(anomalies_df)}")
-        if not anomalies_df.empty:
-            st.dataframe(anomalies_df.head(200), use_container_width=True)
-            download_df_button(anomalies_df, "anomalies_energy.csv", "Download anomalies")
-    else:
-        st.info("Insufficient data/features for anomaly detection (need >=2 iso features and >=30 rows).")
+        with st.spinner("Fitting IsolationForest for anomalies..."):
+            iso.fit(iso_features)
+        iso_scores = iso.decision_function(iso_features)
+        iso_preds = iso.predict(iso_features)  # -1 anomaly, 1 normal
+        filt["_anomaly_score"] = iso_scores
+        filt["_is_anomaly"] = np.where(iso_preds == -1, 1, 0)
+        st.markdown(f"**Anomalies detected (isolation forest):** {int(filt['_is_anomaly'].sum())}")
 
-    # -------------------------
-    # Supervised ML models (3) - trains when enough data exists
-    # -------------------------
-    st.markdown("### ML Models & Predictions")
-
-    # Helper to train and return results
-    def train_regression(X, y, name="reg"):
-        results = {}
+        # 4) KMeans clustering to identify operational modes
         try:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            model = RandomForestRegressor(n_estimators=150, random_state=42)
-            model.fit(X_train, y_train)
-            preds = model.predict(X_test)
-            rmse = math.sqrt(mean_squared_error(y_test, preds))
-            r2 = r2_score(y_test, preds)
-            results.update({"model": model, "X_test_idx": X_test.index if hasattr(X_test, 'index') else None,
-                            "y_test": y_test, "preds": preds, "rmse": rmse, "r2": r2})
+            kmeans_feats = X.fillna(0)
+            kmeans = KMeans(n_clusters=min(4, max(2, int(len(kmeans_feats)/50))), random_state=42)
+            kmeans_labels = kmeans.fit_predict(kmeans_feats)
+            filt["_kmeans_cluster"] = kmeans_labels
+            st.markdown("**KMeans clustering** applied — clusters added to dataset as _kmeans_cluster.")
+            # Visualize clusters on first two PCA components
+            pca = PCA(n_components=2)
+            comp = pca.fit_transform(scaler.fit_transform(kmeans_feats))
+            pcadf = pd.DataFrame(comp, columns=["PC1","PC2"])
+            pcadf["_cluster"] = kmeans_labels
+            fig_pca = px.scatter(pcadf, x="PC1", y="PC2", color="_cluster", title="KMeans clusters (PCA projection)")
+            st.plotly_chart(fig_pca, use_container_width=True)
         except Exception as e:
-            results.update({"error": str(e)})
-        return results
+            st.info("KMeans step failed: " + str(e))
 
-    def train_classifier(X, y, name="clf"):
-        results = {}
-        try:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y if len(np.unique(y))>1 else None)
-            model = RandomForestClassifier(n_estimators=150, random_state=42)
-            model.fit(X_train, y_train)
-            probs = model.predict_proba(X_test)[:,1] if hasattr(model, "predict_proba") else model.predict(X_test)
-            preds_label = model.predict(X_test)
-            acc = accuracy_score(y_test, preds_label)
-            try:
-                auc = roc_auc_score(y_test, probs)
-            except:
-                auc = None
-            results.update({"model": model, "X_test_idx": X_test.index if hasattr(X_test, 'index') else None,
-                            "y_test": y_test, "probs": probs, "preds_label": preds_label, "acc": acc, "auc": auc})
-        except Exception as e:
-            results.update({"error": str(e)})
-        return results
+        # ---------- Prepare downloadable ML predictions (actual vs predicted + features) ----------
+        out_rf = X_test.copy().reset_index(drop=True)
+        out_rf["Actual_Energy_kWh"] = y_test.reset_index(drop=True)
+        out_rf["Pred_RF_kWh"] = preds_rf
+        out_rf["Pred_GBR_kWh"] = preds_gbr
+        st.markdown("#### ML Predictions (sample)")
+        st.dataframe(out_rf.head(20))
+        download_df(out_rf, "energy_predictions_with_features.csv", "Download predictions (RF+GBR)")
 
-    # Model A: Energy consumption prediction (regression)
-    st.markdown("**Model A — Energy Consumption Prediction (regression)**")
-    features_A = [c for c in ["Baseload_Drift_kWh","Cooling_Load_kWh","Power_Factor","Ambient_Temp_C","Output_Units","Compressed_Air_CFM"] if c in filt.columns]
-    if "Energy_Consumption_kWh" in filt.columns and len(filt) >= 60 and len(features_A) >= 2:
-        X_A = filt[features_A].fillna(0)
-        y_A = filt["Energy_Consumption_kWh"].fillna(0)
-        res_A = train_regression(X_A, y_A, name="energy_reg")
-        if "error" in res_A:
-            st.error("Energy model error: " + res_A["error"])
-        else:
-            st.write(f"RMSE: {res_A['rmse']:.2f}, R²: {res_A['r2']:.3f}")
-            # Build downloadable results: actual vs predicted + features
-            Xtest = X_A.loc[res_A['X_test_idx']].reset_index(drop=True)
-            outA = Xtest.copy()
-            outA["Actual_Energy"] = res_A["y_test"].reset_index(drop=True)
-            outA["Predicted_Energy"] = res_A["preds"]
-            st.dataframe(outA.head(12))
-            download_df_button(outA, "energy_predictions.csv", "Download energy predictions")
+    # ---------- Automated Insights ----------
+    st.markdown("### Automated Insights")
+    insights = []
+
+    # Top machines by avg energy intensity
+    if "Machine_ID" in filt.columns and "Energy_Intensity_kWh_per_Unit" in filt.columns:
+        tmp = filt.groupby("Machine_ID")["Energy_Intensity_kWh_per_Unit"].mean().reset_index().sort_values(by="Energy_Intensity_kWh_per_Unit", ascending=False).head(10)
+        for _, r in tmp.iterrows():
+            insights.append({
+                "Insight_Type": "High Energy Intensity",
+                "Machine_ID": r["Machine_ID"],
+                "Energy_Intensity_kWh_per_Unit": round(float(r["Energy_Intensity_kWh_per_Unit"]), 3)
+            })
+
+    # Machines with most anomalies
+    if "_is_anomaly" in filt.columns and "Machine_ID" in filt.columns:
+        anom_counts = filt.groupby("Machine_ID")["_is_anomaly"].sum().reset_index().rename(columns={"_is_anomaly":"anomaly_count"})
+        anom_counts = anom_counts.sort_values("anomaly_count", ascending=False).head(10)
+        for _, r in anom_counts.iterrows():
+            if int(r["anomaly_count"]) > 0:
+                insights.append({
+                    "Insight_Type": "Anomaly Count",
+                    "Machine_ID": r["Machine_ID"],
+                    "Anomaly_Count": int(r["anomaly_count"])
+                })
+
+    # Peak load summary (per machine)
+    if "Peak_Load_Flag" in filt.columns and "Machine_ID" in filt.columns:
+        peaks = filt.groupby("Machine_ID")["Peak_Load_Flag"].sum().reset_index().sort_values(by="Peak_Load_Flag", ascending=False).head(10)
+        for _, r in peaks.iterrows():
+            if int(r["Peak_Load_Flag"]) > 0:
+                insights.append({
+                    "Insight_Type":"Peak Load Events",
+                    "Machine_ID": r["Machine_ID"],
+                    "Peak_Events": int(r["Peak_Load_Flag"])
+                })
+
+    # CO2 summary: top emitters
+    if "CO2_Emissions_kg" in filt.columns and "Machine_ID" in filt.columns:
+        co2 = filt.groupby("Machine_ID")["CO2_Emissions_kg"].sum().reset_index().sort_values(by="CO2_Emissions_kg", ascending=False).head(10)
+        for _, r in co2.iterrows():
+            insights.append({
+                "Insight_Type":"CO2 Emissions",
+                "Machine_ID": r["Machine_ID"],
+                "Total_CO2_kg": round(float(r["CO2_Emissions_kg"]),2)
+            })
+
+    # Add simple text insights (left aligned card)
+    st.markdown("<div class='card left-align'><b>Quick Observations</b><ul class='small'>", unsafe_allow_html=True)
+    # compute some quick bullets
+    avg_energy = round(float(filt["Energy_Consumption_kWh"].mean()),2) if "Energy_Consumption_kWh" in filt.columns else None
+    avg_pf = round(float(filt["Power_Factor"].mean()),2) if "Power_Factor" in filt.columns else None
+    if avg_energy:
+        st.markdown(f"<li class='small'>Average energy consumption in filtered range: <b>{avg_energy} kWh</b></li>", unsafe_allow_html=True)
+    if avg_pf:
+        st.markdown(f"<li class='small'>Average power factor: <b>{avg_pf}</b> (consider PF correction where low)</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
+
+    # Prepare automated insights DataFrame and download
+    if insights:
+        ins_df = pd.DataFrame(insights)
+        st.markdown("#### Insights Table")
+        st.dataframe(ins_df, use_container_width=True)
+        download_df(ins_df, "automated_insights_energy.csv", "Download insights")
     else:
-        st.info("Not enough data/features for Energy prediction (need >=60 rows and >=2 features).")
+        st.info("No automated insights generated for the current filters.")
 
-    # Model B: Peak load classification
-    st.markdown("**Model B — Peak Load Classification**")
-    features_B = [c for c in ["Energy_Consumption_kWh","Cooling_Load_kWh","Voltage_Instability","Power_Factor","Ambient_Temp_C"] if c in filt.columns]
-    if "Peak_Load_Flag" in filt.columns and len(filt) >= 80 and len(features_B) >= 2:
-        X_B = filt[features_B].fillna(0)
-        y_B = filt["Peak_Load_Flag"].astype(int).fillna(0)
-        res_B = train_classifier(X_B, y_B, name="peak_clf")
-        if "error" in res_B:
-            st.error("Peak classification error: " + res_B["error"])
-        else:
-            st.write(f"Accuracy: {res_B['acc']:.3f}" + (f", ROC AUC: {res_B['auc']:.3f}" if res_B['auc'] is not None else ""))
-            XtestB = X_B.loc[res_B['X_test_idx']].reset_index(drop=True)
-            outB = XtestB.copy()
-            outB["Actual_Peak"] = res_B["y_test"].reset_index(drop=True)
-            outB["Predicted_Prob_Peak"] = res_B["probs"]
-            outB["Predicted_Label"] = res_B["preds_label"]
-            st.dataframe(outB.head(12))
-            download_df_button(outB, "peak_predictions.csv", "Download peak predictions")
-    else:
-        st.info("Not enough data/features for Peak classification (need >=80 rows and >=2 features).")
-
-    # Model C: Fuel consumption prediction (regression)
-    st.markdown("**Model C — Fuel Consumption Prediction (regression)**")
-    features_C = [c for c in ["Energy_Consumption_kWh","Output_Units","Ambient_Temp_C","Compressed_Air_CFM"] if c in filt.columns]
-    if "Fuel_Consumption" in filt.columns and len(filt) >= 60 and len(features_C) >= 2:
-        X_C = filt[features_C].fillna(0)
-        y_C = filt["Fuel_Consumption"].fillna(0)
-        res_C = train_regression(X_C, y_C, name="fuel_reg")
-        if "error" in res_C:
-            st.error("Fuel model error: " + res_C["error"])
-        else:
-            st.write(f"RMSE: {res_C['rmse']:.3f}, R²: {res_C['r2']:.3f}")
-            XtestC = X_C.loc[res_C['X_test_idx']].reset_index(drop=True)
-            outC = XtestC.copy()
-            outC["Actual_Fuel"] = res_C["y_test"].reset_index(drop=True)
-            outC["Predicted_Fuel"] = res_C["preds"]
-            st.dataframe(outC.head(12))
-            download_df_button(outC, "fuel_predictions.csv", "Download fuel predictions")
-    else:
-        st.info("Not enough data/features for Fuel prediction (need >=60 rows and >=2 features).")
-
-    # -------------------------
-    # Final notes & export
-    # -------------------------
-    st.markdown("### Done — export any prediction or insights CSVs above. Act on the top machines or shifts with high wastage severity first.")
-    st.markdown("<div class='small'>Tip: Hook this to your scheduler or maintenance ticketing to auto-create tasks for top-risk machines.</div>", unsafe_allow_html=True)
+    # Final note
+    st.markdown("<div class='card left-align'>Done — download predictions, insights, or filtered data. Use clusters and anomaly lists to prioritize maintenance and scheduling changes.</div>", unsafe_allow_html=True)
