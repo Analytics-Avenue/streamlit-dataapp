@@ -188,7 +188,7 @@ with tabs[1]:
 
     # ----------- DEFAULT DATASET -----------
     if mode == "Default dataset (GitHub URL)":
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/inventory_dataset.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/inventory_data.csv"
 
         try:
             df = read_csv_safe(DEFAULT_URL)
