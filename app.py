@@ -152,6 +152,7 @@ sectors = {
         {"name":"EduTech Gen-AI Assistant","page":"https://edutech-sw63app8ga27wxw4wghza3.streamlit.app/"},
         {"name":"Sentiment & Tone Analyzer","page":"https://sentimentandtoneanalyzer-master-3lymcywxgkv5ecwfzyxayc.streamlit.app/"},
         {"name":"Multimodal RAG Demo","page":"https://multimodalrag-master-qlv3gx8ntcfradnltky7qj.streamlit.app/"},
+        {"name": "PII Redaction Solution", "page":"https://gen-ai-pii-redaction-solution-master-7nfq4qhzbrk6pxdmmzdxmn.streamlit.app/"},
     ],
 }
 
@@ -329,6 +330,9 @@ else:
 
             {"overview": "Search, retrieve, and reason across text, images, and documents using multimodal RAG pipelines.",
              "tools": ["Python","RAG","Vector DB","Multimodal Embeddings"]},
+
+            {"overview": "Automatically redact personally identifiable information (PII) from documents using AI-powered detection.",
+     "tools": ["Python", "NLP", "Transformers", "Regex", "LLMs"]},
         ]
     }
 
