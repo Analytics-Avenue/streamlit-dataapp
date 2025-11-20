@@ -340,19 +340,53 @@ with tabs[1]:
                 df[c] = df[c].fillna(0)
 
     # -------------------------
-    # Date-range slider (slicer)
     # -------------------------
-    st.markdown("### Filters")
+    # Fix: Timestamp Cleaning
+    # -------------------------
+    if "Timestamp" not in df.columns:
+        st.error("Timestamp column missing. Cannot use date filter.")
+        st.stop()
+    
+    # Convert safely
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+    
+    # Drop completely invalid timestamps
+    df = df.dropna(subset=["Timestamp"])
+    
+    if df.empty:
+        st.error("All Timestamp values are invalid. Please upload a correct dataset.")
+        st.stop()
+    
+    # Compute cleaned min/max
     min_ts = df["Timestamp"].min()
     max_ts = df["Timestamp"].max()
+    
+    # If still broken, force defaults
     if pd.isna(min_ts) or pd.isna(max_ts):
-        st.warning("Timestamps not found or all invalid. Showing full dataset.")
         min_ts = datetime.now() - timedelta(days=30)
         max_ts = datetime.now()
-
-    date_range = st.slider("Select date range", value=(min_ts, max_ts), min_value=min_ts, max_value=max_ts, format="YYYY-MM-DD HH:mm")
+    
+    # -------------------------
+    # Date Range Slider (SAFE)
+    # -------------------------
+    st.markdown("### Date Filter")
+    
+    date_range = st.slider(
+        "Select date range",
+        min_value=min_ts.to_pydatetime(),
+        max_value=max_ts.to_pydatetime(),
+        value=(min_ts.to_pydatetime(), max_ts.to_pydatetime()),
+        format="YYYY-MM-DD HH:mm"
+    )
+    
     start_dt, end_dt = date_range
-    filt = df[(df["Timestamp"] >= pd.to_datetime(start_dt)) & (df["Timestamp"] <= pd.to_datetime(end_dt))].copy()
+    
+    # Final filter
+    filt = df[(df["Timestamp"] >= start_dt) & (df["Timestamp"] <= end_dt)].copy()
+    
+    if filt.empty:
+        st.warning("No data in selected date range.")
+
 
     # Other filters
     machine_ids = sorted(filt["Machine_ID"].unique().tolist()) if "Machine_ID" in filt.columns else []
