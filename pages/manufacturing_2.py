@@ -55,6 +55,10 @@ st.markdown("""
 # ------------------------------
 # Header
 # ------------------------------
+# Header + Title
+# ------------------------------
+st.markdown("<h1 style='text-align:center; color:#064b86; font-size:42px; font-weight:bold;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
+# ------------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
 <div style="display:flex; align-items:center;">
