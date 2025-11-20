@@ -233,10 +233,7 @@ with tabs[1]:
     ]
 
     # Adjust this to your actual file path
-    DEFAULT_URL = (
-        "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/"
-        "main/datasets/manufacturing/inventory_data.csv"
-    )
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/inventory_data.csv"
 
     # ---------------------- DEFAULT DATASET ----------------------
     if mode == "Default dataset (GitHub URL)":
