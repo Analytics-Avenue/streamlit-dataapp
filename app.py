@@ -161,7 +161,7 @@ thumb_urls = {
     "Real Estate Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/real_estate_thumb.jpeg",
     "Health Care Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/healthcare_thumb.jpeg",
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
-    "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
+    "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
 # -------------------------
