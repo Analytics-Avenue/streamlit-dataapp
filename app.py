@@ -146,6 +146,7 @@ sectors = {
         {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
         {"name":"Order-to-Delivery Analytics","page":"manufacturing_2.py"},
         {"name":"Inventory Pileup & Shortage Analytics","page":"manufacturing_3.py"},
+        {"name":"Energy, Fuel & Resource Wastage Analytics","page":"manufacturing_4.py"},
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
@@ -320,6 +321,10 @@ else:
             and improve on-time delivery. Use predictive lead-time models and production cycle analysis 
             to streamline order fulfillment and boost customer satisfaction.""",
             "tools": ["Python","SQL","Power BI","Machine Learning Regression Models","Process Mining","Excel","Lead-Time Forecasting"]},
+        {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
+            and avoid excess inventory buildup. Use forecasting, safety-stock analytics, and 
+            shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
+            "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]},
         {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
             and avoid excess inventory buildup. Use forecasting, safety-stock analytics, and 
             shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
