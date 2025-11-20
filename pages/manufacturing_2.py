@@ -9,15 +9,17 @@ from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.filterwarnings("ignore")
 
-# ------------------------------
+# ---------------------------------------------------------
 # Page Config
-# ------------------------------
+# ---------------------------------------------------------
 st.set_page_config(page_title="Order-to-Delivery Analytics", layout="wide")
+
+# Hide sidebar
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
-# ------------------------------
-# Card & KPI Glow CSS
-# ------------------------------
+# ---------------------------------------------------------
+# Card Glow CSS
+# ---------------------------------------------------------
 st.markdown("""
 <style>
 .card {
@@ -27,7 +29,6 @@ st.markdown("""
     border: 1px solid #d9d9d9;
     transition: 0.3s;
     box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-    text-align:left;
 }
 .card:hover {
     transform: translateY(-5px);
@@ -35,11 +36,11 @@ st.markdown("""
     border-color: #064b86;
 }
 .kpi {
-    padding: 25px;
+    padding: 30px;
     border-radius: 14px;
     background: white;
     border: 1px solid #ccc;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: bold;
     color: #064b86;
     text-align: center;
@@ -49,25 +50,29 @@ st.markdown("""
     transform: translateY(-4px);
     box-shadow: 0px 4px 15px rgba(6,75,134,0.30);
 }
+.small { font-size:13px; color:#666; }
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------------------
-# ------------------------------
-# Header + Title
-# ------------------------------
-st.markdown("<h1 style='text-align:center; color:#064b86; font-size:42px; font-weight:bold;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
-
+# ---------------------------------------------------------
+# Header + Logo (same style as predictive maintenance app)
+# ---------------------------------------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+
 st.markdown(f"""
-<div style="display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+<div style="display:flex; align-items:center;">
     <img src="{logo_url}" width="60" style="margin-right:10px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:28px; font-weight:bold;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:28px; font-weight:bold;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:34px; font-weight:bold;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:34px; font-weight:bold;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Main App Title
+# ---------------------------------------------------------
+st.markdown("<h1 style='text-align:center; color:#064b86; font-size:40px; font-weight:bold; margin-bottom:20px;'>Order-to-Delivery Analytics Dashboard</h1>", unsafe_allow_html=True)
 
 
 # ------------------------------
