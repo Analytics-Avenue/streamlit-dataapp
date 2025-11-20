@@ -91,10 +91,10 @@ Support investment decisions using rental yield and accurate price prediction an
 Use forecasting, classification, and EMR/EHR data to optimize hospital operations.
 Boost care quality with real-time monitoring and clinical performance analytics.""",
  
-    "Manufacturing Analytics": """Improve patient flow, predict OPD/ER volumes, enhance doctor allocation, and reduce waiting times.
-Use forecasting, classification, and EMR/EHR data to optimize hospital operations.
-Boost care quality with real-time monitoring and clinical performance analytics.""",
-
+    "Manufacturing Analytics": """Optimize production lines, reduce machine downtime, and streamline factory operations with data-driven insights. 
+Use predictive models, IoT sensor data, and advanced planning analytics to enhance throughput, cut delays, and improve supply chain stability. Transform raw manufacturing data into actionable intelligence for 
+efficiency, quality improvement, and cost savings.""", 
+    
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
 }
@@ -106,8 +106,8 @@ sector_tools = {
                               "Regression Models","Time Series","Clustering","Price Prediction","Rental Yield Models"],
     "Health Care Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
                               "Classification Models","NLP","Patient Flow Forecasting"],
-    "Manufacturing Analytics": ["Python","R","SQL","Excel","Power BI","Tableau","EMR/EHR Data","Time Series Forecasting",
-                              "Classification Models","NLP","Patient Flow Forecasting"],
+    "Manufacturing Analytics": ["Python","SQL","Excel","Power BI","Tableau","Machine Sensor/IoT Data","Predictive Maintenance Models",
+                                "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
@@ -311,13 +311,21 @@ else:
              "tools": ["Python","SQL","NLP","Patient Flow Forecasting"]},
         ],
         "Manufacturing Analytics": [
-        {"overview": "Analyze patient visit data to optimize hospital operations and improve patient flow.",
-         "tools": ["Python","SQL","Power BI","Time Series Forecasting"]},
-        {"overview": "Predict patient volume, assess hospital performance metrics, and reduce wait times effectively.",
-         "tools": ["R","Python","Tableau","Forecasting Models"]},
-        {"overview": "Visualize patient journey, resource utilization, and treatment pathways to improve efficiency.",
-         "tools": ["Python","Power BI","EMR/EHR Data","Excel"]},
-         ],
+            {"overview": """Monitor machine health, detect anomalies, and prevent unexpected breakdowns using IoT sensor data.
+            Analyze vibration, temperature, RPM, and load patterns to predict failures before they disrupt production.
+            Improve maintenance planning and extend machine lifespan with predictive analytics.""",
+            "tools": ["Python",
+                "SQL","IoT / Sensor Data","Random Forest / Classification Models","Power BI","Tableau","Time Series Diagnostics"]},
+            {"overview": """Analyze order flow from scheduling to dispatch to identify bottlenecks, reduce lead times, 
+            and improve on-time delivery. Use predictive lead-time models and production cycle analysis 
+            to streamline order fulfillment and boost customer satisfaction.""",
+            "tools": ["Python","SQL","Power BI","Machine Learning Regression Models","Process Mining","Excel","Lead-Time Forecasting"]},
+        {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
+            and avoid excess inventory buildup. Use forecasting, safety-stock analytics, and 
+            shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
+            "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]}
+            ],        
+        
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
