@@ -144,7 +144,7 @@ sectors = {
     ],
     "Manufacturing Analytics": [
         {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
-        {"name":"Patient Visit Analytics & Hospital Performance","page":"manufacturing_2.py"},
+        {"name":"Order-to-Delivery Analytics","page":"manufacturing_2.py"},
         {"name":"PatientFlow Navigator","page":"manufacturing_3.py"},
     ],
     "Gen AI": [
