@@ -145,7 +145,7 @@ sectors = {
     "Manufacturing Analytics": [
         {"name":"Production Downtime & Predictive Maintenance","page":"manufacturing_1.py"},
         {"name":"Order-to-Delivery Analytics","page":"manufacturing_2.py"},
-        {"name":"PatientFlow Navigator","page":"manufacturing_3.py"},
+        {"name":"Inventory Pileup & Shortage Analytics","page":"manufacturing_3.py"},
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
