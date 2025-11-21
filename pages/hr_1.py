@@ -45,16 +45,21 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header area: logo + left aligned title + subtitle
-LOGO_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-col_logo, col_title = st.columns([1, 8], gap="small")
-with col_logo:
-    st.image(LOGO_URL, width=64)
-with col_title:
-    st.markdown('<div class="container-left"><div><h1 class="app-title">Hiring Funnel Drop-Off Analysis</h1>'
-                '<div class="app-sub">Track apply → screen → interview → offer → join funnel, find conversion bottlenecks, and improve hiring velocity.</div>'
-                '</div></div>', unsafe_allow_html=True)
 
+# Logo + title
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(
+    f"""
+<div style="display:flex;align-items:center;">
+  <img src="{logo_url}" width="60" style="margin-right:10px;">
+  <div style="line-height:1;">
+    <div style="color:#064b86;font-size:28px;font-weight:bold;margin:0;padding:0;">Analytics Avenue &</div>
+    <div style="color:#064b86;font-size:28px;font-weight:bold;margin:0;padding:0;">Advanced Analytics</div>
+  </div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 # -------------------------
 # Utility functions
 # -------------------------
