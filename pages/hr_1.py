@@ -60,6 +60,10 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+st.title("Hiring Funnel Drop-Off Analysis")
+
+
 # -------------------------
 # Utility functions
 # -------------------------
