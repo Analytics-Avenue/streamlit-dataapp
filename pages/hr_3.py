@@ -518,7 +518,7 @@ with tabs[1]:
     except Exception as e:
         st.info("Classifier error: " + str(e))
 
-    # Regression: predict Performance_Score at employee level
+    # ---------------------- Regression — Predict Performance_Score ----------------------
     st.markdown("#### Regression — Predict Performance_Score (RandomForestRegressor)")
     try:
         if "Performance_Score" in filt.columns:
@@ -533,22 +533,30 @@ with tabs[1]:
                 Performance_Score=("Performance_Score","mean")
             ).reset_index()
             emp_feats = emp_feats.fillna(0)
+    
             # remove rows without target
             emp_feats = emp_feats[~emp_feats["Performance_Score"].isna()]
             if len(emp_feats) >= 10:
                 reg_features = ["Avg_Current_Level","Avg_Required_Level","Avg_Gap","Training_Count","Annual_Salary","Tenure_Years"]
                 Xr = emp_feats[reg_features]
                 yr = emp_feats["Performance_Score"]
-                Xtr,Xte,ytr,yte = train_test_split(Xr, yr, test_size=0.2, random_state=42)
+                Xtr, Xte, ytr, yte = train_test_split(Xr, yr, test_size=0.2, random_state=42)
+    
                 rfr = RandomForestRegressor(n_estimators=150, random_state=42)
                 rfr.fit(Xtr, ytr)
                 preds_r = rfr.predict(Xte)
-                st.write(f"Regression RMSE: {mean_squared_error(yte,preds_r,squared=False):.3f}, R2: {r2_score(yte,preds_r):.3f}")
+    
+                # compute RMSE and R2 without using the 'squared' kwarg
+                rmse = float(np.sqrt(mean_squared_error(yte, preds_r)))
+                r2 = float(r2_score(yte, preds_r))
+                st.write(f"Regression — RMSE: {rmse:.3f}, R²: {r2:.3f}")
+    
                 out_reg = Xte.reset_index(drop=True).copy()
                 out_reg["Actual_Perf"] = yte.reset_index(drop=True)
                 out_reg["Pred_Perf"] = preds_r
                 st.dataframe(out_reg.head(10))
                 download_df(out_reg, "regression_predictions.csv", "Download regression predictions")
+    
                 # feature importances
                 fi_r = pd.DataFrame({"feature": reg_features, "importance": rfr.feature_importances_}).sort_values("importance", ascending=False)
                 st.dataframe(fi_r)
@@ -558,6 +566,7 @@ with tabs[1]:
             st.info("Performance_Score not found — cannot run regression.")
     except Exception as e:
         st.info("Regression error: " + str(e))
+
 
     # -------------------------
     # Automated Insights generation
