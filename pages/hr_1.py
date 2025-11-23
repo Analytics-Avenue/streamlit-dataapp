@@ -783,9 +783,10 @@ with tabs[1]:
     
     cat_pipeline = Pipeline([
         ("impute", SimpleImputer(strategy="constant", fill_value="__missing__")),
-        ("ohe", OneHotEncoder(handle_unknown="ignore", sparse=False))
+        ("ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
     ])
-    
+
+   
     preprocessor = ColumnTransformer([
         ("num", num_pipeline, num_cols),
         ("cat", cat_pipeline, cat_cols)
