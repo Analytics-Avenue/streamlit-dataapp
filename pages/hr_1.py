@@ -834,8 +834,19 @@ with tabs[1]:
     
     # ---------- split train/test ----------
     test_size = st.slider("Test size (fraction)", min_value=0.1, max_value=0.4, value=0.2, step=0.05, key="test_size_slider")
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42, stratify=y if y.nunique()>1 else None)
+    # Fix: disable stratify if data has < 2 classes OR class counts < 2 per class
+    if y.nunique() < 2 or y.value_counts().min() < 2:
+        stratify_option = None
+    else:
+        stratify_option = y
     
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        random_state=42,
+        stratify=stratify_option
+    )
+
     st.write(f"Training on {len(X_train)} rows, testing on {len(X_test)} rows.")
     
     # ---------- build preprocessing pipeline ----------
