@@ -21,6 +21,28 @@ st.set_page_config(page_title="Absenteeism Prediction & Workforce Planning", lay
 
 # Hide default Streamlit nav + force left aligned title
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 
 st.markdown("""
 <style>
@@ -96,7 +118,6 @@ def read_csv_safe(url_or_file):
 st.markdown('<div style="display:flex; align-items:center; justify-content:space-between;">'
             '<div><h1 class="title-left">Absenteeism Prediction & Workforce Planning</h1>'
             '<div class="subtitle-left">Forecast absenteeism, optimize workforce allocation, and reduce overtime costs.</div></div>'
-            '<div style="text-align:right;"><img src="https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png" width=72></div>'
             '</div>', unsafe_allow_html=True)
 
 # ---------------------------
@@ -538,5 +559,3 @@ with tabs[1]:
     else:
         st.dataframe(ins_df, use_container_width=True)
         download_df(pd.DataFrame(insights), "automated_insights_absenteeism.csv", label="Download automated insights")
-
-    st.markdown("### Done — export insights or predictions and go fix the rota before Monday ghosts you again.")
