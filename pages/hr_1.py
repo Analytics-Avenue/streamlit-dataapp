@@ -250,6 +250,125 @@ with tabs[1]:
         try:
             df = read_csv_safe(DEFAULT_URL)
             df = canonicalize_columns(df, EXPECTED_COLS)
+
+            # ---------------------
+            # Defensive auto-mapping & fallbacks (paste right after canonicalize_columns)
+            # ---------------------
+            st.markdown("### Data diagnostics & defensive fixes")
+            st.write("Columns detected:", list(df.columns))
+            
+            # Helpful preview
+            st.dataframe(df.head(6))
+            
+            # 1) common alternative name mapping (extendable)
+            alt_map = {
+                # date-like
+                "Apply Date": "Apply_Date", "Application Date": "Apply_Date", "applied_on": "Apply_Date",
+                "applied_at": "Apply_Date", "created_at": "Apply_Date", "application_date": "Apply_Date",
+                # applicant id
+                "id": "Applicant_ID", "applicantid": "Applicant_ID", "applicant id": "Applicant_ID",
+                # current stage
+                "status": "Current_Stage", "current_status": "Current_Stage", "stage": "Current_Stage",
+                # time to hire
+                "time_to_hire_days": "Total_Time_to_Hire_Days", "time_to_hire": "Total_Time_to_Hire_Days",
+                # offer flag
+                "offer_accepted": "Offer_Accepted_Flag", "accepted_offer": "Offer_Accepted_Flag",
+                # screen score
+                "screen_score_raw": "Screen_Score", "screen": "Screen_Score",
+                # channel / source variants
+                "source_channel": "Source", "candidate_source": "Source", "channel_name": "Channel",
+                # stage timestamp common patterns
+                "apply_date": "Apply_Date"
+            }
+            # make matches case-insensitive
+            col_map = {}
+            for c in df.columns:
+                low = c.strip().lower()
+                for k,v in alt_map.items():
+                    if low == k.strip().lower():
+                        col_map[c] = v
+            # apply
+            if col_map:
+                df = df.rename(columns=col_map)
+                st.success(f"Auto-renamed columns: {col_map}")
+            
+            # 2) If Apply_Date exists but not parsed, parse it
+            date_candidates = [c for c in df.columns if c and ("date" in c.lower() or "time" in c.lower() or c.lower().startswith("apply"))]
+            parsed_date_col = None
+            for c in date_candidates:
+                try:
+                    parsed = pd.to_datetime(df[c], errors="coerce")
+                    if parsed.notna().sum() > 0:
+                        df[c] = parsed
+                        parsed_date_col = c
+                        break
+                except Exception:
+                    continue
+            
+            if parsed_date_col:
+                st.info(f"Detected date column: {parsed_date_col}")
+            else:
+                st.warning("No parseable date column found. Time-series, cohort, and timelines will be disabled until an Apply/Date column is provided or mapped.")
+            
+            # 3) Create Current_Stage if missing using Stage_* or logic
+            if "Current_Stage" not in df.columns:
+                # try to infer from stage columns first
+                stage_cols_guess = [c for c in df.columns if any(s in c.lower() for s in ["stage_apply","stage_screen","stage_interview","stage_offer","stage_join","stage"])]
+                if stage_cols_guess:
+                    # pick the column with most non-nulls as proxy
+                    best = max(stage_cols_guess, key=lambda x: df[x].notna().sum())
+                    df["Current_Stage"] = df[best].astype(str)
+                    st.info(f"Created Current_Stage from {best}")
+                else:
+                    # try columns that contain 'status' / 'stage' words
+                    fallback = None
+                    for c in df.columns:
+                        if any(w in c.lower() for w in ["status","stage","current"]):
+                            fallback = c
+                            break
+                    if fallback:
+                        df["Current_Stage"] = df[fallback].astype(str)
+                        st.info(f"Created Current_Stage from {fallback}")
+                    else:
+                        st.info("Could not auto-create Current_Stage. You can create a column named 'Current_Stage' or map it in upload+map mode.")
+            
+            # 4) Create Total_Time_to_Hire_Days if missing and if you have per-stage timestamps
+            if "Total_Time_to_Hire_Days" not in df.columns:
+                # look for apply and hire/join dates
+                apply_candidates = [c for c in df.columns if "apply" in c.lower() and ("date" in c.lower() or "time" in c.lower())]
+                join_candidates = [c for c in df.columns if any(w in c.lower() for w in ["join","hire","hired","onboard","start"]) and ("date" in c.lower() or "time" in c.lower())]
+                if apply_candidates and join_candidates:
+                    a = apply_candidates[0]; j = join_candidates[0]
+                    try:
+                        df[a] = pd.to_datetime(df[a], errors="coerce")
+                        df[j] = pd.to_datetime(df[j], errors="coerce")
+                        df["Total_Time_to_Hire_Days"] = (df[j] - df[a]).dt.total_seconds() / (3600*24)
+                        st.info(f"Created Total_Time_to_Hire_Days from {a} -> {j}")
+                    except Exception:
+                        pass
+            
+            # 5) Ensure Offer_Accepted_Flag exists as numeric 0/1
+            if "Offer_Accepted_Flag" in df.columns:
+                df["Offer_Accepted_Flag"] = pd.to_numeric(df["Offer_Accepted_Flag"].map(lambda x: str(x).strip().lower() if pd.notna(x) else x), errors="coerce")
+                df["Offer_Accepted_Flag"] = df["Offer_Accepted_Flag"].fillna(0).apply(lambda x: 1 if str(x).strip().lower() in ("1","true","yes","accepted","joined","hired") or x==1 else 0)
+            
+            # 6) Ensure Screen_Score is numeric if present
+            if "Screen_Score" in df.columns:
+                df["Screen_Score"] = pd.to_numeric(df["Screen_Score"], errors="coerce")
+            
+            # 7) If Applicant_ID missing, create one from index (but warn)
+            if "Applicant_ID" not in df.columns:
+                df["Applicant_ID"] = df.index.astype(str)
+                st.warning("Applicant_ID not found — created synthetic Applicant_ID from index. Better to provide a real Applicant_ID column.")
+            
+            # Final diagnostics
+            diag2 = pd.DataFrame({
+                "column": df.columns,
+                "dtype": [str(df[c].dtype) for c in df.columns],
+                "non_null_count": [int(df[c].notna().sum()) for c in df.columns]
+            })
+            st.dataframe(diag2, use_container_width=True)
+
             st.success("Loaded default dataset from DEFAULT_URL (raw GitHub).")
             st.dataframe(df.head(8))
         except Exception as e:
