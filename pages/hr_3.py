@@ -15,19 +15,34 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # -------------------------
-# App header & page config
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
 # -------------------------
-st.set_page_config(page_title="Skill Gap & Training Needs — Analytics", layout="wide")
-# Title left aligned
-st.markdown("""
-<div style="display:flex; align-items:center; gap:12px;">
-    <img src="https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png" width="56" />
-    <div style="text-align:left;">
-        <h1 style="margin:0; color:#064b86;">Skill Gap & Training Needs Analysis</h1>
-        <div style="color:#333; margin-top:-6px;">Identify skill shortfalls, recommend training, and estimate ROI — before someone spends the budget on another motivational webinar.</div>
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+
+# App header & page config
+# -------------------------
+st.set_page_config(page_title="Skill Gap & Training Needs — Analytics", layout="wide")
+
 
 # -------------------------
 # Card Glow CSS (hover effects)
