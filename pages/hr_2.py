@@ -169,7 +169,7 @@ with tabs[1]:
         "Absent_Flag","Hours_Lost","Absence_Reason","Seasonal_Factor","Absenteeism_Probability"
     ]
     
-  if data_mode == "Use default data":
+    if data_mode == "Use default data":
         DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/hr/absenteeism_dataset.csv"
     
         try:
