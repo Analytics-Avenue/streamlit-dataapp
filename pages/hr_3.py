@@ -603,11 +603,3 @@ with tabs[1]:
     col_b.markdown("Save aggregated employee matrix (useful for clustering/PCA):")
     if 'employee_matrix' in locals() and employee_matrix is not None:
         download_df(employee_matrix.reset_index(), "employee_skill_matrix.csv", "Download employee skill matrix")
-
-    st.markdown("""
-    <div style='margin-top:14px; font-size:13px; color:#555'>
-    Notes: This app runs small ML models in-browser. For production, train and persist models in a proper ML pipeline (feature store, model registry). Treat the ROI numbers as indicative — adjust monetary params and improvement multipliers to reflect your business.
-    </div>
-    """, unsafe_allow_html=True)
-
-# End of app
