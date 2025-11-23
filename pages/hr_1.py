@@ -734,6 +734,18 @@ with tabs[1]:
     
     st.markdown("---")
     st.markdown("## Step 3 — Machine Learning, Predictions & Automated Insights")
+
+    # ------------ CLEAN BINARY TARGET ------------
+    if "Joined" in df.columns:
+        df["Joined_Flag"] = df["Joined"].astype(str).str.lower().isin(
+            ["yes", "joined", "1", "true"]
+        ).astype(int)
+        target_col = "Joined_Flag"
+    else:
+        # fallback for Offer_Status
+        if "Offer_Accepted_Flag" in df.columns:
+            target_col = "Offer_Accepted_Flag"
+
     
     # ---------- identify target column (preference order) ----------
     possible_targets = [
