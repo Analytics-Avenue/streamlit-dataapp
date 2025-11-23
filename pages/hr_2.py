@@ -160,7 +160,7 @@ with tabs[1]:
     st.header("Application")
     st.markdown("### Data Source — choose one option")
 
-    data_mode = st.radio("Dataset option:", ["Use example dataset (generated)", "Upload CSV", "Upload CSV + Map columns"], horizontal=True)
+    data_mode = st.radio("Dataset option:", ["Use default data", "Upload CSV", "Upload CSV + Map columns"], horizontal=True)
 
     df = None
     # Columns expected for mapping mode
