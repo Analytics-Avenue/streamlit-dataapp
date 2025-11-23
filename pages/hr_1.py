@@ -651,30 +651,7 @@ with tabs[1]:
             st.plotly_chart(fig_ss, use_container_width=True)
     else:
         st.info("Screen_Score or Offer_Accepted_Flag missing — skipping scatter.")
-    
-    # -----------------------
-    # Candidate funnel timeline sample (Gantt-like using scatter)
-    # -----------------------
-    st.markdown("### Candidate timeline sample (first 50 candidates)")
-    # We'll synthesize timeline: if there are per-stage timestamps use those, else skip
-    possible_stage_time_cols = [c for c in filt.columns if any(s in c.lower() for s in ["apply","screen","interview","offer","join"]) and ("date" in c.lower() or "time" in c.lower())]
-    if possible_stage_time_cols:
-        # pick first 50 unique applicants with any timestamps and create start/end per candidate
-        tmp = filt.set_index(df.columns[0]) if df.columns.size>0 else filt
-        candidates = filt.dropna(subset=[possible_stage_time_cols[0]]).head(50)
-        # create synthetic timeline using Apply_Date (if exists) and Total_Time_to_Hire_Days
-        if date_col and "Total_Time_to_Hire_Days" in filt.columns:
-            sample = filt[[date_col,"Total_Time_to_Hire_Days"]].dropna().head(50).reset_index()
-            sample["start"] = sample[date_col]
-            sample["end"] = sample["start"] + pd.to_timedelta(sample["Total_Time_to_Hire_Days"], unit="D")
-            sample["Applicant"] = sample["index"].astype(str)
-            fig_g = px.timeline(sample, x_start="start", x_end="end", y="Applicant", title="Candidate timelines (start=Apply, end=Hire/last known)")
-            st.plotly_chart(fig_g, use_container_width=True)
-        else:
-            st.info("Stage timestamp columns insufficient for candidate timeline.")
-    else:
-        st.info("No per-stage timestamp columns detected; cannot draw candidate timeline.")
-    
+
     # -----------------------
     # Cohort table: Monthly applicants and join rate
     # -----------------------
