@@ -239,15 +239,6 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 # ----------------------------------------------------------
 with tab1:
 
-    st.markdown("""
-    <div style="text-align:left;">
-      <h2 style="margin:0; padding:0; color:#000;">Marketing Campaign Performance Analyzer</h2>
-      <p style="margin-top:4px; color:#333; font-size:17px;">
-      Track performance, optimize spend, and unlock smarter marketing decisions.
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
-
     st.markdown("<div class='section-title'>Overview</div>", unsafe_allow_html=True)
     st.markdown("""
     <div class='card'>
