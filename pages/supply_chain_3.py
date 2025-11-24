@@ -213,52 +213,61 @@ with tab2:
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-
-        
-    else:
-        file = st.file_uploader("Upload CSV", type=["csv"])
+    
+    elif mode == "Upload CSV + Column Mapping":
         if file:
             raw = read_csv_safe(file)
             st.write("Preview:")
             st.dataframe(raw.head())
-
+    
             mapping = {}
             for c in REQUIRED:
-                mapping[c] = st.selectbox(f"Map column for → {c}",
-                                          ["-- Select --"] + list(raw.columns))
-
+                mapping[c] = st.selectbox(
+                    f"Map column for → {c}",
+                    ["-- Select --"] + list(raw.columns)
+                )
+    
             if st.button("Apply Mapping"):
-                miss = [m for m in mapping if mapping[m]=="-- Select --"]
-                if miss:
-                    st.error("Missing mappings: " + ", ".join(miss))
-                else:
-                    df = raw.rename(columns={mapping[k]:k for k in mapping})
-                    st.success("Mapping applied.")
-                    st.dataframe(df.head())
-
+                missing = [m for m in mapping if mapping[m] == "-- Select --"]
+                if missing:
+                    st.error("Missing mappings: " + ", ".join(missing))
+                    st.stop()
+                df = raw.rename(columns={mapping[k]: k for k in mapping})
+                st.success("Mapping applied.")
+                st.dataframe(df.head())
+        
     if df is None:
         st.stop()
 
     # ----------------------------------
-    # DATE FILTER
     # ----------------------------------
-    try:
-        df["Order_Timestamp"] = pd.to_datetime(df["Order_Timestamp"], errors="coerce")
-    except:
-        st.error("Order_Timestamp column missing or invalid. Please check your dataset.")
+    # DATE FILTER (robust fix)
+    # ----------------------------------
+    if "Order_Timestamp" not in df.columns:
+        st.error("Order_Timestamp column missing. Please upload a valid dataset or map columns properly.")
         st.stop()
+    
+    df["Order_Timestamp"] = pd.to_datetime(df["Order_Timestamp"], errors="coerce")
     
     if df["Order_Timestamp"].isna().all():
-        st.error("Order_Timestamp conversion failed. The column has invalid date values.")
+        st.error("Order_Timestamp column contains no valid datetime values. Fix your dataset.")
         st.stop()
     
-    min_d, max_d = df["Order_Timestamp"].min(), df["Order_Timestamp"].max()
-
+    min_d = df["Order_Timestamp"].min()
+    max_d = df["Order_Timestamp"].max()
+    
+    # force datetime type for slider
+    min_d = pd.to_datetime(min_d)
+    max_d = pd.to_datetime(max_d)
+    
     st.markdown("### Date Filter")
-    date_range = st.slider("Select date range:",
-                           min_value=min_d,
-                           max_value=max_d,
-                           value=(min_d, max_d))
+    date_range = st.slider(
+        "Select date range:",
+        min_value=min_d,
+        max_value=max_d,
+        value=(min_d, max_d)
+    )
+
 
     df_f = df[(df["Order_Timestamp"] >= date_range[0]) &
               (df["Order_Timestamp"] <= date_range[1])]
