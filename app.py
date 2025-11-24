@@ -368,18 +368,18 @@ else:
 
         "Supply Chain Analytics": [
             {
-                "overview": "Optimize transportation routes, reduce travel time, minimize fuel costs, 
-                and enhance delivery accuracy using geospatial and optimization models.",
+                "overview": """Optimize transportation routes, reduce travel time, minimize fuel costs, 
+                and enhance delivery accuracy using geospatial and optimization models.""",
                 "tools": ["Python", "GeoPandas", "Routing Algorithms", "Optimization Models", "Power BI"]
             },
             {
-                "overview": "Track SLA performance, reduce order delays, analyze fulfillment timelines, 
-                and forecast order volume to achieve higher customer satisfaction.",
+                "overview": """Track SLA performance, reduce order delays, analyze fulfillment timelines, 
+                and forecast order volume to achieve higher customer satisfaction.""",
                 "tools": ["Python", "SQL", "Time Series Forecasting", "Tableau", "Power BI"]
             },
             {
-                "overview": "Monitor warehouse operations, optimize picking efficiency, improve inventory placement, 
-                and reduce handling time using operational analytics.",
+                "overview": """Monitor warehouse operations, optimize picking efficiency, improve inventory placement, 
+                and reduce handling time using operational analytics.""",
                 "tools": ["Python", "Excel", "Process Mining", "Clustering", "Power BI"]
             }
         ],
