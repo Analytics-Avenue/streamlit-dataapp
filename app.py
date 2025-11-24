@@ -72,6 +72,28 @@ st.markdown("""
     background:#d9e7ff;
     transform:scale(1.05);
 }
+
+/* ---------------------------------------
+   NEW CSS FOR EQUAL HEIGHT CARD ALIGNMENT
+   --------------------------------------- */
+.card-box {
+    height:100% !important;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+[data-testid="column"] {
+    display:flex;
+    flex-direction:column;
+}
+
+[data-testid="column"] > div {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -159,14 +181,14 @@ sectors = {
         {"name":"Energy, Fuel & Resource Wastage Analytics","page":"manufacturing_4.py"},
     ],
     "HR Analytics": [
-    {"name": "Hiring Funnel Drop-Off Analysis", "page": "hr_1.py"},
-    {"name": "Absenteeism Prediction & Workforce Planning", "page": "hr_2.py"},
-    {"name": "Skill Gap & Training Needs Analysis", "page": "hr_3.py"},
+        {"name": "Hiring Funnel Drop-Off Analysis", "page": "hr_1.py"},
+        {"name": "Absenteeism Prediction & Workforce Planning", "page": "hr_2.py"},
+        {"name": "Skill Gap & Training Needs Analysis", "page": "hr_3.py"},
     ],
     "Supply Chain Analytics": [
-    {"name": "Route Optimization & Logistics Efficiency", "page": "supply_chain_1.py"},
-    {"name": "Order Fulfillment & SLA Analytics", "page": "supply_chain_2.py"},
-    {"name": "Warehouse Operations Analytics", "page": "supply_chain_3.py"}
+        {"name": "Route Optimization & Logistics Efficiency", "page": "supply_chain_1.py"},
+        {"name": "Order Fulfillment & SLA Analytics", "page": "supply_chain_2.py"},
+        {"name": "Warehouse Operations Analytics", "page": "supply_chain_3.py"}
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
@@ -215,7 +237,6 @@ if st.session_state["sector"] is None:
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
 
-
                 if st.button(f"Explore {sector}", key=f"btn_{sector}"):
                     st.session_state["sector"] = sector
                     try:
@@ -231,29 +252,22 @@ if st.session_state["sector"] is None:
 else:
     sector_name = st.session_state["sector"]
 
-    # Sidebar
-    # -------------------------
-    
-    # -------------------------
     # Sidebar Navigation
-    # -------------------------
     if "navigate_to" not in st.session_state:
         st.session_state["navigate_to"] = None
-    
+
     with st.sidebar:
         st.markdown(f"## {sector_name} Navigation")
-        
+
         if st.button("Home", key="sidebar_home"):
             st.session_state["navigate_to"] = "home"
-        
+
         for s in sector_overview.keys():
             if s != sector_name:
                 if st.button(f"➡ {s}", key=f"sidebar_{s}"):
                     st.session_state["navigate_to"] = s
-    
-    # -------------------------
-    # Handle navigation safely
-    # -------------------------
+
+    # Navigation handling
     if st.session_state.get("navigate_to") is not None:
         target = st.session_state["navigate_to"]
         st.session_state["navigate_to"] = None
@@ -263,19 +277,13 @@ else:
         else:
             st.session_state["sector"] = target
     
-        # Hide potential rerun errors
-        try:
-            st.experimental_rerun()
-        except Exception:
-            pass
+        try: st.experimental_rerun()
+        except Exception: pass
 
-
-
- # -------------------
-
-
+    # Sector Header
     st.header(f"{sector_name} – Projects / Use Cases")
 
+    # Project Details
     project_details = {
         "Marketing Analytics": [
             {"overview": "Analyze campaign effectiveness, optimize ad spends, track click-throughs, and forecast ROI using customer behavior insights.",
@@ -337,53 +345,46 @@ else:
             {"overview": """Monitor machine health, detect anomalies, and prevent unexpected breakdowns using IoT sensor data.
             Analyze vibration, temperature, RPM, and load patterns to predict failures before they disrupt production.
             Improve maintenance planning and extend machine lifespan with predictive analytics.""",
-            "tools": ["Python",
-                "SQL","IoT / Sensor Data","Random Forest / Classification Models","Power BI","Tableau","Time Series Diagnostics"]},
+            "tools": ["Python","SQL","IoT / Sensor Data","Random Forest / Classification Models","Power BI","Tableau","Time Series Diagnostics"]},
+
             {"overview": """Analyze order flow from scheduling to dispatch to identify bottlenecks, reduce lead times, 
             and improve on-time delivery. Use predictive lead-time models and production cycle analysis 
             to streamline order fulfillment and boost customer satisfaction.""",
             "tools": ["Python","SQL","Power BI","Machine Learning Regression Models","Process Mining","Excel","Lead-Time Forecasting"]},
-        {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
+
+            {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
             and avoid excess inventory buildup. Use forecasting, safety-stock analytics, and 
             shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
             "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]},
-        {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
+
+            {"overview": """Track SKU-level demand, inventory, production, and procurement to prevent stockouts 
             and avoid excess inventory buildup. Use forecasting, safety-stock analytics, and 
             shortage/pileup detection to stabilize production and reduce working capital lock-in.""",
-            "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]}
-            ],        
-        "HR Analytics": [
-            {
-            "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, and improve conversion from application to onboarding.",
-            "tools": ["Python", "Excel", "Power BI", "Funnel Analytics", "Logistic Regression"]
-        },
-        {
-            "overview": "Predict employee absenteeism, optimize shift schedules, and improve workforce planning using machine learning and HRIS data.",
-            "tools": ["Python", "Scikit-Learn", "Time Series", "Classification Models", "Power BI"]
-        },
-        {
-            "overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training programs with ML-driven skill profiling.",
-            "tools": ["Python", "NLP", "Embedding Models", "Clustering", "Excel"]
-        }],
-
-        "Supply Chain Analytics": [
-            {
-                "overview": """Optimize transportation routes, reduce travel time, minimize fuel costs, 
-                and enhance delivery accuracy using geospatial and optimization models.""",
-                "tools": ["Python", "GeoPandas", "Routing Algorithms", "Optimization Models", "Power BI"]
-            },
-            {
-                "overview": """Track SLA performance, reduce order delays, analyze fulfillment timelines, 
-                and forecast order volume to achieve higher customer satisfaction.""",
-                "tools": ["Python", "SQL", "Time Series Forecasting", "Tableau", "Power BI"]
-            },
-            {
-                "overview": """Monitor warehouse operations, optimize picking efficiency, improve inventory placement, 
-                and reduce handling time using operational analytics.""",
-                "tools": ["Python", "Excel", "Process Mining", "Clustering", "Power BI"]
-            }
+            "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]},
         ],
-        
+        "HR Analytics": [
+            {"overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, and improve conversion from application to onboarding.",
+             "tools": ["Python","Excel","Power BI","Funnel Analytics","Logistic Regression"]},
+
+            {"overview": "Predict employee absenteeism, optimize shift schedules, and improve workforce planning using machine learning and HRIS data.",
+             "tools": ["Python","Scikit-Learn","Time Series","Classification Models","Power BI"]},
+
+            {"overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training programs with ML-driven skill profiling.",
+             "tools": ["Python","NLP","Embedding Models","Clustering","Excel"]},
+        ],
+        "Supply Chain Analytics": [
+            {"overview": """Optimize transportation routes, reduce travel time, minimize fuel costs, 
+                and enhance delivery accuracy using geospatial and optimization models.""",
+             "tools": ["Python","GeoPandas","Routing Algorithms","Optimization Models","Power BI"]},
+
+            {"overview": """Track SLA performance, reduce order delays, analyze fulfillment timelines, 
+                and forecast order volume to achieve higher customer satisfaction.""",
+             "tools": ["Python","SQL","Time Series Forecasting","Tableau","Power BI"]},
+
+            {"overview": """Monitor warehouse operations, optimize picking efficiency, improve inventory placement, 
+                and reduce handling time using operational analytics.""",
+             "tools": ["Python","Excel","Process Mining","Clustering","Power BI"]},
+        ],
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
@@ -398,12 +399,13 @@ else:
              "tools": ["Python","RAG","Vector DB","Multimodal Embeddings"]},
 
             {"overview": "Automatically redact personally identifiable information (PII) from documents using AI-powered detection.",
-     "tools": ["Python", "NLP", "Transformers", "Regex", "LLMs"]},
+             "tools": ["Python","NLP","Transformers","Regex","LLMs"]},
         ]
     }
 
     usecases = sectors[sector_name]
     details = project_details[sector_name]
+
     rows = [usecases[i:i+3] for i in range(0, len(usecases), 3)]
 
     for row_idx, row in enumerate(rows):
@@ -413,10 +415,10 @@ else:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
                 st.image(thumb_urls[sector_name], use_container_width=True)
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
-                
+
                 proj_overview = details[row_idx*3 + col_idx]['overview']
                 st.markdown(f"<p style='font-size:14px; color:#444; text-align:justify;'>{proj_overview}</p>", unsafe_allow_html=True)
-                
+
                 proj_tools = details[row_idx*3 + col_idx]['tools']
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in proj_tools])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
@@ -434,6 +436,7 @@ else:
                         </div>
                     </a>
                 """, unsafe_allow_html=True)
+
                 st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("Back to Home", key="back_home_bottom"):
