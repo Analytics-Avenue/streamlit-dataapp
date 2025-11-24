@@ -84,6 +84,28 @@ body, [class*="css"] {
 
 .small { color:#666; font-size:13px; }
 
+.variable-card-list {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: 0.3s ease;
+    font-size: 16px;
+}
+.variable-card-list:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 18px rgba(6, 75, 134, 0.45);
+    border-color: #064b86;
+}
+.variable-card-list ul {
+    margin: 0;
+    padding-left: 18px;
+}
+.variable-card-list li {
+    padding-bottom: 6px;
+}
+
 /* Variable Glow Cards */
 .variable-card {
     background: white;
@@ -249,22 +271,23 @@ with tab2:
     st.dataframe(df_dict, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Variables left/right
+    # Variables LEFT & RIGHT (CARD VERSION — no tables)
+    
     indep = ["Campaign", "Channel", "Date", "Impressions", "Clicks", "Spend"]
     dep = ["Leads", "Conversions"]
-
+    
     c1, c2 = st.columns(2)
-
+    
     with c1:
         st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-        st.markdown('<div class="variable-card">', unsafe_allow_html=True)
-        st.dataframe(pd.DataFrame({"Independent Variables": indep}), use_container_width=True)
+        st.markdown('<div class="variable-card-list">', unsafe_allow_html=True)
+        st.markdown("<ul>" + "".join([f"<li>{v}</li>" for v in indep]) + "</ul>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
-
+    
     with c2:
         st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
-        st.markdown('<div class="variable-card">', unsafe_allow_html=True)
-        st.dataframe(pd.DataFrame({"Dependent Variables": dep}), use_container_width=True)
+        st.markdown('<div class="variable-card-list">', unsafe_allow_html=True)
+        st.markdown("<ul>" + "".join([f"<li>{v}</li>" for v in dep]) + "</ul>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------
