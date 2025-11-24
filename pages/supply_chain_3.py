@@ -242,7 +242,16 @@ with tab2:
     # ----------------------------------
     # DATE FILTER
     # ----------------------------------
-    df["Order_Timestamp"] = pd.to_datetime(df["Order_Timestamp"])
+    try:
+        df["Order_Timestamp"] = pd.to_datetime(df["Order_Timestamp"], errors="coerce")
+    except:
+        st.error("Order_Timestamp column missing or invalid. Please check your dataset.")
+        st.stop()
+    
+    if df["Order_Timestamp"].isna().all():
+        st.error("Order_Timestamp conversion failed. The column has invalid date values.")
+        st.stop()
+    
     min_d, max_d = df["Order_Timestamp"].min(), df["Order_Timestamp"].max()
 
     st.markdown("### Date Filter")
