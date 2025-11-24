@@ -302,7 +302,6 @@ with tab2:
 
     req_df = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in required_dict.items()])
 
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.dataframe(req_df, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
