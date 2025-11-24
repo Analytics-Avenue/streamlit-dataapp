@@ -420,7 +420,7 @@ else:
                 st.markdown(f"<h4 style='color:#064b86; margin-top:8px;'>{uc['name']}</h4>", unsafe_allow_html=True)
 
                 proj_overview = details[row_idx*3 + col_idx]['overview']
-                st.markdown(f"<p style='font-size:14px; color:#444; text-align:justify;'>{proj_overview}</p>", unsafe_allow_html=True)
+                st.markdown(f"<p style='font-size:16px; color:#000; line-height:1.55; text-align:justify;'>{proj_overview}</p>", unsafe_allow_html=True)
 
                 proj_tools = details[row_idx*3 + col_idx]['tools']
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in proj_tools])
