@@ -20,6 +20,20 @@ warnings.filterwarnings("ignore")
 # -----------------------------
 st.set_page_config(page_title="Click & Conversion Analytics", layout="wide")
 
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display:flex; align-items:center; margin-bottom:20px;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 # -----------------------------
 # Helper functions
 # -----------------------------
@@ -197,17 +211,7 @@ st.markdown("""
 # -----------------------------
 # Header
 # -----------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-
-st.markdown(f"""
-<div class="header-wrap">
-    <img src="{logo_url}" width="60" />
-    <div>
-        <div class="app-title">Click & Conversion Analytics</div>
-        <div class="app-sub">Enterprise-capable marketing analytics: predictions, forecasts, and actionable insights.</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<h1 style='margin-bottom:0.2rem'>Click & Conversion Analytics</h1>", unsafe_allow_html=True)
 
 # -----------------------------
 # Tabs
@@ -276,8 +280,11 @@ with tab2:
     }
 
     req_df = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in required_dict.items()])
-    styled = req_df.style.set_table_attributes('class="required-table"').hide_index()
-    st.write(styled.to_html(), unsafe_allow_html=True)
+    styled = req_df.style.set_table_attributes('class="required-table"')
+    html = styled.to_html()
+    html = html.replace("<th></th>", "")   # remove index header
+    html = html.replace("<td></td>", "")   # remove index column
+    st.write(html, unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
 
