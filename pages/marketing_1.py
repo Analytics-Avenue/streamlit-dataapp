@@ -205,10 +205,10 @@ with tab1:
     st.markdown("#### KPIs")
     k1, k2, k3, k4 = st.columns(4)
 
-    k1.markdown("<div class='kpi'>Total Impressions<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Total Clicks<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Total Leads<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>Total Spend<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi'>Total Impressions</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Total Clicks</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Total Leads</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Total Spend</div>", unsafe_allow_html=True)
 
     # Who should use this
     st.markdown("### Who should use this & How")
