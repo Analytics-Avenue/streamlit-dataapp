@@ -542,7 +542,7 @@ with tabs[1]:
         cat_cols_r = [c for c in cats if c in Xr.columns]
         transformer_r = ColumnTransformer([
             ("num", StandardScaler(), num_cols_r),
-            ("ohe", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols_r)
+            ("ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols_r)
         ], remainder="drop")
         try:
             Xr_t = transformer_r.fit_transform(Xr.fillna(0))
