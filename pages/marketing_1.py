@@ -40,6 +40,117 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+
+    /* Global font + smoothness */
+    body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    /* Section headers with animated underline */
+    .section-title {
+        font-size: 26px;
+        font-weight: 800;
+        padding-bottom: 6px;
+        margin-top: 20px;
+        position: relative;
+        color: #064b86;
+    }
+    .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: #064b86;
+        transition: width 0.4s;
+    }
+    .section-title:hover::after {
+        width: 35%;
+    }
+
+    /* Soft fade-in animation for tab content */
+    .fade-in {
+        animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Minimal cards */
+    .dict-card, .kpi-card {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #e5eaf0;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+        margin-bottom: 15px;
+        transition: all 0.2s ease-in-out;
+    }
+    .dict-card:hover, .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 18px rgba(0,0,0,0.12);
+    }
+
+    /* Table styling */
+    .dataframe th {
+        background: #064b86 !important;
+        color: white !important;
+        padding: 10px !important;
+        text-align: left !important;
+    }
+
+    .dataframe td {
+        padding: 8px !important;
+        border-bottom: 1px solid #e6e6e6 !important;
+    }
+
+    .dataframe tbody tr:hover {
+        background: #f3faff !important;
+        transition: background 0.25s ease-in-out;
+    }
+
+    /* Button styling */
+    .stButton>button {
+        background: #064b86;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 16px;
+        border: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .stButton>button:hover {
+        background: #0b6ab8;
+        transform: translateY(-2px);
+    }
+
+    /* Radio buttons & checkbox styling */
+    .stRadio label, .stCheckbox label {
+        font-weight: 600 !important;
+    }
+
+    /* Download button styling */
+    .stDownloadButton>button {
+        background: #064b86 !important;
+        color: white !important;
+        border-radius: 8px;
+        padding: 8px 16px !important;
+        border: none;
+        font-weight: 600;
+    }
+    .stDownloadButton>button:hover {
+        background: #0b6ab8 !important;
+    }
+
+</style>
+""", unsafe_allow_html=True)
+
+
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
 # -------------------------------
@@ -75,7 +186,7 @@ def auto_map_columns(df):
 # -------------------------------
 # TABS
 # -------------------------------
-tab1, tab2 = st.tabs(["Overview","Application"])
+tab1, tab2, tab3 = st.tabs(["Overview","Important Attributes","Application"])
 
 # -------------------------------
 # TAB 1: OVERVIEW
@@ -95,9 +206,34 @@ with tab1:
     k4.markdown("<div class='metric-card'>Total Spend</div>", unsafe_allow_html=True)
 
 # -------------------------------
+with tab2:
+    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Important Attributes</div>', unsafe_allow_html=True)
+    st.markdown("This section explains the meaning of the mandatory columns...")
+
+    st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
+    st.markdown('<div class="dict-card">', unsafe_allow_html=True)
+    st.dataframe(df_dict, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+    st.markdown('<div class="dict-card">', unsafe_allow_html=True)
+    st.dataframe(pd.DataFrame({"Independent Variables": indep}), use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+    st.markdown('<div class="dict-card">', unsafe_allow_html=True)
+    st.dataframe(pd.DataFrame({"Dependent Variables": dep}), use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+
 # TAB 2: APPLICATION
 # -------------------------------
-with tab2:
+with tab3:
 
     st.markdown("### Step 1: Load Dataset")
 
