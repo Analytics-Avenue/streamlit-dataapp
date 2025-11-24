@@ -1,13 +1,3 @@
-# app_energy_wastage.py
-# Streamlit app for "Fuel, Power & Resource Wastage" analytics
-# Full single-file app. Loads default dataset (GitHub), supports file upload and column mapping,
-# provides EDA, several charts (no plotly trendline="ols"), 4 ML concepts, automated insights and downloads.
-#
-# Columns expected (example):
-# Timestamp,Machine_ID,Machine_Type,Fuel_Type,Shift,Operator_ID,Energy_Consumption_kWh,Energy_Predicted_kWh,
-# Baseload_Drift_kWh,Cooling_Load_kWh,Fuel_Consumption,Compressed_Air_CFM,Voltage_Instability,Power_Factor,
-# Ambient_Temp_C,Output_Units,Energy_Intensity_kWh_per_Unit,Peak_Load_Flag,Idle_Flag,Wastage_Severity,CO2_Emissions_kg
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -23,6 +13,16 @@ from sklearn.decomposition import PCA
 import math
 import warnings
 warnings.filterwarnings("ignore")
+
+# -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
 
 # ----------------------------
 # Page config and CSS
