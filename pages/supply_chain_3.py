@@ -99,7 +99,7 @@ st.markdown("## Warehouse Operations Analytics")
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["Overview", "Application", "Actionable Playbooks"])
+tab1, tab2 = st.tabs(["Overview", "Application"])
 
 # ---------------------------------------------------------
 # OVERVIEW TAB
@@ -462,25 +462,3 @@ with tab2:
     st.dataframe(ins_df)
     download_csv(ins_df, "automated_insights.csv")
 
-# ---------------------------------------------------------
-# PLAYBOOK TAB
-# ---------------------------------------------------------
-with tab3:
-
-    st.header("Actionable Playbooks")
-
-    play = [
-        ["Reassign congested aisles", "Divert picks away from Aisles with Heatmap_Level > 4"],
-        ["Relocate slow-moving SKUs", "Move low-velocity SKUs to back racks"],
-        ["Picker retraining", "Train pickers with productivity < 25 items/hour"],
-        ["Forklift/AMR scheduling", "Assign AMRs to long-distance pick routes"],
-        ["Travel-time reduction", "Optimize zone routing for high-frequency SKUs"],
-        ["Congestion hotfix", "Stagger Shift-1 pickers during peak hours"],
-        ["Slotting optimization", "Boost Slotting_Score by relocating Class A SKUs"],
-        ["Delay elimination", "Target root causes: Transport/Stockout/Equipment"]
-    ]
-
-    play_df = pd.DataFrame(play, columns=["Action Recommendation", "Reason"])
-    st.dataframe(play_df, use_container_width=True)
-
-    download_csv(play_df, "actionable_playbooks.csv")
