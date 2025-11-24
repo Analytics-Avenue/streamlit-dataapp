@@ -393,7 +393,7 @@ with tabs[1]:
         return model, X_test, y_test, preds, rmse, r2
 
     # 1) RandomForestRegressor -> predict Actual_Travel_Hours
-    if "Actual_Travel_Hours" in df_model.columns and len(df_model) >= 80:
+    if "Actual_Travel_Hours" in df_model.columns and len(df_model) >= 10:
         target = "Actual_Travel_Hours"
         features = [c for c in df_model.columns if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters","Efficiency_Score"]]
         if features:
