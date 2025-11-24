@@ -14,6 +14,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import math
 import warnings
+import folium
+from folium.plugins import MarkerCluster
+from streamlit_folium import st_folium
+
 warnings.filterwarnings("ignore")
 
 # ------------------------
@@ -356,6 +360,116 @@ with tabs[1]:
         fig_corr = go.Figure(data=go.Heatmap(z=corr.values, x=corr.columns, y=corr.columns, colorscale="Blues"))
         fig_corr.update_layout(title="Correlation matrix")
         st.plotly_chart(fig_corr, use_container_width=True)
+
+    # ------------------------------------------------------------
+    # GEOSPATIAL ROUTE MAP
+    # ------------------------------------------------------------
+    st.markdown("### Geospatial Route Map")
+    
+    if "Start_Lat" in filt.columns and "Start_Lon" in filt.columns and "End_Lat" in filt.columns and "End_Lon" in filt.columns:
+        m = folium.Map(location=[filt["Start_Lat"].mean(), filt["Start_Lon"].mean()], zoom_start=6)
+    
+        for _, row in filt.iterrows():
+            folium.PolyLine(
+                [(row["Start_Lat"], row["Start_Lon"]), (row["End_Lat"], row["End_Lon"])],
+                color="blue",
+                weight=3,
+                opacity=0.7
+            ).add_to(m)
+    
+            folium.Marker(location=[row["Start_Lat"], row["Start_Lon"]], tooltip="Start").add_to(m)
+            folium.Marker(location=[row["End_Lat"], row["End_Lon"]], tooltip="End").add_to(m)
+    
+        st_folium(m, width=900, height=500)
+    else:
+        st.info("Missing geolocation columns: Start_Lat, Start_Lon, End_Lat, End_Lon")
+
+
+    # ------------------------------------------------------------
+    # GEOSPATIAL CLUSTERING (KMeans)
+    # ------------------------------------------------------------
+    st.markdown("### Route Clustering (K-Means)")
+    
+    geo_cols = ["Start_Lat", "Start_Lon", "End_Lat", "End_Lon"]
+    
+    if all(c in filt.columns for c in geo_cols):
+        coords = filt[["Start_Lat", "Start_Lon"]].dropna()
+        if len(coords) >= 5:
+            kmeans = KMeans(n_clusters=4, random_state=42)
+            filt["Cluster"] = kmeans.fit_predict(coords)
+    
+            fig = px.scatter_mapbox(
+                filt,
+                lat="Start_Lat",
+                lon="Start_Lon",
+                color="Cluster",
+                zoom=4,
+                height=500,
+                title="Route Start Locations Clustered"
+            )
+            fig.update_layout(mapbox_style="open-street-map")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Not enough geolocation points for clustering.")
+    else:
+        st.info("Geolocation columns missing.")
+
+    # ------------------------------------------------------------
+    # ROUTE-LEVEL COST SIMULATION
+    # ------------------------------------------------------------
+    st.markdown("### Route-Level Cost Simulation")
+    
+    if "Actual_Fuel_Liters" in filt.columns and "Delay_Hours" in filt.columns and "Route_Distance_km" in filt.columns:
+        SIM_FUEL_COST = 94.5   # INR per liter
+        SIM_DRIVER_COST_HR = 220  # per hour
+        SIM_VEHICLE_COST_KM = 18  # depreciation + maintenance
+    
+        sim = filt.copy()
+        sim["Fuel_Cost_INR"] = sim["Actual_Fuel_Liters"] * SIM_FUEL_COST
+        sim["Distance_Cost_INR"] = sim["Route_Distance_km"] * SIM_VEHICLE_COST_KM
+        sim["Delay_Penalty_INR"] = sim["Delay_Hours"] * SIM_DRIVER_COST_HR
+        sim["Total_Route_Cost_INR"] = sim["Fuel_Cost_INR"] + sim["Distance_Cost_INR"] + sim["Delay_Penalty_INR"]
+    
+        st.dataframe(sim[[
+            "Route_ID", "Vehicle_ID", "Fuel_Cost_INR",
+            "Distance_Cost_INR", "Delay_Penalty_INR",
+            "Total_Route_Cost_INR"
+        ]].head(15), use_container_width=True)
+    
+        download_df(sim, "route_cost_simulation.csv", "Download Cost Simulation")
+    else:
+        st.info("Required columns missing for cost simulation.")
+    # ------------------------------------------------------------
+    # FUEL FRAUD / ANOMALY DETECTION
+    # ------------------------------------------------------------
+    st.markdown("### Fuel Fraud Detection")
+    
+    required = ["Actual_Fuel_Liters", "Route_Distance_km", "Fuel_Predicted_Liters"]
+    
+    if all(c in filt.columns for c in required):
+        fraud_df = filt.copy()
+    
+        fraud_df["Fuel_L_per_km"] = fraud_df["Actual_Fuel_Liters"] / np.where(
+            fraud_df["Route_Distance_km"] == 0, np.nan, fraud_df["Route_Distance_km"]
+        )
+    
+        # Fraud scoring
+        fraud_df["Fuel_Anomaly"] = fraud_df["Actual_Fuel_Liters"] - fraud_df["Fuel_Predicted_Liters"]
+        fraud_df["Suspicion_Score"] = (
+            fraud_df["Fuel_Anomaly"] * 0.6 +
+            fraud_df["Fuel_L_per_km"] * 0.4
+        )
+    
+        suspicious = fraud_df.sort_values("Suspicion_Score", ascending=False).head(15)
+    
+        st.markdown("Routes with abnormal fuel usage patterns:")
+        st.dataframe(suspicious, use_container_width=True)
+    
+        download_df(suspicious, "fuel_fraud_detection.csv", "Download Fuel Fraud Report")
+    else:
+        st.info("Missing columns for fuel fraud detection.")
+
+
 
     # ------------------------
     # Step 4 — ML Concepts (4 chosen)
