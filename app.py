@@ -235,8 +235,8 @@ if st.session_state["sector"] is None:
                 st.markdown("<div class='card-box'>", unsafe_allow_html=True)
                 st.image(thumb_urls[sector], use_container_width=True)
                 st.markdown(f"<h3 style='color:#064b86; margin-top:12px;'>{sector}</h3>", unsafe_allow_html=True)
-                st.markdown(f"<p style='font-size:14.5px; color:#444; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
-                
+                st.markdown(f"<p style='font-size:16px; color:#000; line-height:1.55; text-align:justify;'>{sector_overview[sector]}</p>", unsafe_allow_html=True)
+
                 tool_html = "".join([f"<span class='tool-btn'>{t}</span>" for t in sector_tools[sector]])
                 st.markdown(f"<b>Tools & Tech:</b><br>{tool_html}", unsafe_allow_html=True)
 
