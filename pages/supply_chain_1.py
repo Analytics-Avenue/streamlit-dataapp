@@ -163,15 +163,13 @@ with tabs[1]:
     if load_mode == "Default Data":
       url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/route_optimization_dataset.csv"
       try:
-          df = read_csv_safe(url)
-          st.success("Loaded dataset from URL.")
+          df = pd.read_csv(url)
+          df.columns = df.columns.str.strip()
+          st.success("Default dataset loaded")
           st.dataframe(df.head())
       except Exception as e:
-        st.error("Failed to load CSV from URL: " + str(e))
-        st.stop()
-    else:
-        st.info("Press 'Load from URL' after pasting the raw CSV URL.")
-        st.stop()
+          st.error("Failed to load default dataset: " + str(e))
+          st.stop()
 
     elif load_mode == "Upload CSV":
         uploaded = st.file_uploader("Upload CSV file", type=["csv"])
