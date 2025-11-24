@@ -14,6 +14,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 st.set_page_config(page_title="Patient Visit Analytics & Hospital Performance", layout="wide")
+# Hide sidebar
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 
 # -------------------------
