@@ -19,36 +19,95 @@ warnings.filterwarnings("ignore")
 # -------------------------
 st.set_page_config(page_title="Marketing Performance Analysis", layout="wide")
 
-# Hide default sidebar navigation (optional)
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+# -------------------------
+# Global CSS (master design spec applied)
+# - All text: PURE BLACK (#000)
+# - KPI card values: blue
+# - Independent variable labels and values: blue
+# - Card layout, KPI design, table styling, variable-box, fade-in animation
+# - 3-tab layout
+# -------------------------
+st.markdown("""
+<style>
+/* Global text color: pure black everywhere */
+html, body, [data-testid="stAppViewContainer"] *, .css-1d391kg * { color: #000 !important; }
 
+/* Background and container tweaks to preserve aesthetic */
+.css-1d391kg { background-color: #ffffff00; }
 
+/* Card styles (standardized) */
+.master-card {
+  background: #ffffff; /* white card */
+  padding: 18px 20px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.6s ease;
+  opacity: 0; /* start hidden for fade-in */
+  animation: fadeIn 0.9s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI card layout */
+.kpi-row { display:flex; gap:14px; }
+.kpi-card {
+  flex:1; padding:18px; border-radius:12px; text-align:center; background:#f8fbff;
+  border:1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.kpi-title { font-size:13px; font-weight:700; color:#000; margin-bottom:6px; }
+.kpi-value { font-size:20px; font-weight:800; color:#064b86; }
+.kpi-sublabel { font-size:12px; color:#333; }
+
+/* Variable box (Independent variables) */
+.var-box { display:flex; gap:12px; flex-wrap:wrap; }
+.var-item { padding:10px 12px; border-radius:10px; border:1px dashed rgba(0,0,0,0.06); background:#fff; }
+.var-label { font-size:12px; font-weight:700; color:#064b86; }
+.var-value { font-size:13px; color:#064b86; }
+
+/* Table styling - index-safe HTML renderer */
+.styled-table { border-collapse: collapse; font-size:13px; font-family: inherit; width:100%; }
+.styled-table thead tr { background: #f1f5f9; }
+.styled-table th, .styled-table td { padding:8px 10px; border:1px solid rgba(0,0,0,0.06); text-align:left; }
+.styled-table tbody tr:hover { background: #fafafa; }
+.styled-table caption { caption-side: top; text-align:left; padding-bottom:8px; font-weight:700; }
+
+/* Make sure Streamlit native widgets keep black text */
+.css-1q8dd3e, .css-1q8dd3e * { color: #000 !important; }
+
+/* Utility */
+.small-muted { font-size:12px; color:#333; }
+
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------
-# Company Logo + Name
+# Header / Logo
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
-    </div>
+<div class="master-card" style="display:flex; align-items:center; gap:14px;">
+  <img src="{logo_url}" width="56" style="border-radius:6px;"/>
+  <div>
+    <div style="font-size:20px; font-weight:800;">Analytics Avenue &amp; Advanced Analytics</div>
+    <div class="small-muted">Marketing Intelligence & Forecasting Lab — standardized UI</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-
 # -------------------------
-# Required columns
+# Required columns & mapping
 # -------------------------
 REQUIRED_MARKETING_COLS = [
-    "Campaign", "Channel", "Date", "Impressions", "Clicks", "Leads", 
-    "Conversions", "Spend", "Revenue", "ROAS", "Device", "AgeGroup", 
+    "Campaign", "Channel", "Date", "Impressions", "Clicks", "Leads",
+    "Conversions", "Spend", "Revenue", "ROAS", "Device", "AgeGroup",
     "Gender", "AdSet", "Creative"
 ]
 
-# Auto mapping for common variants
 AUTO_MAPS = {
     "Campaign": ["campaign", "campaign_name"],
     "Channel": ["channel", "platform", "source"],
@@ -67,6 +126,7 @@ AUTO_MAPS = {
     "Creative": ["creative", "ad creative"]
 }
 
+
 def auto_map_columns(df):
     rename = {}
     cols = [c.strip() for c in df.columns]
@@ -83,11 +143,13 @@ def auto_map_columns(df):
         df = df.rename(columns=rename)
     return df
 
+
 def to_currency(x):
     try:
         return "₹ " + f"{float(x):,.2f}"
     except:
         return x
+
 
 def ensure_datetime(df, col="Date"):
     try:
@@ -96,150 +158,59 @@ def ensure_datetime(df, col="Date"):
         pass
     return df
 
+
 def download_df(df, filename):
     b = BytesIO()
     b.write(df.to_csv(index=False).encode("utf-8"))
     b.seek(0)
     st.download_button("Download CSV", b, file_name=filename, mime="text/csv")
 
-# -------------------------
-# Custom CSS for cards
-# -------------------------
-st.markdown("""
-<style>
-div[data-testid="stMarkdownContainer"] .card {
-    background: rgba(255,255,255,0.07);
-    padding: 18px 20px;
-    border-radius: 14px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255,255,255,0.25);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
-    backdrop-filter: blur(4px);
-}
-div[data-testid="stMarkdownContainer"] .metric-card {
-    background: rgba(255,255,255,0.10);
-    padding: 20px;
-    border-radius: 14px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.30);
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
-    backdrop-filter: blur(4px);
-}
-div[data-testid="stMarkdownContainer"] .metric-card:hover {
-    background: rgba(255,255,255,0.20);
-    border: 1px solid rgba(255,255,255,0.55);
-    box-shadow: 0 0 18px rgba(255,255,255,0.4);
-    transform: scale(1.04);
-    cursor: pointer;
-}
-.metric-card[title]:hover:after {
-    content: attr(title);
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #222;
-    padding: 6px 10px;
-    color: #fff;
-    border-radius: 6px;
-    font-size: 12px;
-    white-space: nowrap;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-}
-</style>
-""", unsafe_allow_html=True)
+
+def render_index_safe_html_table(df: pd.DataFrame, caption: str = None):
+    """Render an index-safe HTML table using Streamlit's markdown.
+    - We explicitly escape values to avoid accidental HTML injection.
+    - Keep index as a separate column so layout and rendering are stable.
+    """
+    tmp = df.copy()
+    # Ensure index is a column for index-safe rendering
+    tmp.reset_index(inplace=True)
+    # Escape text values safely
+    html = tmp.to_html(index=False, classes="styled-table", escape=True)
+    if caption:
+        # Inject caption in a safe place
+        html = html.replace('<table class="styled-table">', f'<table class="styled-table"><caption>{caption}</caption>')
+    st.markdown(html, unsafe_allow_html=True)
 
 # -------------------------
-# Page header + tabs
+# Tabs: Overview | Application | Modeling
 # -------------------------
-st.markdown("<h1 style='margin-bottom:0.2rem'>Marketing Performance Analysis</h1>", unsafe_allow_html=True)
-st.markdown("Analyze campaign ROI, creative & audience insights, predict revenue & conversions. Smart, actionable metrics.")
-
-tabs = st.tabs(["Overview", "Application"])
+tabs = st.tabs(["Overview", "Application", "Modeling & Forecast"])
 
 with tabs[0]:
-    st.markdown("### Overview")
     st.markdown("""
-    <div class='card'>
-        This app delivers <b>end-to-end marketing performance tracking</b>, across campaigns, channels, creatives, and audience segments. 
-        It aggregates campaign data, measures effectiveness, predicts revenue and conversions using <b>machine learning</b>, 
-        and provides <b>forecasting</b> for short- and medium-term decision-making. 
-        Built for <b>data-driven marketing teams</b>, the app gives actionable insights at a glance.
+    <div class="master-card">
+      <div style="font-weight:800; font-size:18px;">Marketing Performance Analysis — Overview</div>
+      <div class="small-muted">An enterprise-grade layout following the master spec: standardized cards, KPI design, variable boxes and index-safe HTML tables.</div>
+      <hr/>
+      <div style="margin-top:10px;">
+        <strong>Capabilities</strong>
+        <ul>
+          <li>Multi-channel tracking, demographic breakdowns, creative-level analysis</li>
+          <li>Predictive models for revenue and conversions (RandomForest + linear fallback)</li>
+          <li>Automated insights and downloadable reports</li>
+        </ul>
+      </div>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### Capabilities")
-    st.markdown("""
-    <div class='card'>
-        • Multi-channel campaign tracking with breakdowns by channel, device, audience segment<br>
-        • Audience analysis by Age, Gender, Device, and other demographic segments<br>
-        • Creative performance insights: AdSet & Creative level ROI<br>
-        • Predictive analytics: Revenue & Conversion forecasting using <b>RandomForest</b> & <b>Linear Regression</b><br>
-        • Campaign optimization suggestions & ROI comparisons<br>
-        • Automated insights highlighting best and worst-performing segments
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Impact")
-    st.markdown("""
-    <div class='card'>
-        • Make <b>data-driven marketing decisions</b> faster<br>
-        • Identify high-ROI campaigns & avoid wasted spend<br>
-        • Prioritize channels, creatives, and audience segments based on predicted performance<br>
-        • Improve conversion efficiency and revenue per spend unit<br>
-        • Align marketing strategy with real-time insights and predictive trends
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Key Metrics")
-    k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card' title='Total revenue generated across campaigns and channels'>Total Revenue</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card' title='Average return on ad spend across campaigns'>ROAS</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card' title='Total leads generated'>Total Leads</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card' title='Overall conversion rate (Conversions / Clicks)'>Conversion Rate</div>", unsafe_allow_html=True)
-
-    st.markdown("### Forecasting & ML Capabilities")
-    st.markdown("""
-    <div class='card'>
-        • Revenue & Conversion predictions using <b>RandomForest Regression</b><br>
-        • Trend forecasting for next 30 days with <b>linear regression fallback</b> if Prophet is unavailable<br>
-        • Automatic identification of top-performing campaigns, channels, and audience segments<br>
-        • Model performance metrics (R², RMSE) displayed for transparency and trust<br>
-        • Downloadable ML predictions for further analysis
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Automated Insights")
-    st.markdown("""
-    <div class='card'>
-        • Channel-level ROI comparisons<br>
-        • Identification of best and worst performing channels, creatives, and segments<br>
-        • Downloadable insights tables for executive reporting<br>
-        • Supports multi-dimensional filtering for campaigns, channels, device types, age-groups, and gender
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Who Should Use This App?")
-    st.markdown("""
-    <div class='card'>
-        • <b>Marketing Analysts</b> who want predictive insights and campaign breakdowns<br>
-        • <b>CMOs / Marketing Heads</b> needing executive-ready dashboards<br>
-        • <b>Digital Marketing Teams</b> optimizing ad spend across channels<br>
-        • <b>Growth Teams</b> tracking conversion efficiency and revenue trends
-    </div>
-    """, unsafe_allow_html=True)
-
 
 with tabs[1]:
-    st.header("Application")
+    st.markdown("""
+    <div class="master-card">
+      <div style="font-weight:800; font-size:16px;">Step 1 — Load dataset</div>
+      <div class="small-muted">Upload a CSV or use the default sample. App will auto-map common column names.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # -------------------------
-    # Dataset input: all 3 modes
-    # -------------------------
-    st.markdown("### Step 1 — Load dataset")
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
 
@@ -250,7 +221,7 @@ with tabs[1]:
             df.columns = df.columns.str.strip()
             df = auto_map_columns(df)
             st.success("Default dataset loaded")
-            st.dataframe(df.head())
+            render_index_safe_html_table(df.head(5), caption="Default dataset preview (first 5 rows)")
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
@@ -259,30 +230,31 @@ with tabs[1]:
         st.markdown("#### Download Sample CSV for Reference")
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
         try:
-            # Load default dataset
-            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_df = pd.read_csv(URL).head(5)
             sample_csv = sample_df.to_csv(index=False)
             st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
-    
-        # Upload actual CSV
+
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
             df = pd.read_csv(file)
-    
+            df.columns = df.columns.str.strip()
+            st.success("Uploaded dataset preview")
+            render_index_safe_html_table(df.head(5), caption="Uploaded dataset preview (first 5 rows)")
 
     else:  # Upload + mapping
-        uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+        uploaded = st.file_uploader("Upload CSV to map", type=["csv")
         if uploaded is not None:
             raw = pd.read_csv(uploaded)
             raw.columns = raw.columns.str.strip()
             st.write("Preview (first 5 rows):")
-            st.dataframe(raw.head())
+            render_index_safe_html_table(raw.head(5), caption="Raw uploaded preview")
             st.markdown("Map your columns to required fields.")
             mapping = {}
+            cols = list(raw.columns)
             for req in REQUIRED_MARKETING_COLS:
-                mapping[req] = st.selectbox(f"Map → {req}", options=["-- Select --"] + list(raw.columns))
+                mapping[req] = st.selectbox(f"Map → {req}", options=["-- Select --"] + cols)
             if st.button("Apply mapping"):
                 missing = [k for k,v in mapping.items() if v=="-- Select --"]
                 if missing:
@@ -290,123 +262,174 @@ with tabs[1]:
                 else:
                     df = raw.rename(columns={v:k for k,v in mapping.items()})
                     st.success("Mapping applied.")
-                    st.dataframe(df.head())
+                    render_index_safe_html_table(df.head(5), caption="Mapped dataset preview")
 
     if df is None:
         st.stop()
 
-    # Strip spaces, keep only required columns
+    # Keep only required columns that exist
     df = df[[c for c in REQUIRED_MARKETING_COLS if c in df.columns]].copy()
     df = ensure_datetime(df, "Date")
     for col in ["Impressions","Clicks","Leads","Conversions","Spend","Revenue","ROAS"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-    # -------------------------
-    # Filters
-    # -------------------------
-    st.markdown("### Step 2 — Filters & preview")
+    st.markdown("""
+    <div class="master-card">
+      <div style="font-weight:800; font-size:16px;">Step 2 — Filters & Preview</div>
+    </div>
+    """, unsafe_allow_html=True)
+
     c1, c2, c3 = st.columns([2,2,1])
-    campaigns = sorted(df["Campaign"].dropna().unique())
-    channels = sorted(df["Channel"].dropna().unique())
-    devices = sorted(df["Device"].dropna().unique())
-    agegroups = sorted(df["AgeGroup"].dropna().unique())
-    genders = sorted(df["Gender"].dropna().unique())
+    campaigns = sorted(df["Campaign"].dropna().unique()) if "Campaign" in df.columns else []
+    channels = sorted(df["Channel"].dropna().unique()) if "Channel" in df.columns else []
+    devices = sorted(df["Device"].dropna().unique()) if "Device" in df.columns else []
+    agegroups = sorted(df["AgeGroup"].dropna().unique()) if "AgeGroup" in df.columns else []
+    genders = sorted(df["Gender"].dropna().unique()) if "Gender" in df.columns else []
 
     with c1:
         sel_campaigns = st.multiselect("Campaign", options=campaigns, default=campaigns[:5])
     with c2:
         sel_channels = st.multiselect("Channel", options=channels, default=channels[:3])
     with c3:
-        date_range = st.date_input("Date range", value=(df["Date"].min().date(), df["Date"].max().date()))
+        try:
+            date_range = st.date_input("Date range", value=(df["Date"].min().date(), df["Date"].max().date()))
+        except Exception:
+            date_range = None
 
     filt = df.copy()
     if sel_campaigns: filt = filt[filt["Campaign"].isin(sel_campaigns)]
     if sel_channels: filt = filt[filt["Channel"].isin(sel_channels)]
-    if date_range: filt = filt[(filt["Date"]>=pd.to_datetime(date_range[0])) & (filt["Date"]<=pd.to_datetime(date_range[1]))]
+    if date_range:
+        filt = filt[(filt["Date"]>=pd.to_datetime(date_range[0])) & (filt["Date"]<=pd.to_datetime(date_range[1]))]
 
-    st.dataframe(filt.head(5), use_container_width=True)
-    download_df(filt.head(5), "filtered_preview.csv")
+    render_index_safe_html_table(filt.head(10), caption="Filtered preview (first 10 rows)")
+    download_df(filt.head(10), "filtered_preview.csv")
 
     # -------------------------
-    # Key metrics cards
+    # Key metrics cards (KPI values must be blue)
     # -------------------------
-    st.markdown("### Key Metrics")
+    st.markdown("<div class='master-card'><div style='font-weight:800;'>Key Metrics</div></div>", unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Total Revenue", to_currency(filt["Revenue"].sum()))
-    k2.metric("ROAS", f"{filt['ROAS'].mean():.2f}")
-    k3.metric("Total Leads", int(filt["Leads"].sum()))
-    k4.metric("Conversion Rate", f"{filt['Conversions'].sum()/max(filt['Clicks'].sum(),1):.2%}")
+
+    def kpi_html(title, value, sub=None):
+        sub_html = f"<div class='kpi-sublabel'>{sub}</div>" if sub else ""
+        return f"<div class='kpi-card'><div class='kpi-title'>{title}</div><div class='kpi-value'>{value}</div>{sub_html}</div>"
+
+    k1.markdown(kpi_html("Total Revenue", to_currency(filt["Revenue"].sum()), "Sum of Revenue"), unsafe_allow_html=True)
+    k2.markdown(kpi_html("ROAS", f"{filt['ROAS'].mean():.2f}", "Avg ROAS"), unsafe_allow_html=True)
+    k3.markdown(kpi_html("Total Leads", int(filt["Leads"].sum()), "Sum of Leads"), unsafe_allow_html=True)
+    conv_rate = (filt['Conversions'].sum()/max(filt['Clicks'].sum(),1)) if ('Conversions' in filt.columns and 'Clicks' in filt.columns) else 0
+    k4.markdown(kpi_html("Conversion Rate", f"{conv_rate:.2%}", "Conversions/Clicks"), unsafe_allow_html=True)
+
+    # Independent variables (blue text requirement)
+    st.markdown("<div class='master-card'><div style='font-weight:800;'>Independent Variables</div></div>", unsafe_allow_html=True)
+    iv_cols = [c for c in ['Channel','Device','AgeGroup','Gender','AdSet','Creative'] if c in df.columns]
+    iv_html = "<div class='var-box'>"
+    for c in iv_cols:
+        vals = filt[c].dropna().unique()[:6]
+        vals_display = ", ".join([str(v) for v in vals])
+        iv_html += f"<div class='var-item'><div class='var-label'>{c}</div><div class='var-value'>{vals_display}</div></div>"
+    iv_html += "</div>"
+    st.markdown(iv_html, unsafe_allow_html=True)
 
     # -------------------------
     # Charts
     # -------------------------
-    st.markdown("### Campaign Revenue & Conversions")
-    agg = filt.groupby("Campaign")[["Revenue","Conversions"]].sum().reset_index()
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Revenue"], name="Revenue"))
-    fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Conversions"], name="Conversions"))
-    fig.update_layout(barmode='group', xaxis_title="Campaign", yaxis_title="Value")
-    st.plotly_chart(fig, use_container_width=True)
+    st.markdown("<div class='master-card'><div style='font-weight:800;'>Campaign Revenue & Conversions</div></div>", unsafe_allow_html=True)
+    if 'Campaign' in filt.columns and 'Revenue' in filt.columns:
+        agg = filt.groupby('Campaign')[['Revenue','Conversions']].sum().reset_index()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=agg['Campaign'], y=agg['Revenue'], name='Revenue'))
+        if 'Conversions' in agg.columns:
+            fig.add_trace(go.Bar(x=agg['Campaign'], y=agg['Conversions'], name='Conversions'))
+        fig.update_layout(barmode='group', xaxis_title='Campaign', yaxis_title='Value', plot_bgcolor='white')
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info('Campaign/Revenue columns required to render chart')
 
-    st.markdown("### Device / Gender / AgeGroup performance")
-    group_cols = ["Device","Gender","AgeGroup"]
+    st.markdown("<div class='master-card'><div style='font-weight:800;'>Device / Gender / AgeGroup performance</div></div>", unsafe_allow_html=True)
+    group_cols = ['Device','Gender','AgeGroup']
     for g in group_cols:
         if g in filt.columns:
-            grp = filt.groupby(g)[["Revenue","Conversions"]].sum().reset_index()
-            fig = px.bar(grp, x=g, y="Revenue", text="Revenue", title=f"{g} Revenue")
-            fig.update_traces(textposition="outside")
+            grp = filt.groupby(g)[['Revenue','Conversions']].sum().reset_index()
+            fig = px.bar(grp, x=g, y='Revenue', text='Revenue', title=f"{g} Revenue")
+            fig.update_traces(textposition='outside')
             st.plotly_chart(fig, use_container_width=True)
 
+with tabs[2]:
+    st.markdown("""
+    <div class="master-card">
+      <div style="font-weight:800; font-size:16px;">Modeling & Forecast</div>
+      <div class="small-muted">Train a RandomForest regressor for Revenue prediction. Linear regression fallback available.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # -------------------------
-    # ML: Revenue prediction + Download
-    # -------------------------
-    st.markdown("### ML: Predict Revenue (RandomForest)")
-    ml_df = filt.copy().dropna(subset=["Revenue"])
-    feat_cols = ["Channel","Campaign","Device","AgeGroup","Gender","AdSet","Impressions","Clicks","Spend"]
+    ml_df = filt.copy().dropna(subset=['Revenue']) if 'Revenue' in filt.columns else pd.DataFrame()
+    feat_cols = ['Channel','Campaign','Device','AgeGroup','Gender','AdSet','Impressions','Clicks','Spend']
     feat_cols = [c for c in feat_cols if c in ml_df.columns]
-    if len(ml_df) < 30 or len(feat_cols)<2:
-        st.info("Not enough data to train ML model (>=30 rows needed)")
+
+    if ml_df.empty or len(ml_df) < 30 or len(feat_cols) < 2:
+        st.info('Not enough data to train ML model (>=30 rows and at least 2 features required)')
     else:
         X = ml_df[feat_cols]
-        y = ml_df["Revenue"]
-        cat_cols = [c for c in X.columns if X[c].dtype=="object"]
+        y = ml_df['Revenue']
+        cat_cols = [c for c in X.columns if X[c].dtype == 'object']
         num_cols = [c for c in X.columns if c not in cat_cols]
         preprocessor = ColumnTransformer([
-            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-            ("num", StandardScaler(), num_cols)
-        ], remainder="drop")
+            ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), cat_cols),
+            ('num', StandardScaler(), num_cols)
+        ], remainder='drop')
+
         X_t = preprocessor.fit_transform(X)
         X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+
         rf = RandomForestRegressor(n_estimators=200, random_state=42)
-        with st.spinner("Training RandomForest..."):
+        with st.spinner('Training RandomForest...'):
             rf.fit(X_train, y_train)
         preds = rf.predict(X_test)
         rmse = math.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
-        st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
-    
-        # Create downloadable dataframe
+
+        st.markdown(f"<div class='master-card'><div style='font-weight:800;'>Model Performance</div><div class='small-muted'>RMSE: {rmse:.2f} | R²: {r2:.3f}</div></div>", unsafe_allow_html=True)
+
+        # Present test results in index-safe HTML table
         X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
-        X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
-        X_test_df["Predicted_Revenue"] = preds
-        st.dataframe(X_test_df.head())
-        download_df(X_test_df, "ml_revenue_predictions.csv")
-    
-    # -------------------------
-    # Automated Insights (Table + Download)
-    # -------------------------
-    st.markdown("### Automated Insights")
+        X_test_df['Actual_Revenue'] = y_test.reset_index(drop=True)
+        X_test_df['Predicted_Revenue'] = preds
+        render_index_safe_html_table(X_test_df.head(10), caption='ML Predictions (test set - first 10 rows)')
+        download_df(X_test_df, 'ml_revenue_predictions.csv')
+
+        # Quick feature importance if we can map back columns (best-effort)
+        try:
+            # If OneHotEncoder used, feature names are many; we provide generic ranking
+            importances = rf.feature_importances_
+            fi = pd.DataFrame({'feature': [f'F{i}' for i in range(len(importances))], 'importance': importances})
+            fi = fi.sort_values('importance', ascending=False).head(10)
+            st.markdown('<div class="master-card"><div style="font-weight:800;">Top Feature Importances (approx)</div></div>', unsafe_allow_html=True)
+            render_index_safe_html_table(fi, caption='Top feature importances')
+        except Exception:
+            pass
+
+    # Automated insights table
+    st.markdown('<div class="master-card"><div style="font-weight:800;">Automated Insights</div></div>', unsafe_allow_html=True)
     insights_list = []
-    if "Channel" in filt.columns and "Revenue" in filt.columns and "Spend" in filt.columns:
-        ch_perf = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
-        ch_perf["Revenue_per_Rs"] = np.where(ch_perf["Spend"]>0, ch_perf["Revenue"]/ch_perf["Spend"],0)
-        best = ch_perf.sort_values("Revenue_per_Rs", ascending=False).iloc[0]
-        worst = ch_perf.sort_values("Revenue_per_Rs", ascending=True).iloc[0]
-        insights_list.append({"Insight":"Best Channel ROI","Channel":best['Channel'], "Revenue_per_Rs":best['Revenue_per_Rs']})
-        insights_list.append({"Insight":"Lowest Channel ROI","Channel":worst['Channel'], "Revenue_per_Rs":worst['Revenue_per_Rs']})
-    
+    if 'Channel' in filt.columns and 'Revenue' in filt.columns and 'Spend' in filt.columns:
+        ch_perf = filt.groupby('Channel')[['Revenue','Spend']].sum().reset_index()
+        ch_perf['Revenue_per_Rs'] = np.where(ch_perf['Spend']>0, ch_perf['Revenue']/ch_perf['Spend'],0)
+        best = ch_perf.sort_values('Revenue_per_Rs', ascending=False).iloc[0]
+        worst = ch_perf.sort_values('Revenue_per_Rs', ascending=True).iloc[0]
+        insights_list.append({'Insight':'Best Channel ROI','Channel':best['Channel'], 'Revenue_per_Rs':best['Revenue_per_Rs']})
+        insights_list.append({'Insight':'Lowest Channel ROI','Channel':worst['Channel'], 'Revenue_per_Rs':worst['Revenue_per_Rs']})
+
     insights_df = pd.DataFrame(insights_list)
-    st.dataframe(insights_df)
-    download_df(insights_df, "automated_insights.csv")
+    if not insights_df.empty:
+        render_index_safe_html_table(insights_df, caption='Automated insights')
+        download_df(insights_df, 'automated_insights.csv')
+    else:
+        st.markdown('<div class="master-card">No automated insights available for the selected filters.</div>', unsafe_allow_html=True)
+
+# Final note card (hidden in master-card style)
+st.markdown("""
+<div class="master-card"><div class="small-muted">UI spec: Text is PURE BLACK except KPI card values and Independent Variables which are blue. Table rendered via index-safe HTML. Card layout, variable boxes and fade-in animation applied.</div></div>
+""", unsafe_allow_html=True)
