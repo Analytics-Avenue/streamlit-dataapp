@@ -1,5 +1,3 @@
-# warehouse_operations_analytics_app.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -253,19 +251,17 @@ with tab2:
         st.error("Order_Timestamp column contains no valid datetime values. Fix your dataset.")
         st.stop()
     
-    min_d = df["Order_Timestamp"].min()
-    max_d = df["Order_Timestamp"].max()
-    
-    # force datetime type for slider
-    min_d = pd.to_datetime(min_d)
-    max_d = pd.to_datetime(max_d)
+    # Convert to native python datetime objects for Streamlit slider compatibility
+    min_d = df["Order_Timestamp"].min().to_pydatetime()
+    max_d = df["Order_Timestamp"].max().to_pydatetime()
     
     st.markdown("### Date Filter")
     date_range = st.slider(
         "Select date range:",
         min_value=min_d,
         max_value=max_d,
-        value=(min_d, max_d)
+        value=(min_d, max_d),
+        format="YYYY-MM-DD"
     )
 
 
