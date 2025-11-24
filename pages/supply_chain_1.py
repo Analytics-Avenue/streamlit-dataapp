@@ -272,7 +272,6 @@ with tabs[1]:
             start_sel, end_sel = date_range
         except Exception:
             # fallback to date_input if slider complains (consistent types)
-            st.info("Date slider unsupported in this environment — using date_input instead.")
             dates = st.date_input("Select date range (date only)", value=(min_ts.date(), max_ts.date()))
             start_sel = datetime.combine(dates[0], datetime.min.time())
             end_sel = datetime.combine(dates[1], datetime.max.time())
