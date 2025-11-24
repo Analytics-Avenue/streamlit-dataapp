@@ -154,9 +154,9 @@ sectors = {
         {"name":"Energy, Fuel & Resource Wastage Analytics","page":"manufacturing_4.py"},
     ],
     "HR Analytics": [
-    {"name": "Hiring Funnel Drop-Off Analysis", "page": "hr_hiring_funnel.py"},
-    {"name": "Absenteeism Prediction & Workforce Planning", "page": "hr_absenteeism.py"},
-    {"name": "Skill Gap & Training Needs Analysis", "page": "hr_training_needs.py"}
+    {"name": "Hiring Funnel Drop-Off Analysis", "page": "hr_1.py"},
+    {"name": "Absenteeism Prediction & Workforce Planning", "page": "hr_2.py"},
+    {"name": "Skill Gap & Training Needs Analysis", "page": "hr_3.py"},
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
