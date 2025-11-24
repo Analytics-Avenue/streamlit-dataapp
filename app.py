@@ -95,9 +95,8 @@ Boost care quality with real-time monitoring and clinical performance analytics.
 Use predictive models, IoT sensor data, and advanced planning analytics to enhance throughput, cut delays, and improve supply chain stability. Transform raw manufacturing data into actionable intelligence for 
 efficiency, quality improvement, and cost savings.""", 
 
-    "HR Analytics": """Optimize production lines, reduce machine downtime, and streamline factory operations with data-driven insights. 
-Use predictive models, IoT sensor data, and advanced planning analytics to enhance throughput, cut delays, and improve supply chain stability. Transform raw manufacturing data into actionable intelligence for 
-efficiency, quality improvement, and cost savings.""", 
+    "HR Analytics": """Optimize workforce performance, reduce hiring leaks, predict absenteeism, 
+and map employee skill gaps using advanced machine learning and people analytics solutions.""", 
     
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
@@ -112,8 +111,8 @@ sector_tools = {
                               "Classification Models","NLP","Patient Flow Forecasting"],
     "Manufacturing Analytics": ["Python","SQL","Excel","Power BI","Tableau","Machine Sensor/IoT Data","Predictive Maintenance Models",
                                 "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
-    "HR Analytics": ["Python","SQL","Excel","Power BI","Tableau","Machine Sensor/IoT Data","Predictive Maintenance Models",
-                                "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
+    "HR Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Scikit-Learn",
+                 "HRIS Data", "Time Series", "Classification Models", "NLP"],
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
@@ -342,11 +341,20 @@ else:
             "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]}
             ],        
         "HR Analytics": [
-            {"overview": "Analyze patient visit data to optimize hospital operations and improve patient flow.",
-             "tools": ["Python","SQL","Power BI","Time Series Forecasting"]},
-            {"overview": "Predict patient volume, assess hospital performance metrics, and reduce wait times effectively.",
-             "tools": ["R","Python","Tableau","Forecasting Models"]},
-            ],
+            {  "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, 
+            and improve conversion from application to onboarding.",
+            "tools": ["Python", "Excel", "Power BI", "Funnel Analytics", "Logistic Regression"]
+        },
+        {
+            "overview": "Predict employee absenteeism, optimize shift schedules, and improve workforce planning 
+            using machine learning and HRIS data.",
+            "tools": ["Python", "Scikit-Learn", "Time Series", "Classification Models", "Power BI"]
+        },
+        {
+            "overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training 
+            programs with ML-driven skill profiling.",
+            "tools": ["Python", "NLP", "Embedding Models", "Clustering", "Excel"]
+        }],
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
