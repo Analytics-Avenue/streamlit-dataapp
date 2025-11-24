@@ -207,6 +207,61 @@ with tab1:
 
 # -------------------------------
 with tab2:
+    st.markdown("## Important Attributes")
+    st.markdown("This section explains the meaning of the mandatory columns and identifies the independent and dependent variables that drive analysis.")
+
+    st.markdown("### Required Column Data Dictionary")
+    
+    data_dict = {
+        "Campaign": "Name of the marketing campaign or ad set being analyzed.",
+        "Channel": "Marketing channel such as Facebook, Google, Instagram, Email, etc.",
+        "Date": "Date of the marketing activity logged.",
+        "Impressions": "Total number of times the ad was shown.",
+        "Clicks": "Number of users who clicked the ad.",
+        "Leads": "Number of users who submitted interest forms or became prospects.",
+        "Conversions": "Number of leads who completed the target action (purchase, signup, etc.).",
+        "Spend": "Amount spent on the marketing campaign for that period."
+    }
+
+    df_dict = pd.DataFrame(
+        [{"Attribute": k, "Description": v} for k, v in data_dict.items()]
+    )
+
+    st.dataframe(df_dict, use_container_width=True)
+
+    # -------------------------------
+    # VARIABLE CLASSIFICATION
+    # -------------------------------
+    st.markdown("### Independent & Dependent Variables")
+
+    st.markdown("#### Independent Variables (Inputs)")
+    indep = [
+        "Campaign",
+        "Channel",
+        "Date",
+        "Impressions",
+        "Clicks",
+        "Spend"
+    ]
+
+    st.markdown("""
+    These variables influence marketing outcomes and are considered controllable or measurable inputs.
+    """)
+
+    st.write(pd.DataFrame({"Independent Variables": indep}))
+
+    st.markdown("#### Dependent Variables (Outputs)")
+    dep = [
+        "Leads",
+        "Conversions"
+    ]
+
+    st.markdown("""
+    These represent the outcomes of the marketing activities and are directly affected by changes in the independent variables.
+    """)
+
+    st.write(pd.DataFrame({"Dependent Variables": dep}))
+
     st.markdown('<div class="fade-in">', unsafe_allow_html=True)
 
     st.markdown('<div class="section-title">Important Attributes</div>', unsafe_allow_html=True)
