@@ -31,7 +31,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ADVANCED GLOBAL CSS
+# ADVANCED GLOBAL CSS (updated to avoid over-bold)
 # ---------------------------------------------------------
 st.markdown("""
 <style>
@@ -40,36 +40,33 @@ st.markdown("""
     font-family: 'Inter', sans-serif;
 }
 
-/* ------------------------------------------------ */
-/* GLOBAL TEXT SYSTEM */
-/* ------------------------------------------------ */
+/* GLOBAL TEXT */
 body, [class*="css"] {
     color:#000 !important;
     font-size:16px;
 }
 
+/* MAIN HEADER */
 .big-header {
-    font-size: 38px !important;
-    font-weight: 900 !important;
+    font-size: 34px !important;
+    font-weight: 700 !important;
     color:#000 !important;
     margin-bottom:10px;
     animation: fadeIn 1s ease;
 }
 
-/* Fade-in animation */
+/* Fade-in */
 @keyframes fadeIn {
     from {opacity:0; transform:translateY(10px);}
     to {opacity:1; transform:translateY(0);}
 }
 
-/* ------------------------------------------------ */
-/* SECTION TITLE — GLOBAL ACROSS ALL TABS */
-/* ------------------------------------------------ */
+/* SECTION TITLE */
 .section-title {
-    font-size: 26px !important;
-    font-weight: 800 !important;
-    margin-top:35px;
-    margin-bottom:14px;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    margin-top:30px;
+    margin-bottom:12px;
     color:#000 !important;
     position:relative;
     animation: fadeIn 0.8s ease;
@@ -80,135 +77,122 @@ body, [class*="css"] {
     position:absolute;
     bottom:-5px;
     left:0;
-    height:3px;
+    height:2px;
     width:0%;
     background:#064b86;
-    transition: width 0.40s ease;
+    transition: width 0.35s ease;
 }
 
 .section-title:hover:after {
-    width:55%;
+    width:40%;
 }
 
-/* ------------------------------------------------ */
-/* MODERN CARD WITH GLOW */
-/* ------------------------------------------------ */
+/* CARD */
 .card {
-    background: rgba(255,255,255,0.95);
-    padding:24px;
-    border-radius:16px;
-    border:1px solid #d6d6d6;
-    font-size:16px;
+    background: #ffffff;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    font-size:15px;
     color:#064b86 !important;
     font-weight:500;
-    box-shadow:0 4px 16px rgba(0,0,0,0.10);
-    transition: all 0.28s ease;
+    box-shadow:0 3px 14px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
     animation: fadeIn 1s ease;
 }
 
 .card:hover {
-    transform:translateY(-6px);
-    box-shadow:0 14px 32px rgba(6,75,134,0.25);
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(6,75,134,0.18);
     border-color:#064b86;
 }
 
-/* ------------------------------------------------ */
 /* KPI CARDS */
-/* ------------------------------------------------ */
 .kpi {
     background:#ffffff;
-    padding:26px;
+    padding:22px;
     border-radius:14px;
-    border:1px solid #d4d4d4;
-    font-size:21px !important;
-    font-weight:700 !important;
+    border:1px solid #e2e2e2;
+    font-size:18px !important;
+    font-weight:600 !important;
     text-align:center;
     color:#064b86 !important;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    box-shadow:0 3px 14px rgba(0,0,0,0.07);
     transition:0.25s ease;
     animation: fadeIn 0.9s ease;
 }
 
 .kpi:hover {
-    transform:translateY(-5px);
-    box-shadow:0 15px 34px rgba(6,75,134,0.25);
+    transform:translateY(-4px);
+    box-shadow:0 13px 26px rgba(6,75,134,0.20);
     border-color:#064b86;
 }
 
-/* ------------------------------------------------ */
 /* VARIABLE BOXES */
-/* ------------------------------------------------ */
 .variable-box {
-    padding:20px;
+    padding:18px;
     border-radius:14px;
     background:white;
-    border:1px solid #d4d4d4;
-    box-shadow:0 3px 12px rgba(0,0,0,0.12);
+    border:1px solid #e5e5e5;
+    box-shadow:0 2px 10px rgba(0,0,0,0.10);
     transition:0.25s ease;
     text-align:center;
-    font-size:17px !important;
-    font-weight:600 !important;
+    font-size:16px !important;
+    font-weight:500 !important;
     color:#064b86 !important;
     margin-bottom:14px;
     animation: fadeIn 1s ease;
 }
 
 .variable-box:hover {
-    transform:translateY(-6px);
-    box-shadow:0 16px 32px rgba(6,75,134,0.25);
+    transform:translateY(-5px);
+    box-shadow:0 12px 22px rgba(6,75,134,0.18);
     border-color:#064b86;
 }
 
-/* ------------------------------------------------ */
-/* TABLE STYLING */
-/* ------------------------------------------------ */
+/* TABLE */
 .dataframe th {
-    background:#000 !important;
+    background:#064b86 !important;
     color:#fff !important;
-    padding:11px !important;
-    font-size:15px !important;
+    padding:10px !important;
+    font-size:14px !important;
 }
 .dataframe td {
-    font-size:15px !important;
+    font-size:14px !important;
     color:#000 !important;
-    padding:9px !important;
-    border-bottom:1px solid #eaeaea !important;
+    padding:8px !important;
+    border-bottom:1px solid #efefef !important;
 }
 .dataframe tbody tr:hover {
-    background:#f1f6fa !important;
+    background:#f4f9ff !important;
 }
 
-/* ------------------------------------------------ */
 /* BUTTONS */
-/* ------------------------------------------------ */
 .stButton>button,
 .stDownloadButton>button {
     background:#064b86 !important;
     color:white !important;
     border:none;
-    padding:10px 22px;
+    padding:9px 20px;
     border-radius:8px !important;
-    font-size:15px !important;
-    font-weight:700 !important;
+    font-size:14px !important;
+    font-weight:600 !important;
     transition:0.25s ease;
 }
 
 .stButton>button:hover,
 .stDownloadButton>button:hover {
-    transform:translateY(-4px);
+    transform:translateY(-3px);
     background:#0a6eb3 !important;
 }
 
-/* ------------------------------------------------ */
-/* Fade-in for entire tab change */
-/* ------------------------------------------------ */
+/* FADE-IN ENTIRE PAGE */
 .block-container {
     animation: fadeIn 0.5s ease;
 }
 
 </style>
 """, unsafe_allow_html=True)
-
 
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
@@ -254,11 +238,11 @@ with tab1:
     st.markdown("""
     <div class='card'>
     <b>Purpose:</b><br><br>
-    In modern growth environments, marketing decisions must be fast, data-driven, and grounded in real performance metrics.
-    This analyzer centralizes every major marketing signal so you can easily visualize what campaigns are producing results,
-    where budgets are leaking, and how your funnel behaves across channels.<br><br>
-    It helps identify strong campaigns, detect anomalies, highlight underperforming segments, and build a predictable,
-    efficient marketing system.
+    Modern marketing requires fast, reliable, data-driven decision making.
+    This analyzer centralizes your campaign data to reveal what works, what wastes budget,
+    and where your growth opportunities truly lie.<br><br>
+    It simplifies full-funnel insights, highlights anomalies, exposes inefficiencies,
+    and gives teams the clarity needed for smarter marketing investments.
     </div>
     """, unsafe_allow_html=True)
 
@@ -268,12 +252,12 @@ with tab1:
         st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class='card'>
-        • Multi-channel analytics in one place<br>
-        • Full-funnel analysis from impressions to conversions<br>
-        • Identify winning creatives, audiences & geos<br>
-        • ROI, CPL, CPA comparisons<br>
-        • Instant trend spotting & anomaly detection<br>
-        • Dashboard-ready exportable datasets
+        • Multi-channel insights in one dashboard<br>
+        • Full funnel tracking from impressions → conversions<br>
+        • Creative, audience & geo performance analytics<br>
+        • ROI, CPL, CPA benchmarking<br>
+        • Instant anomaly detection<br>
+        • Dataset export for BI tools
         </div>
         """, unsafe_allow_html=True)
 
@@ -282,11 +266,11 @@ with tab1:
         st.markdown("""
         <div class='card'>
         • Reduce wasted ad spend<br>
-        • Improve lead quality & cost efficiency<br>
-        • Make confident budgeting decisions<br>
-        • Forecast performance more accurately<br>
-        • Strengthen conversion rates with insights<br>
-        • Build scalable marketing intelligence
+        • Improve lead & conversion quality<br>
+        • Strengthen budgeting accuracy<br>
+        • Predict performance with confidence<br>
+        • Increase conversion efficiency<br>
+        • Build scalable measurement systems
         </div>
         """, unsafe_allow_html=True)
 
@@ -300,14 +284,11 @@ with tab1:
     st.markdown('<div class="section-title">Who Should Use This & Why</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class='card'>
-    <b>Who is this for?</b><br>
-    Marketing teams, founders, growth analysts, performance marketers, and decision makers.<br><br>
-    <b>Why it matters:</b><br>
-    Fragmented platforms make it hard to understand what really drives ROI. This tool unifies performance and empowers teams 
-    with clarity, accuracy, and speed.
+    <b>Designed for:</b> marketers, founders, analysts, performance managers.<br><br>
+    <b>Why it matters:</b> Because fragmented platform reporting hides what actually drives ROI.
+    This consolidates everything into a single source of truth.
     </div>
     """, unsafe_allow_html=True)
-
 
 # ---------------------------------------------------------
 # TAB 2 – IMPORTANT ATTRIBUTES
@@ -349,7 +330,6 @@ with tab2:
         st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
         for v in dep:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
-
 
 # ---------------------------------------------------------
 # TAB 3 – APPLICATION
