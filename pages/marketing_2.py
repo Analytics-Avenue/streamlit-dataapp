@@ -326,7 +326,6 @@ with tab2:
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.dataframe(req_df.style.set_table_attributes('class="required-table"'), use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
