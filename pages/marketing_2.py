@@ -311,12 +311,12 @@ with tab2:
             .required-table th {
                 background:#ffffff !important;
                 color:#000 !important;
-                font-size:18px !important;
+                font-size:22px !important;
                 border-bottom:2px solid #000 !important;
             }
             .required-table td {
                 color:#000 !important;
-                font-size:17px !important;
+                font-size:21px !important;
                 padding:10px !important;
                 border-bottom:1px solid #dcdcdc !important;
             }
