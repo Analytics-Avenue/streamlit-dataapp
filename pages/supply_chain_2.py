@@ -502,7 +502,7 @@ with tabs[1]:
         cat_cols = [c for c in cats if c in X.columns]
         transformer = ColumnTransformer([
             ("num", StandardScaler(), num_cols),
-            ("ohe", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols)
+            ("ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols)
         ], remainder="drop")
 
         try:
