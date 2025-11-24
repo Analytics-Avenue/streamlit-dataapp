@@ -200,15 +200,15 @@ with tab2:
             st.error(str(e))
 
     elif mode == "Upload CSV":
-    st.markdown("#### Download Sample CSV for Reference")
-    URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/warehouse_operations_analytics.csv"
-    try:
-        # Load default dataset
-        sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
-        sample_csv = sample_df.to_csv(index=False)
-        st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
-    except Exception as e:
-        st.info(f"Sample CSV unavailable: {e}")
+        st.markdown("#### Download Sample CSV for Reference")
+        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/warehouse_operations_analytics.csv"
+        try:
+            # Load default dataset
+            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+        except Exception as e:
+            st.info(f"Sample CSV unavailable: {e}")
 
     # Upload actual CSV
     file = st.file_uploader("Upload your dataset", type=["csv"])
