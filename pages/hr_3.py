@@ -43,8 +43,7 @@ st.markdown(f"""
 # -------------------------
 st.set_page_config(page_title="Skill Gap & Training Needs — Analytics", layout="wide")
 # ----------------------------------------------------------
-st.markdown("<div class='big-header'>Skill Gap & Training Needs — Analytics</div>", unsafe_allow_html=True)
-
+st.markdown("<h1 style='margin-bottom:0.2rem'>Skill Gap & Training Needs — Analytics</h1>", unsafe_allow_html=True)
 
 # -------------------------
 # Card Glow CSS (hover effects)
