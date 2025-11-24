@@ -13,6 +13,16 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
+# -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
 st.set_page_config(page_title="Patient Visit Analytics & Hospital Performance", layout="wide")
 # Hide sidebar
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
