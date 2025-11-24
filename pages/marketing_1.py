@@ -30,8 +30,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
-
 # ---------------------------------------------------------
 # Global CSS
 # ---------------------------------------------------------
@@ -49,14 +47,13 @@ body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* Standard Card */
+/* Standard card */
 .card {
     padding:20px;
     border-radius:12px;
     background:#ffffff;
     border:1px solid #e6e6e6;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
-    text-align:left;
 }
 .card:hover {
     transform: translateY(-6px);
@@ -64,7 +61,7 @@ body, [class*="css"] {
     border-color:#064b86;
 }
 
-/* KPI Card */
+/* KPI card */
 .kpi {
     padding:28px;
     border-radius:12px;
@@ -84,44 +81,27 @@ body, [class*="css"] {
 
 .small { color:#666; font-size:13px; }
 
-.variable-card-list {
+/* REAL VARIABLE CARDS */
+.variable-box {
+    padding: 22px;
     background: white;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    transition: 0.3s ease;
-    font-size: 16px;
+    border-radius: 14px;
+    border: 1px solid #e0e6ed;
+    box-shadow: 0 4px 14px rgba(6, 75, 134, 0.15);
+    transition: 0.25s ease;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color:#064b86;
+    margin-bottom: 12px;
 }
-.variable-card-list:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 18px rgba(6, 75, 134, 0.45);
-    border-color: #064b86;
-}
-.variable-card-list ul {
-    margin: 0;
-    padding-left: 18px;
-}
-.variable-card-list li {
-    padding-bottom: 6px;
+.variable-box:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 28px rgba(6, 75, 134, 0.25);
+    border-color:#064b86;
 }
 
-/* Variable Glow Cards */
-.variable-card {
-    background: white;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    transition: 0.3s ease;
-}
-.variable-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 18px rgba(6, 75, 134, 0.45);
-    border-color: #064b86;
-}
-
-/* DataFrame Styling */
+/* Table styling */
 .dataframe th {
     background: #064b86 !important;
     color: white !important;
@@ -135,12 +115,18 @@ body, [class*="css"] {
     background: #f3faff !important;
 }
 
+.section-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color:#064b86;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Title
-# ---------------------------------------------------------
+
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
@@ -172,12 +158,12 @@ def auto_map_columns(df):
     return df.rename(columns=rename_dict)
 
 # ---------------------------------------------------------
-# Tabs
+# TABS
 # ---------------------------------------------------------
 tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # ----------------------------------------------------------
-# TAB 1 — NEW OVERVIEW LAYOUT (MATCHING ROUTE OPTIMIZATION STYLE)
+# TAB 1 – Overview (Matching your Route Optimization Layout)
 # ----------------------------------------------------------
 with tab1:
 
@@ -188,7 +174,6 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Purpose
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
@@ -196,18 +181,17 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Two-column layout
     colA, colB = st.columns(2)
 
     with colA:
         st.markdown("#### Capabilities")
         st.markdown("""
         <div class='card'>
-        • Track campaign & channel-level performance<br>
+        • Track performance across channels<br>
         • Optimize ROI & reduce wasted spend<br>
         • Conversion funnel analytics<br>
         • Multi-channel cost efficiency scoring<br>
-        • Automated dashboard-ready insights<br>
+        • Dashboard-ready datasets<br>
         </div>
         """, unsafe_allow_html=True)
 
@@ -216,37 +200,22 @@ with tab1:
         st.markdown("""
         <div class='card'>
         • Boost conversions & reduce CPL<br>
-        • Allocate budget more intelligently<br>
-        • Identify high-performing creatives<br>
+        • Allocate budget intelligently<br>
+        • Identify high-performing creatives/channels<br>
         • Improve forecasting & planning<br>
-        • Strengthen overall marketing effectiveness<br>
+        • Strengthen overall marketing efficiency<br>
         </div>
         """, unsafe_allow_html=True)
 
-    # KPI row
     st.markdown("#### KPIs")
     k1, k2, k3, k4 = st.columns(4)
-
-    k1.markdown("<div class='kpi'>Total Impressions</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Total Clicks</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Total Leads</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>Total Spend</div>", unsafe_allow_html=True)
-
-    # Who should use this
-    st.markdown("### Who should use this & How")
-    st.markdown("""
-    <div class='card'>
-      <b>Who</b>: Marketing analysts, growth teams, brand managers, founders.<br><br>
-      <b>How</b>:  
-      1) Load your dataset.  
-      2) Filter by campaign or channel.  
-      3) Review KPIs & charts.  
-      4) Use insights to reallocate spend smartly.  
-    </div>
-    """, unsafe_allow_html=True)
+    k1.markdown("<div class='kpi'>Total Impressions<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Total Clicks<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Total Leads<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Total Spend<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------
-# TAB 2 — IMPORTANT ATTRIBUTES
+# TAB 2 – IMPORTANT ATTRIBUTES (NOW WITH REAL CARDS)
 # ----------------------------------------------------------
 with tab2:
 
@@ -254,12 +223,12 @@ with tab2:
 
     data_dict = {
         "Campaign": "Name of the marketing campaign.",
-        "Channel": "Marketing channel (Facebook, Google, Instagram, etc.)",
-        "Date": "Activity date.",
-        "Impressions": "Number of ad views.",
-        "Clicks": "Number of clicks.",
-        "Leads": "Interested users.",
-        "Conversions": "Completed actions (sale/signup).",
+        "Channel": "Marketing channel (Facebook, Google, etc.)",
+        "Date": "Date of activity.",
+        "Impressions": "Number of times ad was shown.",
+        "Clicks": "Number of ad clicks.",
+        "Leads": "Users expressing interest.",
+        "Conversions": "Completed desired actions.",
         "Spend": "Amount spent."
     }
 
@@ -267,31 +236,28 @@ with tab2:
         [{"Attribute": k, "Description": v} for k, v in data_dict.items()]
     )
 
-    st.markdown('<div class="dict-card">', unsafe_allow_html=True)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.dataframe(df_dict, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Variables LEFT & RIGHT (CARD VERSION — no tables)
-    
+    # REAL variable cards
     indep = ["Campaign", "Channel", "Date", "Impressions", "Clicks", "Spend"]
     dep = ["Leads", "Conversions"]
-    
+
     c1, c2 = st.columns(2)
-    
+
     with c1:
         st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-        st.markdown('<div class="variable-card-list">', unsafe_allow_html=True)
-        st.markdown("<ul>" + "".join([f"<li>{v}</li>" for v in indep]) + "</ul>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    
+        for v in indep:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
     with c2:
         st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
-        st.markdown('<div class="variable-card-list">', unsafe_allow_html=True)
-        st.markdown("<ul>" + "".join([f"<li>{v}</li>" for v in dep]) + "</ul>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        for v in dep:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------
-# TAB 3 — APPLICATION
+# TAB 3 – APPLICATION
 # ----------------------------------------------------------
 with tab3:
 
@@ -304,7 +270,6 @@ with tab3:
         horizontal=True,
     )
 
-    # Default data
     if mode == "Default Dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
         try:
@@ -314,11 +279,10 @@ with tab3:
             for col in REQUIRED_COLS:
                 if col not in df.columns:
                     df[col] = 0
-            st.success("Default dataset loaded.")
+            st.success("Default dataset loaded!")
         except:
             st.error("Failed to load default dataset.")
 
-    # Upload CSV
     elif mode == "Upload CSV":
         file = st.file_uploader("Upload your CSV", type=["csv"])
         if file:
@@ -330,17 +294,16 @@ with tab3:
                     df[col] = 0
             st.success("File uploaded successfully.")
 
-    # Upload + Map
     else:
         file = st.file_uploader("Upload CSV", type=["csv"])
         if file:
             raw = pd.read_csv(file)
             raw.columns = raw.columns.str.strip()
-            st.write("Uploaded Data Preview:", raw.head())
+            st.write("Preview:", raw.head())
 
             mapping = {}
             for col in REQUIRED_COLS:
-                mapping[col] = st.selectbox(f"Map to: {col}", ["-- Select --"] + list(raw.columns))
+                mapping[col] = st.selectbox(f"Map → {col}", ["-- Select --"] + list(raw.columns))
 
             if st.button("Apply Mapping"):
                 missing = [k for k, v in mapping.items() if v == "-- Select --"]
@@ -348,16 +311,15 @@ with tab3:
                     st.error(f"Map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
-                    st.success("Column mapping applied.")
+                    st.success("Mapping completed.")
 
-    # Validation
     if df is None:
-        st.warning("Load or upload a dataset.")
+        st.warning("Please load a dataset.")
         st.stop()
 
-    missing_cols = [c for c in REQUIRED_COLS if c not in df.columns]
-    if missing_cols:
-        st.error(f"Missing required columns: {missing_cols}")
+    missing = [c for c in REQUIRED_COLS if c not in df.columns]
+    if missing:
+        st.error(f"Missing required columns: {missing}")
         st.stop()
 
     df = df.dropna(subset=["Campaign", "Channel"])
@@ -384,7 +346,6 @@ with tab3:
     k3.metric("Total Leads", f"{filt['Leads'].sum():,}")
     k4.metric("Total Spend", inr(filt["Spend"].sum()))
 
-    # Charts
     st.markdown("### Campaign-wise Clicks")
     st.plotly_chart(px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks"))
 
