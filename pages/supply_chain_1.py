@@ -95,7 +95,7 @@ def download_df(df, filename, label="Download CSV"):
 # ------------------------
 # Tabs
 # ------------------------
-tabs = st.tabs(["Overview", "Application"])
+tabs = st.tabs(["Overview", "Application", "Action Playbooks"])
 
 # ------------------------
 # Overview Tab
@@ -531,6 +531,133 @@ with tabs[1]:
         st.dataframe(ins_df, use_container_width=True)
         download_df(ins_df, "automated_insights_route.csv", label="Download insights CSV")
 
-    st.markdown("### Done — export what you need and start cutting costs. If the app crashes, send coffee to the nearest data engineer.")
 
-# end of file
+# --------------------------------------------------------
+# ACTION PLAYBOOKS TAB
+# --------------------------------------------------------
+with tabs[2]:
+    st.header("Actionable Playbooks")
+    st.markdown("Use these data-driven recommendations to immediately improve logistics performance.")
+
+    # Safety check
+    if df is None or filt is None or len(filt) == 0:
+        st.warning("No data available. Load dataset in Application tab first.")
+        st.stop()
+
+    # --------------------------------------------------------
+    # Playbook 1: Top 10 Routes to Reassign (low efficiency + high fuel)
+    # --------------------------------------------------------
+    st.subheader("1. Top 10 Routes to Reassign")
+
+    if "Efficiency_Score" in filt.columns and "Actual_Fuel_Liters" in filt.columns:
+        play_route = filt.groupby("Route_ID").agg(
+            avg_eff=("Efficiency_Score","mean"),
+            avg_fuel=("Actual_Fuel_Liters","mean"),
+            cnt=("Route_ID","count")
+        ).reset_index()
+
+        # Ranking score = low efficiency + high fuel
+        play_route["rank_score"] = (1 - play_route["avg_eff"]) * play_route["avg_fuel"]
+
+        top_routes = play_route.sort_values("rank_score", ascending=False).head(10)
+
+        st.markdown("These routes have *poor efficiency* and *high fuel burn* — reassign or re-evaluate scheduling.")
+        st.dataframe(top_routes, use_container_width=True)
+
+        download_df(top_routes, "top_routes_reassign.csv", "Download playbook CSV")
+    else:
+        st.info("Missing columns for route reassignment insights.")
+
+    # --------------------------------------------------------
+    # Playbook 2: Vehicles to Audit (high fuel/km or delays)
+    # --------------------------------------------------------
+    st.subheader("2. Vehicles to Audit")
+
+    if "Fuel_L_per_km" not in filt.columns and "Actual_Fuel_Liters" in filt.columns and "Route_Distance_km" in filt.columns:
+        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"]==0, np.nan, filt["Route_Distance_km"])
+
+    if "Fuel_L_per_km" in filt.columns and "Delay_Hours" in filt.columns:
+        veh = filt.groupby("Vehicle_ID").agg(
+            avg_fpk=("Fuel_L_per_km","mean"),
+            avg_delay=("Delay_Hours","mean"),
+            cnt=("Vehicle_ID","count")
+        ).reset_index()
+
+        veh["rank_score"] = veh["avg_fpk"] * 0.6 + veh["avg_delay"] * 0.4
+
+        audit_veh = veh.sort_values("rank_score", ascending=False).head(10)
+
+        st.markdown("Vehicles with high delay or fuel waste should be inspected or reassigned.")
+        st.dataframe(audit_veh, use_container_width=True)
+
+        download_df(audit_veh, "vehicles_to_audit.csv", "Download playbook CSV")
+    else:
+        st.info("Missing columns for vehicle audit insights.")
+
+    # --------------------------------------------------------
+    # Playbook 3: Driver Coaching (if Operator/Driver column exists)
+    # --------------------------------------------------------
+    st.subheader("3. Drivers / Operators to Coach")
+
+    driver_cols = [c for c in filt.columns if "driver" in c.lower() or "operator" in c.lower()]
+
+    if driver_cols:
+        dcol = driver_cols[0]   # take first available: Driver_ID / Operator_ID / similar
+
+        driver_df = filt.groupby(dcol).agg(
+            avg_delay=("Delay_Hours","mean") if "Delay_Hours" in filt.columns else None,
+            avg_eff=("Efficiency_Score","mean") if "Efficiency_Score" in filt.columns else None,
+            cnt=(dcol,"count")
+        ).reset_index()
+
+        # score: low efficiency + high delay
+        driver_df["score"] = (1 - driver_df["avg_eff"]) * 0.5 + driver_df["avg_delay"] * 0.5
+
+        top_drivers = driver_df.sort_values("score", ascending=False).head(10)
+
+        st.markdown("These operators show route inefficiency or higher delays — coaching or reskilling recommended.")
+        st.dataframe(top_drivers, use_container_width=True)
+
+        download_df(top_drivers, "drivers_to_coach.csv", "Download playbook CSV")
+    else:
+        st.info("No driver/operator column found.")
+
+    # --------------------------------------------------------
+    # Playbook 4: High-Risk Traffic × Weather conditions
+    # --------------------------------------------------------
+    st.subheader("4. High-Risk Traffic × Weather Conditions")
+
+    if "Traffic_Level" in filt.columns and "Weather_Condition" in filt.columns and "Delay_Hours" in filt.columns:
+        risk = filt.groupby(["Traffic_Level","Weather_Condition"]).agg(
+            avg_delay=("Delay_Hours","mean"),
+            cnt=("Route_ID","count")
+        ).reset_index()
+
+        high_risk = risk.sort_values("avg_delay", ascending=False).head(10)
+
+        st.markdown("These traffic-weather combinations create the worst delays. Use them for dynamic routing rules.")
+        st.dataframe(high_risk, use_container_width=True)
+
+        download_df(high_risk, "high_risk_conditions.csv", "Download playbook CSV")
+    else:
+        st.info("Missing columns for risk condition insights.")
+
+    # --------------------------------------------------------
+    # Final actionable recommendations summary (card layout)
+    # --------------------------------------------------------
+    st.subheader("5. Executive Recommendations (Auto-Generated)")
+
+    st.markdown("""
+    <div class='card left-align'>
+    • Reassign or redesign the top 10 least efficient routes.<br>
+    • Audit vehicles with abnormal fuel/km or chronic delays.<br>
+    • Coach operators showing repeated inefficiency.<br>
+    • Set rule-based routing to avoid high-risk traffic/weather combinations.<br>
+    • Adjust fleet scheduling based on predicted travel times and load capacities.<br>
+    • Prioritize routes with predictable efficiency for time-critical shipments.<br>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.success("Action Playbooks generated successfully.")
+
+
