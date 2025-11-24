@@ -24,113 +24,185 @@ st.markdown(f"""
 <div style="display: flex; align-items: center;">
     <img src="{logo_url}" width="60" style="margin-right:12px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:900;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:900;">Advanced Analytics</div>
+        <div style="color:#000; font-size:38px; font-weight:900;">Analytics Avenue &</div>
+        <div style="color:#000; font-size:38px; font-weight:900;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Global CSS
+# ADVANCED GLOBAL CSS EFFECTS
 # ---------------------------------------------------------
 st.markdown("""
 <style>
 
-.big-header {
-    font-size: 36px;
-    font-weight: 900;
-    color: black;
-}
+/* ----------------------------- */
+/* GLOBAL TYPOGRAPHY + BASE STYLE */
+/* ----------------------------- */
 
-/* Global font */
 body, [class*="css"] {
     font-family: 'Inter', sans-serif;
+    color:#000 !important;
+    font-size: 16px !important;
 }
 
-/* Standard card */
+/* Animated gradient underline header */
+.section-title {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color:#000 !important;
+    position: relative;
+    margin-top: 35px;
+    margin-bottom: 18px;
+}
+.section-title:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 4px;
+    width: 0%;
+    background: linear-gradient(90deg, #064b86, #00b4db);
+    transition: width 0.4s ease;
+}
+.section-title:hover:after {
+    width: 40%;
+}
+
+/* Big Page Header */
+.big-header {
+    font-size: 42px !important;
+    font-weight: 900 !important;
+    color: #000 !important;
+    margin-bottom: 10px !important;
+}
+
+
+/* ----------------------------- */
+/* ADVANCED CARD EFFECTS */
+/* ----------------------------- */
+
+/* Glass-morphism effect */
 .card {
-    padding:20px;
-    border-radius:12px;
-    background:#ffffff;
-    border:1px solid #e6e6e6;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    padding:24px;
+    border-radius:16px;
+    background:rgba(255,255,255,0.75);
+    border:1px solid rgba(0,0,0,0.15);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+    transition: all 0.25s ease-in-out;
 }
 .card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
-    border-color:#064b86;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.25);
+    border-color:#000;
 }
 
-/* KPI card */
+/* KPI Cards (large + clean) */
 .kpi {
-    padding:28px;
-    border-radius:12px;
+    padding:30px;
+    border-radius:14px;
     background:#ffffff;
-    border:1px solid #e6e6e6;
+    border:1px solid rgba(0,0,0,0.12);
     text-align:center;
-    font-weight:700;
-    color:#064b86;
-    font-size:20px;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    font-weight:800;
+    color:#000 !important;
+    font-size:22px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: 0.25s ease;
 }
 .kpi:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
-    border-color:#064b86;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.25);
 }
 
-.small { color:#666; font-size:13px; }
 
-/* REAL VARIABLE CARDS */
+/* ----------------------------- */
+/* VARIABLE CARDS */
+/* ----------------------------- */
+
 .variable-box {
     padding: 22px;
-    background: white;
     border-radius: 14px;
-    border: 1px solid #e0e6ed;
-    box-shadow: 0 4px 14px rgba(6, 75, 134, 0.15);
+    background: linear-gradient(145deg, #ffffff, #f3f3f3);
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     transition: 0.25s ease;
     text-align: center;
-    font-size: 18px;
-    font-weight: 700;
-    color:#064b86;
-    margin-bottom: 12px;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color:#000 !important;
+    margin-bottom: 14px;
 }
 .variable-box:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 28px rgba(6, 75, 134, 0.25);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.25);
     border-color:#064b86;
 }
 
-/* Table styling */
+
+/* ----------------------------- */
+/* TABLE STYLING */
+/* ----------------------------- */
+
 .dataframe th {
-    background: #064b86 !important;
+    background: #000 !important;
     color: white !important;
-    padding: 10px !important;
+    padding: 12px !important;
+    font-size:16px !important;
 }
 .dataframe td {
-    padding: 8px !important;
+    padding: 9px !important;
     border-bottom: 1px solid #e6e6e6 !important;
+    font-size: 15px !important;
+    color:#000 !important;
 }
 .dataframe tbody tr:hover {
-    background: #f3faff !important;
+    background: #f5f5f5 !important;
 }
 
-.section-title {
-    font-size: 26px;
-    font-weight: 800;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    color:#064b86;
+
+/* ----------------------------- */
+/* BUTTON IMPROVEMENTS */
+/* ----------------------------- */
+
+.stButton>button {
+    background: linear-gradient(90deg, #064b86, #00a3cc);
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border:none;
+    transition:0.3s ease;
+}
+.stButton>button:hover {
+    transform: translateY(-3px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.stDownloadButton>button {
+    background: linear-gradient(90deg, #064b86, #00a3cc) !important;
+    color:white !important;
+    border-radius:10px !important;
+    padding:10px 20px !important;
+    font-weight:700 !important;
+    transition:0.25s ease;
+}
+.stDownloadButton>button:hover {
+    transform: translateY(-3px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-
+# ---------------------------------------------------------
+# PAGE TITLE
+# ---------------------------------------------------------
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Required Columns
+# Required Columns + Mapping
 # ---------------------------------------------------------
 REQUIRED_COLS = [
     'Campaign','Channel','Date','Impressions',
@@ -163,18 +235,20 @@ def auto_map_columns(df):
 tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # ----------------------------------------------------------
-# TAB 1 – Overview (Matching your Route Optimization Layout)
+# TAB 1 – Overview
 # ----------------------------------------------------------
 with tab1:
 
     st.markdown("""
     <div style="text-align:left;">
-      <h2 style="margin:0; padding:0;">Marketing Campaign Performance Analyzer</h2>
-      <p style="margin-top:4px; color:#555">Track performance, optimize spend, and unlock smarter marketing decisions.</p>
+      <h2 style="margin:0; padding:0; color:#000;">Marketing Campaign Performance Analyzer</h2>
+      <p style="margin-top:4px; color:#333; font-size:17px;">
+      Track performance, optimize spend, and unlock smarter marketing decisions.
+      </p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Overview")
+    st.markdown("<div class='section-title'>Overview</div>", unsafe_allow_html=True)
     st.markdown("""
     <div class='card'>
       <b>Purpose</b>: Optimize campaigns, reduce wasted spend, improve conversions, and understand what drives ROI across channels.
@@ -184,7 +258,7 @@ with tab1:
     colA, colB = st.columns(2)
 
     with colA:
-        st.markdown("#### Capabilities")
+        st.markdown("<div class='section-title'>Capabilities</div>", unsafe_allow_html=True)
         st.markdown("""
         <div class='card'>
         • Track performance across channels<br>
@@ -196,7 +270,7 @@ with tab1:
         """, unsafe_allow_html=True)
 
     with colB:
-        st.markdown("#### Business Impact")
+        st.markdown("<div class='section-title'>Business Impact</div>", unsafe_allow_html=True)
         st.markdown("""
         <div class='card'>
         • Boost conversions & reduce CPL<br>
@@ -207,19 +281,19 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("#### KPIs")
+    st.markdown("<div class='section-title'>KPIs</div>", unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='kpi'>Total Impressions<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Total Clicks<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Total Leads<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>Total Spend<br><span class='small'>(Dataset driven)</span></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi'>Total Impressions</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Total Clicks</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Total Leads</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Total Spend</div>", unsafe_allow_html=True)
 
 # ----------------------------------------------------------
-# TAB 2 – IMPORTANT ATTRIBUTES (NOW WITH REAL CARDS)
+# TAB 2 – IMPORTANT ATTRIBUTES
 # ----------------------------------------------------------
 with tab2:
 
-    st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Required Column Data Dictionary</div>", unsafe_allow_html=True)
 
     data_dict = {
         "Campaign": "Name of the marketing campaign.",
@@ -240,19 +314,18 @@ with tab2:
     st.dataframe(df_dict, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # REAL variable cards
     indep = ["Campaign", "Channel", "Date", "Impressions", "Clicks", "Spend"]
     dep = ["Leads", "Conversions"]
 
     c1, c2 = st.columns(2)
 
     with c1:
-        st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
         for v in indep:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
     with c2:
-        st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>Dependent Variables</div>", unsafe_allow_html=True)
         for v in dep:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
@@ -261,9 +334,9 @@ with tab2:
 # ----------------------------------------------------------
 with tab3:
 
-    st.markdown("### Step 1: Load Dataset")
-    df = None
+    st.markdown("<div class='section-title'>Step 1: Load Dataset</div>", unsafe_allow_html=True)
 
+    df = None
     mode = st.radio(
         "Select Dataset Option:",
         ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
@@ -295,7 +368,7 @@ with tab3:
             st.success("File uploaded successfully.")
 
     else:
-        file = st.file_uploader("Upload CSV", type=["csv"])
+        file = st.file_uploader("Upload CSV for Column Mapping", type=["csv"])
         if file:
             raw = pd.read_csv(file)
             raw.columns = raw.columns.str.strip()
@@ -324,7 +397,6 @@ with tab3:
 
     df = df.dropna(subset=["Campaign", "Channel"])
 
-    # Filters
     campaign = st.multiselect("Campaign", df["Campaign"].unique())
     channel = st.multiselect("Channel", df["Channel"].unique())
 
@@ -334,10 +406,9 @@ with tab3:
     if channel:
         filt = filt[filt["Channel"].isin(channel)]
 
-    st.markdown("### Data Preview")
+    st.markdown("<div class='section-title'>Data Preview</div>", unsafe_allow_html=True)
     st.dataframe(filt.head(), use_container_width=True)
 
-    # KPIs
     def inr(x): return f"₹{x:,.2f}"
 
     k1, k2, k3, k4 = st.columns(4)
@@ -346,13 +417,13 @@ with tab3:
     k3.metric("Total Leads", f"{filt['Leads'].sum():,}")
     k4.metric("Total Spend", inr(filt["Spend"].sum()))
 
-    st.markdown("### Campaign-wise Clicks")
+    st.markdown("<div class='section-title'>Campaign-wise Clicks</div>", unsafe_allow_html=True)
     st.plotly_chart(px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks"))
 
-    st.markdown("### Channel-wise Leads")
+    st.markdown("<div class='section-title'>Channel-wise Leads</div>", unsafe_allow_html=True)
     st.plotly_chart(px.pie(filt, names="Channel", values="Leads"))
 
-    st.markdown("### Spend vs Conversions")
+    st.markdown("<div class='section-title'>Spend vs Conversions</div>", unsafe_allow_html=True)
     st.plotly_chart(px.scatter(
         filt, x="Spend", y="Conversions",
         size="Impressions", color="Channel", hover_data=["Campaign"]
