@@ -284,32 +284,63 @@ with tab1:
 # Important Attributes Tab
 # -------------------------
 with tab2:
+    # ---------------------------------------------------------
+    # REQUIRED COLUMNS TABLE
+    # ---------------------------------------------------------
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
-    data_dict = {
-        "Campaign": "Name of the marketing campaign.",
-        "Channel": "Traffic source or platform (Facebook, Google, Email, etc.).",
-        "Date": "Date of the activity/report row.",
-        "Impressions": "Number of times the creative was shown.",
-        "Clicks": "Number of clicks on the creative/link.",
-        "Leads": "Leads generated (form submits, demo requests etc.).",
-        "Conversions": "Completed target actions (purchase, signup).",
-        "Spend": "Ad spend for the row (INR)."
-    }
-    df_dict = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in data_dict.items()])
-    st.dataframe(df_dict, use_container_width=True)
 
-    indep = ["Campaign","Channel","Date","Impressions","Clicks","Spend"]
-    dep = ["Leads","Conversions"]
+    required_dict = {
+        "Campaign": "Name of the marketing campaign.",
+        "Channel": "Traffic source (FB, Google, Email, etc.).",
+        "Date": "Date of activity.",
+        "Impressions": "How many times your ad was shown.",
+        "Clicks": "Number of people who clicked.",
+        "Leads": "Users who showed interest.",
+        "Conversions": "Users completing final action.",
+        "Spend": "Amount spent on marketing."
+    }
+
+    req_df = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in required_dict.items()])
+
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.dataframe(req_df, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ---------------------------------------------------------
+    # INDEPENDENT VARIABLES
+    # ---------------------------------------------------------
+    st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+
+    indep_vars = [
+        "Campaign",
+        "Channel",
+        "Date",
+        "Impressions",
+        "Clicks",
+        "Spend"
+    ]
+
+    c1, c2, c3 = st.columns(3)
+    for i, v in enumerate(indep_vars):
+        (c1 if i % 3 == 0 else c2 if i % 3 == 1 else c3).markdown(
+            f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True
+        )
+
+    # ---------------------------------------------------------
+    # DEPENDENT VARIABLES
+    # ---------------------------------------------------------
+    st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+
+    dep_vars = [
+        "Leads",
+        "Conversions"
+    ]
 
     c1, c2 = st.columns(2)
-    with c1:
-        st.markdown('<div class="section-title">Independent Variables (Inputs)</div>', unsafe_allow_html=True)
-        for v in indep:
-            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
-    with c2:
-        st.markdown('<div class="section-title">Dependent Variables (Outputs)</div>', unsafe_allow_html=True)
-        for v in dep:
-            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+    for i, v in enumerate(dep_vars):
+        (c1 if i % 2 == 0 else c2).markdown(
+            f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True
+        )
 
 # -------------------------
 # Application Tab
