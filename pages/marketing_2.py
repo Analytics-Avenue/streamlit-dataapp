@@ -494,11 +494,6 @@ with tab3:
         except:
             return 0
 
-    k1.markdown(f"<div class='kpi'>Total Impressions<br><span style='font-size:12px;color:#222;font-weight:500;'>(dataset)</span></div>", unsafe_allow_html=True)
-    k2.markdown(f"<div class='kpi'>Total Clicks<br><span style='font-size:12px;color:#222;font-weight:500;'>(dataset)</span></div>", unsafe_allow_html=True)
-    k3.markdown(f"<div class='kpi'>Total Leads<br><span style='font-size:12px;color:#222;font-weight:500;'>(dataset)</span></div>", unsafe_allow_html=True)
-    k4.markdown(f"<div class='kpi'>Total Spend<br><span style='font-size:12px;color:#222;font-weight:500;'>(dataset)</span></div>", unsafe_allow_html=True)
-
     # also show numeric metrics real below (safe)
     k1_val, k2_val, k3_val, k4_val = st.columns(4)
     k1_val.metric("Impressions", f"{safe_sum(filt['Impressions']):,}")
