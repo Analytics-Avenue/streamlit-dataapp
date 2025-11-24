@@ -341,7 +341,8 @@ else:
             "tools": ["Python","SQL","Power BI","Time Series Forecasting","Inventory Optimization Models","Excel","Simulation / What-If Analysis"]}
             ],        
         "HR Analytics": [
-            {  "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, 
+            {
+            "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, 
             and improve conversion from application to onboarding.",
             "tools": ["Python", "Excel", "Power BI", "Funnel Analytics", "Logistic Regression"]
         },
