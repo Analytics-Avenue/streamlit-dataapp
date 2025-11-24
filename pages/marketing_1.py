@@ -222,18 +222,11 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 # TAB 1 – OVERVIEW
 # ---------------------------------------------------------
 with tab1:
-
-    st.markdown("""
-    <div style="text-align:left;">
-      <h2 style="margin:0;">Marketing Campaign Performance Analyzer</h2>
-      <p style="color:#444;">Measure, optimize, and improve your digital marketing outcomes.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
     st.markdown("### Overview")
     st.markdown("""
     <div class='card'>
-      <b>Purpose:</b> Understand campaign performance, reduce wasted spend, and systematically improve conversions.
+    <b>Purpose:</b> Modern marketing runs on data, not guesswork. This analyzer helps you understand how every campaign, channel, and ad interaction contributes to your outcomes. 
+    It brings all performance signals into one place so you can quickly identify what's working, what’s wasting money, and where to focus your efforts for maximum ROI. 
     </div>
     """, unsafe_allow_html=True)
 
@@ -243,11 +236,12 @@ with tab1:
         st.markdown("#### Capabilities")
         st.markdown("""
         <div class='card'>
-        • Multi-channel tracking<br>
-        • ROI optimization<br>
-        • Conversion funnel analytics<br>
-        • Spend vs performance modelling<br>
-        • Dashboard-ready analytics<br>
+        • Unify performance across channels like Facebook, Google, Instagram, and Email<br>
+        • Understand full-funnel behavior from impressions to conversions<br>
+        • Identify winning creatives, audiences, and high-value customer actions<br>
+        • Compare campaign ROI with cost-efficient benchmarking<br>
+        • Instantly spot spikes, drops, or unusual campaign behavior<br>
+        • Export ready-to-use dashboards and datasets for deeper BI work<br>
         </div>
         """, unsafe_allow_html=True)
 
@@ -255,20 +249,30 @@ with tab1:
         st.markdown("#### Business Impact")
         st.markdown("""
         <div class='card'>
-        • Increase conversions<br>
-        • Reduce CPL & CAC<br>
-        • Identify high-performing creatives<br>
-        • Real-time campaign intelligence<br>
-        • Budget reallocation insights<br>
+        • Reduce wasted ad spend by pinpointing ineffective campaigns<br>
+        • Improve lead quality by understanding channel-to-outcome patterns<br>
+        • Strengthen planning with reliable performance forecasting<br>
+        • Allocate budgets with confidence based on actual cost-per-result trends<br>
+        • Improve conversion efficiency with actionable funnel insights<br>
+        • Build a scalable marketing measurement system that grows with your business<br>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("#### KPIs")
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='kpi'>Total Impressions<br><span class='small'>(auto-calculated)</span></div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Total Clicks<br><span class='small'>(auto-calculated)</span></div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Total Leads<br><span class='small'>(auto-calculated)</span></div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>Total Spend<br><span class='small'>(auto-calculated)</span></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi'>Total Impressions</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Total Clicks</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Total Leads</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Total Spend</div>", unsafe_allow_html=True)
+
+    st.markdown("### Who Should Use This & Why")
+    st.markdown("""
+    <div class='card'>
+    <b>Who is this for?</b> Marketing teams, founders, growth managers, data analysts, campaign specialists, and anyone responsible for scaling revenue efficiently.<br><br>
+    <b>Why it matters:</b> With increasing ad costs and fragmented platforms, businesses need a single source of truth to decide where to invest, what to optimize, and how to grow sustainably.
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 2 – IMPORTANT ATTRIBUTES
