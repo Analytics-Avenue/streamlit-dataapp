@@ -164,9 +164,9 @@ sectors = {
     {"name": "Skill Gap & Training Needs Analysis", "page": "hr_3.py"},
     ],
     "Supply Chain Analytics": [
-    {"name": "Route Optimization & Logistics Efficiency", "page": "sc_route_optimization.py"},
-    {"name": "Order Fulfillment & SLA Analytics", "page": "sc_sla_analytics.py"},
-    {"name": "Warehouse Operations Analytics", "page": "sc_warehouse_ops.py"}
+    {"name": "Route Optimization & Logistics Efficiency", "page": "supply_chain_1.py"},
+    {"name": "Order Fulfillment & SLA Analytics", "page": "supply_chain_2.py"},
+    {"name": "Warehouse Operations Analytics", "page": "supply_chain_3.py"}
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
