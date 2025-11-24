@@ -284,62 +284,84 @@ with tab1:
 # Important Attributes Tab
 # -------------------------
 with tab2:
-    # ---------------------------------------------------------
-    # REQUIRED COLUMNS TABLE
-    # ---------------------------------------------------------
+
+    # --------------------------------------------
+    # REQUIRED COLUMNS TABLE (PURE BLACK, BIG FONT)
+    # --------------------------------------------
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
 
     required_dict = {
         "Campaign": "Name of the marketing campaign.",
-        "Channel": "Traffic source (FB, Google, Email, etc.).",
-        "Date": "Date of activity.",
-        "Impressions": "How many times your ad was shown.",
-        "Clicks": "Number of people who clicked.",
-        "Leads": "Users who showed interest.",
-        "Conversions": "Users completing final action.",
-        "Spend": "Amount spent on marketing."
+        "Channel": "Source platform (Facebook, Google, Email, etc.).",
+        "Date": "Date of each campaign activity.",
+        "Impressions": "Total number of ad views.",
+        "Clicks": "Number of times users clicked the ads.",
+        "Leads": "Users who expressed interest.",
+        "Conversions": "Users who completed the desired action.",
+        "Spend": "Amount spent on advertising."
     }
 
-    req_df = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in required_dict.items()])
+    req_df = pd.DataFrame(
+        [{"Attribute": k, "Description": v} for k, v in required_dict.items()]
+    )
 
-    st.dataframe(req_df, use_container_width=True)
+    # PURE black table styling override
+    st.markdown("""
+        <style>
+            .required-table th {
+                background:#ffffff !important;
+                color:#000 !important;
+                font-size:18px !important;
+                border-bottom:2px solid #000 !important;
+            }
+            .required-table td {
+                color:#000 !important;
+                font-size:17px !important;
+                padding:10px !important;
+                border-bottom:1px solid #dcdcdc !important;
+            }
+            .required-table tr:hover td {
+                background:#f8f8f8 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.dataframe(req_df.style.set_table_attributes('class="required-table"'), use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------------------------------------------------------
-    # INDEPENDENT VARIABLES
-    # ---------------------------------------------------------
-    st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-
-    indep_vars = [
-        "Campaign",
-        "Channel",
-        "Date",
-        "Impressions",
-        "Clicks",
-        "Spend"
-    ]
-
-    c1, c2, c3 = st.columns(3)
-    for i, v in enumerate(indep_vars):
-        (c1 if i % 3 == 0 else c2 if i % 3 == 1 else c3).markdown(
-            f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True
-        )
-
-    # ---------------------------------------------------------
-    # DEPENDENT VARIABLES
-    # ---------------------------------------------------------
-    st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
-
-    dep_vars = [
-        "Leads",
-        "Conversions"
-    ]
-
+    # --------------------------------------------
+    # Independent LEFT / Dependent RIGHT (cards)
+    # --------------------------------------------
     c1, c2 = st.columns(2)
-    for i, v in enumerate(dep_vars):
-        (c1 if i % 2 == 0 else c2).markdown(
-            f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True
-        )
+
+    # Independent variables LEFT
+    with c1:
+        st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+
+        indep_vars = [
+            "Campaign",
+            "Channel",
+            "Date",
+            "Impressions",
+            "Clicks",
+            "Spend"
+        ]
+
+        for v in indep_vars:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+    # Dependent variables RIGHT
+    with c2:
+        st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+
+        dep_vars = [
+            "Leads",
+            "Conversions"
+        ]
+
+        for v in dep_vars:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Application Tab
