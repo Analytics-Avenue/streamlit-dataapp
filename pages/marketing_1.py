@@ -2,86 +2,89 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# ---------------------------------------------------------
+# Base Config
+# ---------------------------------------------------------
 st.set_page_config(page_title="Marketing Campaign Performance Analyzer", layout="wide")
 
-# Hide default sidebar navigation
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+# Hide sidebar navigation
+st.markdown("""
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+""", unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------
-# COMPANY HEADER
-# ------------------------------------------------------------------------
+# ---------------------------------------------------------
+# Company Header
+# ---------------------------------------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+
 st.markdown(f"""
 <div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:36px; font-weight:900;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:900;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------
-# GLOBAL STYLING
-# ------------------------------------------------------------------------
+st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Global CSS
+# ---------------------------------------------------------
 st.markdown("""
 <style>
 
 .big-header {
     font-size: 36px;
     font-weight: 900;
-    color: black !important;
+    color: black;
 }
 
 /* Global font */
 body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    transition: 0.3s ease;
 }
 
-/* Section title */
-.section-title {
-    font-size: 26px;
-    font-weight: 800;
-    padding-bottom: 6px;
-    margin-top: 20px;
-    position: relative;
-    color: #064b86;
+/* Standard Card */
+.card {
+    padding:20px;
+    border-radius:12px;
+    background:#ffffff;
+    border:1px solid #e6e6e6;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    text-align:left;
 }
-.section-title::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 3px;
-    width: 0%;
-    background: #064b86;
-    transition: width 0.4s;
-}
-.section-title:hover::after {
-    width: 35%;
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
+    border-color:#064b86;
 }
 
-/* Fade-in */
-.fade-in {
-    animation: fadeIn 0.5s ease;
+/* KPI Card */
+.kpi {
+    padding:28px;
+    border-radius:12px;
+    background:#ffffff;
+    border:1px solid #e6e6e6;
+    text-align:center;
+    font-weight:700;
+    color:#064b86;
+    font-size:20px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+.kpi:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
+    border-color:#064b86;
 }
 
-/* Dictionary card */
-.dict-card {
-    background: white;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #e5eaf0;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.06);
-    margin-bottom: 15px;
-}
+.small { color:#666; font-size:13px; }
 
-/* Variable glow cards */
+/* Variable Glow Cards */
 .variable-card {
     background: white;
     padding: 18px;
@@ -96,7 +99,7 @@ body, [class*="css"] {
     border-color: #064b86;
 }
 
-/* DataFrame styling */
+/* DataFrame Styling */
 .dataframe th {
     background: #064b86 !important;
     color: white !important;
@@ -110,29 +113,17 @@ body, [class*="css"] {
     background: #f3faff !important;
 }
 
-/* Buttons */
-.stButton>button, .stDownloadButton>button {
-    background: #064b86 !important;
-    color: white !important;
-    border-radius: 8px;
-    padding: 8px 16px !important;
-    border: none;
-    font-weight: 600;
-    transition: 0.2s;
-}
-.stButton>button:hover, .stDownloadButton>button:hover {
-    background: #0b6ab8 !important;
-    transform: translateY(-2px);
-}
-
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# Title
+# ---------------------------------------------------------
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------
-# REQUIRED COLUMNS
-# ------------------------------------------------------------------------
+# ---------------------------------------------------------
+# Required Columns
+# ---------------------------------------------------------
 REQUIRED_COLS = [
     'Campaign','Channel','Date','Impressions',
     'Clicks','Leads','Conversions','Spend'
@@ -158,83 +149,139 @@ def auto_map_columns(df):
                 break
     return df.rename(columns=rename_dict)
 
-# ------------------------------------------------------------------------
-# TABS
-# ------------------------------------------------------------------------
+# ---------------------------------------------------------
+# Tabs
+# ---------------------------------------------------------
 tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
-# ------------------------------------------------------------------------
-# TAB 1: OVERVIEW
-# ------------------------------------------------------------------------
+# ----------------------------------------------------------
+# TAB 1 — NEW OVERVIEW LAYOUT (MATCHING ROUTE OPTIMIZATION STYLE)
+# ----------------------------------------------------------
 with tab1:
+
+    st.markdown("""
+    <div style="text-align:left;">
+      <h2 style="margin:0; padding:0;">Marketing Campaign Performance Analyzer</h2>
+      <p style="margin-top:4px; color:#555">Track performance, optimize spend, and unlock smarter marketing decisions.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Purpose
     st.markdown("### Overview")
-    st.write("This app tracks marketing campaign performance across channels, helping measure engagement, conversions, and ROI.")
+    st.markdown("""
+    <div class='card'>
+      <b>Purpose</b>: Optimize campaigns, reduce wasted spend, improve conversions, and understand what drives ROI across channels.
+    </div>
+    """, unsafe_allow_html=True)
 
+    # Two-column layout
+    colA, colB = st.columns(2)
+
+    with colA:
+        st.markdown("#### Capabilities")
+        st.markdown("""
+        <div class='card'>
+        • Track campaign & channel-level performance<br>
+        • Optimize ROI & reduce wasted spend<br>
+        • Conversion funnel analytics<br>
+        • Multi-channel cost efficiency scoring<br>
+        • Automated dashboard-ready insights<br>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with colB:
+        st.markdown("#### Business Impact")
+        st.markdown("""
+        <div class='card'>
+        • Boost conversions & reduce CPL<br>
+        • Allocate budget more intelligently<br>
+        • Identify high-performing creatives<br>
+        • Improve forecasting & planning<br>
+        • Strengthen overall marketing effectiveness<br>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # KPI row
+    st.markdown("#### KPIs")
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Total Impressions", "—")
-    k2.metric("Total Clicks", "—")
-    k3.metric("Total Leads", "—")
-    k4.metric("Total Spend", "—")
 
-# ------------------------------------------------------------------------
-# TAB 2: IMPORTANT ATTRIBUTES
-# ------------------------------------------------------------------------
+    k1.markdown("<div class='kpi'>Total Impressions<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Total Clicks<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Total Leads<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Total Spend<br><span class='small'>(from dataset)</span></div>", unsafe_allow_html=True)
+
+    # Who should use this
+    st.markdown("### Who should use this & How")
+    st.markdown("""
+    <div class='card'>
+      <b>Who</b>: Marketing analysts, growth teams, brand managers, founders.<br><br>
+      <b>How</b>:  
+      1) Load your dataset.  
+      2) Filter by campaign or channel.  
+      3) Review KPIs & charts.  
+      4) Use insights to reallocate spend smartly.  
+    </div>
+    """, unsafe_allow_html=True)
+
+# ----------------------------------------------------------
+# TAB 2 — IMPORTANT ATTRIBUTES
+# ----------------------------------------------------------
 with tab2:
-    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
 
-    # Dictionary
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
 
     data_dict = {
         "Campaign": "Name of the marketing campaign.",
-        "Channel": "Marketing channel (Facebook, Google, Instagram, etc.).",
-        "Date": "Date of record.",
-        "Impressions": "Total number of ad views.",
-        "Clicks": "Ad clicks.",
-        "Leads": "Users who submitted interest.",
-        "Conversions": "Users who completed desired action.",
-        "Spend": "Amount spent on ad."
+        "Channel": "Marketing channel (Facebook, Google, Instagram, etc.)",
+        "Date": "Activity date.",
+        "Impressions": "Number of ad views.",
+        "Clicks": "Number of clicks.",
+        "Leads": "Interested users.",
+        "Conversions": "Completed actions (sale/signup).",
+        "Spend": "Amount spent."
     }
 
-    df_dict = pd.DataFrame([{"Attribute": k, "Description": v} for k, v in data_dict.items()])
+    df_dict = pd.DataFrame(
+        [{"Attribute": k, "Description": v} for k, v in data_dict.items()]
+    )
 
     st.markdown('<div class="dict-card">', unsafe_allow_html=True)
     st.dataframe(df_dict, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Variables left & right
+    # Variables left/right
     indep = ["Campaign", "Channel", "Date", "Impressions", "Clicks", "Spend"]
     dep = ["Leads", "Conversions"]
 
-    col1, col2 = st.columns(2)
+    c1, c2 = st.columns(2)
 
-    with col1:
+    with c1:
         st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
         st.markdown('<div class="variable-card">', unsafe_allow_html=True)
         st.dataframe(pd.DataFrame({"Independent Variables": indep}), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    with col2:
+    with c2:
         st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
         st.markdown('<div class="variable-card">', unsafe_allow_html=True)
         st.dataframe(pd.DataFrame({"Dependent Variables": dep}), use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ------------------------------------------------------------------------
-# TAB 3: APPLICATION
-# ------------------------------------------------------------------------
+# ----------------------------------------------------------
+# TAB 3 — APPLICATION
+# ----------------------------------------------------------
 with tab3:
 
     st.markdown("### Step 1: Load Dataset")
     df = None
 
-    mode = st.radio("Select Dataset Option:",
+    mode = st.radio(
+        "Select Dataset Option:",
         ["Default Dataset", "Upload CSV", "Upload CSV + Column Mapping"],
-        horizontal=True
+        horizontal=True,
     )
 
+    # Default data
     if mode == "Default Dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
         try:
@@ -244,12 +291,13 @@ with tab3:
             for col in REQUIRED_COLS:
                 if col not in df.columns:
                     df[col] = 0
-            st.success("Default dataset loaded successfully.")
+            st.success("Default dataset loaded.")
         except:
-            st.error("Unable to load default dataset.")
+            st.error("Failed to load default dataset.")
 
+    # Upload CSV
     elif mode == "Upload CSV":
-        file = st.file_uploader("Upload your CSV file", type=["csv"])
+        file = st.file_uploader("Upload your CSV", type=["csv"])
         if file:
             df = pd.read_csv(file)
             df.columns = df.columns.str.strip()
@@ -259,35 +307,37 @@ with tab3:
                     df[col] = 0
             st.success("File uploaded successfully.")
 
-    elif mode == "Upload CSV + Column Mapping":
-        file = st.file_uploader("Upload your CSV", type=["csv"])
+    # Upload + Map
+    else:
+        file = st.file_uploader("Upload CSV", type=["csv"])
         if file:
             raw = pd.read_csv(file)
             raw.columns = raw.columns.str.strip()
-            st.write("Uploaded Data Preview", raw.head())
+            st.write("Uploaded Data Preview:", raw.head())
 
             mapping = {}
             for col in REQUIRED_COLS:
-                mapping[col] = st.selectbox(f"Map: {col}", ["-- Select --"] + list(raw.columns))
+                mapping[col] = st.selectbox(f"Map to: {col}", ["-- Select --"] + list(raw.columns))
 
             if st.button("Apply Mapping"):
-                missing = [k for k,v in mapping.items() if v == "-- Select --"]
+                missing = [k for k, v in mapping.items() if v == "-- Select --"]
                 if missing:
-                    st.error(f"Please map all: {missing}")
+                    st.error(f"Map all required columns: {missing}")
                 else:
                     df = raw.rename(columns=mapping)
-                    st.success("Mapping applied successfully.")
+                    st.success("Column mapping applied.")
 
+    # Validation
     if df is None:
-        st.warning("Please load or upload a dataset.")
+        st.warning("Load or upload a dataset.")
         st.stop()
 
-    missing = [col for col in REQUIRED_COLS if col not in df.columns]
-    if missing:
-        st.error(f"Missing required columns: {missing}")
+    missing_cols = [c for c in REQUIRED_COLS if c not in df.columns]
+    if missing_cols:
+        st.error(f"Missing required columns: {missing_cols}")
         st.stop()
 
-    df = df.dropna(subset=["Campaign","Channel"])
+    df = df.dropna(subset=["Campaign", "Channel"])
 
     # Filters
     campaign = st.multiselect("Campaign", df["Campaign"].unique())
@@ -303,13 +353,12 @@ with tab3:
     st.dataframe(filt.head(), use_container_width=True)
 
     # KPIs
-    def inr(x):
-        return f"₹{x:,.2f}"
+    def inr(x): return f"₹{x:,.2f}"
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Total Impressions", f"{int(filt['Impressions'].sum()):,}")
-    k2.metric("Total Clicks", f"{int(filt['Clicks'].sum()):,}")
-    k3.metric("Total Leads", f"{int(filt['Leads'].sum()):,}")
+    k1.metric("Total Impressions", f"{filt['Impressions'].sum():,}")
+    k2.metric("Total Clicks", f"{filt['Clicks'].sum():,}")
+    k3.metric("Total Leads", f"{filt['Leads'].sum():,}")
     k4.metric("Total Spend", inr(filt["Spend"].sum()))
 
     # Charts
@@ -320,6 +369,9 @@ with tab3:
     st.plotly_chart(px.pie(filt, names="Channel", values="Leads"))
 
     st.markdown("### Spend vs Conversions")
-    st.plotly_chart(px.scatter(filt, x="Spend", y="Conversions", size="Impressions", color="Channel"))
+    st.plotly_chart(px.scatter(
+        filt, x="Spend", y="Conversions",
+        size="Impressions", color="Channel", hover_data=["Campaign"]
+    ))
 
     st.download_button("Download Filtered Dataset", filt.to_csv(index=False), "marketing_filtered.csv")
