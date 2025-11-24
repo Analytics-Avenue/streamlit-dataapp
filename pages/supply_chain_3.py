@@ -96,6 +96,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("## Warehouse Operations Analytics")
+
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
@@ -105,9 +107,6 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Application", "Actionable Playbooks"])
 # OVERVIEW TAB
 # ---------------------------------------------------------
 with tab1:
-
-    st.markdown("## Warehouse Operations Analytics")
-
     st.markdown("""
     <div class='card'>
         Analyze picking efficiency, slotting patterns, congestion, picker productivity,
