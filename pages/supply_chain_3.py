@@ -99,7 +99,7 @@ st.markdown("## Warehouse Operations Analytics")
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
-tab1, tab2 = st.tabs(["Overview", "Application"])
+tab1, tab2, tab3 = st.tabs(["Overview", "Application", "Actionable Playbooks"])
 
 # ---------------------------------------------------------
 # OVERVIEW TAB
@@ -299,62 +299,94 @@ with tab2:
         st.plotly_chart(fig, use_container_width=True)
 
     # 1: Pick Qty Distribution
-    chart(px.histogram(df_f, x="Pick_Qty", nbins=40,
-                       title="Pick Quantity Distribution"))
+    with st.expander("📊 Pick Qty Distribution — Purpose & Quick Tip"):
+        st.write("Purpose: Shows the distribution of order picking quantities to detect bulk orders.")
+        st.write("Quick Tip: Watch for long tails indicating inconsistent SKU demand.")
+    chart(px.histogram(df_f, x="Pick_Qty", nbins=40, title="Pick Quantity Distribution"))
 
     # 2: Travel Distance Over Time
-    chart(px.scatter(df_f, x="Order_Timestamp", y="Travel_Distance_M",
-                     color="Warehouse", title="Travel Distance Over Time"))
+    with st.expander("📍 Travel Distance Over Time — Purpose & Quick Tip"):
+        st.write("Purpose: Track how picker travel distance changes over time.")
+        st.write("Quick Tip: Sudden spikes highlight layout or slotting inefficiencies.")
+    chart(px.scatter(df_f, x="Order_Timestamp", y="Travel_Distance_M", color="Warehouse", title="Travel Distance Over Time"))
 
     # 3: Heatmap Activity by Zone
-    chart(px.box(df_f, x="Zone", y="Heatmap_Level",
-                 title="Zone-Level Heatmap Activity"))
+    with st.expander("🔥 Zone Heatmap Activity — Purpose & Quick Tip"):
+        st.write("Purpose: Identify high-activity or congested warehouse zones.")
+        st.write("Quick Tip: Zones with wide boxplots indicate unstable workload distribution.")
+    chart(px.box(df_f, x="Zone", y="Heatmap_Level", title="Zone-Level Heatmap Activity"))
 
     # 4: Slotting Score by SKU Class
-    chart(px.violin(df_f, x="SKU_Class", y="Slotting_Score",
-                    title="Slotting Score Distribution by SKU Class"))
+    with st.expander("📦 Slotting Score by SKU Class — Purpose & Quick Tip"):
+        st.write("Purpose: Compare slotting optimization across SKU classes.")
+        st.write("Quick Tip: Low slotting scores for Class A items indicate layout problems.")
+    chart(px.violin(df_f, x="SKU_Class", y="Slotting_Score", title="Slotting Score Distribution by SKU Class"))
 
     # 5: Delay Reasons %
+    with st.expander("⏳ Delay Reasons — Purpose & Quick Tip"):
+        st.write("Purpose: Understand root causes of operational delays.")
+        st.write("Quick Tip: Focus improvement efforts on the dominant reason slice.")
     chart(px.pie(df_f, names="Delay_Reason", title="Delay Reasons Distribution"))
 
     # 6: Travel Time vs Distance
-    chart(px.scatter(df_f, x="Travel_Distance_M", y="Travel_Time_Sec",
-                     trendline="ols", title="Travel Time vs Distance"))
+    with st.expander("🛒 Travel Time vs Distance — Purpose & Quick Tip"):
+        st.write("Purpose: Measure relationship between distance walked and time consumed.")
+        st.write("Quick Tip: Outliers may indicate interruptions or picker inefficiencies.")
+    chart(px.scatter(df_f, x="Travel_Distance_M", y="Travel_Time_Sec", title="Travel Time vs Distance"))
 
     # 7: Equipment usage
+    with st.expander("🚜 Equipment Usage — Purpose & Quick Tip"):
+        st.write("Purpose: Understand which equipment types are used most.")
+        st.write("Quick Tip: High reliance on a single type may signal imbalance.")
     chart(px.bar(df_f, x="Equipment_Type", title="Equipment Usage"))
 
     # 8: Picker productivity
-    chart(px.histogram(df_f, x="Picker_Productivity_Items_Hour",
-                       title="Picker Productivity Distribution"))
+    with st.expander("👷 Picker Productivity — Purpose & Quick Tip"):
+        st.write("Purpose: Evaluate distribution of picker productivity levels.")
+        st.write("Quick Tip: Consider retraining bottom-performers.")
+    chart(px.histogram(df_f, x="Picker_Productivity_Items_Hour", title="Picker Productivity Distribution"))
 
     # 9: Congestion Factor
-    chart(px.box(df_f, y="Congestion_Factor", color="Warehouse",
-                 title="Congestion Factor by Warehouse"))
+    with st.expander("🚧 Congestion Factor — Purpose & Quick Tip"):
+        st.write("Purpose: Analyze congestion differences across warehouses.")
+        st.write("Quick Tip: Consistent high congestion requires layout revision.")
+    chart(px.box(df_f, y="Congestion_Factor", color="Warehouse", title="Congestion Factor by Warehouse"))
 
     # 10: SKU weight distribution
+    with st.expander("⚖️ SKU Weight Distribution — Purpose & Quick Tip"):
+        st.write("Purpose: Assess weight variation across SKUs.")
+        st.write("Quick Tip: Heavy-SKU clusters help redesign ergonomic picking.")
     chart(px.histogram(df_f, x="SKU_Weight_KG", title="SKU Weight Distribution"))
 
     # 11: Pick Time vs Pack Time
-    chart(px.scatter(df_f, x="Pick_Time_Sec", y="Pack_Time_Sec",
-                     title="Pick vs Pack Time"))
+    with st.expander("📦 Pick vs Pack Time — Purpose & Quick Tip"):
+        st.write("Purpose: Compare picking and packing time correlation.")
+        st.write("Quick Tip: Large gaps may reveal packing station bottlenecks.")
+    chart(px.scatter(df_f, x="Pick_Time_Sec", y="Pack_Time_Sec", title="Pick vs Pack Time"))
 
     # 12: Heatmap Level Time-Series
-    chart(px.line(df_f.sort_values("Order_Timestamp"),
-                  x="Order_Timestamp", y="Heatmap_Level",
-                  title="Heatmap Level Over Time"))
+    with st.expander("⏱️ Heatmap Level Over Time — Purpose & Quick Tip"):
+        st.write("Purpose: Monitor congestion intensity across time.")
+        st.write("Quick Tip: Peaks often align with shift overlaps or restocking.")
+    chart(px.line(df_f.sort_values("Order_Timestamp"), x="Order_Timestamp", y="Heatmap_Level", title="Heatmap Level Over Time"))
 
     # 13: Aisle Congestion Map
-    chart(px.density_heatmap(df_f, x="Aisle", y="Heatmap_Level",
-                             title="Aisle Congestion Heatmap"))
+    with st.expander("🗺️ Aisle Congestion Map — Purpose & Quick Tip"):
+        st.write("Purpose: Identify which aisles face maximum congestion.")
+        st.write("Quick Tip: Darker zones suggest rerouting opportunities.")
+    chart(px.density_heatmap(df_f, x="Aisle", y="Heatmap_Level", title="Aisle Congestion Heatmap"))
 
     # 14: Productivity by Shift
-    chart(px.box(df_f, x="Shift", y="Picker_Productivity_Items_Hour",
-                 title="Productivity by Shift"))
+    with st.expander("🌙 Productivity by Shift — Purpose & Quick Tip"):
+        st.write("Purpose: Compare picker performance across shifts.")
+        st.write("Quick Tip: Low-performing shifts often align with staffing imbalance.")
+    chart(px.box(df_f, x="Shift", y="Picker_Productivity_Items_Hour", title="Productivity by Shift"))
 
     # 15: Delay Time Distribution
-    chart(px.histogram(df_f, x="Delay_Minutes", nbins=40,
-                       title="Delay Duration Distribution"))
+    with st.expander("⏱️ Delay Duration Distribution — Purpose & Quick Tip"):
+        st.write("Purpose: Examine distribution of delay lengths.")
+        st.write("Quick Tip: Long-tail delays require root-cause drilling.")
+    chart(px.histogram(df_f, x="Delay_Minutes", nbins=40, title="Delay Duration Distribution"))
 
 
     # ---------------------------------------------------------
@@ -462,3 +494,25 @@ with tab2:
     st.dataframe(ins_df)
     download_csv(ins_df, "automated_insights.csv")
 
+# ---------------------------------------------------------
+# PLAYBOOK TAB
+# ---------------------------------------------------------
+with tab3:
+
+    st.header("Actionable Playbooks")
+
+    play = [
+        ["Reassign congested aisles", "Divert picks away from Aisles with Heatmap_Level > 4"],
+        ["Relocate slow-moving SKUs", "Move low-velocity SKUs to back racks"],
+        ["Picker retraining", "Train pickers with productivity < 25 items/hour"],
+        ["Forklift/AMR scheduling", "Assign AMRs to long-distance pick routes"],
+        ["Travel-time reduction", "Optimize zone routing for high-frequency SKUs"],
+        ["Congestion hotfix", "Stagger Shift-1 pickers during peak hours"],
+        ["Slotting optimization", "Boost Slotting_Score by relocating Class A SKUs"],
+        ["Delay elimination", "Target root causes: Transport/Stockout/Equipment"]
+    ]
+
+    play_df = pd.DataFrame(play, columns=["Action Recommendation", "Reason"])
+    st.dataframe(play_df, use_container_width=True)
+
+    download_csv(play_df, "actionable_playbooks.csv")
