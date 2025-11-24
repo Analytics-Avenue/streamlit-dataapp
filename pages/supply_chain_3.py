@@ -209,10 +209,11 @@ with tab2:
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
 
-    # Upload actual CSV
-    file = st.file_uploader("Upload your dataset", type=["csv"])
-    if file:
-        df = pd.read_csv(file)
+        # Upload actual CSV
+        file = st.file_uploader("Upload your dataset", type=["csv"])
+        if file:
+            df = pd.read_csv(file)
+
         
     else:
         file = st.file_uploader("Upload CSV", type=["csv"])
