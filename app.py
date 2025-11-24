@@ -342,18 +342,15 @@ else:
             ],        
         "HR Analytics": [
             {
-            "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, 
-            and improve conversion from application to onboarding.",
+            "overview": "Identify where candidates drop off in the hiring pipeline, analyze recruiter efficiency, and improve conversion from application to onboarding.",
             "tools": ["Python", "Excel", "Power BI", "Funnel Analytics", "Logistic Regression"]
         },
         {
-            "overview": "Predict employee absenteeism, optimize shift schedules, and improve workforce planning 
-            using machine learning and HRIS data.",
+            "overview": "Predict employee absenteeism, optimize shift schedules, and improve workforce planning using machine learning and HRIS data.",
             "tools": ["Python", "Scikit-Learn", "Time Series", "Classification Models", "Power BI"]
         },
         {
-            "overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training 
-            programs with ML-driven skill profiling.",
+            "overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training programs with ML-driven skill profiling.",
             "tools": ["Python", "NLP", "Embedding Models", "Clustering", "Excel"]
         }],
         "Gen AI": [
