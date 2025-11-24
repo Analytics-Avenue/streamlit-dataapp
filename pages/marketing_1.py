@@ -21,7 +21,7 @@ section[data-testid="stSidebar"] {display: none;}
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
 st.markdown(f"""
-<div style="display: flex; align-items: center;">
+<div style="display: flex; align-items: center; margin-bottom:15px;">
     <img src="{logo_url}" width="60" style="margin-right:12px;">
     <div style="line-height:1;">
         <div style="color:#064b86; font-size:36px; font-weight:900;">Analytics Avenue &</div>
@@ -36,64 +36,79 @@ st.markdown(f"""
 st.markdown("""
 <style>
 
+* {
+    font-family: 'Inter', sans-serif;
+}
+
 /* ------------------------------------------------ */
-/* GLOBAL FONT + COLOR SYSTEM */
+/* GLOBAL TEXT SYSTEM */
 /* ------------------------------------------------ */
 body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px !important;
     color:#000 !important;
+    font-size:16px;
 }
 
 .big-header {
     font-size: 38px !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
     color:#000 !important;
-    margin-bottom:8px;
+    margin-bottom:10px;
+    animation: fadeIn 1s ease;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
 }
 
 /* ------------------------------------------------ */
-/* SECTION TITLES with ANIMATED UNDERLINE */
+/* SECTION TITLE — GLOBAL ACROSS ALL TABS */
 /* ------------------------------------------------ */
 .section-title {
-    font-size: 24px !important;
-    font-weight: 700 !important;
-    margin-top:30px;
-    margin-bottom:12px;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    margin-top:35px;
+    margin-bottom:14px;
     color:#000 !important;
     position:relative;
+    animation: fadeIn 0.8s ease;
 }
+
 .section-title:after {
     content:"";
     position:absolute;
-    bottom:-4px;
+    bottom:-5px;
     left:0;
     height:3px;
     width:0%;
     background:#064b86;
-    transition:width 0.35s ease;
+    transition: width 0.40s ease;
 }
+
 .section-title:hover:after {
-    width:45%;
+    width:55%;
 }
 
 /* ------------------------------------------------ */
-/* MODERN CARD EFFECT */
+/* MODERN CARD WITH GLOW */
 /* ------------------------------------------------ */
 .card {
-    background:#fff;
-    padding:22px;
-    border-radius:14px;
-    border:1px solid #d9d9d9;
-    font-size:16px !important;
+    background: rgba(255,255,255,0.95);
+    padding:24px;
+    border-radius:16px;
+    border:1px solid #d6d6d6;
+    font-size:16px;
     color:#064b86 !important;
     font-weight:500;
-    box-shadow:0 3px 14px rgba(0,0,0,0.10);
-    transition: all 0.25s ease;
+    box-shadow:0 4px 16px rgba(0,0,0,0.10);
+    transition: all 0.28s ease;
+    animation: fadeIn 1s ease;
 }
+
 .card:hover {
-    transform:translateY(-5px);
-    box-shadow:0 12px 26px rgba(0,0,0,0.20);
+    transform:translateY(-6px);
+    box-shadow:0 14px 32px rgba(6,75,134,0.25);
     border-color:#064b86;
 }
 
@@ -104,30 +119,30 @@ body, [class*="css"] {
     background:#ffffff;
     padding:26px;
     border-radius:14px;
-    border:1px solid #d9d9d9;
-    font-size:20px !important;
+    border:1px solid #d4d4d4;
+    font-size:21px !important;
     font-weight:700 !important;
     text-align:center;
     color:#064b86 !important;
-    box-shadow:0 3px 14px rgba(0,0,0,0.10);
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
     transition:0.25s ease;
+    animation: fadeIn 0.9s ease;
 }
+
 .kpi:hover {
-    transform:translateY(-4px);
-    box-shadow:0 12px 26px rgba(0,0,0,0.20);
+    transform:translateY(-5px);
+    box-shadow:0 15px 34px rgba(6,75,134,0.25);
     border-color:#064b86;
 }
 
-.small { font-size:13px; color:#5b5b5b !important; }
-
 /* ------------------------------------------------ */
-/* VARIABLE CARDS (Independent vs Dependent) */
+/* VARIABLE BOXES */
 /* ------------------------------------------------ */
 .variable-box {
-    padding:18px;
+    padding:20px;
     border-radius:14px;
     background:white;
-    border:1px solid #dcdcdc;
+    border:1px solid #d4d4d4;
     box-shadow:0 3px 12px rgba(0,0,0,0.12);
     transition:0.25s ease;
     text-align:center;
@@ -135,10 +150,12 @@ body, [class*="css"] {
     font-weight:600 !important;
     color:#064b86 !important;
     margin-bottom:14px;
+    animation: fadeIn 1s ease;
 }
+
 .variable-box:hover {
-    transform:translateY(-5px);
-    box-shadow:0 12px 26px rgba(0,0,0,0.18);
+    transform:translateY(-6px);
+    box-shadow:0 16px 32px rgba(6,75,134,0.25);
     border-color:#064b86;
 }
 
@@ -148,14 +165,14 @@ body, [class*="css"] {
 .dataframe th {
     background:#000 !important;
     color:#fff !important;
-    padding:10px !important;
+    padding:11px !important;
     font-size:15px !important;
 }
 .dataframe td {
     font-size:15px !important;
     color:#000 !important;
     padding:9px !important;
-    border-bottom:1px solid #e6e6e6 !important;
+    border-bottom:1px solid #eaeaea !important;
 }
 .dataframe tbody tr:hover {
     background:#f1f6fa !important;
@@ -169,39 +186,48 @@ body, [class*="css"] {
     background:#064b86 !important;
     color:white !important;
     border:none;
-    padding:9px 20px;
+    padding:10px 22px;
     border-radius:8px !important;
     font-size:15px !important;
-    font-weight:600 !important;
+    font-weight:700 !important;
     transition:0.25s ease;
 }
+
 .stButton>button:hover,
 .stDownloadButton>button:hover {
-    transform:translateY(-3px);
+    transform:translateY(-4px);
     background:#0a6eb3 !important;
+}
+
+/* ------------------------------------------------ */
+/* Fade-in for entire tab change */
+/* ------------------------------------------------ */
+.block-container {
+    animation: fadeIn 0.5s ease;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
+
 st.markdown("<div class='big-header'>Marketing Campaign Performance Analyzer</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# REQUIRED COLUMNS + AUTO MAPPER
+# REQUIRED COLS + MAPPER
 # ---------------------------------------------------------
 REQUIRED_COLS = [
     'Campaign','Channel','Date','Impressions','Clicks','Leads','Conversions','Spend'
 ]
 
 FB_MAP = {
-    "Campaign": ["Campaign name", "campaign_name"],
-    "Channel": ["Page Name", "page_name"],
-    "Date": ["Date", "Day"],
-    "Impressions": ["Impressions", "impressions"],
-    "Clicks": ["Link clicks", "clicks"],
-    "Leads": ["Results", "leads"],
-    "Conversions": ["Conversions", "Website conversions"],
-    "Spend": ["Amount spent (INR)", "Spend"]
+    "Campaign": ["Campaign name","campaign_name"],
+    "Channel": ["Page Name","page_name"],
+    "Date": ["Date","Day"],
+    "Impressions": ["Impressions","impressions"],
+    "Clicks": ["Link clicks","clicks"],
+    "Leads": ["Results","leads"],
+    "Conversions": ["Conversions","Website conversions"],
+    "Spend": ["Amount spent (INR)","Spend"]
 }
 
 def auto_map_columns(df):
@@ -222,54 +248,63 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 # TAB 1 – OVERVIEW
 # ---------------------------------------------------------
 with tab1:
-    st.markdown("### Overview")
+
+    st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
+
     st.markdown("""
     <div class='card'>
-    <b>Purpose:</b> Modern marketing runs on data, not guesswork. This analyzer helps you understand how every campaign, channel, and ad interaction contributes to your outcomes. 
-    It brings all performance signals into one place so you can quickly identify what's working, what’s wasting money, and where to focus your efforts for maximum ROI. 
+    <b>Purpose:</b><br><br>
+    In modern growth environments, marketing decisions must be fast, data-driven, and grounded in real performance metrics.
+    This analyzer centralizes every major marketing signal so you can easily visualize what campaigns are producing results,
+    where budgets are leaking, and how your funnel behaves across channels.<br><br>
+    It helps identify strong campaigns, detect anomalies, highlight underperforming segments, and build a predictable,
+    efficient marketing system.
     </div>
     """, unsafe_allow_html=True)
 
     left, right = st.columns(2)
 
     with left:
-        st.markdown("#### Capabilities")
+        st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class='card'>
-        • Unify performance across channels like Facebook, Google, Instagram, and Email<br>
-        • Understand full-funnel behavior from impressions to conversions<br>
-        • Identify winning creatives, audiences, and high-value customer actions<br>
-        • Compare campaign ROI with cost-efficient benchmarking<br>
-        • Instantly spot spikes, drops, or unusual campaign behavior<br>
-        • Export ready-to-use dashboards and datasets for deeper BI work<br>
+        • Multi-channel analytics in one place<br>
+        • Full-funnel analysis from impressions to conversions<br>
+        • Identify winning creatives, audiences & geos<br>
+        • ROI, CPL, CPA comparisons<br>
+        • Instant trend spotting & anomaly detection<br>
+        • Dashboard-ready exportable datasets
         </div>
         """, unsafe_allow_html=True)
 
     with right:
-        st.markdown("#### Business Impact")
+        st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class='card'>
-        • Reduce wasted ad spend by pinpointing ineffective campaigns<br>
-        • Improve lead quality by understanding channel-to-outcome patterns<br>
-        • Strengthen planning with reliable performance forecasting<br>
-        • Allocate budgets with confidence based on actual cost-per-result trends<br>
-        • Improve conversion efficiency with actionable funnel insights<br>
-        • Build a scalable marketing measurement system that grows with your business<br>
+        • Reduce wasted ad spend<br>
+        • Improve lead quality & cost efficiency<br>
+        • Make confident budgeting decisions<br>
+        • Forecast performance more accurately<br>
+        • Strengthen conversion rates with insights<br>
+        • Build scalable marketing intelligence
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("#### KPIs")
+    st.markdown('<div class="section-title">Key Performance Indicators</div>', unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='kpi'>Total Impressions</div>", unsafe_allow_html=True)
     k2.markdown("<div class='kpi'>Total Clicks</div>", unsafe_allow_html=True)
     k3.markdown("<div class='kpi'>Total Leads</div>", unsafe_allow_html=True)
     k4.markdown("<div class='kpi'>Total Spend</div>", unsafe_allow_html=True)
 
-    st.markdown("### Who Should Use This & Why")
+    st.markdown('<div class="section-title">Who Should Use This & Why</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class='card'>
-    <b>Who is this for?</b> Marketing teams, founders, growth managers, data analysts, campaign specialists, and anyone responsible for scaling revenue efficiently.<br><br>
-    <b>Why it matters:</b> With increasing ad costs and fragmented platforms, businesses need a single source of truth to decide where to invest, what to optimize, and how to grow sustainably.
+    <b>Who is this for?</b><br>
+    Marketing teams, founders, growth analysts, performance marketers, and decision makers.<br><br>
+    <b>Why it matters:</b><br>
+    Fragmented platforms make it hard to understand what really drives ROI. This tool unifies performance and empowers teams 
+    with clarity, accuracy, and speed.
     </div>
     """, unsafe_allow_html=True)
 
@@ -315,12 +350,13 @@ with tab2:
         for v in dep:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
+
 # ---------------------------------------------------------
 # TAB 3 – APPLICATION
 # ---------------------------------------------------------
 with tab3:
 
-    st.markdown("### Step 1: Load Dataset")
+    st.markdown('<div class="section-title">Step 1: Load Dataset</div>', unsafe_allow_html=True)
 
     df = None
     mode = st.radio("Select Dataset Option:", ["Default Dataset","Upload CSV","Upload CSV + Column Mapping"], horizontal=True)
@@ -381,6 +417,8 @@ with tab3:
     df = df.dropna(subset=["Campaign","Channel"])
 
     # Filters
+    st.markdown('<div class="section-title">Filters</div>', unsafe_allow_html=True)
+
     campaign = st.multiselect("Campaign", df["Campaign"].unique())
     channel = st.multiselect("Channel", df["Channel"].unique())
 
@@ -390,10 +428,12 @@ with tab3:
     if channel:
         filt = filt[filt["Channel"].isin(channel)]
 
-    st.markdown("### Data Preview")
+    st.markdown('<div class="section-title">Data Preview</div>', unsafe_allow_html=True)
     st.dataframe(filt.head(), use_container_width=True)
 
     # KPIs
+    st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
+
     def inr(x): return f"₹{x:,.2f}"
 
     k1, k2, k3, k4 = st.columns(4)
@@ -403,17 +443,16 @@ with tab3:
     k4.metric("Total Spend", inr(filt['Spend'].sum()))
 
     # Charts
-    st.markdown("### Campaign-wise Clicks")
+    st.markdown('<div class="section-title">Campaign-wise Clicks</div>', unsafe_allow_html=True)
     st.plotly_chart(px.bar(filt, x="Campaign", y="Clicks", color="Campaign", text="Clicks"))
 
-    st.markdown("### Channel-wise Leads")
+    st.markdown('<div class="section-title">Channel-wise Leads</div>', unsafe_allow_html=True)
     st.plotly_chart(px.pie(filt, names="Channel", values="Leads"))
 
-    st.markdown("### Spend vs Conversions")
+    st.markdown('<div class="section-title">Spend vs Conversions</div>', unsafe_allow_html=True)
     st.plotly_chart(px.scatter(
         filt, x="Spend", y="Conversions",
         size="Impressions", color="Channel", hover_data=["Campaign"]
     ))
 
     st.download_button("Download Filtered Dataset", filt.to_csv(index=False), "marketing_filtered.csv")
-
