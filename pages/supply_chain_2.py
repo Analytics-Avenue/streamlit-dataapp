@@ -21,6 +21,23 @@ warnings.filterwarnings("ignore")
 # -----------------------------
 st.set_page_config(page_title="Order Fulfillment & SLA Analytics", layout="wide", page_icon="🚚")
 
+# -------------------------
+# Company Logo + Name
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center;">
+    <img src="{logo_url}" width="60" style="margin-right:10px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 style='margin-bottom:0.2rem'>Order Fulfillment & SLA Analytics</h1>", unsafe_allow_html=True)
+
+
 # -----------------------------
 # Styling: left-aligned title, card glow, KPI cards
 # -----------------------------
@@ -71,19 +88,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Header / logo
-# -----------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div class="header-row">
-  <img src="{logo_url}" width="56" style="margin-right:8px;">
-  <div style="line-height:1.05;">
-    <div class="header-title">Order Fulfillment & SLA Analytics</div>
-    <div class="header-sub">Reduce SLA breaches, improve fulfillment accuracy and speed — data-driven actions for operations.</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
 
 # -----------------------------
 # Helper utilities
