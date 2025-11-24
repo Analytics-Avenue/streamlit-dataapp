@@ -12,6 +12,18 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
+
+# -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+
 # --- Page Setup ---
 st.set_page_config(page_title="PatientFlow Navigator", layout="wide")
 
