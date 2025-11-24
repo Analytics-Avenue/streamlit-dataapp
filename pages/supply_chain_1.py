@@ -415,7 +415,7 @@ with tabs[1]:
         st.info("Not enough data to train RandomForest for Actual_Travel_Hours (need >=80 rows and the column).")
 
     # 2) GradientBoostingRegressor -> predict Actual_Fuel_Liters
-    if "Actual_Fuel_Liters" in df_model.columns and len(df_model) >= 80:
+    if "Actual_Fuel_Liters" in df_model.columns:
         target2 = "Actual_Fuel_Liters"
         features2 = [c for c in df_model.columns if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters","Efficiency_Score"]]
         if features2:
