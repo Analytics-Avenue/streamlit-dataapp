@@ -97,6 +97,9 @@ efficiency, quality improvement, and cost savings.""",
 
     "HR Analytics": """Optimize workforce performance, reduce hiring leaks, predict absenteeism, 
 and map employee skill gaps using advanced machine learning and people analytics solutions.""", 
+
+    "Supply Chain Analytics": """Optimize logistics routes, improve order fulfillment performance, 
+reduce delays, and enhance warehouse efficiency using predictive and prescriptive analytics.""",
     
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
@@ -113,6 +116,8 @@ sector_tools = {
                                 "Time Series Forecasting","Production Planning Analytics", "Simulation Models"],
     "HR Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Scikit-Learn",
                  "HRIS Data", "Time Series", "Classification Models", "NLP"],
+    "Supply Chain Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Routing Algorithms", "Optimization Models",
+                            "Forecasting", "GeoSpatial Analytics", "Inventory Analytics"],                 
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
@@ -158,6 +163,11 @@ sectors = {
     {"name": "Absenteeism Prediction & Workforce Planning", "page": "hr_2.py"},
     {"name": "Skill Gap & Training Needs Analysis", "page": "hr_3.py"},
     ],
+    "Supply Chain Analytics": [
+    {"name": "Route Optimization & Logistics Efficiency", "page": "sc_route_optimization.py"},
+    {"name": "Order Fulfillment & SLA Analytics", "page": "sc_sla_analytics.py"},
+    {"name": "Warehouse Operations Analytics", "page": "sc_warehouse_ops.py"}
+    ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
         {"name":"EduTech Gen-AI Assistant","page":"https://edutech-sw63app8ga27wxw4wghza3.streamlit.app/"},
@@ -173,6 +183,7 @@ thumb_urls = {
     "Health Care Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/healthcare_thumb.jpeg",
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
     "HR Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/hr_thumb.jpeg",
+    "Supply Chain Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
     "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
@@ -354,6 +365,25 @@ else:
             "overview": "Map employee skills, identify gaps vs. job role needs, and recommend targeted training programs with ML-driven skill profiling.",
             "tools": ["Python", "NLP", "Embedding Models", "Clustering", "Excel"]
         }],
+
+        "Supply Chain Analytics": [
+            {
+                "overview": "Optimize transportation routes, reduce travel time, minimize fuel costs, 
+                and enhance delivery accuracy using geospatial and optimization models.",
+                "tools": ["Python", "GeoPandas", "Routing Algorithms", "Optimization Models", "Power BI"]
+            },
+            {
+                "overview": "Track SLA performance, reduce order delays, analyze fulfillment timelines, 
+                and forecast order volume to achieve higher customer satisfaction.",
+                "tools": ["Python", "SQL", "Time Series Forecasting", "Tableau", "Power BI"]
+            },
+            {
+                "overview": "Monitor warehouse operations, optimize picking efficiency, improve inventory placement, 
+                and reduce handling time using operational analytics.",
+                "tools": ["Python", "Excel", "Process Mining", "Clustering", "Power BI"]
+            }
+        ],
+        
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
