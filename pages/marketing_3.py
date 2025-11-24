@@ -277,12 +277,10 @@ with tab2:
     # Use .to_html via styler to apply class attribute (Streamlit will render HTML)
     try:
         styled = req_df.style.set_table_attributes('class="required-table"').hide_index()
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.write(styled.to_html(), unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     except Exception:
         # fallback to st.dataframe if styler fails in some environments
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.dataframe(req_df, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
