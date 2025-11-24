@@ -15,6 +15,8 @@ from sklearn.metrics import accuracy_score, roc_auc_score, mean_squared_error, r
 import math
 import warnings
 warnings.filterwarnings("ignore")
+# Hide sidebar
+st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 # -----------------------------
 # App header / page config
