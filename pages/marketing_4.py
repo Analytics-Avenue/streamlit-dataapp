@@ -138,6 +138,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("<div class='big-header'>Marketing Performance Analysis</div>", unsafe_allow_html=True)
+
 # -------------------------
 # Global CSS — EXACT from your sample
 # -------------------------
