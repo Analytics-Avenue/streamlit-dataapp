@@ -491,7 +491,9 @@ with tab3:
 
         # Show model performance
         preds_test = rf.predict(X_test)
-        rmse = mean_squared_error(y_test, preds_test, squared=False)
+       
+        mse = mean_squared_error(y_test, preds_test)
+        rmse = mse ** 0.5
         r2 = r2_score(y_test, preds_test)
         st.markdown(f"**Model performance:** RMSE: {rmse:.3f} | R²: {r2:.3f}")
 
