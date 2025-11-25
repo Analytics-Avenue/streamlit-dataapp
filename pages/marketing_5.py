@@ -324,30 +324,44 @@ with tab2:
         "Conversions": "Completed conversions attributed to page.",
         "Revenue": "Revenue attributed to conversions on this page."
     }
+
     dict_df = pd.DataFrame([{"Attribute": k, "Description": v} for k,v in required_dict.items()])
     render_index_safe_table(dict_df)
 
-    st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-    indep_col1, indep_col2 = st.columns(2)
-    indep_list = [
-        "Page", "Content_Type", "Keyword", "Device", "Country",
-        "Impressions", "Clicks", "Backlinks", "Time_on_Page_sec"
-    ]
-    with indep_col1:
-        for v in indep_list[:len(indep_list)//2]:
-            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
-    with indep_col2:
-        for v in indep_list[len(indep_list)//2:]:
+    # --------------------------------------------
+    # Independent (LEFT) / Dependent (RIGHT)
+    # --------------------------------------------
+    st.markdown('<div class="section-title">Attributes Overview</div>', unsafe_allow_html=True)
+
+    left, right = st.columns(2)
+
+    # Independent on LEFT
+    with left:
+        st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+        indep_vars = [
+            "Page",
+            "Content_Type",
+            "Keyword",
+            "Device",
+            "Country",
+            "Impressions",
+            "Clicks",
+            "Backlinks",
+            "Time_on_Page_sec"
+        ]
+        for v in indep_vars:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
-    dep_vars = ["Conversions", "Revenue", "CTR", "Bounce_Rate"]
-    c1,c2 = st.columns(2)
-    with c1:
-        for v in dep_vars[:2]:
-            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
-    with c2:
-        for v in dep_vars[2:]:
+    # Dependent on RIGHT
+    with right:
+        st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+        dep_vars = [
+            "Conversions",
+            "Revenue",
+            "CTR",
+            "Bounce_Rate"
+        ]
+        for v in dep_vars:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
 # -------------------------
