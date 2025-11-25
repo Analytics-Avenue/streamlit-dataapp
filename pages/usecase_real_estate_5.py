@@ -1,9 +1,8 @@
-# marketing_lab_real_estate.py
+# marketing_lab_real_estate_fixed.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 from io import BytesIO
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -33,8 +32,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-
-
 # -------------------------
 # CSS (Marketing Lab rules: Inter font, pure-black text, blue KPI & variable boxes, fade-in)
 # -------------------------
@@ -42,13 +39,10 @@ st.markdown("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 * { font-family: 'Inter', sans-serif; }
-
 /* GLOBAL TEXT - PURE BLACK */
 body, [class*="css"] { color:#000 !important; font-size:16.5px; }
-
 /* MAIN HEADER (keeps spacing consistent) */
 .big-header { font-size: 36px !important; font-weight:700 !important; color:#000 !important; margin-bottom:8px; }
-
 /* SECTION TITLE */
 .section-title {
     font-size: 22px !important;
@@ -69,7 +63,6 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     transition: width 0.35s ease;
 }
 .section-title:hover:after { width:36%; }
-
 /* CARD LAYOUT */
 .card {
     background:#ffffff;
@@ -83,7 +76,6 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     transition: all 0.20s ease;
 }
 .card:hover { transform: translateY(-4px); box-shadow:0 10px 28px rgba(6,75,134,0.10); border-color:#064b86; }
-
 /* KPI CARDS - BLUE TEXT */
 .kpi {
     background:#ffffff;
@@ -97,7 +89,6 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     box-shadow:0 3px 12px rgba(0,0,0,0.05);
 }
 .kpi:hover { transform: translateY(-4px); box-shadow:0 14px 28px rgba(6,75,134,0.12); }
-
 /* VARIABLE BOXES - BLUE TEXT */
 .variable-box {
     padding:14px;
@@ -111,7 +102,6 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     color:#064b86 !important;
     margin-bottom:10px;
 }
-
 /* TABLE (index-safe) */
 .stDataFrame>div>div>div>table { border-collapse:collapse; }
 .dataframe th {
@@ -126,9 +116,6 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     padding:8px !important;
     border-bottom:1px solid #efefef !important;
 }
-
-
-
 /* Buttons */
 .stButton>button, .stDownloadButton>button {
     background:#064b86 !important;
@@ -140,11 +127,9 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     font-weight:600 !important;
 }
 .stButton>button:hover, .stDownloadButton>button:hover { background:#0a6eb3 !important; transform:translateY(-2px); }
-
 /* Fade-in */
 .block-container { animation: fadeIn 0.45s ease; }
 @keyframes fadeIn { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -157,7 +142,6 @@ REQUIRED_COLS = [
     "City", "Property_Type", "Price", "Area_sqft", "Agent_Name",
     "Conversion_Probability", "Latitude", "Longitude"
 ]
-
 AUTO_MAPS = {
     "City": ["city"],
     "Property_Type": ["property_type","type","property type"],
@@ -168,7 +152,6 @@ AUTO_MAPS = {
     "Latitude": ["lat","latitude"],
     "Longitude": ["lon","lng","long","longitude"]
 }
-
 def auto_map_columns(df):
     rename = {}
     cols = [c.strip() for c in df.columns]
@@ -238,7 +221,6 @@ with tab_overview:
         • Cluster & segment analysis for city-level patterns.
         </div>
         """, unsafe_allow_html=True)
-
     with right:
         st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
         st.markdown("""
@@ -270,7 +252,6 @@ with tab_overview:
 # -------------------------
 with tab_attributes:
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
-
     dict_rows = [
         ("City", "City where the property is listed — used for geo-aggregation, city-level KPIs and mapping."),
         ("Property_Type", "Category of property (Apartment, Villa, Studio, Commercial etc.) used for type-level benchmarking."),
@@ -285,7 +266,6 @@ with tab_attributes:
     st.dataframe(req_df.style.set_table_attributes('class="dataframe"'), use_container_width=True)
 
     st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-    # Left column: independent vars (blue boxes)
     indep = ["City","Property_Type","Area_sqft","Agent_Name","Latitude","Longitude"]
     c1,c2 = st.columns(2)
     with c1:
@@ -319,7 +299,6 @@ with tab_application:
     mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
     raw = None
-
     if mode == "Default dataset":
         DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
         try:
@@ -331,7 +310,6 @@ with tab_application:
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
-
     elif mode == "Upload CSV":
         st.markdown("#### Download Sample CSV for Reference")
         SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
@@ -346,7 +324,6 @@ with tab_application:
             df.columns = df.columns.str.strip()
             df = auto_map_columns(df)
             st.success("Uploaded dataset loaded (auto-mapping attempted).")
-
     else:
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
         if uploaded is not None:
@@ -375,20 +352,20 @@ with tab_application:
     # -------------------------
     # Keep only required columns present
     df = df[[c for c in REQUIRED_COLS if c in df.columns]].copy()
+
     # numeric conversions
     for col in ["Price","Area_sqft","Conversion_Probability","Latitude","Longitude"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+
     df = df.dropna(subset=["Price","Area_sqft"])  # ensure fundamentals exist
 
     # derive basic metrics
-    # rental yield proxy (assume monthly rent = 0.5% of price by default, configurable later)
     st.markdown('<div class="section-title">Step 2 — Filters & Preview</div>', unsafe_allow_html=True)
     c1,c2,c3 = st.columns([2,2,1])
     cities = sorted(df["City"].dropna().unique()) if "City" in df.columns else []
     ptypes = sorted(df["Property_Type"].dropna().unique()) if "Property_Type" in df.columns else []
     agents = sorted(df["Agent_Name"].dropna().unique()) if "Agent_Name" in df.columns else []
-
     with c1:
         sel_cities = st.multiselect("City", options=cities, default=cities[:6])
     with c2:
@@ -413,39 +390,66 @@ with tab_application:
 
     # compute rental yield proxy and expected ROI
     rent_pct = st.number_input("Assumed monthly rent % of price (0.1% - 2.0%)", min_value=0.1, max_value=2.0, value=0.5, step=0.1)
+    filt = filt.copy()
     filt["Est_Rent"] = filt["Price"] * (rent_pct/100)
     filt["Rental_Yield"] = np.where(filt["Price"]>0, (filt["Est_Rent"]*12) / filt["Price"], 0)
-    filt["Expected_ROI"] = filt["Price"] * np.where(filt.get("Conversion_Probability", pd.Series(0)) > 0,
-                                                   filt["Conversion_Probability"], 0)
+
+    # Handle Conversion_Probability more robustly:
+    if "Conversion_Probability" in filt.columns:
+        # If values appear >1 (e.g., 50 for 50%), attempt to normalize
+        conv = filt["Conversion_Probability"].copy()
+        # Remove obvious outliers / invalid values
+        conv = pd.to_numeric(conv, errors="coerce")
+        # If values mostly between 0-1 keep them, else if >1 and <=100 treat as percent
+        if conv.dropna().empty:
+            conv = pd.Series(0, index=filt.index)
+        else:
+            median_val = conv.dropna().median()
+            if median_val > 1.0 and median_val <= 100:
+                conv = conv / 100.0
+            # clip to [0,1]
+            conv = conv.clip(lower=0.0, upper=1.0).fillna(0.0)
+        filt["Conversion_Probability"] = conv
+    else:
+        filt["Conversion_Probability"] = 0.0
+
+    filt["Expected_ROI"] = filt["Price"] * filt["Conversion_Probability"]
 
     total_listings = len(filt)
     top_rental = filt.sort_values("Rental_Yield", ascending=False).iloc[0] if total_listings>0 else None
-    highest_yield_city = filt.groupby("City")["Rental_Yield"].mean().sort_values(ascending=False).head(1).index[0] if total_listings>0 else "N/A"
+    highest_yield_city = "N/A"
+    if total_listings > 0 and "City" in filt.columns:
+        city_yields = filt.groupby("City")["Rental_Yield"].mean().sort_values(ascending=False)
+        if not city_yields.empty:
+            highest_yield_city = city_yields.index[0]
 
-    k1.markdown(f"<div class='kpi'>Top Rental Yield Property<br><b>{top_rental['Property_Type'] if top_rental is not None else 'N/A'}</b></div>", unsafe_allow_html=True)
+    k1.markdown(f"<div class='kpi'>Top Rental Yield Property<br><b>{top_rental['Property_Type'] if top_rental is not None and 'Property_Type' in top_rental else 'N/A'}</b></div>", unsafe_allow_html=True)
     k2.markdown(f"<div class='kpi'>Highest Yield City<br><b>{highest_yield_city}</b></div>", unsafe_allow_html=True)
-    k3.markdown(f"<div class='kpi'>Median Rental Yield<br><b>{filt['Rental_Yield'].median():.2f}</b></div>", unsafe_allow_html=True)
-    k4.markdown(f"<div class='kpi'>Top Property Type<br><b>{filt.groupby('Property_Type')['Expected_ROI'].mean().sort_values(ascending=False).head(1).index[0] if total_listings>0 else 'N/A'}</b></div>", unsafe_allow_html=True)
+    k3.markdown(f"<div class='kpi'>Median Rental Yield<br><b>{filt['Rental_Yield'].median():.4f}</b></div>", unsafe_allow_html=True)
+    top_ptype = "N/A"
+    if total_listings > 0 and "Property_Type" in filt.columns:
+        roi_by_type = filt.groupby("Property_Type")["Expected_ROI"].mean().sort_values(ascending=False)
+        if not roi_by_type.empty:
+            top_ptype = roi_by_type.index[0]
+    k4.markdown(f"<div class='kpi'>Top Property Type<br><b>{top_ptype}</b></div>", unsafe_allow_html=True)
 
     # -------------------------
     # Charts
     # -------------------------
     st.markdown('<div class="section-title">Charts & Visuals</div>', unsafe_allow_html=True)
 
-    # 1) Rental Yield by Property Type
     st.markdown("##### Rental Yield by Property Type")
-    if not filt.empty:
+    if not filt.empty and "Property_Type" in filt.columns:
         ptype_yield = filt.groupby("Property_Type")["Rental_Yield"].mean().reset_index().sort_values("Rental_Yield", ascending=False)
         fig1 = px.bar(ptype_yield, x="Property_Type", y="Rental_Yield", text="Rental_Yield", template="plotly_white")
-        fig1.update_traces(texttemplate="%{text:.2f}", textposition="outside")
+        fig1.update_traces(texttemplate="%{text:.4f}", textposition="outside")
         fig1.update_layout(xaxis_title="Property Type", yaxis_title="Rental Yield")
         st.plotly_chart(fig1, use_container_width=True)
     else:
         st.info("No data to plot Rental Yield by Property Type.")
 
-    # 2) Expected ROI by City
     st.markdown("##### Expected ROI by City")
-    if not filt.empty:
+    if not filt.empty and "City" in filt.columns:
         city_roi = filt.groupby("City")["Expected_ROI"].mean().reset_index().sort_values("Expected_ROI", ascending=False)
         fig2 = px.bar(city_roi, x="City", y="Expected_ROI", text="Expected_ROI", template="plotly_white")
         fig2.update_traces(texttemplate="₹ %{text:,.0f}", textposition="outside")
@@ -453,13 +457,11 @@ with tab_application:
     else:
         st.info("No data to plot Expected ROI by City.")
 
-    # 3) Map: Investment hotspots
     st.markdown("##### Investment Hotspot Map")
-    map_df = filt.dropna(subset=["Latitude","Longitude","Expected_ROI"])
+    map_df = filt.dropna(subset=["Latitude","Longitude","Expected_ROI"]) if {"Latitude","Longitude","Expected_ROI"}.issubset(filt.columns) else pd.DataFrame()
     if map_df.empty:
         st.info("No geolocation data available for map.")
     else:
-        # small jitter
         map_df = map_df.copy()
         map_df["Latitude"] += np.random.uniform(-0.0003,0.0003,size=len(map_df))
         map_df["Longitude"] += np.random.uniform(-0.0003,0.0003,size=len(map_df))
@@ -467,7 +469,7 @@ with tab_application:
         center_lon = map_df["Longitude"].mean()
         map_fig = px.scatter_mapbox(map_df, lat="Latitude", lon="Longitude",
                                     size="Expected_ROI", color="Rental_Yield",
-                                    hover_name="Property_Type",
+                                    hover_name="Property_Type" if "Property_Type" in map_df.columns else None,
                                     hover_data=["City","Price","Rental_Yield","Conversion_Probability","Expected_ROI"],
                                     color_continuous_scale=px.colors.sequential.Viridis,
                                     size_max=18, zoom=11, center={"lat":center_lat,"lon":center_lon})
@@ -489,16 +491,27 @@ with tab_application:
     else:
         X = ml_df[feat_cols].copy()
         y = ml_df["Expected_ROI"].astype(float)
+
         cat_cols = [c for c in X.columns if X[c].dtype == "object"]
         num_cols = [c for c in X.columns if c not in cat_cols]
 
-        preprocessor = ColumnTransformer([
-            ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols) if cat_cols else ("noop","passthrough",[]),
-            ("num", StandardScaler(), num_cols) if num_cols else ("noop2","passthrough",[])
-        ], remainder="drop")
+        # Build transformers list only for non-empty groups
+        transformers = []
+        if cat_cols:
+            # Use sparse=False for broad sklearn compatibility
+            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols))
+        if num_cols:
+            transformers.append(("num", StandardScaler(), num_cols))
+
+        preprocessor = ColumnTransformer(transformers, remainder="drop")
+
         try:
             X_t = preprocessor.fit_transform(X)
-            X_train,X_test,y_train,y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+            # If result is 1D (single numeric feature), ensure 2D
+            if X_t.ndim == 1:
+                X_t = X_t.reshape(-1, 1)
+
+            X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
             rf = RandomForestRegressor(n_estimators=200, random_state=42)
             with st.spinner("Training RandomForest..."):
                 rf.fit(X_train, y_train)
@@ -506,9 +519,13 @@ with tab_application:
             rmse = math.sqrt(((y_test - preds_test)**2).mean())
             r2 = 1 - (((y_test - preds_test)**2).sum() / ((y_test - y_test.mean())**2).sum()) if len(y_test)>1 else 0.0
             st.write(f"ML results — RMSE: {rmse:.2f}, R² (approx): {r2:.3f}")
-            # combine predictions with sample features for download
+
+            # Build a DataFrame for results; use generic feature columns F_0..F_n
             X_test_df = pd.DataFrame(X_test, columns=[f"F_{i}" for i in range(X_test.shape[1])])
-            X_test_df["Actual_Expected_ROI"] = y_test.reset_index(drop=True)
+            X_test_df = X_test_df.reset_index(drop=True)
+            y_test = y_test.reset_index(drop=True)
+            preds_test = pd.Series(preds_test)
+            X_test_df["Actual_Expected_ROI"] = y_test
             X_test_df["Predicted_Expected_ROI"] = preds_test
             st.dataframe(X_test_df.head(), use_container_width=True)
             download_df(X_test_df, "ml_expected_roi_predictions.csv")
@@ -521,22 +538,21 @@ with tab_application:
     st.markdown('<div class="section-title">Automated Insights</div>', unsafe_allow_html=True)
     insights = []
     if not filt.empty:
-        # top city
-        city_top = filt.groupby("City")["Expected_ROI"].mean().reset_index().sort_values("Expected_ROI", ascending=False)
-        if not city_top.empty:
-            insights.append({"Insight":"Top City by Expected ROI","Value":city_top.iloc[0]["City"], "Metric": city_top.iloc[0]["Expected_ROI"]})
-        # top property type
-        ptype_top = filt.groupby("Property_Type")["Expected_ROI"].mean().reset_index().sort_values("Expected_ROI", ascending=False)
-        if not ptype_top.empty:
-            insights.append({"Insight":"Top Property Type by ROI","Value":ptype_top.iloc[0]["Property_Type"], "Metric": ptype_top.iloc[0]["Expected_ROI"]})
-        # agent top
-        agent_top = filt.groupby("Agent_Name")["Conversion_Probability"].mean().reset_index().sort_values("Conversion_Probability", ascending=False)
-        if not agent_top.empty:
-            insights.append({"Insight":"Top Agent by Conversion","Value":agent_top.iloc[0]["Agent_Name"], "Metric": agent_top.iloc[0]["Conversion_Probability"]})
-        # high ROI listing
+        if "City" in filt.columns:
+            city_top = filt.groupby("City")["Expected_ROI"].mean().reset_index().sort_values("Expected_ROI", ascending=False)
+            if not city_top.empty:
+                insights.append({"Insight":"Top City by Expected ROI","Value":city_top.iloc[0]["City"], "Metric": city_top.iloc[0]["Expected_ROI"]})
+        if "Property_Type" in filt.columns:
+            ptype_top = filt.groupby("Property_Type")["Expected_ROI"].mean().reset_index().sort_values("Expected_ROI", ascending=False)
+            if not ptype_top.empty:
+                insights.append({"Insight":"Top Property Type by ROI","Value":ptype_top.iloc[0]["Property_Type"], "Metric": ptype_top.iloc[0]["Expected_ROI"]})
+        if "Agent_Name" in filt.columns and "Conversion_Probability" in filt.columns:
+            agent_top = filt.groupby("Agent_Name")["Conversion_Probability"].mean().reset_index().sort_values("Conversion_Probability", ascending=False)
+            if not agent_top.empty:
+                insights.append({"Insight":"Top Agent by Conversion","Value":agent_top.iloc[0]["Agent_Name"], "Metric": agent_top.iloc[0]["Conversion_Probability"]})
         high_prop = filt.sort_values("Expected_ROI", ascending=False).head(1)
         if not high_prop.empty:
-            insights.append({"Insight":"Highest Expected ROI Listing","Value":high_prop.iloc[0]["Property_Type"], "Metric": high_prop.iloc[0]["Expected_ROI"]})
+            insights.append({"Insight":"Highest Expected ROI Listing","Value":high_prop.iloc[0].get("Property_Type", "N/A"), "Metric": high_prop.iloc[0]["Expected_ROI"]})
 
     insights_df = pd.DataFrame(insights)
     if insights_df.empty:
