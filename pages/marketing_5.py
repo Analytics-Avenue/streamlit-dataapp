@@ -21,124 +21,168 @@ st.set_page_config(page_title="Content & SEO Dashboard — Marketing Lab Style",
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
 # -------------------------
-# Global CSS (Inter, pure black text, KPI/variable-blue, cards, table, fade-in)
+# CSS (match Marketing Intelligence & Forecasting Lab style)
 # -------------------------
-st.markdown(f"""
+st.markdown("""
 <style>
-/* Load Inter via Google Fonts (best-effort; offline fallback will use sans-serif) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-* {{ font-family: 'Inter', sans-serif; }}
+* { font-family: 'Inter', sans-serif; }
 
-:root {{
-    --brand-blue: #064b86;
-    --pure-black: #000000;
-    --card-bg: #ffffff;
-    --muted-border: #e6e6e6;
-}}
+/* GLOBAL TEXT */
+body, [class*="css"] { color:#000 !important; font-size:17px; }
 
-/* Ensure most text is pure black */
-[data-testid="stAppViewContainer"] * {{
-    color: var(--pure-black) !important;
-}}
+/* MAIN HEADER */
+.big-header {
+    font-size:36px !important;
+    font-weight:700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}
 
-/* Page container fade-in */
-.block-container {{ animation: fadeIn 0.45s ease; }}
-@keyframes fadeIn {{ from {{opacity:0; transform:translateY(8px)}} to {{opacity:1; transform:translateY(0)}} }}
+/* SECTION TITLE */
+.section-title {
+    font-size:24px !important;
+    font-weight:600 !important;
+    margin-top:30px;
+    margin-bottom:12px;
+    color:#000 !important;
+    position:relative;
+}
+.section-title:after {
+    content:"";
+    position:absolute;
+    bottom:-5px;
+    left:0;
+    height:2px;
+    width:0%;
+    background:#064b86;
+    transition: width 0.35s ease;
+}
+.section-title:hover:after { width:40%; }
 
-/* Header */
-.header-wrap {{ display:flex; align-items:center; gap:12px; margin-bottom:8px; }}
-.header-title-main {{ font-size:34px !important; font-weight:700 !important; color:var(--pure-black) !important; margin:0; }}
-.header-sub {{ font-size:16px !important; color:var(--pure-black) !important; margin:0; }}
+/* CARD (pure black text) */
+.card {
+    background:#ffffff;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    font-size:16.5px;
+    color:#000 !important;
+    font-weight:500;
+    box-shadow:0 3px 14px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+.card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(6,75,134,0.18);
+    border-color:#064b86;
+}
 
-/* Card */
-.card {{
-    background: var(--card-bg);
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid var(--muted-border);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-    transition: all 0.20s ease;
-    color: var(--pure-black) !important;
-}}
-.card:hover {{
-    transform: translateY(-6px);
-    box-shadow: 0 14px 30px rgba(6,75,134,0.08);
-    border-color: var(--brand-blue);
-}}
-
-/* Section title */
-.section-title {{
+/* KPI CARDS - blue text */
+.kpi {
+    background:#ffffff;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #e2e2e2;
     font-size:20px !important;
     font-weight:600 !important;
-    margin-top:16px;
-    margin-bottom:10px;
-    color:var(--pure-black) !important;
-}}
-
-/* KPI (blue text) */
-.kpi {{
-    background: var(--card-bg);
-    padding:16px;
-    border-radius:12px;
-    border:1px solid #eaeaea;
     text-align:center;
-    font-size:18px;
-    font-weight:700;
-    color: var(--brand-blue) !important;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.05);
-}}
-.kpi:hover {{ transform: translateY(-4px); box-shadow: 0 12px 22px rgba(6,75,134,0.08); }}
+    color:#064b86 !important;
+    box-shadow:0 3px 14px rgba(0,0,0,0.07);
+    transition:0.25s ease;
+}
+.kpi:hover {
+    transform:translateY(-4px);
+    box-shadow:0 13px 26px rgba(6,75,134,0.20);
+    border-color:#064b86;
+}
 
-/* Variable boxes (blue text) */
-.variable-box {{
-    padding:12px 14px;
-    border-radius:12px;
-    background: var(--card-bg);
-    border:1px solid #ececec;
-    color: var(--brand-blue) !important;
-    font-weight:600;
+/* VARIABLE BOXES - blue text */
+.variable-box {
+    padding:18px;
+    border-radius:14px;
+    background:white;
+    border:1px solid #e5e5e5;
+    box-shadow:0 2px 10px rgba(0,0,0,0.10);
+    transition:0.25s ease;
     text-align:center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    margin-bottom:10px;
-}}
+    font-size:17.5px !important;
+    font-weight:500 !important;
+    color:#064b86 !important;
+    margin-bottom:12px;
+}
+.variable-box:hover {
+    transform:translateY(-5px);
+    box-shadow:0 12px 22px rgba(6,75,134,0.18);
+    border-color:#064b86;
+}
 
-/* Tables - pure black text, index-safe */
-.required-table thead th {{
-    background: #ffffff !important;
-    color: var(--pure-black) !important;
+/* Table */
+.dataframe th {
+    background:#064b86 !important;
+    color:#fff !important;
+    padding:11px !important;
+    font-size:15.5px !important;
+}
+.dataframe td {
+    font-size:15.5px !important;
+    color:#000 !important;
+    padding:9px !important;
+    border-bottom:1px solid #efefef !important;
+}
+.dataframe tbody tr:hover { background:#f4f9ff !important; }
+
+/* required-table for index-safe HTML rendering */
+.required-table thead th {
+    background:#ffffff !important;
+    color:#000 !important;
     font-size:18px !important;
-    border-bottom:2px solid var(--pure-black) !important;
+    border-bottom:2px solid #000 !important;
     padding:10px !important;
     text-align:left;
-}}
-.required-table tbody td {{
-    color: var(--pure-black) !important;
+}
+.required-table tbody td {
+    color:#000 !important;
     font-size:15.5px !important;
     padding:10px !important;
     border-bottom:1px solid #efefef !important;
-}}
-.required-table tbody tr:hover td {{ background:#f8f8f8 !important; }}
+}
+.required-table tbody tr:hover td { background:#f8f8f8 !important; }
 
-/* Dataframe general styling (fallback) */
-.css-ffhzg2 {{ color: var(--pure-black) !important; }}
-
-/* Buttons styling */
-.stButton>button, .stDownloadButton>button {{
-    background: var(--brand-blue) !important;
-    color: white !important;
-    border: none;
-    padding: 8px 18px;
-    border-radius:8px;
-    font-weight:700;
-}}
-.stButton>button:hover, .stDownloadButton>button:hover {{
+/* Buttons */
+.stButton>button,
+.stDownloadButton>button {
+    background:#064b86 !important;
+    color:white !important;
+    border:none;
+    padding:10px 22px;
+    border-radius:8px !important;
+    font-size:15.5px !important;
+    font-weight:600 !important;
+    transition:0.25s ease;
+}
+.stButton>button:hover,
+.stDownloadButton>button:hover {
+    transform:translateY(-3px);
     background:#0a6eb3 !important;
-    transform: translateY(-2px);
-}}
+}
 
-/* Small helpers */
-.small-muted {{ color: #6b6b6b !important; font-size:13px !important; }}
+/* Page fade */
+.block-container { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+
+.small-muted { color:#6b6b6b !important; font-size:13px !important; }
 </style>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div style="display: flex; align-items: center; margin-bottom:8px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # -------------------------
@@ -207,10 +251,6 @@ def download_df(df, filename, label="Download CSV"):
     st.download_button(label, b, file_name=filename, mime="text/csv")
 
 def render_index_safe_table(df: pd.DataFrame, classes="required-table"):
-    """
-    Renders an HTML table from a dataframe with index omitted (index-safe).
-    Uses classes so CSS from above applies.
-    """
     if df is None or df.empty:
         st.info("No table data to display.")
         return
@@ -218,38 +258,23 @@ def render_index_safe_table(df: pd.DataFrame, classes="required-table"):
     st.markdown(html, unsafe_allow_html=True)
 
 # -------------------------
-# Header / Title
-# -------------------------
-st.markdown(
-    f"""
-    <div class="header-wrap">
-        <img src="{logo_url}" width="56" style="border-radius:6px;">
-        <div>
-            <div class="header-title-main">Analytics Avenue &amp; Advanced Analytics</div>
-            <div class="header-sub small-muted">Content & SEO Performance Dashboard — marketing lab UI</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# -------------------------
-# 3 Tabs: Overview | Important Attributes | Application
+# Tabs
 # -------------------------
 tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # -------------------------
-# TAB 1 — Overview
+# Overview Tab
 # -------------------------
 with tab1:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="card">
-        <b>Purpose:</b> Centralize Content & SEO page-level metrics, provide engagement and conversion insights, and enable simple ML-driven revenue predictions and quick recommendations.
+    <b>Purpose:</b><br><br>
+    Centralize Content & SEO page-level metrics, provide engagement and conversion insights, and enable ML-driven revenue predictions and recommendations.
     </div>
     """, unsafe_allow_html=True)
 
-    left, right = st.columns([2,1])
+    left, right = st.columns(2)
     with left:
         st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
         st.markdown("""
@@ -279,11 +304,10 @@ with tab1:
     k4.markdown("<div class='kpi'>Average Bounce Rate</div>", unsafe_allow_html=True)
 
 # -------------------------
-# TAB 2 — Important Attributes
+# Important Attributes Tab
 # -------------------------
 with tab2:
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
-
     required_dict = {
         "Date": "Date of the record (yyyy-mm-dd).",
         "Page": "Landing page URL or page ID.",
@@ -300,10 +324,7 @@ with tab2:
         "Conversions": "Completed conversions attributed to page.",
         "Revenue": "Revenue attributed to conversions on this page."
     }
-
     dict_df = pd.DataFrame([{"Attribute": k, "Description": v} for k,v in required_dict.items()])
-
-    # Render index-safe HTML table with required styling
     render_index_safe_table(dict_df)
 
     st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
@@ -330,7 +351,7 @@ with tab2:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
 # -------------------------
-# TAB 3 — Application
+# Application Tab
 # -------------------------
 with tab3:
     st.markdown('<div class="section-title">Step 1 — Load dataset</div>', unsafe_allow_html=True)
@@ -404,7 +425,7 @@ with tab3:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
     # -------------------------
-    # Step 2 — Filters & Preview
+    # Step 2 — Filters & preview
     # -------------------------
     st.markdown('<div class="section-title">Step 2 — Filters & preview</div>', unsafe_allow_html=True)
     c1,c2,c3 = st.columns([2,2,1])
@@ -418,7 +439,6 @@ with tab3:
     with c2:
         sel_devices = st.multiselect("Device", options=devices, default=devices[:3] if devices else [])
     with c3:
-        # date bounds
         try:
             min_d = df["Date"].min().date()
             max_d = df["Date"].max().date()
@@ -446,7 +466,7 @@ with tab3:
     # Key Metrics display (as numbers + KPI cards)
     # -------------------------
     st.markdown('<div class="section-title">Key Metrics</div>', unsafe_allow_html=True)
-    k1,k2,k3,k4 = st.columns(4)
+    kcol1,kcol2,kcol3,kcol4 = st.columns(4)
 
     def safe_sum(s):
         try:
@@ -454,19 +474,25 @@ with tab3:
         except:
             return 0
 
-    k1.metric("Total Revenue", to_currency(filt["Revenue"].sum() if "Revenue" in filt.columns else 0))
-    k2.metric("Total Conversions", int(safe_sum(filt["Conversions"]) if "Conversions" in filt.columns else 0))
-    # Avoid divide by zero; CTR stored as fractional or percentage? user earlier treated as fraction -> format
+    # Show KPI cards (blue) and metric numbers below
+    kcol1.markdown("<div class='kpi'>Total Revenue</div>", unsafe_allow_html=True)
+    kcol2.markdown("<div class='kpi'>Total Conversions</div>", unsafe_allow_html=True)
+    kcol3.markdown("<div class='kpi'>Average CTR</div>", unsafe_allow_html=True)
+    kcol4.markdown("<div class='kpi'>Average Bounce Rate</div>", unsafe_allow_html=True)
+
+    # numeric metrics (safe)
+    n1,n2,n3,n4 = st.columns(4)
+    n1.metric("Revenue", to_currency(filt["Revenue"].sum() if "Revenue" in filt.columns else 0))
+    n2.metric("Conversions", int(safe_sum(filt["Conversions"]) if "Conversions" in filt.columns else 0))
     avg_ctr = (filt["CTR"].mean() if "CTR" in filt.columns else 0)
     try:
-        # if CTR appears >1 assume it's percentage and convert
         if avg_ctr > 1:
             avg_ctr_display = f"{avg_ctr:.2f}%"
         else:
             avg_ctr_display = f"{avg_ctr:.2%}"
     except:
         avg_ctr_display = "0.00%"
-    k3.metric("Average CTR", avg_ctr_display)
+    n3.metric("Avg CTR", avg_ctr_display)
     avg_bounce = (filt["Bounce_Rate"].mean() if "Bounce_Rate" in filt.columns else 0)
     try:
         if avg_bounce > 1:
@@ -475,7 +501,7 @@ with tab3:
             b_display = f"{avg_bounce:.2%}"
     except:
         b_display = "0.00%"
-    k4.metric("Avg Bounce Rate", b_display)
+    n4.metric("Avg Bounce Rate", b_display)
 
     # -------------------------
     # Charts
@@ -521,7 +547,6 @@ with tab3:
         y = ml_df["Revenue"]
         cat_cols = [c for c in X.columns if X[c].dtype == "object"]
         num_cols = [c for c in X.columns if c not in cat_cols]
-        # ColumnTransformer: OneHotEncoder (dense output) for cats, StandardScaler for nums
         transformers = []
         if cat_cols:
             transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols))
@@ -544,7 +569,6 @@ with tab3:
             r2 = r2_score(y_test, preds)
             st.write(f"Revenue prediction — RMSE: {rmse:.2f}, R²: {r2:.3f}")
 
-            # Combine predictions with features for preview and download
             X_test_df = pd.DataFrame(X_test, columns=[f"Feature_{i}" for i in range(X_test.shape[1])])
             X_test_df["Actual_Revenue"] = y_test.reset_index(drop=True)
             X_test_df["Predicted_Revenue"] = preds
@@ -567,7 +591,6 @@ with tab3:
             insights.append({"Insight":"Best Country ROI", "Country":best['Country'], "Revenue_per_Conversion":best['Revenue_per_Conversion']})
             insights.append({"Insight":"Lowest Country ROI", "Country":worst['Country'], "Revenue_per_Conversion":worst['Revenue_per_Conversion']})
 
-    # Page-level engagement flags
     if "Page" in filt.columns and "Bounce_Rate" in filt.columns and "Time_on_Page_sec" in filt.columns:
         page_eng = filt.groupby("Page")[["Bounce_Rate","Time_on_Page_sec","Conversions"]].mean().reset_index()
         high_bounce = page_eng[page_eng["Bounce_Rate"] > page_eng["Bounce_Rate"].median()].sort_values("Bounce_Rate", ascending=False).head(3)
@@ -577,7 +600,6 @@ with tab3:
         if not low_time.empty:
             insights.append({"Insight":"Low Time-On-Page (top 3)", "Pages": ", ".join(low_time["Page"].astype(str).tolist())})
 
-    # Keyword-level quick ROI (if Keyword present)
     if "Keyword" in filt.columns and "Conversions" in filt.columns and "Revenue" in filt.columns:
         kw = filt.groupby("Keyword")[["Clicks","Conversions","Revenue"]].sum().reset_index()
         kw["Rev_per_Click"] = np.where(kw["Clicks"]>0, kw["Revenue"]/kw["Clicks"], 0)
@@ -588,28 +610,25 @@ with tab3:
     if not insights:
         st.info("No automated insights available for the selected filters.")
     else:
-        # Present insights as a styled dataframe & provide download
         ins_df = pd.DataFrame(insights)
-        # Clean small dicts for display
         st.markdown('<div class="small-muted">Insights</div>', unsafe_allow_html=True)
         render_index_safe_table(ins_df)
         download_df(ins_df, "automated_insights.csv", label="Download insights (CSV)")
 
     # -------------------------
-    # Export full filtered dataset
+    # Export & Naive Predict
     # -------------------------
     st.markdown('<div class="section-title">Export & Predict</div>', unsafe_allow_html=True)
     st.download_button("Download filtered dataset (all rows)", filt.to_csv(index=False), "content_seo_filtered.csv", "text/csv")
 
-    # Naive conversion predictor (median conversion-rate)
     if "Clicks" in filt.columns and "Conversions" in filt.columns:
         if st.button("Predict conversions (naive median conversion rate)"):
             try:
-                filt = filt.copy()
-                filt["Conversion_Rate"] = np.where(filt["Clicks"]>0, filt["Conversions"]/filt["Clicks"], 0)
-                median_conv = filt["Conversion_Rate"].median()
-                preds = (filt["Clicks"] * median_conv).round().astype(int)
-                out = filt.copy()
+                temp = filt.copy()
+                temp["Conversion_Rate"] = np.where(temp["Clicks"]>0, temp["Conversions"]/temp["Clicks"], 0)
+                median_conv = temp["Conversion_Rate"].median() if not temp["Conversion_Rate"].isna().all() else 0
+                preds = (temp["Clicks"] * median_conv).round().astype(int)
+                out = temp.copy()
                 out["Predicted_Conversions"] = preds
                 st.markdown('<div class="small-muted">Predicted conversions (naive)</div>', unsafe_allow_html=True)
                 st.dataframe(out.head(10), use_container_width=True)
