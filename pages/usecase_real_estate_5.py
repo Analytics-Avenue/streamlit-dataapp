@@ -127,13 +127,7 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     border-bottom:1px solid #efefef !important;
 }
 
-/* MAIN HEADER */
-.big-header {
-    font-size:36px !important;
-    font-weight:700 !important;
-    color:#000 !important;
-    margin-bottom:12px;
-}
+
 
 /* Buttons */
 .stButton>button, .stDownloadButton>button {
