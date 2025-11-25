@@ -13,6 +13,16 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+# -------------------------
 # Page config + Branding
 # -------------------------
 st.set_page_config(page_title="Rental Yield & Investment Analyzer — Marketing Lab", layout="wide")
@@ -175,22 +185,74 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 # -------------------------
 with tab1:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card">Estimate rental yield and investment potential across cities and property types. Designed with the Marketing Lab UI system.</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+    The Rental Yield & Investment Analyzer is designed as an end-to-end intelligence system for real estate investors, 
+    analysts, and developers who want to separate profitable opportunities from risky distractions.  
+    It brings together core investment fundamentals such as purchase price, estimated rental return, occupancy likelihood, 
+    and geographic value indicators to compute rental yield and an Investment Score — a combined metric that signals the 
+    long-term ROI potential of a property.
 
-    left, right = st.columns(2)
-    with left:
-        st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card">• Rental yield calculation<br>• Investment score combining yield & conversion probability<br>• City & property-type segmentation<br>• Map visualization and exportable top-investments</div>', unsafe_allow_html=True)
-    with right:
+    This platform follows the Marketing Lab UI framework, ensuring high design consistency, structured storytelling, and 
+    executive-level clarity. Whether you're benchmarking multiple cities, comparing property types, or prioritizing 
+    high-scoring neighborhoods, the system gives you a clean and structured way to explore what actually drives returns.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Purpose</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+    • Provide a standardized approach to evaluate rental yield across cities and property types.<br>
+    • Help investors quantify risk and reward using a simple but effective Investment Score.<br>
+    • Highlight high-performing areas where rental demand and property appreciation intersect.<br>
+    • Enable property advisors and developers to make faster, more data-backed recommendations.<br>
+    • Reduce guesswork by grounding decisions in evidence rather than subjective market assumptions.
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown('<div class="section-title">Technical Capabilities</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card">
+        • Automatic rental yield computation using price and estimated rental value.<br>
+        • Investment Score engine combining yield and conversion probability for ROI-based ranking.<br>
+        • City-level and property-type segmentation for market pattern detection.<br>
+        • Interactive charts, heat maps, and location intelligence for geographic insights.<br>
+        • ML-powered prediction of investment score for newly added properties.<br>
+        • Export-ready datasets for reporting and business reviews.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
         st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card">• Prioritise high-ROI investments<br>• Reduce time to identify buy-to-let candidates<br>• Data-driven portfolio optimization</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card">
+        • Prioritize properties with the strongest balance of demand, rental potential, and long-term ROI.<br>
+        • Optimize inventory strategy based on measurable performance indicators rather than intuition.<br>
+        • Improve negotiation leverage with data-backed pricing and yield insights.<br>
+        • Strengthen investor confidence through transparent, consistent evaluation metrics.<br>
+        • Build smarter acquisition and leasing strategies powered by market-driven intelligence.
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
-    K1, K2, K3, K4 = st.columns(4)
-    K1.markdown("<div class='kpi'>Top Rental Yield Property</div>", unsafe_allow_html=True)
-    K2.markdown("<div class='kpi'>Highest Yield City</div>", unsafe_allow_html=True)
-    K3.markdown("<div class='kpi'>Median Rental Yield</div>", unsafe_allow_html=True)
-    K4.markdown("<div class='kpi'>Top Property Type</div>", unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Key KPIs Tracked</div>', unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
+    k1.markdown("<div class='kpi'>Top Rental Yield Property</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Highest Yield City</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Median Rental Yield</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Top Property Type</div>", unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Ideal Users</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+    • Real estate investors focusing on stable rental returns.<br>
+    • Developers evaluating which product types deliver maximum occupancy and yield.<br>
+    • Brokers and property consultants who require fast comparables for client meetings.<br>
+    • Portfolio managers optimizing holdings based on performance metrics.<br>
+    • Analysts performing feasibility studies, competitive benchmarking, or rental market forecasting.
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Important Attributes tab
