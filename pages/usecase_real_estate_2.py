@@ -372,7 +372,6 @@ with tab3:
         pass
 
     st.markdown("Filtered Preview", unsafe_allow_html=True)
-    render_required_table(filt.head(4))
 
     download_df(filt, "filtered_real_estate_data.csv", label="Download filtered dataset")
 
