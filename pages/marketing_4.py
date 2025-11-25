@@ -1,13 +1,3 @@
-# ====================================================================================
-# marketing_performance_app.py
-# Final full file — UI follows Marketing Intelligence & Forecasting Lab design system
-# - All helpers defined before usage
-# - All tables rendered via render_required_table (index-safe)
-# - Upload + Column mapping restored
-# - ML preview + full-download implemented
-# - CSS enforces pure black text except KPIs & variable boxes (blue)
-# ====================================================================================
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -483,8 +473,7 @@ with tab3:
     # Basic cleaning & derived metrics
     df = ensure_datetime(df, "Date")
     df = safe_numeric(df, ["Impressions","Clicks","Leads","Conversions","Spend","Revenue","ROAS"])
-    st.markdown("Preview:")
-    render_required_table(df.head(10))
+
 
     # Step 2 — Filters
     st.markdown('<div class="section-title">Step 2 — Filters</div>', unsafe_allow_html=True)
@@ -517,8 +506,8 @@ with tab3:
     except Exception:
         pass
 
-    st.markdown("Filtered preview (first 10 rows):")
-    render_required_table(filt.head(10))
+    st.markdown("Filtered preview:")
+    render_required_table(filt.head(4))
     download_df(filt.head(500), "filtered_preview.csv", label="Download filtered preview (up to 500 rows)")
 
     # KPIs
