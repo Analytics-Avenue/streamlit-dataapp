@@ -193,25 +193,35 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="card">
-        • Feature-level pricing analysis<br>
-        • City and property type comparisons<br>
-        • ML-driven price estimation<br>
-        • Interactive charts and insights
-    </div>
-    """, unsafe_allow_html=True)
+     st.markdown('<div class="section-title">Capabilities & Business Impact</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="card">
-        • Stronger negotiation insights<br>
-        • Better pricing transparency<br>
-        • Improved investment analysis<br>
-        • Faster, data-backed decisions
-    </div>
-    """, unsafe_allow_html=True)
+    colA, colB = st.columns(2)
+
+    # ----------------- Left: Capabilities -----------------
+    with colA:
+        st.markdown("""
+        <div class="card">
+            <div style="font-size:22px; font-weight:600; margin-bottom:10px;">Capabilities</div>
+            • Feature-level pricing analysis<br>
+            • Interactive dashboards<br>
+            • City & property-type comparisons<br>
+            • ML-driven price estimation<br>
+            • Visual insights on area, BHK, bathrooms & age impact
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ----------------- Right: Business Impact -----------------
+    with colB:
+        st.markdown("""
+        <div class="card">
+            <div style="font-size:22px; font-weight:600; margin-bottom:10px;">Business Impact</div>
+            • Better pricing transparency<br>
+            • Improved negotiation leverage<br>
+            • Accurate investment planning<br>
+            • Faster decision-making using data-driven valuation<br>
+            • Enhanced buyer & investor confidence
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
     k1,k2,k3,k4 = st.columns(4)
