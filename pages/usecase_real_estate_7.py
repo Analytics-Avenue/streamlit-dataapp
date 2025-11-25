@@ -193,8 +193,7 @@ with tab1:
     and geographic value indicators to compute rental yield and an Investment Score — a combined metric that signals the 
     long-term ROI potential of a property.
 
-    This platform follows the Marketing Lab UI framework, ensuring high design consistency, structured storytelling, and 
-    executive-level clarity. Whether you're benchmarking multiple cities, comparing property types, or prioritizing 
+    Whether you're benchmarking multiple cities, comparing property types, or prioritizing 
     high-scoring neighborhoods, the system gives you a clean and structured way to explore what actually drives returns.
     </div>
     """, unsafe_allow_html=True)
