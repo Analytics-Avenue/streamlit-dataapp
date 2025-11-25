@@ -15,6 +15,16 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
+# -------------------------
 # App config + logo
 # -------------------------
 st.set_page_config(page_title="Customer Journey & Funnel Analytics — Lab", layout="wide", initial_sidebar_state="collapsed")
