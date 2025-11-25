@@ -11,6 +11,28 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import math
+# -------------------------
+# Helper: download DataFrame as CSV
+# Must be defined before any call to download_df(...)
+# -------------------------
+from io import BytesIO
+
+def download_df(df: pd.DataFrame, filename: str):
+    """
+    Provide a safe CSV download button for dataframe `df`.
+    Keeps no index and uses UTF-8. Call anywhere after this definition.
+    """
+    if df is None or df.empty:
+        st.info("No data to download.")
+        return
+
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    b = BytesIO()
+    b.write(csv_bytes)
+    b.seek(0)
+    st.download_button(label="Download CSV", data=b, file_name=filename, mime="text/csv")
+
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -475,19 +497,19 @@ with t3:
             "Predicted_Revenue": preds
         })
     
+        # after training and producing out_df (Actual_Revenue, Predicted_Revenue)
         st.markdown("<div class='section-title'>ML Predictions Preview</div>", unsafe_allow_html=True)
-    
         preview_df = out_df.head(10)
-    
-        # Render preview with required-table style
+        
+        # render preview with required-table style (no index shown)
         styled_preview = preview_df.style.set_table_attributes('class="required-table"')
         html_preview = styled_preview.to_html()
         html_preview = html_preview.replace("<th></th>", "").replace("<td></td>", "")
         st.write(html_preview, unsafe_allow_html=True)
-    
-        # Full dataset download
-        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Download full predictions (calls download_df defined above)
         download_df(out_df, "ml_revenue_predictions.csv")
+
 
 
     
