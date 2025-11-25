@@ -16,6 +16,42 @@ import math
 # Must be defined before any call to download_df(...)
 # -------------------------
 from io import BytesIO
+# ------------------------------------------------
+# Auto column mapper (must be defined BEFORE usage)
+# ------------------------------------------------
+AUTO_MAPS = {
+    "Campaign": ["campaign", "campaign_name"],
+    "Channel": ["channel", "platform", "source"],
+    "Date": ["date", "day"],
+    "Impressions": ["impressions", "impression"],
+    "Clicks": ["clicks", "link clicks"],
+    "Leads": ["leads", "results"],
+    "Conversions": ["conversions", "purchase", "add to cart"],
+    "Spend": ["spend", "budget", "cost", "amount spent"],
+    "Revenue": ["revenue", "amount"],
+    "ROAS": ["roas"],
+    "Device": ["device"],
+    "AgeGroup": ["age group", "age"],
+    "Gender": ["gender", "sex"],
+    "AdSet": ["adset", "ad set"],
+    "Creative": ["creative"]
+}
+
+def auto_map_columns(df):
+    rename = {}
+    cols = [c.strip() for c in df.columns]
+    for req, candidates in AUTO_MAPS.items():
+        for c in cols:
+            low = c.lower().strip()
+            for cand in candidates:
+                if cand.lower() == low or cand.lower() in low or low in cand.lower():
+                    rename[c] = req
+                    break
+            if c in rename:
+                break
+    if rename:
+        df = df.rename(columns=rename)
+    return df
 
 def download_df(df: pd.DataFrame, filename: str):
     """
