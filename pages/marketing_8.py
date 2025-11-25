@@ -279,7 +279,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='big-header'>Google Ads & SEO Performance Lab — unified paid + organic insights</div>", unsafe_allow_html=True)
+st.markdown("<div class='big-header'>Google Ads & SEO Performance Lab</div>", unsafe_allow_html=True)
 
 
 # -------------------------
