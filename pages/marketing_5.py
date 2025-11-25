@@ -185,6 +185,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("<div class='big-header'>Content & SEO Dashboard — Marketing Lab Style</div>", unsafe_allow_html=True)
+
+
 # -------------------------
 # Helpers & Constants
 # -------------------------
