@@ -1,7 +1,3 @@
-# tenant_risk_marketing_lab.py
-# Tenant Risk & Market Trend Analyzer — Marketing Lab UI (full app)
-# Drop this into a file and run with: streamlit run tenant_risk_marketing_lab.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -359,10 +355,6 @@ with tab3:
     if age_range and "Age_Years" in filt.columns:
         filt = filt[(filt["Age_Years"] >= age_range[0]) & (filt["Age_Years"] <= age_range[1])]
 
-    st.markdown('<div class="section-title">Filtered preview</div>', unsafe_allow_html=True)
-    render_index_safe_table(filt.head(10))
-
-    download_df(filt.head(500), "tenant_risk_filtered_preview.csv", label="Download filtered preview (CSV)")
 
     # -------------------------
     # KPIs (blue KPI cards)
