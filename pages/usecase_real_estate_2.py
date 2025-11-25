@@ -181,19 +181,21 @@ html, body, [data-testid="stAppViewContainer"] {{
 """, unsafe_allow_html=True)
 
 # =======================================================================================
-# HEADER BLOCK
-# =======================================================================================
+# Header & Logo
+# -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-
 st.markdown(f"""
-<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-    <img src="{logo_url}" width="60">
-    <div>
-        <div style="font-size:32px; font-weight:700; color:{BLUE};">Analytics Avenue & Advanced Analytics</div>
-        <div style="font-size:14px; color:{BLACK}; opacity:0.7;">Real Estate Demand Forecasting Lab</div>
+<div style="display: flex; align-items: center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("<div class='big-header'>Real Estate Demand Forecasting Lab</div>", unsafe_allow_html=True)
+
 
 # =======================================================================================
 # TABS
