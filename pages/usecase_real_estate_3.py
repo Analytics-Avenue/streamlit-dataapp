@@ -233,15 +233,38 @@ with tab2:
 
     st.dataframe(dict_df.style.set_table_attributes('class="required-table"'),
                  use_container_width=True)
-
-    st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
-    indep = ["City","Property_Type","BHK","Bathroom_Count","Area_sqft","Parking","Age_Years"]
-    for i in indep:
-        st.markdown(f"<div class='variable-box'>{i}</div>", unsafe_allow_html=True)
-
-    st.markdown('<div class="section-title">Dependent Variable</div>', unsafe_allow_html=True)
-    st.markdown("<div class='variable-box'>Price</div>", unsafe_allow_html=True)
-
+    left, right = st.columns(2)
+    
+    # Independent Variables (Left)
+    with left:
+        st.markdown("""
+        <div style="font-size:22px; font-weight:600; margin-bottom:10px; color:black;">
+            Independent Variables
+        </div>
+        """, unsafe_allow_html=True)
+    
+        indep = [
+            "City",
+            "Property_Type",
+            "BHK",
+            "Bathroom_Count",
+            "Area_sqft",
+            "Parking",
+            "Age_Years"
+        ]
+    
+        for var in indep:
+            st.markdown(f"<div class='variable-box'>{var}</div>", unsafe_allow_html=True)
+    
+    # Dependent Variable (Right)
+    with right:
+        st.markdown("""
+        <div style="font-size:22px; font-weight:600; margin-bottom:10px; color:black;">
+            Dependent Variable
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.markdown("<div class='variable-box'>Price</div>", unsafe_allow_html=True)
 # ------------------------------------------------------------
 # APPLICATION TAB
 # ------------------------------------------------------------
