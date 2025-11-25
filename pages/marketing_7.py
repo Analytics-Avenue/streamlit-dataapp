@@ -178,13 +178,14 @@ html, body, [data-testid="stAppViewContainer"] {{
     position:relative;
     display:inline-block;
 }}
+
 /* MAIN HEADER */
-.big-header {
+.big-header {{
     font-size:36px !important;
     font-weight:700 !important;
     color:#000 !important;
     margin-bottom:12px;
-}
+}}
 .section-title:hover::after {{
     content: "";
     position:absolute;
