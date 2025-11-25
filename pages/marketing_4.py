@@ -419,44 +419,68 @@ with t3:
 
     # -------------------------
     # ML prediction (Revenue)
-    # -------------------------
-    st.markdown('<div class="section-title">ML — Predict Revenue</div>', unsafe_allow_html=True)
-
-    ml = filt.dropna(subset=["Revenue"])
-    features = ["Channel","Campaign","Device","AgeGroup","Gender","AdSet","Impressions","Clicks","Spend"]
-    features = [f for f in features if f in ml.columns]
-
-    if len(ml) < 40:
-        st.info("Not enough rows for ML (need 40+).")
+    # ----------------------------------------------------
+    
+    st.markdown('<div class="section-title">ML — Predict Revenue (RandomForest)</div>', unsafe_allow_html=True)
+    
+    ml_df = filt.copy().dropna(subset=["Revenue"]) if "Revenue" in filt.columns else pd.DataFrame()
+    feat_cols = ["Channel","Campaign","Device","AgeGroup","Gender","AdSet",
+                 "Impressions","Clicks","Spend"]
+    feat_cols = [c for c in feat_cols if c in ml_df.columns]
+    
+    if ml_df.shape[0] < 30 or len(feat_cols) < 2:
+        st.info("Not enough data to train ML model (>=30 rows and >1 feature required).")
     else:
-        X = ml[features]
-        y = ml["Revenue"]
-
-        cat = [c for c in X.columns if X[c].dtype == "object"]
-        num = [c for c in X.columns if c not in cat]
-
-        prep = ColumnTransformer([
-            ("cat", OneHotEncoder(handle_unknown="ignore"), cat),
-            ("num", StandardScaler(), num)
-        ])
-
-        X_p = prep.fit_transform(X)
-        X_train, X_test, y_train, y_test = train_test_split(X_p, y, test_size=0.2, random_state=42)
-
-        rf = RandomForestRegressor(n_estimators=200, random_state=42)
-        rf.fit(X_train, y_train)
+        X = ml_df[feat_cols]
+        y = ml_df["Revenue"]
+    
+        cat_cols = [c for c in X.columns if X[c].dtype == "object"]
+        num_cols = [c for c in X.columns if c not in cat_cols]
+    
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
+                ("num", StandardScaler(), num_cols)
+            ],
+            remainder="drop"
+        )
+    
+        X_t = preprocessor.fit_transform(X)
+        X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+    
+        rf = RandomForestRegressor(n_estimators=220, random_state=42)
+        with st.spinner("Training RandomForest…"):
+            rf.fit(X_train, y_train)
+    
         preds = rf.predict(X_test)
-
         rmse = math.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
+    
+        st.markdown(
+            f"<div class='card'>RMSE: {rmse:.2f} | R²: {r2:.3f}</div>",
+            unsafe_allow_html=True
+        )
+    
+        # ---------------------------------------
+        # Build table-friendly output
+        # ---------------------------------------
+        out_df = pd.DataFrame({
+            "Actual_Revenue": y_test.reset_index(drop=True),
+            "Predicted_Revenue": preds
+        })
+    
+        # Required-table renderer (index-safe)
+        st.markdown("<div class='section-title'>ML Predictions (tabular)</div>", unsafe_allow_html=True)
+    
+        styled = out_df.style.set_table_attributes('class="required-table"')
+        html = styled.to_html()
+        html = html.replace("<th></th>", "").replace("<td></td>", "")
+        st.write(html, unsafe_allow_html=True)
+    
+        # Download
+        download_df(out_df, "ml_revenue_predictions.csv")
 
-        st.markdown(f"""
-        <div class="card">
-        RMSE: {rmse:.2f}<br>
-        R²: {r2:.3f}
-        </div>
-        """, unsafe_allow_html=True)
-
+    
     # -------------------------
     # Forecasting
     # -------------------------
