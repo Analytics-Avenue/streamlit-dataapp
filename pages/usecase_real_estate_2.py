@@ -285,7 +285,7 @@ with tab3:
             df = pd.read_csv(URL)
             df = auto_map_columns(df)
             st.success("Default dataset loaded.")
-            render_required_table(df.head(5))
+            render_required_table(df.head(3))
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
@@ -372,7 +372,7 @@ with tab3:
         pass
 
     st.markdown("Filtered Preview", unsafe_allow_html=True)
-    render_required_table(filt.head(10))
+    render_required_table(filt.head(4))
 
     download_df(filt, "filtered_real_estate_data.csv", label="Download filtered dataset")
 
