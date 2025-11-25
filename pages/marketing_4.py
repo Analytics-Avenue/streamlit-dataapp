@@ -230,7 +230,7 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 .required-table {
     width:100%;
     border-collapse:collapse;
-    font-size:17px;
+    font-size:14px;
     color:#000;
     background:#fff;
 }
