@@ -11,40 +11,49 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import math
+import warnings
+warnings.filterwarnings("ignore")
+
 # -------------------------
-# Helper: download DataFrame as CSV
-# Must be defined before any call to download_df(...)
+# Helpers - MUST BE DEFINED BEFORE ANY USAGE
 # -------------------------
-from io import BytesIO
-# ------------------------------------------------
-# Auto column mapper (must be defined BEFORE usage)
-# ------------------------------------------------
+# Auto-column mapping dictionary
 AUTO_MAPS = {
-    "Campaign": ["campaign", "campaign_name"],
-    "Channel": ["channel", "platform", "source"],
-    "Date": ["date", "day"],
+    "Campaign": ["campaign", "campaign_name", "campaign name"],
+    "Channel": ["channel", "platform", "source", "page", "page name"],
+    "Date": ["date", "day", "start date", "end date"],
     "Impressions": ["impressions", "impression"],
-    "Clicks": ["clicks", "link clicks"],
-    "Leads": ["leads", "results"],
-    "Conversions": ["conversions", "purchase", "add to cart"],
-    "Spend": ["spend", "budget", "cost", "amount spent"],
+    "Clicks": ["clicks", "link clicks", "all clicks", "total clicks"],
+    "Leads": ["leads", "results", "result"],
+    "Conversions": ["conversions", "purchase", "add to cart", "complete registration"],
+    "Spend": ["spend", "budget", "cost", "amount spent", "amount spent (inr)"],
     "Revenue": ["revenue", "amount"],
     "ROAS": ["roas"],
-    "Device": ["device"],
-    "AgeGroup": ["age group", "age"],
+    "Device": ["device", "platform"],
+    "AgeGroup": ["agegroup", "age group", "age"],
     "Gender": ["gender", "sex"],
     "AdSet": ["adset", "ad set"],
-    "Creative": ["creative"]
+    "Creative": ["creative", "ad creative"]
 }
 
-def auto_map_columns(df):
+REQUIRED_MARKETING_COLS = [
+    "Campaign", "Channel", "Date", "Impressions", "Clicks", "Leads",
+    "Conversions", "Spend", "Revenue", "ROAS", "Device", "AgeGroup",
+    "Gender", "AdSet", "Creative"
+]
+
+def auto_map_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Attempt to auto-rename columns based on AUTO_MAPS.
+    """
     rename = {}
     cols = [c.strip() for c in df.columns]
     for req, candidates in AUTO_MAPS.items():
         for c in cols:
             low = c.lower().strip()
             for cand in candidates:
-                if cand.lower() == low or cand.lower() in low or low in cand.lower():
+                cand_low = cand.lower().strip()
+                if cand_low == low or cand_low in low or low in cand_low:
                     rename[c] = req
                     break
             if c in rename:
@@ -53,33 +62,47 @@ def auto_map_columns(df):
         df = df.rename(columns=rename)
     return df
 
-def download_df(df: pd.DataFrame, filename: str):
+def ensure_datetime(df: pd.DataFrame, col: str = "Date") -> pd.DataFrame:
+    if col in df.columns:
+        try:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+        except Exception:
+            pass
+    return df
+
+def safe_numeric(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    for col in cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    return df
+
+def download_df(df: pd.DataFrame, filename: str, label: str = "Download CSV"):
     """
-    Provide a safe CSV download button for dataframe `df`.
-    Keeps no index and uses UTF-8. Call anywhere after this definition.
+    Download button for DataFrame. Removes index and writes UTF-8 CSV to buffer.
     """
     if df is None or df.empty:
         st.info("No data to download.")
         return
-
     csv_bytes = df.to_csv(index=False).encode("utf-8")
     b = BytesIO()
     b.write(csv_bytes)
     b.seek(0)
-    st.download_button(label="Download CSV", data=b, file_name=filename, mime="text/csv")
-    # ------------------------------------------------
-    # Required-table safe HTML renderer
-    # MUST be defined BEFORE calling render_required_table()
-    # ------------------------------------------------
-    def render_required_table(df):
-        styled = df.style.set_table_attributes('class="required-table"')
-        html = styled.to_html()
-        html = html.replace("<th></th>", "").replace("<td></td>", "")
-        st.write(html, unsafe_allow_html=True)
+    st.download_button(label=label, data=b, file_name=filename, mime="text/csv")
 
+def render_required_table(df: pd.DataFrame):
+    """
+    Render index-safe required-style HTML table used across the UI.
+    """
+    styled = df.style.set_table_attributes('class="required-table"')
+    html = styled.to_html()
+    html = html.replace("<th></th>", "").replace("<td></td>", "")
+    st.write(html, unsafe_allow_html=True)
 
-import warnings
-warnings.filterwarnings("ignore")
+def to_currency(x):
+    try:
+        return "₹ " + f"{float(x):,.2f}"
+    except:
+        return "₹ 0.00"
 
 # -------------------------
 # Page config
@@ -87,7 +110,7 @@ warnings.filterwarnings("ignore")
 st.set_page_config(page_title="Marketing Performance Analysis", layout="wide")
 
 # -------------------------
-# Header & Logo
+# Header & Logo (sample layout)
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
@@ -188,7 +211,26 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
     border-color:#064b86;
 }
 
-/* Table styling */
+/* Required-table CSS (index-safe renderer uses this class) */
+.required-table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:17px;
+    color:#000;
+    background:#fff;
+}
+.required-table thead th {
+    border-bottom:2px solid #000;
+    padding:10px;
+    font-weight:600;
+}
+.required-table tbody td {
+    padding:10px;
+    border-bottom:1px solid #efefef;
+}
+.required-table tbody tr:hover { background:#fafafa; }
+
+/* Table styling fallback */
 .dataframe th {
     background:#064b86 !important;
     color:#fff !important;
@@ -229,53 +271,28 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Helpers
+# Simple helpers used in UI (kept local names)
 # -------------------------
 REQUIRED_COLS = [
     "Campaign", "Channel", "Date", "Impressions", "Clicks",
     "Leads", "Conversions", "Spend", "Revenue", "ROAS"
 ]
 
-def auto_map(df):
-    mapping = {}
-    lower = {c.lower(): c for c in df.columns}
-    for req in REQUIRED_COLS:
-        if req.lower() in lower:
-            mapping[lower[req.lower()]] = req
-    df = df.rename(columns=mapping)
-    return df
-
-def ensure_numeric(df):
-    for c in ["Impressions","Clicks","Leads","Conversions","Spend","Revenue","ROAS"]:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
-    return df
-
-def ensure_date(df):
-    if "Date" in df.columns:
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    return df
-
-def download(df, name):
-    b = BytesIO()
-    b.write(df.to_csv(index=False).encode("utf-8"))
-    b.seek(0)
-    st.download_button("Download CSV", b, name)
-
 def to_money(v):
-    try: return "₹ " + format(float(v), ",.2f")
-    except: return "₹ 0.00"
+    try:
+        return "₹ " + format(float(v), ",.2f")
+    except:
+        return "₹ 0.00"
 
 # -------------------------
 # Tabs
 # -------------------------
-t1, t2, t3 = st.tabs(["Overview", "Important Attributes", "Application"])
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # =======================================================================================
 # TAB 1 — OVERVIEW (Exact layout)
 # =======================================================================================
-with t1:
-
+with tab1:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="card">
@@ -284,9 +301,9 @@ with t1:
     </div>
     """, unsafe_allow_html=True)
 
-    L, R = st.columns(2)
+    left, right = st.columns(2)
 
-    with L:
+    with left:
         st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class="card">
@@ -298,7 +315,7 @@ with t1:
         </div>
         """, unsafe_allow_html=True)
 
-    with R:
+    with right:
         st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class="card">
@@ -328,13 +345,9 @@ with t1:
 # =======================================================================================
 # TAB 2 — IMPORTANT ATTRIBUTES (Exact layout)
 # =======================================================================================
-with t2:
-
-    # --------------------------------------------
-    # Required Column Data Dictionary (Marketing Performance)
-    # --------------------------------------------
+with tab2:
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
-    
+
     required_dict = {
         "Campaign": "Name of the marketing campaign or initiative.",
         "Channel": "Acquisition platform (Facebook, Google, Meta Ads, Email, etc.).",
@@ -347,12 +360,10 @@ with t2:
         "Revenue": "Revenue generated from the campaign activity.",
         "ROAS": "Return on Ad Spend = Revenue / Spend."
     }
-    
-    dict_df = pd.DataFrame(
-        [{"Column": k, "Description": v} for k, v in required_dict.items()]
-    )
-    
-    # PURE BLACK table styling override (same as your sample)
+
+    dict_df = pd.DataFrame([{"Column": k, "Description": v} for k, v in required_dict.items()])
+
+    # styling override for this dict table
     st.markdown("""
         <style>
             .req-table th {
@@ -372,9 +383,8 @@ with t2:
             }
         </style>
     """, unsafe_allow_html=True)
-    
-    st.dataframe(dict_df.style.set_table_attributes('class="req-table"'), use_container_width=True)
 
+    st.dataframe(dict_df.style.set_table_attributes('class="req-table"'), use_container_width=True)
 
     L, R = st.columns(2)
 
@@ -391,24 +401,18 @@ with t2:
 # =======================================================================================
 # TAB 3 — APPLICATION (Exact layout)
 # =======================================================================================
-with t3:
-
-    # -------------------------
-    # Step 1 — Load dataset
-    # -------------------------
+with tab3:
     st.markdown('<div class="section-title">Step 1 — Load dataset</div>', unsafe_allow_html=True)
-    
+
     mode = st.radio(
         "Dataset option:",
         ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
         horizontal=True
     )
-    
+
     df = None
-    
-    # ----------------------------------------------------
+
     # DEFAULT DATASET
-    # ----------------------------------------------------
     if mode == "Default dataset":
         DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
         try:
@@ -420,10 +424,8 @@ with t3:
         except Exception as e:
             st.error("Failed to load default dataset: " + str(e))
             st.stop()
-    
-    # ----------------------------------------------------
+
     # UPLOAD SIMPLE CSV (AUTO MAP)
-    # ----------------------------------------------------
     elif mode == "Upload CSV":
         st.markdown("#### Download sample CSV (optional)")
         SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
@@ -437,7 +439,7 @@ with t3:
             )
         except:
             pass
-    
+
         uploaded = st.file_uploader("Upload CSV file", type=["csv"])
         if uploaded:
             df = pd.read_csv(uploaded)
@@ -445,31 +447,28 @@ with t3:
             df = auto_map_columns(df)
             st.success("File uploaded.")
             render_required_table(df.head(5))
-    
-    
-    # ----------------------------------------------------
-    # UPLOAD + FULL COLUMN MAPPING
-    # ----------------------------------------------------
-    else:  # Upload CSV + mapping
+
+    # UPLOAD + MAPPING
+    else:
         uploaded = st.file_uploader("Upload CSV for manual mapping", type=["csv"])
         if uploaded:
             raw = pd.read_csv(uploaded)
             raw.columns = raw.columns.str.strip()
-    
+
             st.markdown("### Preview (first 5 rows)")
             render_required_table(raw.head(5))
-    
+
             st.markdown("### Map your columns to required fields")
             mapping = {}
             options = ["-- Select --"] + list(raw.columns)
-    
+
             for req_col in REQUIRED_MARKETING_COLS:
                 mapping[req_col] = st.selectbox(
                     f"Map → {req_col}",
                     options=options,
                     key=f"map_{req_col}"
                 )
-    
+
             if st.button("Apply Mapping"):
                 missing = [k for k,v in mapping.items() if v == "-- Select --"]
                 if missing:
@@ -478,204 +477,191 @@ with t3:
                     df = raw.rename(columns={v: k for k, v in mapping.items()})
                     st.success("Mapping applied successfully.")
                     render_required_table(df.head(5))
-    
+
     # STOP IF NO DATAFRAME
     if df is None:
         st.stop()
 
-    df = ensure_date(df)
-    df = ensure_numeric(df)
-
+    # Basic cleaning & derived metrics
+    df = ensure_datetime(df, "Date")
+    df = safe_numeric(df, ["Impressions","Clicks","Leads","Conversions","Spend","Revenue","ROAS"])
     st.markdown("Preview:")
     st.dataframe(df.head(10), use_container_width=True)
 
-    # -------------------------
     # Step 2 — Filters
-    # -------------------------
     st.markdown('<div class="section-title">Step 2 — Filters</div>', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns([2,2,1])
 
-    C1, C2, C3 = st.columns([2,2,1])
+    campaigns = sorted(df["Campaign"].dropna().unique()) if "Campaign" in df.columns else []
+    channels  = sorted(df["Channel"].dropna().unique()) if "Channel" in df.columns else []
 
-    with C1:
-        camp = sorted(df["Campaign"].dropna().unique())
-        s_camp = st.multiselect("Campaign", camp, default=camp[:5])
-
-    with C2:
-        ch = sorted(df["Channel"].dropna().unique())
-        s_ch = st.multiselect("Channel", ch, default=ch[:5])
-
-    with C3:
-        min_d = df["Date"].min()
-        max_d = df["Date"].max()
-        dr = st.date_input("Date Range", (min_d, max_d))
+    with c1:
+        sel_campaigns = st.multiselect("Campaign", options=campaigns, default=campaigns[:5])
+    with c2:
+        sel_channels = st.multiselect("Channel", options=channels, default=channels[:3])
+    with c3:
+        try:
+            min_date = df["Date"].min().date()
+            max_date = df["Date"].max().date()
+            date_range = st.date_input("Date range", value=(min_date, max_date))
+        except Exception:
+            date_range = st.date_input("Date range")
 
     filt = df.copy()
-    if s_camp:
-        filt = filt[filt["Campaign"].isin(s_camp)]
-    if s_ch:
-        filt = filt[filt["Channel"].isin(s_ch)]
+    if sel_campaigns:
+        filt = filt[filt["Campaign"].isin(sel_campaigns)]
+    if sel_channels:
+        filt = filt[filt["Channel"].isin(sel_channels)]
     try:
-        filt = filt[(filt["Date"] >= pd.to_datetime(dr[0])) &
-                    (filt["Date"] <= pd.to_datetime(dr[1]))]
-    except:
+        if date_range and len(date_range) == 2:
+            start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+            filt = filt[(filt["Date"] >= start) & (filt["Date"] <= end)]
+    except Exception:
         pass
 
-    st.markdown("Filtered preview:")
+    st.markdown("Filtered preview (first 10 rows):")
     st.dataframe(filt.head(10), use_container_width=True)
-    download(filt.head(500), "filtered_preview.csv")
+    download_df(filt.head(500), "filtered_preview.csv", label="Download filtered preview (up to 500 rows)")
 
-    # -------------------------
     # KPIs
-    # -------------------------
     st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
-    k1, k2, k3, k4 = st.columns(4)
+    kk1, kk2, kk3, kk4 = st.columns(4)
+    total_rev = float(filt["Revenue"].sum()) if "Revenue" in filt.columns else 0.0
+    avg_roas = float(filt["ROAS"].mean()) if "ROAS" in filt.columns else 0.0
+    total_leads = int(filt["Leads"].sum()) if "Leads" in filt.columns else 0
+    conv_rate = (filt["Conversions"].sum() / max(filt["Clicks"].sum(), 1)) if ("Conversions" in filt.columns and "Clicks" in filt.columns) else 0.0
 
-    total_rev = filt["Revenue"].sum()
-    avg_roas  = filt["ROAS"].mean()
-    total_leads = filt["Leads"].sum()
-    total_conv = filt["Conversions"].sum()
+    kk1.markdown(f"<div class='kpi'>Total Revenue<br>{to_money(total_rev)}</div>", unsafe_allow_html=True)
+    kk2.markdown(f"<div class='kpi'>ROAS<br>{avg_roas:.2f}</div>", unsafe_allow_html=True)
+    kk3.markdown(f"<div class='kpi'>Total Leads<br>{total_leads:,}</div>", unsafe_allow_html=True)
+    kk4.markdown(f"<div class='kpi'>Conversion Rate<br>{conv_rate:.2%}</div>", unsafe_allow_html=True)
 
-    k1.markdown(f"<div class='kpi'>Revenue<br>{to_money(total_rev)}</div>", unsafe_allow_html=True)
-    k2.markdown(f"<div class='kpi'>ROAS<br>{avg_roas:.2f}</div>", unsafe_allow_html=True)
-    k3.markdown(f"<div class='kpi'>Leads<br>{int(total_leads)}</div>", unsafe_allow_html=True)
-    k4.markdown(f"<div class='kpi'>Conversions<br>{int(total_conv)}</div>", unsafe_allow_html=True)
-
-    # -------------------------
     # Charts & EDA
-    # -------------------------
     st.markdown('<div class="section-title">Charts & EDA</div>', unsafe_allow_html=True)
+    if "Campaign" in filt.columns and (("Revenue" in filt.columns) or ("Conversions" in filt.columns)):
+        agg = filt.groupby("Campaign")[["Revenue","Conversions"]].sum().reset_index()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Revenue"], name="Revenue"))
+        fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Conversions"], name="Conversions"))
+        fig.update_layout(barmode='group', template="plotly_white")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Campaign-level revenue/conversion data missing for charting.")
 
-    ag = filt.groupby("Campaign")[["Revenue","Conversions"]].sum().reset_index()
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=ag["Campaign"], y=ag["Revenue"], name="Revenue"))
-    fig.add_trace(go.Bar(x=ag["Campaign"], y=ag["Conversions"], name="Conversions"))
-    fig.update_layout(barmode="group", template="plotly_white")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # -------------------------
-    # ML prediction (Revenue)
-    
+    # ML — Predict Revenue (show preview only + download)
     st.markdown('<div class="section-title">ML — Predict Revenue (RandomForest)</div>', unsafe_allow_html=True)
-    
     ml_df = filt.copy().dropna(subset=["Revenue"]) if "Revenue" in filt.columns else pd.DataFrame()
-    feat_cols = ["Channel","Campaign","Device","AgeGroup","Gender","AdSet",
-                 "Impressions","Clicks","Spend"]
+    feat_cols = ["Channel","Campaign","Device","AgeGroup","Gender","AdSet","Impressions","Clicks","Spend"]
     feat_cols = [c for c in feat_cols if c in ml_df.columns]
-    
+
     if ml_df.shape[0] < 30 or len(feat_cols) < 2:
         st.info("Not enough data to train ML model (>=30 rows and >1 feature required).")
     else:
         X = ml_df[feat_cols]
         y = ml_df["Revenue"]
-    
+
         cat_cols = [c for c in X.columns if X[c].dtype == "object"]
         num_cols = [c for c in X.columns if c not in cat_cols]
-    
+
         preprocessor = ColumnTransformer(
             transformers=[
-                ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-                ("num", StandardScaler(), num_cols)
+                ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols) if cat_cols else ("noop_cat","passthrough", []),
+                ("num", StandardScaler(), num_cols) if num_cols else ("noop_num","passthrough", [])
             ],
             remainder="drop"
         )
-    
-        X_t = preprocessor.fit_transform(X)
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_t, y, test_size=0.2, random_state=42
-        )
-    
-        rf = RandomForestRegressor(n_estimators=220, random_state=42)
-        with st.spinner("Training RandomForest…"):
-            rf.fit(X_train, y_train)
-    
-        preds = rf.predict(X_test)
-        rmse = math.sqrt(mean_squared_error(y_test, preds))
-        r2 = r2_score(y_test, preds)
-    
-        # Performance summary card
-        st.markdown(
-            f"""
-            <div class='card'>
+
+        try:
+            X_t = preprocessor.fit_transform(X)
+        except Exception as e:
+            st.error("Preprocessing failed: " + str(e))
+            X_t = None
+
+        if X_t is not None:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_t, y, test_size=0.2, random_state=42
+            )
+
+            rf = RandomForestRegressor(n_estimators=220, random_state=42)
+            with st.spinner("Training RandomForest…"):
+                rf.fit(X_train, y_train)
+
+            preds = rf.predict(X_test)
+            rmse = math.sqrt(mean_squared_error(y_test, preds))
+            r2 = r2_score(y_test, preds)
+
+            st.markdown(f"""
+                <div class="card">
                 <h4>Model Performance</h4>
                 RMSE: {rmse:.2f}<br>
                 R² Score: {r2:.3f}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    
-        # Build output table
-        out_df = pd.DataFrame({
-            "Actual_Revenue": y_test.reset_index(drop=True),
-            "Predicted_Revenue": preds
-        })
-    
-        # after training and producing out_df (Actual_Revenue, Predicted_Revenue)
-        st.markdown("<div class='section-title'>ML Predictions Preview</div>", unsafe_allow_html=True)
-        preview_df = out_df.head(10)
-        
-        # render preview with required-table style (no index shown)
-        styled_preview = preview_df.style.set_table_attributes('class="required-table"')
-        html_preview = styled_preview.to_html()
-        html_preview = html_preview.replace("<th></th>", "").replace("<td></td>", "")
-        st.write(html_preview, unsafe_allow_html=True)
-        
-        # Download full predictions (calls download_df defined above)
-        download_df(out_df, "ml_revenue_predictions.csv")
+                </div>
+                """, unsafe_allow_html=True)
 
+            out_df = pd.DataFrame({
+                "Actual_Revenue": y_test.reset_index(drop=True),
+                "Predicted_Revenue": preds
+            })
 
+            # preview only
+            preview_df = out_df.head(10)
+            st.markdown("<div class='section-title'>ML Predictions Preview</div>", unsafe_allow_html=True)
+            render_required_table(preview_df)
 
-    
-    # -------------------------
-    # Forecasting
-    # -------------------------
+            # download full predictions
+            download_df(out_df, "ml_revenue_predictions.csv", label="Download full ML predictions")
+
+    # Forecasting (linear fallback)
     st.markdown('<div class="section-title">Forecasting</div>', unsafe_allow_html=True)
-
     if "Date" in filt.columns and "Revenue" in filt.columns:
-        daily = filt.groupby(pd.Grouper(key="Date", freq="D"))["Revenue"].sum().reset_index()
-        if len(daily) >= 10:
+        daily = filt.groupby(pd.Grouper(key="Date", freq="D"))["Revenue"].sum().reset_index().dropna()
+        if daily.shape[0] >= 10:
+            daily = daily.reset_index(drop=True)
             daily["t"] = np.arange(len(daily))
             lr = LinearRegression()
             lr.fit(daily[["t"]], daily["Revenue"])
+            future_idx = np.arange(len(daily), len(daily)+30).reshape(-1,1)
+            preds_future = lr.predict(future_idx)
+            future_dates = pd.date_range(daily["Date"].max()+pd.Timedelta(days=1), periods=30)
 
-            future_t = np.arange(len(daily), len(daily)+30)
-            preds = lr.predict(future_t.reshape(-1,1))
-            future_dates = pd.date_range(daily["Date"].max() + pd.Timedelta(days=1), periods=30)
-
-            fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=daily["Date"], y=daily["Revenue"], name="Actual"))
-            fig2.add_trace(go.Scatter(x=future_dates, y=preds, name="Forecast"))
-            fig2.update_layout(template="plotly_white")
-            st.plotly_chart(fig2, use_container_width=True)
+            df_forecast = pd.DataFrame({"Date": future_dates, "Forecast_Revenue": preds_future})
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=daily["Date"], y=daily["Revenue"], name="Actual"))
+            fig.add_trace(go.Scatter(x=df_forecast["Date"], y=df_forecast["Forecast_Revenue"], name="Forecast"))
+            fig.update_layout(plot_bgcolor="white")
+            st.plotly_chart(fig, use_container_width=True)
+            download_df(df_forecast, "revenue_30day_forecast.csv", label="Download 30-day forecast")
         else:
-            st.info("Not enough daily data (need 10+).")
+            st.info("Not enough daily data (>=10) to produce forecast.")
+    else:
+        st.info("Date or Revenue column missing for forecasting.")
 
-    # -------------------------
-    # Insights
-    # -------------------------
+    # Automated Insights
     st.markdown('<div class="section-title">Automated Insights</div>', unsafe_allow_html=True)
-
     insights = []
-
-    if "Channel" in filt.columns:
-        ch = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
-        ch["ROI"] = np.where(ch["Spend"]>0, ch["Revenue"]/ch["Spend"], 0)
-        if not ch.empty:
-            best = ch.loc[ch["ROI"].idxmax()]
-            worst = ch.loc[ch["ROI"].idxmin()]
-            insights.append(f"Best ROI channel: {best['Channel']} — {best['ROI']:.2f}")
-            insights.append(f"Worst ROI channel: {worst['Channel']} — {worst['ROI']:.2f}")
+    if "Channel" in filt.columns and "Revenue" in filt.columns and "Spend" in filt.columns:
+        ch_perf = filt.groupby("Channel")[["Revenue","Spend"]].sum().reset_index()
+        ch_perf["Revenue_per_Rs"] = np.where(ch_perf["Spend"]>0, ch_perf["Revenue"]/ch_perf["Spend"], 0)
+        if not ch_perf.empty:
+            best = ch_perf.sort_values("Revenue_per_Rs", ascending=False).iloc[0]
+            worst = ch_perf.sort_values("Revenue_per_Rs", ascending=True).iloc[0]
+            insights.append({"Insight":"Best Channel ROI","Channel":best['Channel'],"Revenue_per_Rs":float(best['Revenue_per_Rs'])})
+            insights.append({"Insight":"Lowest Channel ROI","Channel":worst['Channel'],"Revenue_per_Rs":float(worst['Revenue_per_Rs'])})
+    if "Creative" in filt.columns and "Revenue" in filt.columns:
+        cr_perf = filt.groupby("Creative")[["Revenue"]].sum().reset_index()
+        if not cr_perf.empty:
+            top_creative = cr_perf.sort_values("Revenue", ascending=False).iloc[0]
+            insights.append({"Insight":"Top Creative by Revenue","Creative": top_creative['Creative'], "Revenue": float(top_creative['Revenue'])})
 
     if insights:
-        for i,v in enumerate(insights):
-            st.markdown(f"<div class='card'><b>Insight {i+1}:</b> {v}</div>", unsafe_allow_html=True)
+        ins_df = pd.DataFrame(insights)
+        render_required_table(ins_df)
+        download_df(ins_df, "automated_insights.csv", label="Download automated insights")
     else:
-        st.markdown("<div class='card'>No insights could be generated.</div>", unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="small-muted">No automated insights available for selected filters.</div></div>', unsafe_allow_html=True)
 
-    # -------------------------
-    # Export
-    # -------------------------
+    # Exports
     st.markdown('<div class="section-title">Export</div>', unsafe_allow_html=True)
-    st.download_button("Download full filtered data", filt.to_csv(index=False), "marketing_filtered.csv")
+    download_df(filt, "marketing_filtered_full.csv", label="Download full filtered dataset (CSV)")
 
-# END FILE
+# END OF FILE
