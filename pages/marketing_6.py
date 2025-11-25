@@ -660,12 +660,4 @@ with tab3:
         render_index_safe_table(ins_df)
         download_df(ins_df, "automated_insights.csv", label="Download automated insights (CSV)")
 
-    # -------------------------
-    # Export full filtered dataset
-    # -------------------------
-    st.markdown('<div class="section-title">Export</div>', unsafe_allow_html=True)
-    st.download_button("Download filtered dataset (all rows)", filt.to_csv(index=False), "customer_retention_filtered.csv", "text/csv")
-
-    st.markdown("### Done — export what you need", unsafe_allow_html=True)
-
-# End of file
+        
