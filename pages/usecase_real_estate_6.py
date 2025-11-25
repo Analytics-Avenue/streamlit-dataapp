@@ -194,7 +194,7 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 # -------------------------
 with tab1:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card">This app identifies tenant/occupancy risk and surfaces emerging market trends for real-estate portfolios. Built to Marketing Lab UI standards.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">This app identifies occupancy risk and emerging market trends. Investors and property managers can proactively manage portfolios by analyzing property age, location, and conversion probability. The system highlights properties with high vacancy risk and areas showing growth potential.</div>', unsafe_allow_html=True)
 
     left, right = st.columns(2)
     with left:
