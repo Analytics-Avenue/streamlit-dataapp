@@ -13,6 +13,15 @@ from sklearn.metrics import mean_squared_error, r2_score
 import math
 import warnings
 warnings.filterwarnings("ignore")
+# -------------------------
+
+hide_sidebar = """
+<style>
+[data-testid="stSidebarNav"] {display: none;}
+section[data-testid="stSidebar"] {display: none;}
+</style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
 
 # -------------------------
 # Helpers - MUST BE DEFINED BEFORE ANY USAGE
