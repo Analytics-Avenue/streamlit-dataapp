@@ -140,6 +140,14 @@ html, body, [data-testid="stAppViewContainer"] {{
   to {{ opacity: 1; transform: translateY(0); }}
 }}
 
+/* MAIN HEADER */
+.big-header {{
+    font-size:36px !important;
+    font-weight:700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}}
+
 /* Section titles */
 .section-title {{
     color: {BLACK};
