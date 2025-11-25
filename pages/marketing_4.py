@@ -352,22 +352,90 @@ with t3:
     # Step 1 — Load dataset
     # -------------------------
     st.markdown('<div class="section-title">Step 1 — Load dataset</div>', unsafe_allow_html=True)
-
+    
+    mode = st.radio(
+        "Dataset option:",
+        ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"],
+        horizontal=True
+    )
+    
     df = None
-    mode = st.radio("Choose input:", ["Default dataset", "Upload CSV"], horizontal=True)
-
+    
+    # ----------------------------------------------------
+    # DEFAULT DATASET
+    # ----------------------------------------------------
     if mode == "Default dataset":
-        url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
-        df = pd.read_csv(url)
-        df = auto_map(df)
-    else:
-        up = st.file_uploader("Upload CSV", type=["csv"])
-        if up:
-            df = pd.read_csv(up)
-            df = auto_map(df)
-
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
+        try:
+            df = pd.read_csv(DEFAULT_URL)
+            df.columns = df.columns.str.strip()
+            df = auto_map_columns(df)
+            st.success("Default dataset loaded successfully.")
+            render_required_table(df.head(5))
+        except Exception as e:
+            st.error("Failed to load default dataset: " + str(e))
+            st.stop()
+    
+    # ----------------------------------------------------
+    # UPLOAD SIMPLE CSV (AUTO MAP)
+    # ----------------------------------------------------
+    elif mode == "Upload CSV":
+        st.markdown("#### Download sample CSV (optional)")
+        SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/marketing.csv"
+        try:
+            smp = pd.read_csv(SAMPLE_URL).head(5)
+            st.download_button(
+                "Download Sample CSV",
+                smp.to_csv(index=False),
+                "sample_marketing.csv",
+                "text/csv"
+            )
+        except:
+            pass
+    
+        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
+        if uploaded:
+            df = pd.read_csv(uploaded)
+            df.columns = df.columns.str.strip()
+            df = auto_map_columns(df)
+            st.success("File uploaded.")
+            render_required_table(df.head(5))
+    
+    
+    # ----------------------------------------------------
+    # UPLOAD + FULL COLUMN MAPPING
+    # ----------------------------------------------------
+    else:  # Upload CSV + mapping
+        uploaded = st.file_uploader("Upload CSV for manual mapping", type=["csv"])
+        if uploaded:
+            raw = pd.read_csv(uploaded)
+            raw.columns = raw.columns.str.strip()
+    
+            st.markdown("### Preview (first 5 rows)")
+            render_required_table(raw.head(5))
+    
+            st.markdown("### Map your columns to required fields")
+            mapping = {}
+            options = ["-- Select --"] + list(raw.columns)
+    
+            for req_col in REQUIRED_MARKETING_COLS:
+                mapping[req_col] = st.selectbox(
+                    f"Map → {req_col}",
+                    options=options,
+                    key=f"map_{req_col}"
+                )
+    
+            if st.button("Apply Mapping"):
+                missing = [k for k,v in mapping.items() if v == "-- Select --"]
+                if missing:
+                    st.error("Please map all required columns: " + ", ".join(missing))
+                else:
+                    df = raw.rename(columns={v: k for k, v in mapping.items()})
+                    st.success("Mapping applied successfully.")
+                    render_required_table(df.head(5))
+    
+    # STOP IF NO DATAFRAME
     if df is None:
-        st.info("Upload a dataset to continue.")
         st.stop()
 
     df = ensure_date(df)
