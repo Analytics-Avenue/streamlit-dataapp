@@ -258,18 +258,21 @@ html, body, [data-testid="stAppViewContainer"] {{
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Header (logo + title)
+# Header & Logo
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div class="fade-in" style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
-    <img src="{logo_url}" width="56" style="border-radius:8px;"/>
-    <div>
-        <div style="font-size:28px; font-weight:700; color:{BLUE}; margin:0;">Analytics Avenue & Advanced Analytics</div>
-        <div style="font-size:13px; color:{BLACK}; margin:0;" class="small-muted">Google Ads & SEO Performance Lab — unified paid + organic insights</div>
+<div style="display: flex; align-items: center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("<div class='big-header'>Google Ads & SEO Performance Lab — unified paid + organic insights</div>", unsafe_allow_html=True)
+
 
 # -------------------------
 # Tabs (Overview / Important Attributes / Application)
