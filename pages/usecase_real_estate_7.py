@@ -1,7 +1,3 @@
-# rental_yield_marketing_lab.py
-# Rental Yield & Investment Analyzer — Marketing Lab UI (full app)
-# Run with: streamlit run rental_yield_marketing_lab.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -47,6 +43,13 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
     margin-bottom:10px;
     position:relative;
 }
+/* MAIN HEADER */
+.big-header {
+    font-size:36px !important;
+    font-weight:700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}
 .section-title:after {
     content:"";
     position:absolute; bottom:-6px; left:0;
@@ -91,17 +94,20 @@ body, [class*="css"] { color:#000 !important; font-size:16.5px; }
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Header
+# Header & Logo
 # -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div class="header-row">
-    <img src="{LOGO}" width="56" style="border-radius:6px;">
-    <div>
-        <div class="header-title">Rental Yield & Investment Analyzer</div>
-        <div class="header-sub">Estimate rental yield, compute investment score, find high-potential properties — Marketing Lab UI</div>
+<div style="display: flex; align-items: center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+st.markdown("<div class='big-header'>Rental Yield & Investment Analyzer</div>", unsafe_allow_html=True)
+
 
 # -------------------------
 # Required columns & mapping hints
