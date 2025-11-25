@@ -339,10 +339,10 @@ with tab_overview:
 
     st.markdown('<div class="section-title">Key Metrics</div>', unsafe_allow_html=True)
     kk1, kk2, kk3, kk4 = st.columns(4)
-    kk1.markdown('<div class="kpi">Total Revenue<div class="kpi-value">—</div></div>', unsafe_allow_html=True)
-    kk2.markdown('<div class="kpi">ROAS<div class="kpi-value">—</div></div>', unsafe_allow_html=True)
-    kk3.markdown('<div class="kpi">Total Leads<div class="kpi-value">—</div></div>', unsafe_allow_html=True)
-    kk4.markdown('<div class="kpi">Conversion Rate<div class="kpi-value">—</div></div>', unsafe_allow_html=True)
+    kk1.markdown('<div class="kpi">Total Revenue</div>', unsafe_allow_html=True)
+    kk2.markdown('<div class="kpi">ROAS</div>', unsafe_allow_html=True)
+    kk3.markdown('<div class="kpi">Total Leads</div>', unsafe_allow_html=True)
+    kk4.markdown('<div class="kpi">Conversion Rate</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="section-title">Forecasting & ML</div>', unsafe_allow_html=True)
     st.markdown("""
