@@ -69,21 +69,23 @@ def safe_numeric(df: pd.DataFrame, cols: list):
 
 def render_required_table(df: pd.DataFrame):
     """
-    Fully index-free table renderer (no hide_index, no index HTML output).
-    Works across all Streamlit + Pandas versions.
+    Index-safe table renderer (no .hide_index() used because some Streamlit builds break).
     """
-    df2 = df.reset_index(drop=True).copy()  # <-- Remove index completely
-
     styled = (
-        df2.style
+        df.style
         .set_table_attributes('class="required-table"')
-        .set_properties(**{"color": "#000000", "font-size": "17px"})
+        .set_properties(**{
+            "color": "#000000",
+            "font-size": "17px",
+        })
         .set_table_styles([
             {"selector": "th", "props": [("color", "#000000"), ("font-size", "18px"), ("font-weight", "600")]}
         ])
+        .format_index(lambda x: "", axis=0)  # <— SAFEST cross-version alternative
     )
 
     html = styled.to_html()
+    html = html.replace("<th></th>", "").replace("<td></td>", "")  # clean empty index cells
     st.write(html, unsafe_allow_html=True)
 
 
