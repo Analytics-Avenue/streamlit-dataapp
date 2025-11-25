@@ -67,6 +67,15 @@ def download_df(df: pd.DataFrame, filename: str):
     b.write(csv_bytes)
     b.seek(0)
     st.download_button(label="Download CSV", data=b, file_name=filename, mime="text/csv")
+    # ------------------------------------------------
+    # Required-table safe HTML renderer
+    # MUST be defined BEFORE calling render_required_table()
+    # ------------------------------------------------
+    def render_required_table(df):
+        styled = df.style.set_table_attributes('class="required-table"')
+        html = styled.to_html()
+        html = html.replace("<th></th>", "").replace("<td></td>", "")
+        st.write(html, unsafe_allow_html=True)
 
 
 import warnings
