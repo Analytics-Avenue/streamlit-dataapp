@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 # -------------------------
 # Page / App Config
 # -------------------------
-st.set_page_config(page_title="Content & SEO Dashboard — Marketing Lab Style", layout="wide")
+st.set_page_config(page_title="Content & SEO Dashboard", layout="wide")
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
 # -------------------------
@@ -185,7 +185,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='big-header'>Content & SEO Dashboard — Marketing Lab Style</div>", unsafe_allow_html=True)
+st.markdown("<div class='big-header'>Content & SEO Dashboard</div>", unsafe_allow_html=True)
 
 
 # -------------------------
