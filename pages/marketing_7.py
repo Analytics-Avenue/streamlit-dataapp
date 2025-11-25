@@ -68,12 +68,26 @@ def safe_numeric(df: pd.DataFrame, cols: list):
     return df
 
 def render_required_table(df: pd.DataFrame):
-    """Index-safe HTML table renderer used for required/dictionary tables."""
-    styled = df.style.set_table_attributes('class="required-table"').hide_index()
+    """
+    Index-safe table renderer (no .hide_index() used because some Streamlit builds break).
+    """
+    styled = (
+        df.style
+        .set_table_attributes('class="required-table"')
+        .set_properties(**{
+            "color": "#000000",
+            "font-size": "17px",
+        })
+        .set_table_styles([
+            {"selector": "th", "props": [("color", "#000000"), ("font-size", "18px"), ("font-weight", "600")]}
+        ])
+        .format_index(lambda x: "", axis=0)  # <— SAFEST cross-version alternative
+    )
+
     html = styled.to_html()
-    # sanitize empty index placeholders added by pandas Styler
-    html = html.replace("<th></th>", "").replace("<td></td>", "")
+    html = html.replace("<th></th>", "").replace("<td></td>", "")  # clean empty index cells
     st.write(html, unsafe_allow_html=True)
+
 
 def auto_map_columns(df: pd.DataFrame, mapping_dict: dict):
     """
