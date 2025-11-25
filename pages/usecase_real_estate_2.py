@@ -108,6 +108,14 @@ html, body, [data-testid="stAppViewContainer"] {{
     border-radius:2px;
 }}
 
+/* MAIN HEADER */
+.big-header {{
+    font-size:36px !important;
+    font-weight:700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}}
+
 .card {{
     background:#ffffff;
     color:{BLACK};
