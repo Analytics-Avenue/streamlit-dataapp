@@ -136,7 +136,7 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 .required-table thead th {
     background:#ffffff !important;
     color:#000 !important;
-    font-size:18px !important;
+    font-size:14px !important;
     border-bottom:2px solid #000 !important;
     padding:10px !important;
     text-align:left;
@@ -656,8 +656,5 @@ with tab3:
         st.info("No automated insights generated for the selected filters.")
     else:
         ins_df = pd.DataFrame(insights)
-        st.markdown('<div class="small-muted">Automated Insights (summary)</div>', unsafe_allow_html=True)
         render_index_safe_table(ins_df)
         download_df(ins_df, "automated_insights.csv", label="Download automated insights (CSV)")
-
-        
