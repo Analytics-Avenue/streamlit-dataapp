@@ -12,120 +12,18 @@ import math
 import warnings
 warnings.filterwarnings("ignore")
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-st.set_page_config(page_title="Google Ads & SEO Performance Lab", layout="wide")
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
+# -------------------------
+# App config
+# -------------------------
+st.set_page_config(page_title="Google Ads & SEO Performance Lab", layout="wide", initial_sidebar_state="collapsed")
 
-# ============================================================
-# COMPANY HEADER
-# ============================================================
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div style="display:flex; align-items:center; margin-bottom:18px;">
-    <img src="{logo_url}" width="60" style="margin-right:12px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# -------------------------
+# Constants / UI tokens
+# -------------------------
+BLUE = "#064b86"
+BLACK = "#000000"
+BASE_FONT_SIZE_PX = 17
 
-# ============================================================
-# GLOBAL MI&FL UI CSS
-# ============================================================
-st.markdown("""
-<style>
-* { font-family: 'Inter', sans-serif; }
-
-/* pure black text */
-body, [class*="css"] { color:#000 !important; font-size:17px; }
-
-/* section title */
-.section-title {
-    font-size:24px;
-    font-weight:600;
-    margin-top:30px;
-    margin-bottom:12px;
-    position:relative;
-}
-.section-title:after {
-    content:"";
-    position:absolute;
-    bottom:-6px;
-    left:0;
-    width:0%;
-    height:2px;
-    background:#064b86;
-    transition:0.35s ease;
-}
-.section-title:hover:after { width:40%; }
-
-/* card */
-.card {
-    background:#fff;
-    padding:22px;
-    border-radius:14px;
-    border:1px solid #e6e6e6;
-    font-size:16.5px;
-    font-weight:500;
-    box-shadow:0 4px 14px rgba(0,0,0,0.07);
-    transition:0.25s ease;
-}
-.card:hover {
-    transform:translateY(-4px);
-    border-color:#064b86;
-    box-shadow:0 12px 25px rgba(6,75,134,0.18);
-}
-
-/* KPI */
-.kpi {
-    background:#fff;
-    padding:22px;
-    text-align:center;
-    border-radius:14px;
-    border:1px solid #dedede;
-    color:#064b86 !important;
-    font-size:20px;
-    font-weight:600;
-    box-shadow:0 3px 14px rgba(0,0,0,0.08);
-    transition:0.25s ease;
-}
-.kpi:hover {
-    transform:translateY(-4px);
-    border-color:#064b86;
-}
-
-/* Buttons */
-.stButton>button,
-.stDownloadButton>button {
-    background:#064b86 !important;
-    color:white !important;
-    padding:10px 22px;
-    border-radius:8px;
-    border:none;
-    font-weight:600;
-    transition:0.25s ease;
-}
-.stButton>button:hover,
-.stDownloadButton>button:hover {
-    background:#0a6eb3 !important;
-    transform:translateY(-3px);
-}
-
-/* Fade */
-.block-container { animation:fadeIn 0.5s ease; }
-@keyframes fadeIn {
-    from { opacity:0; transform:translateY(10px); }
-    to { opacity:1; transform:translateY(0); }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ============================================================
-# REQUIRED COLUMNS
-# ============================================================
 REQUIRED_COLS = [
     "Date","Campaign","AdGroup","Keyword","Device","Country",
     "Impressions","Clicks","CTR","CPC","Cost","Conversions","ConversionRate","Revenue","ROAS",
@@ -133,281 +31,553 @@ REQUIRED_COLS = [
     "Page_Position","Backlinks"
 ]
 
-def to_currency(x):
-    try: return "₹ "+f"{float(x):,.2f}"
-    except: return x
+AUTO_MAPS = {
+    "Date": ["date","day","report_date","reporting date"],
+    "Campaign": ["campaign","campaign name","campaign_name"],
+    "AdGroup": ["adgroup","ad group","ad_group"],
+    "Keyword": ["keyword","query","search term"],
+    "Device": ["device","platform"],
+    "Country": ["country","region"],
+    "Impressions": ["impressions","impr"],
+    "Clicks": ["clicks","click"],
+    "CTR": ["ctr"],
+    "CPC": ["cpc","cost per click"],
+    "Cost": ["cost","spend","amount"],
+    "Conversions": ["conversions","orders","purchases"],
+    "ConversionRate": ["conversion rate","conversion_rate","conv_rate"],
+    "Revenue": ["revenue","amount","value"],
+    "ROAS": ["roas"],
+    "Organic_Impressions": ["organic impressions","organic_impressions"],
+    "Organic_Clicks": ["organic clicks","organic_clicks"],
+    "Organic_CTR": ["organic ctr","organic_ctr"],
+    "Bounce_Rate": ["bounce","bounce_rate"],
+    "Avg_Time_on_Page_sec": ["avg time","avg_time","time on page","avg_time_on_page_sec"],
+    "Page_Position": ["position","page_position"],
+    "Backlinks": ["backlinks","inbound links"]
+}
 
-def ensure_datetime(df, col="Date"):
-    try: df[col] = pd.to_datetime(df[col], errors="coerce")
-    except: pass
+# -------------------------
+# Helpers - must be defined before usage
+# -------------------------
+def auto_map_columns(df: pd.DataFrame) -> pd.DataFrame:
+    rename = {}
+    cols = [c.strip() for c in df.columns]
+    for req, candidates in AUTO_MAPS.items():
+        for c in cols:
+            low = c.lower().strip()
+            for cand in candidates:
+                cand_low = cand.lower().strip()
+                if cand_low == low or cand_low in low or low in cand_low:
+                    rename[c] = req
+                    break
+            if c in rename:
+                break
+    if rename:
+        df = df.rename(columns=rename)
     return df
 
-def download_df(df, filename):
+def ensure_datetime(df: pd.DataFrame, col: str = "Date") -> pd.DataFrame:
+    if col in df.columns:
+        try:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+        except Exception:
+            pass
+    return df
+
+def safe_numeric(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    for col in cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    return df
+
+def to_currency(x):
+    try:
+        return "₹ " + f"{float(x):,.2f}"
+    except Exception:
+        return "₹ 0.00"
+
+def download_df(df: pd.DataFrame, filename: str, label: str = "Download CSV"):
+    if df is None or df.empty:
+        st.info("No data to download.")
+        return
     b = BytesIO()
     b.write(df.to_csv(index=False).encode("utf-8"))
     b.seek(0)
-    st.download_button("Download CSV", b, file_name=filename, mime="text/csv")
+    st.download_button(label=label, data=b, file_name=filename, mime="text/csv")
 
-# ============================================================
-# --- TABS: Overview / Important Attributes / Application ---
-# ============================================================
-tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
+def render_required_table(df: pd.DataFrame):
+    """
+    Index-free HTML table renderer. Resets/drops index to avoid invisible index columns.
+    Uses class 'required-table' so CSS can style it.
+    """
+    df2 = df.reset_index(drop=True).copy()
+    styled = df2.style.set_table_attributes('class="required-table"')
+    html = styled.to_html()
+    # remove extra empty th/td produced by pandas styler in some versions
+    html = html.replace("<th></th>", "").replace("<td></td>", "")
+    st.write(html, unsafe_allow_html=True)
 
-# ============================================================
-# TAB 1 — OVERVIEW
-# ============================================================
-with tab1:
+# -------------------------
+# Global CSS (Inter font, pure black text, blue KPIs/var boxes)
+# -------------------------
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+html, body, [data-testid="stAppViewContainer"] {{
+    background: #ffffff;
+    color: {BLACK};
+    font-family: 'Inter', sans-serif;
+    font-size: {BASE_FONT_SIZE_PX}px;
+}}
+
+/* Fade-in */
+.fade-in {{
+  animation: fadeIn 0.45s ease-in-out;
+}}
+@keyframes fadeIn {{
+  from {{ opacity: 0; transform: translateY(6px); }}
+  to {{ opacity: 1; transform: translateY(0); }}
+}}
+
+/* Section titles */
+.section-title {{
+    color: {BLACK};
+    font-size: 22px;
+    font-weight: 600;
+    text-align: left;
+    margin: 12px 0 12px 0;
+    position: relative;
+    display: inline-block;
+}}
+.section-title:hover::after {{
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 40%;
+    height: 3px;
+    background: {BLUE};
+    border-radius: 2px;
+}}
+
+/* Cards (pure black body text) */
+.card {{
+    background: #ffffff;
+    color: {BLACK};
+    border: 1px solid #e6e6e6;
+    border-radius: 13px;
+    padding: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    margin-bottom: 16px;
+}}
+.card:hover {{
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+    border-color: {BLUE};
+    cursor: pointer;
+}}
+.card h4, .card p, .card li {{
+    color: {BLACK};
+    margin: 0;
+}}
+
+/* KPI cards (blue text) */
+.kpi-row {{ display:flex; gap:16px; margin-bottom:16px; }}
+.kpi-card {{
+    flex:1;
+    background:#ffffff;
+    color:{BLUE};
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+    border:1px solid #e6e6e6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    font-weight:600;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}}
+.kpi-card:hover {{
+    transform: translateY(-6px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+    filter: drop-shadow(0 0 8px rgba(6,75,134,0.12));
+    cursor:pointer;
+}}
+.kpi-card .kpi-value {{ font-size:20px; color:{BLUE}; margin-top:6px; display:block; }}
+
+/* Variable boxes (blue text) */
+.variable-box {{
+    background: #ffffff;
+    color: {BLUE};
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    text-align:center;
+}}
+.variable-title {{ font-weight:600; color:{BLUE}; margin-bottom:6px; }}
+
+/* Required table (pure black) */
+.required-table {{
+    border-collapse: collapse;
+    width:100%;
+    font-size:17px;
+    color: {BLACK};
+    background:#fff;
+}}
+.required-table thead th {{
+    border-bottom: 2px solid #000;
+    padding: 10px;
+    text-align:left;
+    font-weight:600;
+}}
+.required-table tbody td {{
+    padding:10px;
+    border-bottom:1px solid #f2f2f2;
+}}
+.required-table tbody tr:hover {{ background:#f7f7f7; }}
+
+/* Buttons */
+.stButton>button, .stDownloadButton>button {{
+    background:{BLUE} !important;
+    color:white !important;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px !important;
+    font-size:15px !important;
+    font-weight:600 !important;
+}}
+.stButton>button:hover, .stDownloadButton>button:hover {{
+    transform: translateY(-3px);
+    background:#0a6eb3 !important;
+}}
+
+/* small-muted utility */
+.small-muted {{ color:#666666; font-size:13px; }}
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Header (logo + title)
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div class="fade-in" style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+    <img src="{logo_url}" width="56" style="border-radius:8px;"/>
+    <div>
+        <div style="font-size:28px; font-weight:700; color:{BLUE}; margin:0;">Analytics Avenue & Advanced Analytics</div>
+        <div style="font-size:13px; color:{BLACK}; margin:0;" class="small-muted">Google Ads & SEO Performance Lab — unified paid + organic insights</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# Tabs (Overview / Important Attributes / Application)
+# -------------------------
+tab_overview, tab_attributes, tab_app = st.tabs(["Overview", "Important Attributes", "Application"])
+
+# -------------------------
+# Overview tab
+# -------------------------
+with tab_overview:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="card">
-    Analyze Google Ads and SEO performance together for unified ROI, CTR, revenue and keyword insights. 
-    Supports paid + organic metrics, conversion funnel behavior, ML revenue prediction, and automated insights.
+        <h4>Purpose</h4>
+        <p>Unify paid search (Google Ads) performance with SEO signals to measure combined impact on clicks, conversions and revenue.</p>
+        <hr style="border:none;margin:8px 0;border-top:1px solid #eee;" />
+        <h4>What this lab does</h4>
+        <ul style="margin:6px 0 0 18px;">
+            <li>Keyword-level & landing page performance comparison (paid vs organic)</li>
+            <li>Revenue & ROAS attribution, ML-driven revenue predictions, and short-term forecasts</li>
+            <li>Exportable predictions and automated insight tables for leadership</li>
+        </ul>
     </div>
     """, unsafe_allow_html=True)
 
-    L, R = st.columns(2)
+    st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+        • Multi-channel paid + organic performance analytics<br>
+        • Keyword- and page-level revenue/ROAS slicing<br>
+        • SERP position & backlink signal integration<br>
+        • Automated insights and model explainability for trust
+    </div>
+    """, unsafe_allow_html=True)
 
-    with L:
-        st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <div class="card">
-        • Paid + organic search performance<br>
-        • Keyword-level ROI breakdown<br>
-        • Bounce rate, time on page & organic CTR insights<br>
-        • ML-driven revenue prediction<br>
-        • Campaign and AdGroup analysis<br>
-        • Executive-ready reporting exports
-        </div>
-        """, unsafe_allow_html=True)
-
-    with R:
-        st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
-        st.markdown("""
-        <div class="card">
-        • Improve ROAS by combining SEO + ads<br>
-        • Identify high-ROI keywords<br>
-        • Reduce wasted paid spend<br>
-        • Strengthen content & bidding strategy<br>
-        • Forecast performance & revenue
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">High-level KPIs</div>', unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='kpi'>Paid Clicks</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Organic Clicks</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Revenue</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi'>ROAS</div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi-card'>Paid Clicks<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi-card'>Organic Clicks<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi-card'>Revenue<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi-card'>ROAS<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
 
-# ============================================================
-# TAB 2 — IMPORTANT ATTRIBUTES
-# ============================================================
-with tab2:
-    st.markdown('<div class="section-title">Required Column Dictionary</div>', unsafe_allow_html=True)
-    req_dict = {
-        "Campaign":"Google Ads campaign name",
-        "AdGroup":"Ad group name",
-        "Keyword":"Keyword text",
-        "Impressions":"Total paid impressions",
-        "Organic_Impressions":"Organic impressions",
-        "Clicks":"Paid clicks",
-        "Organic_Clicks":"Clicks from organic search",
-        "CTR":"Paid Click-through Rate",
-        "CPC":"Cost per Click",
-        "Cost":"Total cost",
-        "Conversions":"Paid conversions",
-        "Revenue":"Total revenue",
-        "ROAS":"Return on Ad Spend",
-        "Bounce_Rate":"SEO bounce rate",
-        "Avg_Time_on_Page_sec":"Average time on page",
-        "Page_Position":"SERP position",
-        "Backlinks":"Backlink count"
+# -------------------------
+# Important Attributes tab
+# -------------------------
+with tab_attributes:
+    st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
+
+    required_dict = {
+        "Date": "Date of the record (parseable).",
+        "Campaign": "Paid campaign name (Google Ads).",
+        "AdGroup": "Paid ad group name.",
+        "Keyword": "Keyword or query text.",
+        "Device": "Device type (Desktop / Mobile / Tablet).",
+        "Impressions": "Number of times ad/page was displayed.",
+        "Clicks": "Number of clicks.",
+        "CTR": "Click-through rate.",
+        "CPC": "Cost per click.",
+        "Cost": "Paid cost/spend.",
+        "Conversions": "Number of conversions/actions.",
+        "Revenue": "Revenue attributed to the row.",
+        "ROAS": "Revenue / Cost.",
+        "Organic_Impressions": "Search console impressions (organic).",
+        "Organic_Clicks": "Search console clicks (organic).",
+        "Bounce_Rate": "Bounce rate for landing pages.",
+        "Avg_Time_on_Page_sec": "Average time on page in seconds."
     }
 
-    df_attr = pd.DataFrame(
-        [{"Attribute":k, "Description":v} for k,v in req_dict.items()]
-    )
-    st.dataframe(df_attr, use_container_width=True)
+    dict_df = pd.DataFrame([{"Column": k, "Description": v} for k, v in required_dict.items()])
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    render_required_table(dict_df)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# ============================================================
-# TAB 3 — APPLICATION
-# ============================================================
-with tab3:
-    st.markdown('<div class="section-title">Step 1 — Load Dataset</div>', unsafe_allow_html=True)
-    mode = st.radio("Dataset option:", ["Default dataset","Upload CSV","Upload CSV + Column mapping"], horizontal=True)
+    left_col, right_col = st.columns(2)
+    with left_col:
+        st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+        indep = ["Campaign","AdGroup","Keyword","Device","Impressions","Clicks","Cost","Organic_Impressions","Organic_Clicks"]
+        for v in indep:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+    with right_col:
+        st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+        dep = ["Conversions","Revenue","ConversionRate","ROAS","Bounce_Rate","Avg_Time_on_Page_sec"]
+        for v in dep:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+# -------------------------
+# Application tab
+# -------------------------
+with tab_app:
+    st.markdown('<div class="section-title">Application</div>', unsafe_allow_html=True)
+
+    # Step 1 — Load dataset
+    st.markdown('<div class="section-title">Step 1 — Load dataset</div>', unsafe_allow_html=True)
+    mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
 
-    # ----------------- DEFAULT
     if mode == "Default dataset":
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/google_ads_seo_performance.csv"
+        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/google_ads_seo_performance.csv"
         try:
-            df = pd.read_csv(URL)
+            df = pd.read_csv(DEFAULT_URL)
             df.columns = df.columns.str.strip()
-            st.success("Default dataset loaded.")
-            st.dataframe(df.head())
+            df = auto_map_columns(df)
+            st.success("Default dataset loaded")
+            # small preview via index-free renderer
+            render_required_table(df.head(5))
         except Exception as e:
-            st.error(f"Could not load dataset: {e}")
+            st.error("Failed to load default dataset: " + str(e))
             st.stop()
 
-    # ----------------- SIMPLE UPLOAD
     elif mode == "Upload CSV":
-        sample_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/google_ads_seo_performance.csv"
+        st.markdown("#### Download Sample CSV for Reference", unsafe_allow_html=True)
+        SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/marketing_analytics/google_ads_seo_performance.csv"
         try:
-            smp = pd.read_csv(sample_url).head(5)
-            st.download_button("Download Sample CSV", smp.to_csv(index=False), "sample.csv", "text/csv")
-        except:
+            sample_df = pd.read_csv(SAMPLE_URL).head(5)
+            sample_csv = sample_df.to_csv(index=False)
+            st.download_button("Download Sample CSV", sample_csv, "sample_google_ads_seo.csv", "text/csv")
+        except Exception:
             pass
 
-        f = st.file_uploader("Upload CSV file", type=["csv"])
-        if f:
-            df = pd.read_csv(f)
+        uploaded = st.file_uploader("Upload CSV file", type=["csv"])
+        if uploaded:
+            df = pd.read_csv(uploaded)
             df.columns = df.columns.str.strip()
-            st.dataframe(df.head())
+            df = auto_map_columns(df)
+            st.success("File uploaded")
+            render_required_table(df.head(5))
 
-    # ----------------- MAPPING MODE
     else:
-        up = st.file_uploader("Upload CSV for mapping", type=["csv"])
-        if up:
-            raw = pd.read_csv(up)
+        uploaded = st.file_uploader("Upload CSV for manual mapping", type=["csv"])
+        if uploaded:
+            raw = pd.read_csv(uploaded)
             raw.columns = raw.columns.str.strip()
-            st.write("Preview:")
-            st.dataframe(raw.head())
+            st.markdown("Preview (first 5 rows)", unsafe_allow_html=True)
+            render_required_table(raw.head(5))
+
+            st.markdown("Map your columns to required fields", unsafe_allow_html=True)
             mapping = {}
+            options = ["-- Select --"] + list(raw.columns)
             for req in REQUIRED_COLS:
-                mapping[req] = st.selectbox(f"Map → {req}", ["-- Select --"] + list(raw.columns))
-            if st.button("Apply Mapping"):
-                missing = [k for k,v in mapping.items() if v=="-- Select --"]
+                mapping[req] = st.selectbox(f"Map → {req}", options=options, key=f"map_{req}")
+
+            if st.button("Apply mapping"):
+                missing = [k for k, v in mapping.items() if v == "-- Select --"]
                 if missing:
-                    st.error("Map all required columns: "+", ".join(missing))
+                    st.error("Please map all required columns: " + ", ".join(missing))
                 else:
-                    df = raw.rename(columns={v:k for k,v in mapping.items()})
-                    st.success("Mapping applied.")
-                    st.dataframe(df.head())
+                    df = raw.rename(columns={v: k for k, v in mapping.items()})
+                    st.success("Mapping applied successfully.")
+                    render_required_table(df.head(5))
 
     if df is None:
         st.stop()
 
-    # ============================================================
-    # CLEANING
-    # ============================================================
+    # Basic cleaning
     df = ensure_datetime(df, "Date")
-    num_cols = [
-        "Impressions","Clicks","Organic_Clicks","CTR","CPC","Cost","Conversions",
-        "ConversionRate","Revenue","ROAS","Organic_Impressions","Organic_CTR",
-        "Bounce_Rate","Avg_Time_on_Page_sec","Page_Position","Backlinks"
+    numeric_cols = [
+        "Impressions","Clicks","CTR","CPC","Cost","Conversions","ConversionRate","Revenue","ROAS",
+        "Organic_Impressions","Organic_Clicks","Organic_CTR","Bounce_Rate","Avg_Time_on_Page_sec",
+        "Page_Position","Backlinks"
     ]
-    for c in num_cols:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
+    df = safe_numeric(df, numeric_cols)
 
-    # ============================================================
-    # FILTERS
-    # ============================================================
+    # Step 2 — Filters & Preview
     st.markdown('<div class="section-title">Step 2 — Filters & Preview</div>', unsafe_allow_html=True)
-    c1,c2,c3 = st.columns([2,2,1])
-
-    campaigns = sorted(df["Campaign"].dropna().unique().tolist())
-    adgroups  = sorted(df["AdGroup"].dropna().unique().tolist())
+    c1, c2, c3 = st.columns([2,2,1])
+    campaigns = sorted(df["Campaign"].dropna().unique()) if "Campaign" in df.columns else []
+    adgroups = sorted(df["AdGroup"].dropna().unique()) if "AdGroup" in df.columns else []
+    keywords = sorted(df["Keyword"].dropna().unique()) if "Keyword" in df.columns else []
 
     with c1:
-        sel_campaigns = st.multiselect("Campaign", campaigns, default=campaigns[:3])
+        sel_campaigns = st.multiselect("Campaign", options=campaigns, default=campaigns[:3])
     with c2:
-        sel_ag = st.multiselect("AdGroup", adgroups, default=adgroups[:3])
+        sel_adgroups = st.multiselect("AdGroup", options=adgroups, default=adgroups[:3])
     with c3:
-        date_range = st.date_input("Date range", (df["Date"].min().date(), df["Date"].max().date()))
+        try:
+            min_d = df["Date"].min().date()
+            max_d = df["Date"].max().date()
+            date_range = st.date_input("Date range", value=(min_d, max_d))
+        except Exception:
+            date_range = st.date_input("Date range")
 
     filt = df.copy()
     if sel_campaigns:
         filt = filt[filt["Campaign"].isin(sel_campaigns)]
-    if sel_ag:
-        filt = filt[filt["AdGroup"].isin(sel_ag)]
-    start,end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
-    filt = filt[(filt["Date"]>=start) & (filt["Date"]<=end)]
+    if sel_adgroups:
+        filt = filt[filt["AdGroup"].isin(sel_adgroups)]
+    try:
+        if date_range and len(date_range) == 2:
+            start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+            filt = filt[(filt["Date"] >= start) & (filt["Date"] <= end)]
+    except Exception:
+        pass
 
-    st.dataframe(filt.head(10), use_container_width=True)
-    download_df(filt.head(300), "filtered_preview.csv")
+    st.markdown("Filtered preview (first 10 rows):", unsafe_allow_html=True)
+    render_required_table(filt.head(10))
+    download_df(filt.head(500), "filtered_preview.csv", label="Download filtered preview (up to 500 rows)")
 
-    # ============================================================
     # KPIs
-    # ============================================================
-    st.markdown('<div class="section-title">KPIs</div>', unsafe_allow_html=True)
-    k1,k2,k3,k4,k5,k6 = st.columns(6)
-    k1.metric("Paid Clicks", int(filt["Clicks"].sum()))
-    k2.metric("Organic Clicks", int(filt["Organic_Clicks"].sum()))
-    k3.metric("Revenue", to_currency(filt["Revenue"].sum()))
-    k4.metric("ROAS", round(filt["ROAS"].mean(),2))
-    k5.metric("Bounce Rate", f"{round(filt['Bounce_Rate'].mean()*100,2)}%")
-    k6.metric("Avg Time Page (s)", round(filt["Avg_Time_on_Page_sec"].mean(),2))
+    st.markdown('<div class="section-title">Key Metrics</div>', unsafe_allow_html=True)
+    k1, k2, k3, k4, k5, k6 = st.columns(6)
+    paid_clicks = int(filt["Clicks"].sum()) if "Clicks" in filt.columns else 0
+    organic_clicks = int(filt["Organic_Clicks"].sum()) if "Organic_Clicks" in filt.columns else 0
+    revenue_val = float(filt["Revenue"].sum()) if "Revenue" in filt.columns else 0.0
+    roas_avg = float(filt["ROAS"].mean()) if "ROAS" in filt.columns else 0.0
+    bounce_avg = float(filt["Bounce_Rate"].mean()) if "Bounce_Rate" in filt.columns else 0.0
+    avg_time = float(filt["Avg_Time_on_Page_sec"].mean()) if "Avg_Time_on_Page_sec" in filt.columns else 0.0
 
-    # ============================================================
-    # CHARTS
-    # ============================================================
-    st.markdown('<div class="section-title">Charts</div>', unsafe_allow_html=True)
+    k1.markdown(f"<div class='kpi-card'>Paid Clicks<div class='kpi-value'>{paid_clicks:,}</div></div>", unsafe_allow_html=True)
+    k2.markdown(f"<div class='kpi-card'>Organic Clicks<div class='kpi-value'>{organic_clicks:,}</div></div>", unsafe_allow_html=True)
+    k3.markdown(f"<div class='kpi-card'>Revenue<div class='kpi-value'>{to_currency(revenue_val)}</div></div>", unsafe_allow_html=True)
+    k4.markdown(f"<div class='kpi-card'>ROAS<div class='kpi-value'>{roas_avg:.2f}</div></div>", unsafe_allow_html=True)
+    k5.markdown(f"<div class='kpi-card'>Bounce Rate<div class='kpi-value'>{bounce_avg:.2%}</div></div>", unsafe_allow_html=True)
+    k6.markdown(f"<div class='kpi-card'>Avg Time / Page<div class='kpi-value'>{avg_time:.1f} s</div></div>", unsafe_allow_html=True)
 
-    agg = filt.groupby("Campaign").agg({"Clicks":"sum","Organic_Clicks":"sum"}).reset_index()
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Clicks"], name="Paid Clicks"))
-    fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Organic_Clicks"], name="Organic Clicks"))
-    fig.update_layout(barmode='group', template="plotly_white")
-    st.plotly_chart(fig, use_container_width=True)
+    # Charts & EDA
+    st.markdown('<div class="section-title">Charts & EDA</div>', unsafe_allow_html=True)
+    if "Campaign" in filt.columns:
+        agg = filt.groupby("Campaign").agg({"Clicks":"sum","Organic_Clicks":"sum"}).reset_index()
+        if not agg.empty:
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Clicks"], name="Paid Clicks"))
+            fig.add_trace(go.Bar(x=agg["Campaign"], y=agg["Organic_Clicks"], name="Organic Clicks"))
+            fig.update_layout(barmode='group', template="plotly_white", xaxis_title="Campaign", yaxis_title="Clicks")
+            st.plotly_chart(fig, use_container_width=True)
 
-    ts = filt.groupby("Date").agg({"CTR":"mean","Organic_CTR":"mean"}).reset_index()
-    fig2 = px.line(ts, x="Date", y=["CTR","Organic_CTR"], template="plotly_white")
-    st.plotly_chart(fig2, use_container_width=True)
+    # CTR trend
+    if "Date" in filt.columns:
+        ts = filt.groupby("Date").agg({"CTR":"mean","Organic_CTR":"mean"}).reset_index()
+        if not ts.empty:
+            fig2 = px.line(ts, x="Date", y=["CTR","Organic_CTR"], labels={"value":"CTR","variable":"Series"})
+            st.plotly_chart(fig2, use_container_width=True)
 
-    kw = filt.groupby("Keyword").agg({"Revenue":"sum","ROAS":"mean"}).reset_index()
-    fig3 = go.Figure()
-    fig3.add_trace(go.Bar(x=kw["Keyword"], y=kw["Revenue"], name="Revenue"))
-    fig3.add_trace(go.Scatter(x=kw["Keyword"], y=kw["ROAS"], name="ROAS", yaxis="y2"))
-    fig3.update_layout(
-        template="plotly_white",
-        yaxis2=dict(title="ROAS", overlaying="y", side="right")
-    )
-    st.plotly_chart(fig3, use_container_width=True)
+    # Revenue by Keyword (top N)
+    if "Keyword" in filt.columns and "Revenue" in filt.columns:
+        agg_kw = filt.groupby("Keyword").agg({"Revenue":"sum","ROAS":"mean"}).reset_index().sort_values("Revenue", ascending=False).head(30)
+        if not agg_kw.empty:
+            fig3 = go.Figure()
+            fig3.add_trace(go.Bar(x=agg_kw["Keyword"], y=agg_kw["Revenue"], name="Revenue"))
+            fig3.update_layout(xaxis_title="Keyword", yaxis_title="Revenue", template="plotly_white")
+            st.plotly_chart(fig3, use_container_width=True)
 
-    # ============================================================
-    # ML
-    # ============================================================
-    st.markdown('<div class="section-title">ML — Predict Revenue</div>', unsafe_allow_html=True)
-    ml_df = filt.dropna(subset=["Revenue"])
-    if len(ml_df)<30:
-        st.info("Not enough data for ML.")
+    # ML — Predict Revenue (preview + downloadable)
+    st.markdown('<div class="section-title">ML — Predict Revenue (RandomForest) — Preview + Download</div>', unsafe_allow_html=True)
+    ml_df = filt.copy()
+    if "Revenue" not in ml_df.columns or ml_df["Revenue"].dropna().shape[0] < 30:
+        st.info("Not enough Revenue history (>=30 rows) to train a model.")
     else:
-        feat = ["Clicks","Impressions","Organic_Clicks","Conversions","CPC","CTR"]
-        X = ml_df[feat]
-        y = ml_df["Revenue"]
+        feat_cols = ["Clicks","Impressions","Organic_Clicks","Conversions","CPC","CTR"]
+        feat_cols = [c for c in feat_cols if c in ml_df.columns]
+        if len(feat_cols) < 2:
+            st.info("Insufficient feature columns for ML. Need at least 2 numeric features.")
+        else:
+            X = ml_df[feat_cols].fillna(0)
+            y = ml_df["Revenue"].fillna(0)
+            # simple preprocessing: scale numeric features
+            scaler = StandardScaler()
+            try:
+                X_t = scaler.fit_transform(X)
+            except Exception as e:
+                st.error("Feature scaling failed: " + str(e))
+                X_t = None
 
-        scaler = StandardScaler()
-        X_t = scaler.fit_transform(X)
+            if X_t is not None and len(X_t) >= 30:
+                X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+                rf = RandomForestRegressor(n_estimators=200, random_state=42)
+                with st.spinner("Training RandomForest..."):
+                    rf.fit(X_train, y_train)
+                preds = rf.predict(X_test)
+                rmse = math.sqrt(np.mean((y_test - preds) ** 2))
+                r2 = rf.score(X_test, y_test)
+                st.markdown(f"<div class='card'><b>Model performance</b><br>RMSE: {rmse:.2f} &nbsp;&nbsp; R²: {r2:.3f}</div>", unsafe_allow_html=True)
 
-        X_train,X_test,y_train,y_test = train_test_split(X_t,y,test_size=0.2,random_state=42)
-        rf = RandomForestRegressor(n_estimators=200, random_state=42)
-        with st.spinner("Training RandomForest..."):
-            rf.fit(X_train,y_train)
-        preds = rf.predict(X_test)
-        rmse = math.sqrt(np.mean((y_test - preds)**2))
-        r2 = rf.score(X_test,y_test)
-        st.write(f"RMSE: {rmse:.2f} | R²: {r2:.3f}")
+                out_df = pd.DataFrame({
+                    "Actual_Revenue": y_test.reset_index(drop=True),
+                    "Predicted_Revenue": preds
+                })
+                # preview only
+                render_required_table(out_df.head(8))
+                # full downloadable
+                download_df(out_df.reset_index(drop=True), "ml_revenue_predictions.csv", label="Download full ML predictions")
 
-        results = pd.DataFrame({"Actual":y_test, "Predicted":preds})
-        st.dataframe(results.head(), use_container_width=True)
-        download_df(results, "ml_revenue_predictions.csv")
-
-    # ============================================================
-    # INSIGHTS
-    # ============================================================
+    # Automated insights (table + download)
     st.markdown('<div class="section-title">Automated Insights</div>', unsafe_allow_html=True)
-    ins = filt.groupby(["Campaign","Keyword"]).agg({
-        "Revenue":"sum",
-        "Clicks":"sum",
-        "Conversions":"sum",
-        "ROAS":"mean"
-    }).reset_index().sort_values("Revenue", ascending=False)
-    st.dataframe(ins, use_container_width=True)
-    download_df(ins, "automated_insights.csv")
+    insights = []
+    if "Campaign" in filt.columns and "Revenue" in filt.columns and "Cost" in filt.columns:
+        ch = filt.groupby("Campaign")[["Revenue","Cost"]].sum().reset_index()
+        ch["ROI"] = np.where(ch["Cost"]>0, ch["Revenue"]/ch["Cost"], 0)
+        if not ch.empty:
+            best = ch.loc[ch["ROI"].idxmax()]
+            worst = ch.loc[ch["ROI"].idxmin()]
+            insights.append({"Insight":"Best ROI Campaign","Campaign":best["Campaign"], "ROI":float(best["ROI"])})
+            insights.append({"Insight":"Lowest ROI Campaign","Campaign":worst["Campaign"], "ROI":float(worst["ROI"])})
 
-    # ============================================================
-    # EXPORT
-    # ============================================================
-    st.markdown('<div class="section-title">Export Full Filtered Dataset</div>', unsafe_allow_html=True)
-    download_df(filt, "google_ads_seo_filtered.csv")
+    if "Keyword" in filt.columns and "Revenue" in filt.columns:
+        kw = filt.groupby("Keyword")[["Revenue","Clicks"]].sum().reset_index().sort_values("Revenue", ascending=False)
+        if not kw.empty:
+            topkw = kw.iloc[0]
+            insights.append({"Insight":"Top Keyword by Revenue","Keyword":topkw["Keyword"], "Revenue":float(topkw["Revenue"])})
+
+    if insights:
+        ins_df = pd.DataFrame(insights)
+        render_required_table(ins_df)
+        download_df(ins_df, "automated_insights.csv", label="Download automated insights")
+    else:
+        st.markdown('<div class="card"><div class="small-muted">No automated insights available for selected filters.</div></div>', unsafe_allow_html=True)
+
+    # Export
+    st.markdown('<div class="section-title">Export filtered dataset</div>', unsafe_allow_html=True)
+    download_df(filt.reset_index(drop=True), "google_ads_seo_filtered.csv", label="Download full filtered dataset (CSV)")
+
+# END OF FILE
