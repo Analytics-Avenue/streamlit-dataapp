@@ -2,278 +2,417 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
 from io import BytesIO
+import warnings
+warnings.filterwarnings("ignore")
 
-# ----------------------------------------------------------
-# PAGE LAYOUT
-# ----------------------------------------------------------
-st.set_page_config(page_title="Demand Forecasting Suite", layout="wide")
+# =======================================================================================
+# PAGE CONFIG
+# =======================================================================================
+st.set_page_config(page_title="Real Estate Demand Forecasting Lab", layout="wide", initial_sidebar_state="collapsed")
 
-hide_sidebar = """
+# Hide sidebar
+st.markdown("""
 <style>
-[data-testid="stSidebarNav"] {display: none;}
-section[data-testid="stSidebar"] {display: none;}
+[data-testid="stSidebarNav"] {display:none;}
+section[data-testid="stSidebar"] {display:none;}
 </style>
-"""
-st.markdown(hide_sidebar, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# -------------------------
-# Company Logo + Name
-# -------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+# =======================================================================================
+# GLOBAL CONSTANTS
+# =======================================================================================
+BLUE = "#064b86"
+BLACK = "#000000"
+BASE_FONT_SIZE_PX = 17
+
+REQUIRED_COLS = ["City", "Listing_Date", "Property_Type", "Price"]
+
+AUTO_MAPS = {
+    "City": ["city","location","area"],
+    "Listing_Date": ["listing_date","date","posted_on","created_at"],
+    "Property_Type": ["property_type","type","category"],
+    "Price": ["price","amount","cost"]
+}
+
+# =======================================================================================
+# HELPERS
+# =======================================================================================
+def auto_map_columns(df):
+    rename = {}
+    for req, patterns in AUTO_MAPS.items():
+        for col in df.columns:
+            c = col.lower().strip()
+            for p in patterns:
+                p = p.lower().strip()
+                if p == c or p in c or c in p:
+                    rename[col] = req
+                    break
+            if col in rename:
+                break
+    return df.rename(columns=rename)
+
+def ensure_datetime(df, col):
+    if col in df.columns:
+        try:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+        except:
+            pass
+    return df
+
+def download_df(df, filename, label="Download CSV"):
+    if df is None or df.empty:
+        return st.info("No data available.")
+    b = BytesIO()
+    b.write(df.to_csv(index=False).encode("utf-8"))
+    b.seek(0)
+    st.download_button(label=label, data=b, file_name=filename, mime="text/csv")
+
+def render_required_table(df):
+    df2 = df.reset_index(drop=True)
+    styled = df2.style.set_table_attributes('class="required-table"')
+    html = styled.to_html().replace("<th></th>","").replace("<td></td>","")
+    st.write(html, unsafe_allow_html=True)
+
+# =======================================================================================
+# GLOBAL CSS (Marketing Lab Standard)
+# =======================================================================================
 st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+html, body, [data-testid="stAppViewContainer"] {{
+    font-family: 'Inter', sans-serif;
+    color: {BLACK};
+    font-size: {BASE_FONT_SIZE_PX}px;
+}}
+
+.section-title {{
+    font-size: 22px;
+    font-weight: 600;
+    margin: 16px 0 12px 0;
+    color: {BLACK};
+    position: relative;
+    display: inline-block;
+}}
+.section-title:hover::after {{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-6px;
+    width:40%;
+    height:3px;
+    background:{BLUE};
+    border-radius:2px;
+}}
+
+.card {{
+    background:#ffffff;
+    color:{BLACK};
+    border-radius:12px;
+    border:1px solid #e6e6e6;
+    padding:18px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.06);
+    transition:0.25s ease;
+}}
+.card:hover {{
+    transform: translateY(-5px);
+    border-color:{BLUE};
+    box-shadow:0 10px 24px rgba(0,0,0,0.12);
+}}
+
+.kpi-card {{
+    background:#ffffff;
+    color:{BLUE};
+    border-radius:12px;
+    border:1px solid #e6e6e6;
+    padding:16px;
+    text-align:center;
+    font-weight:600;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}}
+.kpi-card:hover {{
+    transform:translateY(-5px);
+    box-shadow:0 12px 26px rgba(6,75,134,0.2);
+}}
+
+.variable-box {{
+    background:white;
+    color:{BLUE};
+    border-radius:12px;
+    padding:14px;
+    border:1px solid #e5e5e5;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+    text-align:center;
+    margin-bottom:12px;
+}}
+
+.required-table {{
+    border-collapse:collapse;
+    width:100%;
+}}
+.required-table thead th {{
+    border-bottom:2px solid #000;
+    padding:10px;
+}}
+.required-table tbody td {{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}}
+.required-table tbody tr:hover {{
+    background:#f8f8f8;
+}}
+
+.stButton>button, .stDownloadButton>button {{
+    background:{BLUE} !important;
+    color:white !important;
+    border:none;
+    padding:10px 20px;
+    border-radius:8px;
+    font-weight:600;
+}}
+.stButton>button:hover, .stDownloadButton>button:hover {{
+    transform:translateY(-3px);
+    background:#0a6eb3 !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
+# =======================================================================================
+# HEADER BLOCK
+# =======================================================================================
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+
+st.markdown(f"""
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+    <img src="{logo_url}" width="60">
+    <div>
+        <div style="font-size:32px; font-weight:700; color:{BLUE};">Analytics Avenue & Advanced Analytics</div>
+        <div style="font-size:14px; color:{BLACK}; opacity:0.7;">Real Estate Demand Forecasting Lab</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------------------------
-# CSS
-# ----------------------------------------------------------
-st.markdown("""
-<style>
-.big-header {font-size:40px; font-weight:900; color:black;}
-.card, .metric-card, .hover-card {background:#fff; border-radius:15px; padding:20px; margin-bottom:15px; box-shadow:0 4px 20px rgba(0,0,0,0.08); transition: all 0.25s ease; text-align:left;}
-.card:hover, .metric-card:hover, .hover-card:hover {box-shadow:0 0 18px rgba(0,0,0,0.4); transform:scale(1.03);}
-.metric-card {font-weight:600;}
-.grid-container {display:flex; gap:20px; flex-wrap:wrap;}
-.grid-item {flex:1;}
-</style>
-""", unsafe_allow_html=True)
-
-# ----------------------------------------------------------
-# TITLE
-# ----------------------------------------------------------
-st.markdown("<div class='big-header'>Real Estate Demand Forecasting System</div>", unsafe_allow_html=True)
-
-# ----------------------------------------------------------
+# =======================================================================================
 # TABS
-# ----------------------------------------------------------
-tab1, tab2 = st.tabs(["Overview", "Application"])
+# =======================================================================================
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
-# ----------------------------------------------------------
-# OVERVIEW
-# ----------------------------------------------------------
+# =======================================================================================
+# TAB 1: Overview
+# =======================================================================================
 with tab1:
-    st.markdown("### Overview")
+
+    st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class='hover-card'>
-    This platform forecasts real estate demand using market signals like price, location, and listing trends.
+    <div class="card">
+        A complete forecasting engine for real estate demand analysis.  
+        Tracks market cycles, price trends, inventory behavior, and predicts demand for the upcoming months.
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Purpose")
+    st.markdown('<div class="section-title">Capabilities</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class='hover-card'>
-    • Identify demand cycles<br>
-    • Detect property trends<br>
-    • Forecast future inventory needs<br>
-    • Support pricing and sales strategy
+    <div class="card">
+        • Time-series demand tracking<br>
+        • Property-type segmentation<br>
+        • Price sensitivity analysis<br>
+        • ML-based forecasting (6-month linear regression)<br>
+        • Automated insights for cities & property types
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Capabilities & Business Impact")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("""
-        <div class='hover-card'>
-        <b>Capabilities</b><br>
-        • Regression forecasting<br>
-        • Dynamic filters<br>
-        • Time-based analytics<br>
-        • Automated insights engine
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class='hover-card'>
-        <b>Business Impact</b><br>
-        • Predict market cycles<br>
-        • Optimize inventory<br>
-        • Guide pricing<br>
-        • Improve conversion outcomes
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Business Impact</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+        • Predict market cycles early<br>
+        • Prevent over/under inventory allocation<br>
+        • Optimize pricing strategy<br>
+        • Support strategic investment & expansion
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("### KPIs")
+    st.markdown('<div class="section-title">High-Level KPIs</div>', unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='metric-card'>Avg Monthly Sales</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='metric-card'>Demand Growth Rate</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='metric-card'>High Demand Cities</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Price Sensitivity</div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi-card'>Avg Monthly Sales</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi-card'>Demand Growth</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi-card'>Top Cities</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi-card'>Price Sensitivity</div>", unsafe_allow_html=True)
 
-    st.markdown("### Use of App")
-    st.markdown("""
-    <div class='hover-card'>
-    • Monitor real estate demand trends<br>
-    • Forecast upcoming market activity<br>
-    • Support strategic pricing and inventory decisions
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### Who Should Use")
-    st.markdown("""
-    <div class='hover-card'>
-    • Real estate developers<br>
-    • Property investors<br>
-    • Market analysts<br>
-    • Agencies handling property transactions
-    </div>
-    """, unsafe_allow_html=True)
-
-# ----------------------------------------------------------
-# APPLICATION
-# ----------------------------------------------------------
+# =======================================================================================
+# TAB 2: IMPORTANT ATTRIBUTES
+# =======================================================================================
 with tab2:
 
-    st.markdown("### Step 1: Load Dataset")
+    st.markdown('<div class="section-title">Required Column Dictionary</div>', unsafe_allow_html=True)
 
+    dict_df = pd.DataFrame([
+        {"Column": "City", "Description": "City of the property listing."},
+        {"Column": "Listing_Date", "Description": "Date when property was listed."},
+        {"Column": "Property_Type", "Description": "Type of property (Villa, Plot, Apartment, etc)."},
+        {"Column": "Price", "Description": "Listed property price."},
+    ])
+
+    render_required_table(dict_df)
+
+    left, right = st.columns(2)
+
+    with left:
+        st.markdown('<div class="section-title">Independent Variables</div>', unsafe_allow_html=True)
+        for v in ["City","Listing_Date","Property_Type","Price"]:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+    with right:
+        st.markdown('<div class="section-title">Dependent Variables</div>', unsafe_allow_html=True)
+        for v in ["Demand","Trend","Forecast"]:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+# =======================================================================================
+# TAB 3: APPLICATION
+# =======================================================================================
+with tab3:
+
+    st.markdown('<div class="section-title">Step 1 — Load Dataset</div>', unsafe_allow_html=True)
+    mode = st.radio("Dataset option:", ["Default dataset", "Upload CSV", "Upload CSV + Column mapping"], horizontal=True)
     df = None
-    REQUIRED = {
-        "City": "City",
-        "Listing_Date": "Date",
-        "Property_Type": "Property Type",
-        "Price": "Price",
-    }
 
-    mode = st.radio(
-        "Select Input Method",
-        ["Default Dataset", "Upload CSV (Auto Detect)", "Upload CSV (Manual Mapping)"],
-        horizontal=True
-    )
-
-    if mode == "Default Dataset":
+    # DEFAULT DATASET
+    if mode == "Default dataset":
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
         try:
             df = pd.read_csv(URL)
+            df = auto_map_columns(df)
             st.success("Default dataset loaded.")
-            st.dataframe(df.head(), use_container_width=True)
+            render_required_table(df.head(5))
         except Exception as e:
-            st.error(f"Could not load dataset: {e}")
+            st.error("Failed to load default dataset: " + str(e))
             st.stop()
 
-    if mode == "Upload CSV (Auto Detect)":
-        st.markdown("#### Download Sample CSV for Reference")
-        URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
-        sample_df = pd.read_csv(URL).head(5)
-        sample_csv = sample_df.to_csv(index=False)
-        st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
-        file = st.file_uploader("Upload your dataset", type=["csv"])
-        if file:
-            df = pd.read_csv(file)
-            missing = [c for c in REQUIRED if c not in df.columns]
-            if missing:
-                st.error(f"Dataset missing required columns: {missing}")
-                st.stop()
-            st.success("Dataset uploaded.")
-            st.dataframe(df.head(), use_container_width=True)
-        else:
-            st.stop()
+    # UPLOAD CSV — AUTO DETECT
+    elif mode == "Upload CSV":
+        st.markdown("#### Sample CSV (optional)", unsafe_allow_html=True)
+        SAMPLE_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/RealEstate/real_estate_data.csv"
+        try:
+            smp = pd.read_csv(SAMPLE_URL).head(5)
+            st.download_button("Download Sample CSV", smp.to_csv(index=False), "sample_realestate.csv")
+        except:
+            pass
 
-    if mode == "Upload CSV (Manual Mapping)":
-        file = st.file_uploader("Upload dataset to map", type=["csv"])
-        if file:
-            raw = pd.read_csv(file)
-            st.success("Dataset uploaded. Map required columns below.")
-            col1, col2, col3, col4 = st.columns(4)
-            city_col = col1.selectbox("City Column", raw.columns)
-            date_col = col2.selectbox("Date Column", raw.columns)
-            type_col = col3.selectbox("Property Type Column", raw.columns)
-            price_col = col4.selectbox("Price Column", raw.columns)
-            df = raw.rename(columns={
-                city_col: "City",
-                date_col: "Listing_Date",
-                type_col: "Property_Type",
-                price_col: "Price"
-            })
-            st.info("Mapped Columns → City, Date, Property_Type, Price")
-            st.dataframe(df.head(), use_container_width=True)
-        else:
-            st.stop()
+        uploaded = st.file_uploader("Upload CSV", type=["csv"])
+        if uploaded:
+            df = pd.read_csv(uploaded)
+            df = auto_map_columns(df)
+            st.success("File uploaded & auto-mapped.")
+            render_required_table(df.head(5))
 
-    if not all(col in df.columns for col in REQUIRED):
-        missing = [c for c in REQUIRED if c not in df.columns]
-        st.error(f"Dataset must contain required columns: {missing}")
+    # MANUAL MAPPING
+    else:
+        uploaded = st.file_uploader("Upload CSV to map", type=["csv"])
+        if uploaded:
+            raw = pd.read_csv(uploaded)
+            st.markdown("Preview:", unsafe_allow_html=True)
+            render_required_table(raw.head(5))
+
+            mapping = {}
+            options = ["-- Select --"] + list(raw.columns)
+
+            for req in REQUIRED_COLS:
+                mapping[req] = st.selectbox(f"Map → {req}", options=options, key=f"map_{req}")
+
+            if st.button("Apply Mapping"):
+                missing = [k for k, v in mapping.items() if v == "-- Select --"]
+                if missing:
+                    st.error("Map all required fields: " + ", ".join(missing))
+                else:
+                    df = raw.rename(columns={v: k for k, v in mapping.items()})
+                    st.success("Mapping applied.")
+                    render_required_table(df.head(5))
+
+    if df is None:
         st.stop()
 
-    df["Date"] = pd.to_datetime(df["Listing_Date"], errors="coerce")
+    # CLEANING
+    df = ensure_datetime(df, "Listing_Date")
     df = df.dropna(subset=["Listing_Date"])
+    df["Date"] = df["Listing_Date"]
+    df["Price"] = pd.to_numeric(df["Price"], errors="coerce").fillna(0)
 
-    # ----------------------------------------------------------
     # FILTERS
-    # ----------------------------------------------------------
-    st.markdown("### Step 2: Dashboard Filters")
-    f1, f2, f3 = st.columns(3)
-    city = f1.multiselect("City", df["City"].unique(), df["City"].unique())
-    ptype = f2.multiselect("Property Type", df["Property_Type"].unique(), df["Property_Type"].unique())
-    dates = f3.date_input("Select Date Range", [])
+    st.markdown('<div class="section-title">Step 2 — Filters</div>', unsafe_allow_html=True)
 
-    dff = df.copy()
-    if city:
-        dff = dff[dff["City"].isin(city)]
-    if ptype:
-        dff = dff[dff["Property_Type"].isin(ptype)]
-    if len(dates) == 2:
-        dff = dff[(dff["Date"] >= pd.to_datetime(dates[0])) & (dff["Date"] <= pd.to_datetime(dates[1]))]
+    c1, c2, c3 = st.columns(3)
+    cities = sorted(df["City"].dropna().unique())
+    types = sorted(df["Property_Type"].dropna().unique())
 
-    st.markdown("### Data Preview")
-    st.dataframe(dff.head(), use_container_width=True)
+    with c1:
+        sel_city = st.multiselect("City", options=cities, default=cities[:5])
+    with c2:
+        sel_type = st.multiselect("Property Type", options=types, default=types[:5])
+    with c3:
+        try:
+            min_d = df["Date"].min().date()
+            max_d = df["Date"].max().date()
+            date_range = st.date_input("Date range", value=(min_d, max_d))
+        except:
+            date_range = st.date_input("Date range")
 
-    # ----------------------------------------------------------
-    # DOWNLOAD FILTERED DATA
-    # ----------------------------------------------------------
-    buf = BytesIO()
-    dff.to_csv(buf, index=False)
-    st.download_button("Download Filtered Data", data=buf.getvalue(), file_name="filtered_data.csv", mime="text/csv")
+    filt = df.copy()
+    if sel_city:
+        filt = filt[filt["City"].isin(sel_city)]
+    if sel_type:
+        filt = filt[filt["Property_Type"].isin(sel_type)]
 
-    # ----------------------------------------------------------
-    # CHARTS
-    # ----------------------------------------------------------
-    st.markdown("### Monthly Demand Trend")
-    dff["Month"] = dff["Date"].dt.to_period("M").astype(str)
-    trend = dff.groupby("Month").size().reset_index(name="Demand")
-    fig1 = px.line(trend, x="Month", y="Demand", markers=True, text="Demand", color_discrete_sequence=px.colors.qualitative.Dark24)
-    fig1.update_traces(textposition="top center", textfont=dict(size=12))
-    fig1.update_layout(xaxis=dict(showline=True, linewidth=2, linecolor="black"), yaxis=dict(showline=True, linewidth=2, linecolor="black"), xaxis_title="<b>Month</b>", yaxis_title="<b>Demand</b>")
-    st.plotly_chart(fig1, use_container_width=True)
+    try:
+        if len(date_range) == 2:
+            start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+            filt = filt[(filt["Date"] >= start) & (filt["Date"] <= end)]
+    except:
+        pass
 
-    st.markdown("### Demand by Property Type")
-    tdf = dff.groupby("Property_Type").size().reset_index(name="Count")
-    fig2 = px.bar(tdf, x="Property_Type", y="Count", text="Count", color="Property_Type", color_discrete_sequence=px.colors.qualitative.Prism)
-    fig2.update_traces(textposition="outside", textfont=dict(size=12))
-    fig2.update_layout(xaxis=dict(showline=True, linewidth=2, linecolor="black"), yaxis=dict(showline=True, linewidth=2, linecolor="black"), xaxis_title="<b>Property Type</b>", yaxis_title="<b>Demand</b>")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("Filtered Preview", unsafe_allow_html=True)
+    render_required_table(filt.head(10))
 
-    # ----------------------------------------------------------
-    # FORECASTING / ML PREDICTIONS TABLE + DOWNLOAD
-    # ----------------------------------------------------------
-    st.markdown("### 6-Month Demand Forecast & ML Table")
+    download_df(filt, "filtered_real_estate_data.csv", label="Download filtered dataset")
 
+    # DEMAND TREND
+    st.markdown('<div class="section-title">Monthly Demand Trend</div>', unsafe_allow_html=True)
+    filt["Month"] = filt["Date"].dt.to_period("M").astype(str)
+    trend = filt.groupby("Month").size().reset_index(name="Demand")
+    if not trend.empty:
+        fig = px.line(trend, x="Month", y="Demand", markers=True, template="plotly_white")
+        st.plotly_chart(fig, use_container_width=True)
+
+    # PROPERTY TYPE DEMAND
+    st.markdown('<div class="section-title">Demand by Property Type</div>', unsafe_allow_html=True)
+    prop = filt.groupby("Property_Type").size().reset_index(name="Count")
+    if not prop.empty:
+        fig2 = px.bar(prop, x="Property_Type", y="Count", text="Count", template="plotly_white")
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # FORECASTING (6 months)
+    st.markdown('<div class="section-title">6-Month Demand Forecast</div>', unsafe_allow_html=True)
     if len(trend) >= 3:
         trend["Index"] = np.arange(len(trend))
         model = LinearRegression().fit(trend[["Index"]], trend["Demand"])
         future_idx = np.arange(len(trend), len(trend)+6)
-        forecast_vals = model.predict(future_idx.reshape(-1,1))
+        preds = model.predict(future_idx.reshape(-1,1))
 
-        fdf = pd.DataFrame({"Month":[f"Future {i+1}" for i in range(6)], "Forecasted":forecast_vals})
-        st.dataframe(fdf, use_container_width=True)
+        fdf = pd.DataFrame({"Month":[f"Future {i+1}" for i in range(6)], "Forecast":preds})
+        render_required_table(fdf)
+        download_df(fdf, "demand_forecast.csv", label="Download forecast")
 
-        # Download ML Predictions CSV
-        buf_ml = BytesIO()
-        fdf.to_csv(buf_ml, index=False)
-        st.download_button("Download Forecast CSV", buf_ml.getvalue(), file_name="ml_predictions.csv", mime="text/csv")
-
-        # Automated Insights Table
-        insights = dff.groupby(["City","Property_Type"]).agg({"Price":["mean","max","min"]}).reset_index()
+    # AUTOMATED INSIGHTS
+    st.markdown('<div class="section-title">Automated Insights</div>', unsafe_allow_html=True)
+    try:
+        insights = filt.groupby(["City","Property_Type"]).agg({
+            "Price":["mean","max","min"]
+        }).reset_index()
         insights.columns = ["City","Property_Type","Avg_Price","Max_Price","Min_Price"]
-        st.markdown("### Automated Insights Table")
-        st.dataframe(insights, use_container_width=True)
+        render_required_table(insights)
+        download_df(insights, "automated_insights.csv", label="Download insights")
+    except:
+        st.info("Not enough data for insights.")
 
-        buf_ai = BytesIO()
-        insights.to_csv(buf_ai, index=False)
-        st.download_button("Download Automated Insights CSV", buf_ai.getvalue(), file_name="automated_insights.csv", mime="text/csv")
+# END OF FILE
