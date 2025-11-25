@@ -178,14 +178,14 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 
 
 # -------------------------
-# Header / Branding
 # -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
-<div style="display: flex; align-items: center; margin-bottom:8px;">
-    <img src="{logo_url}" width="56" style="border-radius:6px; margin-right:12px;">
-    <div>
-        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &amp; Advanced Analytics</div>
-        <div style="color:#6b6b6b; font-size:13px; margin-top:2px;">Customer Retention & Churn Analysis — Marketing Lab UI</div>
+<div style="display: flex; align-items: center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
