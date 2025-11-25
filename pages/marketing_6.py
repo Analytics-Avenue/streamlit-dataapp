@@ -176,7 +176,6 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 """, unsafe_allow_html=True)
 
 
-st.markdown("<div class='big-header'>Customer Retention & Churn Analysis</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Header / Branding
@@ -190,6 +189,8 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("<div class='big-header'>Customer Retention & Churn Analysis</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Required Columns & Auto-maps
@@ -377,7 +378,7 @@ with tab3:
             df = auto_map_columns(df)
             st.success("Default dataset loaded.")
             st.markdown('<div class="small-muted">Preview (first 5 rows)</div>', unsafe_allow_html=True)
-            st.dataframe(df.head(5), use_container_width=True)
+            st.dataframe(df.head(3), use_container_width=True)
         except Exception as e:
             st.error(f"Failed to load default dataset: {e}")
             st.stop()
@@ -484,8 +485,8 @@ with tab3:
         pass
 
     st.markdown('<div class="section-title">Filtered preview (first 10 rows)</div>', unsafe_allow_html=True)
-    st.dataframe(filt.head(10), use_container_width=True)
-    download_df(filt.head(500), "filtered_customers_preview.csv", label="Download filtered preview (up to 500 rows)")
+    st.dataframe(filt.head(3), use_container_width=True)
+    download_df(filt.head(100), "filtered_customers_preview.csv", label="Download filtered preview (up to 500 rows)")
 
     # -------------------------
     # Key Metrics
@@ -609,7 +610,7 @@ with tab3:
                         feature_names = [f"f_{i}" for i in range(X_t.shape[1])]
                     fi = pd.Series(clf.feature_importances_, index=feature_names).sort_values(ascending=False).head(30)
                     st.markdown("Top feature importances")
-                    st.dataframe(fi.reset_index().rename(columns={"index":"feature", 0:"importance"}).head(20))
+                    st.dataframe(fi.reset_index().rename(columns={"index":"feature", 0:"importance"}).head(10))
                 except Exception:
                     st.info("Feature importance unavailable for this preprocessing pipeline.")
 
@@ -620,8 +621,8 @@ with tab3:
                     sample_customers = sample_customers.reset_index(drop=True)
                     sample_customers["Churn_Prob"] = preds_proba[:len(sample_customers)]
                     sample_customers["Churn_Pred"] = preds[:len(sample_customers)]
-                    st.markdown('<div class="small-muted">Sample predictions (first rows)</div>', unsafe_allow_html=True)
-                    st.dataframe(sample_customers.head(10), use_container_width=True)
+                    st.markdown('<div class="small-muted">Sample predictions</div>', unsafe_allow_html=True)
+                    st.dataframe(sample_customers.head(3), use_container_width=True)
                     download_df(sample_customers.head(500), "churn_predictions.csv", label="Download churn predictions (sample)")
                 except Exception:
                     st.info("Could not map predictions back to original rows for download. Use the returned predictions object instead.")
