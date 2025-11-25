@@ -221,7 +221,7 @@ html, body, [data-testid="stAppViewContainer"] {{
 .required-table {{
     border-collapse: collapse;
     width:100%;
-    font-size:17px;
+    font-size:14px;
     color: {BLACK};
     background:#fff;
 }}
@@ -285,8 +285,6 @@ with tab_overview:
     <div class="card">
         <h4>Purpose</h4>
         <p>Unify paid search (Google Ads) performance with SEO signals to measure combined impact on clicks, conversions and revenue.</p>
-        <hr style="border:none;margin:8px 0;border-top:1px solid #eee;" />
-        <h4>What this lab does</h4>
         <ul style="margin:6px 0 0 18px;">
             <li>Keyword-level & landing page performance comparison (paid vs organic)</li>
             <li>Revenue & ROAS attribution, ML-driven revenue predictions, and short-term forecasts</li>
@@ -575,9 +573,3 @@ with tab_app:
         download_df(ins_df, "automated_insights.csv", label="Download automated insights")
     else:
         st.markdown('<div class="card"><div class="small-muted">No automated insights available for selected filters.</div></div>', unsafe_allow_html=True)
-
-    # Export
-    st.markdown('<div class="section-title">Export filtered dataset</div>', unsafe_allow_html=True)
-    download_df(filt.reset_index(drop=True), "google_ads_seo_filtered.csv", label="Download full filtered dataset (CSV)")
-
-# END OF FILE
