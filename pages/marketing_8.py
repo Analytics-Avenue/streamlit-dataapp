@@ -305,10 +305,10 @@ with tab_overview:
 
     st.markdown('<div class="section-title">High-level KPIs</div>', unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown("<div class='kpi-card'>Paid Clicks<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi-card'>Organic Clicks<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi-card'>Revenue<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
-    k4.markdown("<div class='kpi-card'>ROAS<div class='kpi-value'>—</div></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi-card'>Paid Clicks</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi-card'>Organic Clicks</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi-card'>Revenue</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi-card'>ROAS</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Important Attributes tab
