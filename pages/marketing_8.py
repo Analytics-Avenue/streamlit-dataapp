@@ -348,7 +348,6 @@ with tab_attributes:
     }
 
     dict_df = pd.DataFrame([{"Column": k, "Description": v} for k, v in required_dict.items()])
-    st.markdown('<div class="card">', unsafe_allow_html=True)
     render_required_table(dict_df)
     st.markdown('</div>', unsafe_allow_html=True)
 
