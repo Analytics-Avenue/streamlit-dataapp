@@ -150,6 +150,14 @@ st.markdown("""
 /* PURE BLACK global text */
 body, [class*="css"] { color:#000 !important; font-size:17px; }
 
+/* MAIN HEADER */
+.big-header {
+    font-size: 36px !important;
+    font-weight: 700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}
+
 /* Section Title */
 .section-title {
     font-size: 24px !important;
