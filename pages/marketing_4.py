@@ -1,3 +1,13 @@
+# ====================================================================================
+# marketing_performance_app.py
+# Final full file — UI follows Marketing Intelligence & Forecasting Lab design system
+# - All helpers defined before usage
+# - All tables rendered via render_required_table (index-safe)
+# - Upload + Column mapping restored
+# - ML preview + full-download implemented
+# - CSS enforces pure black text except KPIs & variable boxes (blue)
+# ====================================================================================
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -17,7 +27,6 @@ warnings.filterwarnings("ignore")
 # -------------------------
 # Helpers - MUST BE DEFINED BEFORE ANY USAGE
 # -------------------------
-# Auto-column mapping dictionary
 AUTO_MAPS = {
     "Campaign": ["campaign", "campaign_name", "campaign name"],
     "Channel": ["channel", "platform", "source", "page", "page name"],
@@ -91,9 +100,25 @@ def download_df(df: pd.DataFrame, filename: str, label: str = "Download CSV"):
 
 def render_required_table(df: pd.DataFrame):
     """
-    Render index-safe required-style HTML table used across the UI.
+    Render index-safe table using unified font color + size,
+    fully overriding Streamlit table styles.
     """
-    styled = df.style.set_table_attributes('class="required-table"')
+    if df is None:
+        st.info("No table to render.")
+        return
+    styled = (
+        df.style
+        .set_table_attributes('class="required-table"')
+        .set_properties(**{
+            "color": "#000000",
+            "font-size": "17px",
+            "text-align": "left"
+        })
+        .set_table_styles([
+            {"selector": "th", "props": [("color", "#000000"), ("font-size", "18px"), ("font-weight", "600"), ("text-align", "left")]},
+            {"selector": "td", "props": [("color", "#000000"), ("font-size", "17px"), ("text-align", "left")]},
+        ])
+    )
     html = styled.to_html()
     html = html.replace("<th></th>", "").replace("<td></td>", "")
     st.write(html, unsafe_allow_html=True)
@@ -271,13 +296,8 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Simple helpers used in UI (kept local names)
+# UI small helpers
 # -------------------------
-REQUIRED_COLS = [
-    "Campaign", "Channel", "Date", "Impressions", "Clicks",
-    "Leads", "Conversions", "Spend", "Revenue", "ROAS"
-]
-
 def to_money(v):
     try:
         return "₹ " + format(float(v), ",.2f")
@@ -290,7 +310,7 @@ def to_money(v):
 tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # =======================================================================================
-# TAB 1 — OVERVIEW (Exact layout)
+# TAB 1 — OVERVIEW
 # =======================================================================================
 with tab1:
     st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
@@ -343,7 +363,7 @@ with tab1:
     """, unsafe_allow_html=True)
 
 # =======================================================================================
-# TAB 2 — IMPORTANT ATTRIBUTES (Exact layout)
+# TAB 2 — IMPORTANT ATTRIBUTES
 # =======================================================================================
 with tab2:
     st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
@@ -362,29 +382,7 @@ with tab2:
     }
 
     dict_df = pd.DataFrame([{"Column": k, "Description": v} for k, v in required_dict.items()])
-
-    # styling override for this dict table
-    st.markdown("""
-        <style>
-            .req-table th {
-                background:#ffffff !important;
-                color:#000 !important;
-                font-size:22px !important;
-                border-bottom:2px solid #000 !important;
-            }
-            .req-table td {
-                color:#000 !important;
-                font-size:20px !important;
-                padding:10px !important;
-                border-bottom:1px solid #dcdcdc !important;
-            }
-            .req-table tr:hover td {
-                background:#f8f8f8 !important;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
-    st.dataframe(dict_df.style.set_table_attributes('class="req-table"'), use_container_width=True)
+    render_required_table(dict_df)
 
     L, R = st.columns(2)
 
@@ -399,7 +397,7 @@ with tab2:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
 # =======================================================================================
-# TAB 3 — APPLICATION (Exact layout)
+# TAB 3 — APPLICATION
 # =======================================================================================
 with tab3:
     st.markdown('<div class="section-title">Step 1 — Load dataset</div>', unsafe_allow_html=True)
@@ -486,7 +484,7 @@ with tab3:
     df = ensure_datetime(df, "Date")
     df = safe_numeric(df, ["Impressions","Clicks","Leads","Conversions","Spend","Revenue","ROAS"])
     st.markdown("Preview:")
-    st.dataframe(df.head(10), use_container_width=True)
+    render_required_table(df.head(10))
 
     # Step 2 — Filters
     st.markdown('<div class="section-title">Step 2 — Filters</div>', unsafe_allow_html=True)
@@ -520,7 +518,7 @@ with tab3:
         pass
 
     st.markdown("Filtered preview (first 10 rows):")
-    st.dataframe(filt.head(10), use_container_width=True)
+    render_required_table(filt.head(10))
     download_df(filt.head(500), "filtered_preview.csv", label="Download filtered preview (up to 500 rows)")
 
     # KPIs
