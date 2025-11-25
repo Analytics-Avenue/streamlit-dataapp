@@ -499,7 +499,7 @@ with tab_application:
         transformers = []
         if cat_cols:
             # Use sparse=False for broad sklearn compatibility
-            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols))
+            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols))
         if num_cols:
             transformers.append(("num", StandardScaler(), num_cols))
 
@@ -560,8 +560,3 @@ with tab_application:
     else:
         st.dataframe(insights_df, use_container_width=True)
         download_df(insights_df, "automated_insights.csv")
-
-    st.markdown("### Done — download filtered dataset or insights as needed", unsafe_allow_html=True)
-    st.download_button("Download filtered dataset (full)", filt.to_csv(index=False), "filtered_dataset_full.csv", "text/csv")
-
-# End of file
