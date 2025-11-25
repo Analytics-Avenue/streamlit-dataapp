@@ -1,9 +1,3 @@
-# customer_journey_lab.py
-# Rebuilt app: Customer Journey & Funnel Analytics
-# UI strictly follows Marketing Lab style (pure-black body text, blue KPI & variable elements)
-# Content and data columns come from your provided Customer Journey app.
-# Single-file Streamlit app.
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -282,14 +276,16 @@ html, body, [data-testid="stAppViewContainer"] {{
 # Header
 # -------------------------
 st.markdown(f"""
-<div class="header-row">
-    <img src="{logo_url}" width="56" style="border-radius:8px;">
+<div style="display: flex; align-items: center; margin-bottom:8px;">
+    <img src="{logo_url}" width="56" style="border-radius:6px; margin-right:12px;">
     <div>
-        <div class="header-title">Analytics Avenue & Advanced Analytics</div>
-        <div class="header-sub">Customer Journey & Funnel Analytics — Lab</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &amp; Advanced Analytics</div>
+        <div style="color:#6b6b6b; font-size:13px; margin-top:2px;">Customer Retention & Churn Analysis — Marketing Lab UI</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("<div class='big-header'>Customer Journey & Funnel Analytics</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Tabs (Overview, Important Attributes, Application)
