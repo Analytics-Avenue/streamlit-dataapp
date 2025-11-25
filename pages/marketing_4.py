@@ -101,7 +101,7 @@ def render_required_table(df: pd.DataFrame):
         .set_table_attributes('class="required-table"')
         .set_properties(**{
             "color": "#000000",
-            "font-size": "17px",
+            "font-size": "14px",
             "text-align": "left"
         })
         .set_table_styles([
