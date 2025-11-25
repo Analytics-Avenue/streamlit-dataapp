@@ -419,7 +419,6 @@ with t3:
 
     # -------------------------
     # ML prediction (Revenue)
-    # ----------------------------------------------------
     
     st.markdown('<div class="section-title">ML — Predict Revenue (RandomForest)</div>', unsafe_allow_html=True)
     
@@ -446,7 +445,9 @@ with t3:
         )
     
         X_t = preprocessor.fit_transform(X)
-        X_train, X_test, y_train, y_test = train_test_split(X_t, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_t, y, test_size=0.2, random_state=42
+        )
     
         rf = RandomForestRegressor(n_estimators=220, random_state=42)
         with st.spinner("Training RandomForest…"):
@@ -456,29 +457,38 @@ with t3:
         rmse = math.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
     
+        # Performance summary card
         st.markdown(
-            f"<div class='card'>RMSE: {rmse:.2f} | R²: {r2:.3f}</div>",
-            unsafe_allow_html=True
+            f"""
+            <div class='card'>
+                <h4>Model Performance</h4>
+                RMSE: {rmse:.2f}<br>
+                R² Score: {r2:.3f}
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
     
-        # ---------------------------------------
-        # Build table-friendly output
-        # ---------------------------------------
+        # Build output table
         out_df = pd.DataFrame({
             "Actual_Revenue": y_test.reset_index(drop=True),
             "Predicted_Revenue": preds
         })
     
-        # Required-table renderer (index-safe)
-        st.markdown("<div class='section-title'>ML Predictions (tabular)</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title'>ML Predictions Preview</div>", unsafe_allow_html=True)
     
-        styled = out_df.style.set_table_attributes('class="required-table"')
-        html = styled.to_html()
-        html = html.replace("<th></th>", "").replace("<td></td>", "")
-        st.write(html, unsafe_allow_html=True)
+        preview_df = out_df.head(10)
     
-        # Download
+        # Render preview with required-table style
+        styled_preview = preview_df.style.set_table_attributes('class="required-table"')
+        html_preview = styled_preview.to_html()
+        html_preview = html_preview.replace("<th></th>", "").replace("<td></td>", "")
+        st.write(html_preview, unsafe_allow_html=True)
+    
+        # Full dataset download
+        st.markdown("<br>", unsafe_allow_html=True)
         download_df(out_df, "ml_revenue_predictions.csv")
+
 
     
     # -------------------------
