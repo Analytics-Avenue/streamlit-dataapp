@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 # -------------------------
 # Page / App Config
 # -------------------------
-st.set_page_config(page_title="Customer Retention & Churn Analysis — Marketing Lab", layout="wide")
+st.set_page_config(page_title="Customer Retention & Churn Analysis", layout="wide")
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
 # -------------------------
@@ -174,6 +174,9 @@ body, [class*="css"] { color:#000 !important; font-size:17px; }
 .small-muted { color:#6b6b6b !important; font-size:13px !important; }
 </style>
 """, unsafe_allow_html=True)
+
+
+st.markdown("<div class='big-header'>Customer Retention & Churn Analysis</div>", unsafe_allow_html=True)
 
 # -------------------------
 # Header / Branding
