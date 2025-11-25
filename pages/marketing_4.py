@@ -105,8 +105,8 @@ def render_required_table(df: pd.DataFrame):
             "text-align": "left"
         })
         .set_table_styles([
-            {"selector": "th", "props": [("color", "#000000"), ("font-size", "18px"), ("font-weight", "600"), ("text-align", "left")]},
-            {"selector": "td", "props": [("color", "#000000"), ("font-size", "17px"), ("text-align", "left")]},
+            {"selector": "th", "props": [("color", "#000000"), ("font-size", "15px"), ("font-weight", "600"), ("text-align", "left")]},
+            {"selector": "td", "props": [("color", "#000000"), ("font-size", "14px"), ("text-align", "left")]},
         ])
     )
     html = styled.to_html()
