@@ -69,24 +69,23 @@ def safe_numeric(df: pd.DataFrame, cols: list):
 
 def render_required_table(df: pd.DataFrame):
     """
-    Index-safe table renderer (no .hide_index() used because some Streamlit builds break).
+    Fully index-free table renderer (no hide_index, no index HTML output).
+    Works across all Streamlit + Pandas versions.
     """
+    df2 = df.reset_index(drop=True).copy()  # <-- Remove index completely
+
     styled = (
-        df.style
+        df2.style
         .set_table_attributes('class="required-table"')
-        .set_properties(**{
-            "color": "#000000",
-            "font-size": "17px",
-        })
+        .set_properties(**{"color": "#000000", "font-size": "17px"})
         .set_table_styles([
             {"selector": "th", "props": [("color", "#000000"), ("font-size", "18px"), ("font-weight", "600")]}
         ])
-        .format_index(lambda x: "", axis=0)  # <— SAFEST cross-version alternative
     )
 
     html = styled.to_html()
-    html = html.replace("<th></th>", "").replace("<td></td>", "")  # clean empty index cells
     st.write(html, unsafe_allow_html=True)
+
 
 
 def auto_map_columns(df: pd.DataFrame, mapping_dict: dict):
@@ -668,11 +667,3 @@ with tab_app:
         download_df_bytes(ins_df, "automated_insights.csv", label="Download automated insights")
     else:
         st.markdown('<div class="card">No automated insights available for the selected filters.</div>', unsafe_allow_html=True)
-
-    # -------------------------
-    # Export full filtered dataset
-    # -------------------------
-    st.markdown('<div class="section-title">Export</div>', unsafe_allow_html=True)
-    download_df_bytes(filt.reset_index(drop=True), "customer_journey_filtered_full.csv", label="Download full filtered dataset (CSV)")
-
-# End of file
