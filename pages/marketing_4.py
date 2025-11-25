@@ -1,9 +1,3 @@
-# ====================================================================================
-# marketing_performance_app.py
-# FINAL VERSION — EXACT same layout as sample, Marketing Performance content inside
-# PURE BLACK TEXT GLOBAL / BLUE TEXT for KPI & variable boxes ONLY
-# ====================================================================================
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -269,10 +263,51 @@ with t1:
 # =======================================================================================
 with t2:
 
-    st.markdown('<div class="section-title">Required Columns</div>', unsafe_allow_html=True)
+    # --------------------------------------------
+    # Required Column Data Dictionary (Marketing Performance)
+    # --------------------------------------------
+    st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
+    
+    required_dict = {
+        "Campaign": "Name of the marketing campaign or initiative.",
+        "Channel": "Acquisition platform (Facebook, Google, Meta Ads, Email, etc.).",
+        "Date": "Date of the campaign record. Must be parseable as datetime.",
+        "Impressions": "Total number of times the ad was shown to users.",
+        "Clicks": "Total number of user clicks recorded for the ad.",
+        "Leads": "Number of users who submitted a form / expressed intent.",
+        "Conversions": "Number of users who completed the final business goal (purchase / signup / booking).",
+        "Spend": "Total marketing cost for that row/period.",
+        "Revenue": "Revenue generated from the campaign activity.",
+        "ROAS": "Return on Ad Spend = Revenue / Spend."
+    }
+    
+    dict_df = pd.DataFrame(
+        [{"Column": k, "Description": v} for k, v in required_dict.items()]
+    )
+    
+    # PURE BLACK table styling override (same as your sample)
+    st.markdown("""
+        <style>
+            .req-table th {
+                background:#ffffff !important;
+                color:#000 !important;
+                font-size:22px !important;
+                border-bottom:2px solid #000 !important;
+            }
+            .req-table td {
+                color:#000 !important;
+                font-size:20px !important;
+                padding:10px !important;
+                border-bottom:1px solid #dcdcdc !important;
+            }
+            .req-table tr:hover td {
+                background:#f8f8f8 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.dataframe(dict_df.style.set_table_attributes('class="req-table"'), use_container_width=True)
 
-    req_df = pd.DataFrame({"Field": REQUIRED_COLS})
-    st.dataframe(req_df, use_container_width=True)
 
     L, R = st.columns(2)
 
