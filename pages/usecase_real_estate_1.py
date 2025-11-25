@@ -136,6 +136,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("<div class='big-header'>Real Estate Demand Forecasting Lab</div>", unsafe_allow_html=True)
+
 # -------------------------
 # Required columns & automap helpers
 # -------------------------
