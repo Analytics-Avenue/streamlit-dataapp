@@ -193,7 +193,7 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-     st.markdown('<div class="section-title">Capabilities & Business Impact</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Capabilities & Business Impact</div>', unsafe_allow_html=True)
 
     colA, colB = st.columns(2)
 
