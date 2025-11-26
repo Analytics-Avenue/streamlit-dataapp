@@ -536,11 +536,6 @@ with tab3:
     
     # Apply filters
     filt = df.copy()
-    
-    if vehicle:
-        filt = filt[filt["vehicle_id"].isin(vehicle)]
-    if driver:
-        filt = filt[filt["driver_id"].isin(driver)]
     if traffic:
         filt = filt[filt["traffic_level"].isin(traffic)]
     if weather:
@@ -555,15 +550,11 @@ with tab3:
     if filt.empty:
         st.warning("Filters removed all rows. Restoring defaults.")
         filt = df.copy()
-        vehicle = df["vehicle_id"].unique().tolist()
-        driver = df["driver_id"].unique().tolist()
         traffic = df["traffic_level"].unique().tolist()
         weather = df["weather_condition"].unique().tolist()
         delay = (int(df["delay_minutes"].min()), int(df["delay_minutes"].max()))
     
     # Save current selections
-    st.session_state.selected_vehicle = vehicle
-    st.session_state.selected_driver = driver
     st.session_state.selected_traffic = traffic
     st.session_state.selected_weather = weather
     st.session_state.selected_delay = delay
