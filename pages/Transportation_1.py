@@ -642,7 +642,22 @@ with tab3:
             fig2.update_xaxes(tickangle=-45)
             st.plotly_chart(fig2, use_container_width=True)
 
-    # Time-series of average delay
+            # Time-series of average delay
+        
+            def convert_to_time(val):
+                try:
+                    mins, sec = val.split(":")
+                    return pd.to_timedelta(f"{mins}m {sec}s")
+                except:
+                    return pd.NaT
+            
+            df["start_time"] = df["start_time"].astype(str).apply(convert_to_time)
+            df["end_time"] = df["end_time"].astype(str).apply(convert_to_time)
+            
+            # Add artificial date since dataset has no date
+            df["date"] = pd.to_datetime("today").normalize()
+
+    
     if "start_time" in filt.columns and "delay_minutes" in filt.columns and not filt["start_time"].isna().all():
         ts = (
             filt.dropna(subset=["start_time"])
