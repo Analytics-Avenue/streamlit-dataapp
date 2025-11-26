@@ -449,7 +449,7 @@ with tab3:
 
     dataset_mode = st.radio(
         "Choose dataset mode",
-        ["Default Dataset (full)", "Default Sample (20 rows)", "Upload + Manual Mapping"],
+        ["Default Dataset (full)",  "Upload + Manual Mapping"],
         horizontal=True,
     )
 
@@ -464,16 +464,6 @@ with tab3:
             st.dataframe(df.head(10), use_container_width=True)
         except Exception as e:
             st.error(f"Failed to load default dataset: {e}")
-
-    elif dataset_mode == "Default Sample (20 rows)":
-        try:
-            df = pd.read_csv(DEFAULT_DATA_URL)
-            df = remove_dup(df).head(20)
-            st.session_state["hospital_master"] = df
-            st.success("Sample dataset (20 rows) loaded.")
-            st.dataframe(df.head(10), use_container_width=True)
-        except Exception as e:
-            st.error(f"Failed to load sample dataset: {e}")
 
     else:  # Upload + Manual Mapping
         uploaded_file = st.file_uploader("Upload CSV for mapping", type=["csv"])
