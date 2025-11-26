@@ -576,6 +576,7 @@ with tab3:
             fig_age.update_traces(texttemplate="%{text:.2f}", textposition="outside")
             st.plotly_chart(fig_age, use_container_width=True)
 
+
     # 2) Breakdown rate by fault_code
     if "fault_code" in filt.columns:
         fc = (
