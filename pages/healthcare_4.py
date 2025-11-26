@@ -749,7 +749,7 @@ with tab3:
                         if len(num_cols_ml) > 0:
                             transformers.append(("num", StandardScaler(), num_cols_ml))
                         if len(cat_cols_ml) > 0:
-                            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols_ml))
+                            transformers.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols_ml))
 
                         preproc = ColumnTransformer(transformers, remainder="drop") if transformers else None
                         reg = RandomForestRegressor(n_estimators=150, random_state=42)
@@ -781,7 +781,7 @@ with tab3:
                         if len(num_cols_ml) > 0:
                             transformers_c.append(("num", StandardScaler(), num_cols_ml))
                         if len(cat_cols_ml) > 0:
-                            transformers_c.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), cat_cols_ml))
+                            transformers_c.append(("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols_ml))
 
                         preproc_c = ColumnTransformer(transformers_c, remainder="drop") if transformers_c else None
                         clf = RandomForestClassifier(n_estimators=150, random_state=42)
