@@ -175,13 +175,31 @@ with tab2:
 
     st.dataframe(data_dict, use_container_width=True)
 
-    st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
-    for v in REQUIRED_COLS[:-1]:
-        st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+    # -------------------------
+    # Independent Variables
+    # -------------------------
+    with col1:
+        st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
+        independent_vars = [
+            "City",
+            "Neighborhood",
+            "Property_Type",
+            "Price",
+            "Latitude",
+            "Longitude",
+            "Climate_Risk_Score"
+        ]
+        for v in independent_vars:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>Dependent Variable</div>", unsafe_allow_html=True)
-    st.markdown("<div class='variable-box'>Lifestyle_Score</div>", unsafe_allow_html=True)
-
+    # -------------------------
+    # Dependent Variable
+    # -------------------------
+    with col2:
+        st.markdown("<div class='section-title'>Dependent Variable</div>", unsafe_allow_html=True)
+        dependent_vars = ["Lifestyle_Score"]
+        for v in dependent_vars:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
 # ==========================================================
 # TAB 3 – APPLICATION
 # ==========================================================
