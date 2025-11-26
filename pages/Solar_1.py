@@ -685,9 +685,11 @@ with tab3:
     # ML — Actual Generation Regression (RandomForest)
     # -------------------------
     st.markdown('<div class="section-title">ML — Actual Generation Regression (RandomForest)</div>', unsafe_allow_html=True)
-    with st.expander("Train & evaluate model (requires >= 80 rows)", expanded=False):
+    
+    with st.expander("Train & evaluate model", expanded=False):
+    
         ml_df = filt.dropna(subset=["actual_generation_kwh"]).copy()
-
+    
         feat_cols = [
             "solar_radiation_wm2",
             "diffuse_radiation_wm2",
@@ -708,53 +710,69 @@ with tab3:
             "is_holiday_flag"
         ]
         feat_cols = [c for c in feat_cols if c in ml_df.columns]
-
-        if len(ml_df) < 80 or len(feat_cols) < 3:
-            st.info("Not enough rows or features to train a robust model (need at least ~80 rows and a few features).")
-        else:
-            X = ml_df[feat_cols].copy()
-            y = ml_df["actual_generation_kwh"].astype(float)
-
-            # Handle holiday flag to numeric if it's boolean/string
-            if "is_holiday_flag" in X.columns:
-                X["is_holiday_flag"] = X["is_holiday_flag"].astype(str)
-
-            cat_cols = [c for c in X.columns if X[c].dtype == "object"]
-            num_cols_ml = [c for c in X.columns if c not in cat_cols]
-
-            preprocessor = ColumnTransformer(
-                transformers=[
-                    ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols) if cat_cols else ("noop", "passthrough", []),
-                    ("num", StandardScaler(), num_cols_ml) if num_cols_ml else ("noop2", "passthrough", [])
-                ],
-                remainder="drop"
-            )
-
-            try:
-                X_t = preprocessor.fit_transform(X)
-            except Exception as e:
-                st.error("Preprocessing failed: " + str(e))
-                X_t = None
-
-            if X_t is not None:
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X_t, y, test_size=0.2, random_state=42
-                )
-                rf = RandomForestRegressor(n_estimators=200, random_state=42)
-                with st.spinner("Training RandomForest regression model..."):
-                    rf.fit(X_train, y_train)
-                preds = rf.predict(X_test)
-
-                rmse_m = math.sqrt(mean_squared_error(y_test, preds))
-                r2_m = r2_score(y_test, preds)
-                st.write(f"Actual generation regression — RMSE: {rmse_m:.2f} kWh, R²: {r2_m:.3f}")
-
-                res_df = pd.DataFrame({
-                    "Actual_kWh": y_test.reset_index(drop=True),
-                    "Predicted_kWh": preds
-                })
-                st.dataframe(res_df.head(20), use_container_width=True)
-                download_df(res_df, "solar_generation_predictions.csv", "Download prediction sample")
+    
+        # --------------------------------------------
+        # NEW RULES
+        # --------------------------------------------
+        if len(ml_df) < 5:
+            st.warning("Not enough rows to train any model (minimum 5 rows required).")
+            st.stop()
+    
+        if len(ml_df) < 20:
+            st.warning("Dataset is very small (<20 rows). Model will train but predictions may be unstable.")
+    
+        X = ml_df[feat_cols].copy()
+        y = ml_df["actual_generation_kwh"].astype(float)
+    
+        # Handle holiday flag to numeric if boolean/string
+        if "is_holiday_flag" in X.columns:
+            X["is_holiday_flag"] = X["is_holiday_flag"].astype(str)
+    
+        cat_cols = [c for c in X.columns if X[c].dtype == "object"]
+        num_cols_ml = [c for c in X.columns if c not in cat_cols]
+    
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols) if cat_cols else ("noop", "passthrough", []),
+                ("num", StandardScaler(), num_cols_ml) if num_cols_ml else ("noop2", "passthrough", [])
+            ],
+            remainder="drop"
+        )
+    
+        try:
+            X_t = preprocessor.fit_transform(X)
+        except Exception as e:
+            st.error("Preprocessing failed: " + str(e))
+            st.stop()
+    
+        # Simple splitting logic for small datasets
+        test_size = 0.3 if len(ml_df) < 40 else 0.2
+    
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_t, y, test_size=test_size, random_state=42
+        )
+    
+        rf = RandomForestRegressor(n_estimators=200, random_state=42)
+    
+        with st.spinner("Training RandomForest model..."):
+            rf.fit(X_train, y_train)
+    
+        preds = rf.predict(X_test)
+    
+        rmse_val = math.sqrt(mean_squared_error(y_test, preds))
+        r2_val = r2_score(y_test, preds)
+    
+        st.success(f"Model trained successfully (Rows={len(ml_df)}).")
+    
+        st.write(f"RMSE: {rmse_val:.2f} kWh")
+        st.write(f"R² Score: {r2_val:.3f}")
+    
+        res_df = pd.DataFrame({
+            "Actual_kWh": y_test.reset_index(drop=True),
+            "Predicted_kWh": preds
+        })
+        st.dataframe(res_df.head(20), use_container_width=True)
+        download_df(res_df, "solar_generation_predictions.csv", "Download prediction sample")
 
     # -------------------------
     # Automated Insights
