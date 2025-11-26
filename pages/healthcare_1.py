@@ -345,7 +345,7 @@ with tab3:
     # ==========================================================
     # AUTOMATED INSIGHTS TABLE
     # ==========================================================
-    st.markdown("<div class='section-title'>Automated Insights (AI Generated)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Automated Insights</div>", unsafe_allow_html=True)
 
     insights_list = []
 
