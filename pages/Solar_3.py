@@ -180,7 +180,7 @@ st.markdown("<div class='big-header'>PV Panel Degradation Intelligence Lab</div>
 # CONSTANTS
 # ---------------------------------------------------
 # If this path is wrong in your repo, just update this URL
-DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Solar/pv_degradation.csv"
+DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/Solar/panel_degradation.csv"
 
 REQUIRED_PV_COLS = [
     "panel_id",
