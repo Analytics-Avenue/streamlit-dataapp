@@ -710,7 +710,7 @@ with tab3:
         feat_cols = [c for c in feat_cols if c in ml_df.columns]
 
         if len(ml_df) < 80 or len(feat_cols) < 3:
-            st.info("Not enough rows or features to train a robust model (need at least ~200 rows and a few features).")
+            st.info("Not enough rows or features to train a robust model (need at least ~80 rows and a few features).")
         else:
             X = ml_df[feat_cols].copy()
             y = ml_df["actual_generation_kwh"].astype(float)
