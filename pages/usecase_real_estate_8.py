@@ -186,8 +186,42 @@ with tab1:
 # TAB 2 – IMPORTANT ATTRIBUTES
 # ==========================================================
 with tab2:
+
     st.markdown("<div class='section-title'>Important Attributes</div>", unsafe_allow_html=True)
 
+    # Data Dictionary
+    st.markdown("<div class='section-title'>Data Dictionary</div>", unsafe_allow_html=True)
+
+    data_dict = pd.DataFrame({
+        "Column Name": [
+            "City", 
+            "Property_Type", 
+            "Price", 
+            "Latitude", 
+            "Longitude", 
+            "Buyer_Sentiment"
+        ],
+        "Data Type": [
+            "string",
+            "string",
+            "float",
+            "float",
+            "float",
+            "float (0 to 1)"
+        ],
+        "Description": [
+            "City where the property is located",
+            "Type/category of the property (e.g., 2BHK, Villa, Plot)",
+            "Listing price of the property",
+            "Latitude coordinate for mapping",
+            "Longitude coordinate for mapping",
+            "Sentiment score derived from buyer actions & interest"
+        ]
+    })
+
+    st.dataframe(data_dict, use_container_width=True)
+
+    # Variables section
     col1, col2 = st.columns(2)
 
     with col1:
