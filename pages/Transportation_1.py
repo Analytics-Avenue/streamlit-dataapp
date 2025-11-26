@@ -199,7 +199,7 @@ ROUTE_REQUIRED_COLS = [
     "route_toll_cost"
 ]
 
-DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/main/datasets/transportation/route_optimization.csv"
+DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/transportation/route_optimization.csv"
 
 
 def ensure_datetime(df, col):
