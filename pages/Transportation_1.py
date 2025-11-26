@@ -496,8 +496,6 @@ with tab3:
     # Store defaults when df loads
     if "default_values" not in st.session_state:
         st.session_state.default_values = {
-            "vehicle": df["vehicle_id"].unique().tolist(),
-            "driver": df["driver_id"].unique().tolist(),
             "traffic": df["traffic_level"].unique().tolist(),
             "weather": df["weather_condition"].unique().tolist(),
             "delay_min": int(df["delay_minutes"].min()),
@@ -506,8 +504,6 @@ with tab3:
     
     # Reset Filters Button
     if st.button("Reset Filters"):
-        st.session_state.selected_vehicle = st.session_state.default_values["vehicle"]
-        st.session_state.selected_driver = st.session_state.default_values["driver"]
         st.session_state.selected_traffic = st.session_state.default_values["traffic"]
         st.session_state.selected_weather = st.session_state.default_values["weather"]
         st.session_state.selected_delay = (
@@ -516,18 +512,6 @@ with tab3:
         )
     
     # Build filter controls
-    vehicle = st.multiselect(
-        "Vehicle ID",
-        df["vehicle_id"].unique(),
-        default=st.session_state.get("selected_vehicle", df["vehicle_id"].unique().tolist())
-    )
-    
-    driver = st.multiselect(
-        "Driver ID",
-        df["driver_id"].unique(),
-        default=st.session_state.get("selected_driver", df["driver_id"].unique().tolist())
-    )
-    
     traffic = st.multiselect(
         "Traffic Level",
         df["traffic_level"].unique(),
