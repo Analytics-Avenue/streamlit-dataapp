@@ -231,8 +231,8 @@ thumb_urls = {
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
     "HR Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/hr_thumb.jpeg",
     "Supply Chain Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
-    "Solar Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
-    "Transportation Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
+    "Solar Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/Solar.jpeg",
+    "Transportation Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/Transportation.jpeg",
     "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
