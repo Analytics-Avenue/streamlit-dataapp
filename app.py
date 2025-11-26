@@ -204,16 +204,16 @@ sectors = {
         {"name": "Warehouse Operations Analytics", "page": "supply_chain_3.py"}
     ],
     "Solar Analytics": [
-    {"name": "Solar Power Generation Forecasting", "page": "solar_generation_forecasting.py"},
-    {"name": "Inverter Failure Prediction", "page": "solar_inverter_failure.py"},
-    {"name": "PV Panel Performance Degradation Analysis", "page": "solar_panel_degradation.py"},
-    {"name": "Energy Storage Optimization (Battery Analytics)", "page": "solar_battery_optimization.py"}
+    {"name": "Solar Power Generation Forecasting", "page": "Solar_1.py"},
+    {"name": "Inverter Failure Prediction", "page": "Solar_2.py"},
+    {"name": "PV Panel Performance Degradation Analysis", "page": "Solar_3.py"},
+    {"name": "Energy Storage Optimization (Battery Analytics)", "page": "Solar_4.py"}
     ],
     "Transportation Analytics": [
-    {"name": "Route Optimization & Fleet Efficiency", "page": "transport_route_optimization.py"},
-    {"name": "Estimated Time of Arrival (ETA) Prediction", "page": "transport_eta_prediction.py"},
-    {"name": "Predictive Maintenance for Vehicles", "page": "transport_predictive_maintenance.py"},
-    {"name": "Driver Behaviour & Safety Analytics", "page": "transport_driver_behavior.py"}
+    {"name": "Route Optimization & Fleet Efficiency", "page": "Transportation_1.py"},
+    {"name": "Estimated Time of Arrival (ETA) Prediction", "page": "Transportation_2.py"},
+    {"name": "Predictive Maintenance for Vehicles", "page": "Transportation_3.py"},
+    {"name": "Driver Behaviour & Safety Analytics", "page": "Transportation_4.py"}
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
