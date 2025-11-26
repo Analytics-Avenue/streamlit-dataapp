@@ -685,7 +685,7 @@ with tab3:
     # ML — Actual Generation Regression (RandomForest)
     # -------------------------
     st.markdown('<div class="section-title">ML — Actual Generation Regression (RandomForest)</div>', unsafe_allow_html=True)
-    with st.expander("Train & evaluate model (requires >= 200 rows)", expanded=False):
+    with st.expander("Train & evaluate model (requires >= 80 rows)", expanded=False):
         ml_df = filt.dropna(subset=["actual_generation_kwh"]).copy()
 
         feat_cols = [
@@ -709,7 +709,7 @@ with tab3:
         ]
         feat_cols = [c for c in feat_cols if c in ml_df.columns]
 
-        if len(ml_df) < 200 or len(feat_cols) < 3:
+        if len(ml_df) < 80 or len(feat_cols) < 3:
             st.info("Not enough rows or features to train a robust model (need at least ~200 rows and a few features).")
         else:
             X = ml_df[feat_cols].copy()
