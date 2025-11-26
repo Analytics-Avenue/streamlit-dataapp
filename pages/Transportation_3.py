@@ -561,16 +561,30 @@ with tab3:
 
     # 1) Breakdown rate by vehicle_age_years band
     if "vehicle_age_years" in filt.columns:
-        age_bins = pd.cut(filt["vehicle_age_years"], bins=[0,2,5,8,12,20,50], include_lowest=True)
-        age_break = filt.groupby(age_bins)["breakdown_within_30_days"].mean().reset_index(name="breakdown_rate")
+        age_bins = pd.cut(
+            filt["vehicle_age_years"],
+            bins=[0, 2, 5, 8, 12, 20, 50],
+            include_lowest=True
+        )
+        
+        age_break = (
+            filt.groupby(age_bins)["breakdown_within_30_days"]
+            .mean()
+            .reset_index(name="breakdown_rate")
+        )
+        
+        # Convert Interval objects to strings
+        age_break["age_band"] = age_break["vehicle_age_years"].astype(str)
+        
         age_break = age_break.dropna(subset=["breakdown_rate"])
+        
         if not age_break.empty:
             fig_age = px.bar(
                 age_break,
-                x="vehicle_age_years",
+                x="age_band",
                 y="breakdown_rate",
                 text="breakdown_rate",
-                labels={"vehicle_age_years": "Vehicle age band", "breakdown_rate": "Breakdown rate"},
+                labels={"age_band": "Vehicle age band", "breakdown_rate": "Breakdown rate"},
                 title="Breakdown rate by vehicle age band"
             )
             fig_age.update_traces(texttemplate="%{text:.2f}", textposition="outside")
