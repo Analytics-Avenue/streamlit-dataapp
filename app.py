@@ -435,23 +435,23 @@ else:
     ],
         "Transportation Analytics": [
         {
-            "overview": "Optimize routes dynamically using live traffic, weather, closures, 
-            and historical trip data to reduce fuel usage and delivery delays.",
+            "overview": """Optimize routes dynamically using live traffic, weather, closures, 
+            and historical trip data to reduce fuel usage and delivery delays.""",
             "tools": ["Python", "GeoPandas", "Routing Algorithms", "Optimization Models", "Power BI"]
         },
         {
-            "overview": "Predict accurate ETA by modeling delay patterns, driver behavior, 
-            and real-time route factors to improve SLA and customer satisfaction.",
+            "overview": """Predict accurate ETA by modeling delay patterns, driver behavior, 
+            and real-time route factors to improve SLA and customer satisfaction.""",
             "tools": ["Python", "Time Series Models", "Driver Data", "Traffic API", "ML Forecasting"]
         },
         {
-            "overview": "Predict vehicle failures using sensor telemetry such as RPM, vibration, 
-            temperature, and fault codes to reduce breakdowns and emergency repairs.",
+            "overview": """Predict vehicle failures using sensor telemetry such as RPM, vibration, 
+            temperature, and fault codes to reduce breakdowns and emergency repairs.""",
             "tools": ["Python", "Scikit-Learn", "Anomaly Detection", "Telemetry Data", "Predictive Models"]
         },
         {
-            "overview": "Analyze driver behavior using telemetry patterns like harsh braking, 
-            overspeeding, idling, and sudden acceleration to improve safety and compliance.",
+            "overview": """Analyze driver behavior using telemetry patterns like harsh braking, 
+            overspeeding, idling, and sudden acceleration to improve safety and compliance.""",
             "tools": ["Python", "Pattern Recognition", "GPS Sensor Data", "Dashboards", "Safety Scoring"]
         }
     ],
