@@ -287,7 +287,56 @@ with tab1:
 # TAB 2 – IMPORTANT ATTRIBUTES
 # ==========================================================
 with tab2:
-    st.markdown('<div class="section-title">Important Attributes</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Required Column Data Dictionary</div>', unsafe_allow_html=True)
+    
+    data_dict = {
+        "Patient_ID": "Unique patient identifier for tracking visits.",
+        "Age": "Age of the patient at the time of visit.",
+        "Gender": "Patient gender (Male / Female / Other).",
+        "Disease": "Primary diagnosed disease or condition.",
+        "Symptoms": "Symptoms reported by the patient.",
+        "Treatment": "Treatment administered to the patient.",
+        "Admission_Date": "Date the patient was admitted.",
+        "Discharge_Date": "Date the patient was discharged.",
+        "Treatment_Cost": "Total treatment cost for the admission.",
+        "Readmission": "Whether the patient was readmitted (Yes/No).",
+        "Department": "Hospital department handling the case.",
+        "Visit_Date": "Date of outpatient/inpatient visit.",
+        "Outcome": "Final outcome (Recovered / Stable / Critical / etc.).",
+        "Risk_Level": "Risk category (Low / Medium / High).",
+        "Risk_Score": "Numerical risk score for ML models."
+    }
+    
+    dict_df = pd.DataFrame(
+        [{"Attribute": k, "Description": v} for k, v in data_dict.items()]
+    )
+    
+    # ---- PURE BLACK TABLE STYLING ----
+    st.markdown("""
+    <style>
+    .required-table th {
+        background:#ffffff !important;
+        color:#000 !important;
+        font-size:18px !important;
+        border-bottom:2px solid #000 !important;
+    }
+    .required-table td {
+        color:#000 !important;
+        font-size:16px !important;
+        padding:8px !important;
+        border-bottom:1px solid #dcdcdc !important;
+    }
+    .required-table tr:hover td {
+        background:#f8f8f8 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.dataframe(
+        dict_df.style.set_table_attributes('class="required-table"'),
+        use_container_width=True
+    )
 
     col1, col2 = st.columns(2)
 
