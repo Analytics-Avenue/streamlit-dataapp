@@ -1,79 +1,198 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import plotly.express as px
 
 st.set_page_config(page_title="Real Estate Buyer Sentiment Analyzer", layout="wide")
 
-# ----------------------------
-# Hide Sidebar
-# ----------------------------
+# ==========================================================
+# HIDE SIDEBAR
+# ==========================================================
 st.markdown("""
 <style>
-[data-testid="stSidebarNav"] {display: none;}
-section[data-testid="stSidebar"] {display: none;}
-.big-header {font-size: 40px; font-weight: 900; color:black;}
-.card {background:#fff;border-radius:15px;padding:20px;margin-bottom:15px; box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-.metric-card {background:#eef4ff;padding:15px;border-radius:8px;text-align:center; transition: 0.3s; }
-.metric-card:hover {box-shadow: 0 0 25px rgba(0,123,255,0.6);}
+[data-testid="stSidebarNav"] {display:none;}
+section[data-testid="stSidebar"] {display:none;}
+
+.big-header {
+    font-size:40px;
+    font-weight:900;
+    color:black;
+    margin-bottom:12px;
+}
+
+/* Cards */
+.card {
+    background:#ffffff;
+    padding:20px;
+    border-radius:15px;
+    border:1px solid #e5e5e5;
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom:18px;
+}
+
+/* KPI Cards */
+.metric-card {
+    background:#eef4ff;
+    padding:20px;
+    text-align:center;
+    border-radius:14px;
+    font-size:18px;
+    color:#064b86;
+    font-weight:600;
+    box-shadow:0 3px 14px rgba(0,0,0,0.1);
+    transition:0.25s ease;
+}
+.metric-card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 10px 25px rgba(6,75,134,0.2);
+}
+
+/* Variable boxes */
+.variable-box {
+    padding:16px;
+    border-radius:12px;
+    background:white;
+    border:1px solid #e5e5e5;
+    text-align:center;
+    font-size:17px;
+    font-weight:500;
+    color:#064b86;
+    margin-bottom:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    transition:0.25s ease;
+}
+.variable-box:hover {
+    transform:translateY(-5px);
+    box-shadow:0 12px 20px rgba(6,75,134,0.18);
+}
+
+/* Section title */
+.section-title {
+    font-size:26px;
+    font-weight:700;
+    color:black;
+    margin-top:25px;
+    margin-bottom:12px;
+    position:relative;
+}
+.section-title:after {
+    content:"";
+    position:absolute;
+    bottom:-6px;
+    left:0;
+    width:0%;
+    height:2px;
+    background:#064b86;
+    transition:0.35s;
+}
+.section-title:hover:after { width:40%; }
+
+/* Page Fade */
+.block-container { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# Company Logo + Name
-# -------------------------
+# ==========================================================
+# HEADER
+# ==========================================================
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+
 st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
+<div style="display:flex; align-items:center; margin-bottom:15px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Required columns for the app
-REQUIRED_COLS = ["City", "Property_Type", "Price", "Latitude", "Longitude", "Buyer_Sentiment"]
-
-# -------------------------
-# Main Header
-# -------------------------
 st.markdown("<div class='big-header'>Real Estate Buyer Sentiment Analyzer</div>", unsafe_allow_html=True)
 
-# -------------------------
-# Tabs
-# -------------------------
-tab1, tab2 = st.tabs(["Overview", "Application"])
 
 # ==========================================================
-# TAB 1 - OVERVIEW
+# 3 TABS
+# ==========================================================
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
+
+
+# ==========================================================
+# TAB 1 – OVERVIEW
 # ==========================================================
 with tab1:
-    st.markdown("### Overview")
-    st.markdown("<div class='card'>This app measures buyer sentiment across properties and locations to generate investment insights and guide marketing strategies.</div>", unsafe_allow_html=True)
-    
-    st.markdown("### Purpose")
-    st.markdown("<div class='card'>• Monitor buyer sentiment trends by property type and city<br>• Identify potential investment hotspots<br>• Support data-driven pricing and marketing decisions<br>• Optimize resource allocation for high-demand properties</div>", unsafe_allow_html=True)
-    
-    st.markdown("### Capabilities")
+
+    st.markdown("<div class='section-title'>Overview</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='card'>
+        This platform evaluates real estate buyer sentiment across cities, neighborhoods, and property categories.
+        It helps investors and builders measure demand hotspots, track pricing expectations, and understand urban engagement levels.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='section-title'>Purpose</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='card'>
+        • Track buyer sentiment trends<br>
+        • Identify top-performing areas<br>
+        • Guide pricing strategies<br>
+        • Detect demand surges or drops<br>
+        • Support data-backed inventory planning
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='section-title'>Capabilities</div>", unsafe_allow_html=True)
+
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("<div class='card'><b>Technical</b><br>• Buyer sentiment scoring<br>• Interactive city/property dashboards<br>• Hotspot maps<br>• ML revenue predictions</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='card'>
+            <b>Technical:</b><br>
+            • Sentiment scoring engine<br>
+            • Interactive dashboards<br>
+            • Property-level sentiment heatmaps<br>
+            • Market segmentation analytics
+        </div>
+        """, unsafe_allow_html=True)
     with c2:
-        st.markdown("<div class='card'><b>Business</b><br>• Investment prioritization<br>• Portfolio optimization<br>• Market opportunity mapping<br>• Strategic marketing planning</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='card'>
+            <b>Business:</b><br>
+            • Demand forecasting<br>
+            • Investment hotspot detection<br>
+            • Price-to-sentiment optimization<br>
+            • Marketing efficiency analysis
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("### KPIs")
+    st.markdown("<div class='section-title'>KPIs</div>", unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='metric-card'>High Sentiment Properties</div>", unsafe_allow_html=True)
     k2.markdown("<div class='metric-card'>Top Cities by Sentiment</div>", unsafe_allow_html=True)
     k3.markdown("<div class='metric-card'>Top Property Types</div>", unsafe_allow_html=True)
-    k4.markdown("<div class='metric-card'>Average Sentiment Score</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='metric-card'>Avg Sentiment Score</div>", unsafe_allow_html=True)
+
 
 # ==========================================================
-# TAB 2 - APPLICATION
+# TAB 2 – IMPORTANT ATTRIBUTES
 # ==========================================================
 with tab2:
+
+    st.markdown("<div class='section-title'>Important Attributes</div>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
+        for v in ["City", "Property_Type", "Price", "Latitude", "Longitude"]:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("<div class='section-title'>Dependent Variables</div>", unsafe_allow_html=True)
+        for v in ["Buyer_Sentiment"]:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+# ==========================================================
+# TAB 3 - APPLICATION
+# ==========================================================
+with tab3:
     st.markdown("### Step 1: Load Dataset")
     df = None
 
