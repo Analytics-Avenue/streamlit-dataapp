@@ -642,7 +642,7 @@ with tab3:
         ]
         feat_cols = [c for c in feat_cols if c in ml_df.columns]
 
-        if len(ml_df) < 80 or len(feat_cols) < 2:
+        if len(ml_df) < 10 or len(feat_cols) < 2:
             st.info("Not enough rows or features to train a reliable model (need at least ~80 rows).")
         else:
             X = ml_df[feat_cols].copy()
