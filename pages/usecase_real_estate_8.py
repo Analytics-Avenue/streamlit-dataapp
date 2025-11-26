@@ -186,9 +186,6 @@ with tab1:
 # TAB 2 – IMPORTANT ATTRIBUTES
 # ==========================================================
 with tab2:
-
-    st.markdown("<div class='section-title'>Important Attributes</div>", unsafe_allow_html=True)
-
     # Data Dictionary
     st.markdown("<div class='section-title'>Data Dictionary</div>", unsafe_allow_html=True)
 
@@ -200,14 +197,6 @@ with tab2:
             "Latitude", 
             "Longitude", 
             "Buyer_Sentiment"
-        ],
-        "Data Type": [
-            "string",
-            "string",
-            "float",
-            "float",
-            "float",
-            "float (0 to 1)"
         ],
         "Description": [
             "City where the property is located",
