@@ -174,7 +174,7 @@ with tab2:
     })
 
     st.dataframe(data_dict, use_container_width=True)
-
+    col1, col2 = st.columns(2)
     # -------------------------
     # Independent Variables
     # -------------------------
@@ -191,7 +191,6 @@ with tab2:
         ]
         for v in independent_vars:
             st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
     # -------------------------
     # Dependent Variable
     # -------------------------
