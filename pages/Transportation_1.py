@@ -489,54 +489,78 @@ with tab3:
 
     # -------------------------
     # Filters & Preview
-    # -------------------------
-    st.markdown('<div class="section-title">Step 2: Filters & Preview</div>', unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([2, 2, 2])
-
-    vehicles = sorted(df["vehicle_id"].dropna().unique().tolist())
-    drivers = sorted(df["driver_id"].dropna().unique().tolist())
-    traffic_levels = sorted(df["traffic_level"].dropna().unique().tolist())
-    weathers = sorted(df["weather_condition"].dropna().unique().tolist())
-
-    with c1:
-        sel_vehicles = st.multiselect("Vehicle", options=vehicles, default=vehicles[:5] if vehicles else [])
-    with c2:
-        sel_drivers = st.multiselect("Driver", options=drivers, default=drivers[:5] if drivers else [])
-    with c3:
-        sel_traffic = st.multiselect("Traffic level", options=traffic_levels, default=traffic_levels)
-
-    c4, c5 = st.columns(2)
-    with c4:
-        sel_weather = st.multiselect("Weather condition", options=weathers, default=weathers)
-    with c5:
-        delay_range = st.slider(
-            "Delay (minutes) range filter",
-            float(df["delay_minutes"].min() if df["delay_minutes"].notna().any() else 0),
-            float(df["delay_minutes"].max() if df["delay_minutes"].notna().any() else 0),
-            (
-                float(df["delay_minutes"].min() if df["delay_minutes"].notna().any() else 0),
-                float(df["delay_minutes"].max() if df["delay_minutes"].notna().any() else 0),
-            )
-        )
-
+    # --------------------------
+    
+    st.markdown("### Step 2: Filters")
+    
+    # Save defaults when df loads
+    if "default_values" not in st.session_state:
+        st.session_state.default_values = {
+            "city": df["City"].unique().tolist(),
+            "ptype": df["Property_Type"].unique().tolist(),
+            "agent": df["Agent_Name"].unique().tolist(),
+            "delay_min": int(df["Conversion_Probability"].min()),
+            "delay_max": int(df["Conversion_Probability"].max())
+        }
+    
+    # Reset button
+    if st.button("Reset Filters"):
+        st.session_state.selected_city = st.session_state.default_values["city"]
+        st.session_state.selected_ptype = st.session_state.default_values["ptype"]
+        st.session_state.selected_agent = st.session_state.default_values["agent"]
+    
+    # Multiselects with session defaults
+    city = st.multiselect(
+        "City",
+        df["City"].unique(),
+        default=st.session_state.get("selected_city", df["City"].unique().tolist())
+    )
+    
+    ptype = st.multiselect(
+        "Property Type",
+        df["Property_Type"].unique(),
+        default=st.session_state.get("selected_ptype", df["Property_Type"].unique().tolist())
+    )
+    
+    agent = st.multiselect(
+        "Agent Name",
+        df["Agent_Name"].unique(),
+        default=st.session_state.get("selected_agent", df["Agent_Name"].unique().tolist())
+    )
+    
+    # Apply filters
     filt = df.copy()
-    if sel_vehicles:
-        filt = filt[filt["vehicle_id"].isin(sel_vehicles)]
-    if sel_drivers:
-        filt = filt[filt["driver_id"].isin(sel_drivers)]
-    if sel_traffic:
-        filt = filt[filt["traffic_level"].isin(sel_traffic)]
-    if sel_weather:
-        filt = filt[filt["weather_condition"].isin(sel_weather)]
-    if "delay_minutes" in filt.columns:
-        filt = filt[
-            (filt["delay_minutes"] >= delay_range[0]) &
-            (filt["delay_minutes"] <= delay_range[1])
-        ]
-
-    st.markdown('<div class="section-title">Preview (first 10 rows)</div>', unsafe_allow_html=True)
-    st.dataframe(filt.head(10), use_container_width=True)
-    download_df(filt.head(500), "route_filtered_preview.csv", "Download filtered preview (first 500 rows)")
+    
+    if city:
+        filt = filt[filt["City"].isin(city)]
+    if ptype:
+        filt = filt[filt["Property_Type"].isin(ptype)]
+    if agent:
+        filt = filt[filt["Agent_Name"].isin(agent)]
+    
+    # If empty → auto-restore
+    if filt.empty:
+        st.warning("Filters removed all rows. Restoring default filters.")
+        filt = df.copy()
+        city = df["City"].unique().tolist()
+        ptype = df["Property_Type"].unique().tolist()
+        agent = df["Agent_Name"].unique().tolist()
+    
+    # Save selections
+    st.session_state.selected_city = city
+    st.session_state.selected_ptype = ptype
+    st.session_state.selected_agent = agent
+    
+    # Filter count display
+    st.markdown(f"""
+    <div style='padding:8px; background:#eef4ff; border-radius:8px; font-weight:600;'>
+    Filtered Rows: {len(filt)} of {len(df)}
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Data Preview
+    st.markdown("### Data Preview")
+    st.dataframe(filt.head(), use_container_width=True)
 
     # -------------------------
     # KPIs
