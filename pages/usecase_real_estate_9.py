@@ -161,10 +161,6 @@ with tab2:
 
     data_dict = pd.DataFrame({
         "Column Name": REQUIRED_COLS,
-        "Data Type": [
-            "string", "string", "string", "float",
-            "float", "float", "float (0-1)", "float (0-1)"
-        ],
         "Description": [
             "City where the property is located",
             "Specific neighborhood inside the city",
