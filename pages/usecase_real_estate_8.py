@@ -108,6 +108,18 @@ st.markdown(f"""
 
 st.markdown("<div class='big-header'>Real Estate Buyer Sentiment Analyzer</div>", unsafe_allow_html=True)
 
+# ==========================================================
+# REQUIRED COLUMNS (ADDED BACK – FIXES NameError)
+# ==========================================================
+REQUIRED_COLS = [
+    "City",
+    "Property_Type",
+    "Price",
+    "Latitude",
+    "Longitude",
+    "Buyer_Sentiment"
+]
+
 
 # ==========================================================
 # 3 TABS
