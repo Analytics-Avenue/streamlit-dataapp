@@ -618,7 +618,12 @@ with tab3:
         tmp = filt[["traffic_index", "delay_min"]].dropna()
         if not tmp.empty:
             tmp["traffic_band"] = pd.qcut(tmp["traffic_index"], q=4, duplicates="drop")
+
+            # Convert Interval -> String because Plotly cannot serialize Interval objects
+            tmp["traffic_band"] = tmp["traffic_band"].astype(str)
+            
             band_df = tmp.groupby("traffic_band")["delay_min"].mean().reset_index()
+            
             fig_band = px.bar(
                 band_df,
                 x="traffic_band",
@@ -627,8 +632,9 @@ with tab3:
                 title="Average delay by traffic band"
             )
             fig_band.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-            fig_band.update_layout(template="plotly_white")
+            
             st.plotly_chart(fig_band, use_container_width=True)
+
 
     # 3) Avg delay by road_type
     if "road_type" in filt.columns and "delay_min" in filt.columns:
