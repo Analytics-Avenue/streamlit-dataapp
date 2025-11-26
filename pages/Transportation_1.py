@@ -651,7 +651,8 @@ with tab3:
             .reset_index()
             .rename(columns={"start_time": "date"})
         )
-        ts["date"] = pd.to_datetime(ts["start_time"].dt.date)
+        ts["start_time"] = pd.to_datetime(ts["start_time"], errors="coerce")
+        ts["date"] = ts["start_time"].dt.date
         ts = ts.rename(columns={ts.columns[0]: "date"})
         ts = ts.sort_values("date")
         if not ts.empty:
