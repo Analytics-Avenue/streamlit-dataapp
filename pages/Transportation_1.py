@@ -487,69 +487,102 @@ with tab3:
         if c in df.columns:
             df[c] = to_float_series(df[c])
 
-    # -------------------------
-    # Filters & Preview
+    # --------------------------
+    # FIXED FILTER SYSTEM FOR ROUTE OPTIMIZATION
     # --------------------------
     
     st.markdown("### Step 2: Filters")
     
-    # Save defaults when df loads
+    # Store defaults when df loads
     if "default_values" not in st.session_state:
         st.session_state.default_values = {
-            "city": df["City"].unique().tolist(),
-            "ptype": df["Property_Type"].unique().tolist(),
-            "agent": df["Agent_Name"].unique().tolist(),
-            "delay_min": int(df["Conversion_Probability"].min()),
-            "delay_max": int(df["Conversion_Probability"].max())
+            "vehicle": df["vehicle_id"].unique().tolist(),
+            "driver": df["driver_id"].unique().tolist(),
+            "traffic": df["traffic_level"].unique().tolist(),
+            "weather": df["weather_condition"].unique().tolist(),
+            "delay_min": int(df["delay_minutes"].min()),
+            "delay_max": int(df["delay_minutes"].max())
         }
     
-    # Reset button
+    # Reset Filters Button
     if st.button("Reset Filters"):
-        st.session_state.selected_city = st.session_state.default_values["city"]
-        st.session_state.selected_ptype = st.session_state.default_values["ptype"]
-        st.session_state.selected_agent = st.session_state.default_values["agent"]
+        st.session_state.selected_vehicle = st.session_state.default_values["vehicle"]
+        st.session_state.selected_driver = st.session_state.default_values["driver"]
+        st.session_state.selected_traffic = st.session_state.default_values["traffic"]
+        st.session_state.selected_weather = st.session_state.default_values["weather"]
+        st.session_state.selected_delay = (
+            st.session_state.default_values["delay_min"],
+            st.session_state.default_values["delay_max"]
+        )
     
-    # Multiselects with session defaults
-    city = st.multiselect(
-        "City",
-        df["City"].unique(),
-        default=st.session_state.get("selected_city", df["City"].unique().tolist())
+    # Build filter controls
+    vehicle = st.multiselect(
+        "Vehicle ID",
+        df["vehicle_id"].unique(),
+        default=st.session_state.get("selected_vehicle", df["vehicle_id"].unique().tolist())
     )
     
-    ptype = st.multiselect(
-        "Property Type",
-        df["Property_Type"].unique(),
-        default=st.session_state.get("selected_ptype", df["Property_Type"].unique().tolist())
+    driver = st.multiselect(
+        "Driver ID",
+        df["driver_id"].unique(),
+        default=st.session_state.get("selected_driver", df["driver_id"].unique().tolist())
     )
     
-    agent = st.multiselect(
-        "Agent Name",
-        df["Agent_Name"].unique(),
-        default=st.session_state.get("selected_agent", df["Agent_Name"].unique().tolist())
+    traffic = st.multiselect(
+        "Traffic Level",
+        df["traffic_level"].unique(),
+        default=st.session_state.get("selected_traffic", df["traffic_level"].unique().tolist())
+    )
+    
+    weather = st.multiselect(
+        "Weather Condition",
+        df["weather_condition"].unique(),
+        default=st.session_state.get("selected_weather", df["weather_condition"].unique().tolist())
+    )
+    
+    delay = st.slider(
+        "Delay Minutes",
+        int(df["delay_minutes"].min()),
+        int(df["delay_minutes"].max()),
+        st.session_state.get(
+            "selected_delay",
+            (int(df["delay_minutes"].min()), int(df["delay_minutes"].max()))
+        )
     )
     
     # Apply filters
     filt = df.copy()
     
-    if city:
-        filt = filt[filt["City"].isin(city)]
-    if ptype:
-        filt = filt[filt["Property_Type"].isin(ptype)]
-    if agent:
-        filt = filt[filt["Agent_Name"].isin(agent)]
+    if vehicle:
+        filt = filt[filt["vehicle_id"].isin(vehicle)]
+    if driver:
+        filt = filt[filt["driver_id"].isin(driver)]
+    if traffic:
+        filt = filt[filt["traffic_level"].isin(traffic)]
+    if weather:
+        filt = filt[filt["weather_condition"].isin(weather)]
     
-    # If empty → auto-restore
+    filt = filt[
+        (filt["delay_minutes"] >= delay[0]) &
+        (filt["delay_minutes"] <= delay[1])
+    ]
+    
+    # Auto-restore if filtered empty
     if filt.empty:
-        st.warning("Filters removed all rows. Restoring default filters.")
+        st.warning("Filters removed all rows. Restoring defaults.")
         filt = df.copy()
-        city = df["City"].unique().tolist()
-        ptype = df["Property_Type"].unique().tolist()
-        agent = df["Agent_Name"].unique().tolist()
+        vehicle = df["vehicle_id"].unique().tolist()
+        driver = df["driver_id"].unique().tolist()
+        traffic = df["traffic_level"].unique().tolist()
+        weather = df["weather_condition"].unique().tolist()
+        delay = (int(df["delay_minutes"].min()), int(df["delay_minutes"].max()))
     
-    # Save selections
-    st.session_state.selected_city = city
-    st.session_state.selected_ptype = ptype
-    st.session_state.selected_agent = agent
+    # Save current selections
+    st.session_state.selected_vehicle = vehicle
+    st.session_state.selected_driver = driver
+    st.session_state.selected_traffic = traffic
+    st.session_state.selected_weather = weather
+    st.session_state.selected_delay = delay
     
     # Filter count display
     st.markdown(f"""
@@ -558,9 +591,10 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
     
-    # Data Preview
+    # Data preview
     st.markdown("### Data Preview")
     st.dataframe(filt.head(), use_container_width=True)
+
 
     # -------------------------
     # KPIs
