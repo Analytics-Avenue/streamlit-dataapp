@@ -125,7 +125,13 @@ and map employee skill gaps using advanced machine learning and people analytics
 
     "Supply Chain Analytics": """Optimize logistics routes, improve order fulfillment performance, 
 reduce delays, and enhance warehouse efficiency using predictive and prescriptive analytics.""",
+
+    "Solar Analytics": """Forecast generation, predict inverter failures, analyze panel degradation, 
+and optimize battery storage using advanced energy data analytics and ML models.""",
     
+    "Transportation Analytics": """Optimize routes, predict arrival times, improve vehicle health, 
+and enhance driver safety using advanced mobility analytics and ML-driven fleet intelligence.""",
+
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
 }
@@ -142,7 +148,11 @@ sector_tools = {
     "HR Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Scikit-Learn",
                  "HRIS Data", "Time Series", "Classification Models", "NLP"],
     "Supply Chain Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Routing Algorithms", "Optimization Models",
-                            "Forecasting", "GeoSpatial Analytics", "Inventory Analytics"],                 
+                            "Forecasting", "GeoSpatial Analytics", "Inventory Analytics"],   
+    "Solar Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Time Series Models", "Forecasting", "Anomaly Detection",
+                        "IoT Sensor Data", "Weather API Integration"],
+    "Transportation Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Routing Algorithms", 
+                        "Time Series Models", "GeoSpatial Analytics", "Anomaly Detection", "Predictive Maintenance", "Telemetry Analytics"],
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
@@ -193,6 +203,18 @@ sectors = {
         {"name": "Order Fulfillment & SLA Analytics", "page": "supply_chain_2.py"},
         {"name": "Warehouse Operations Analytics", "page": "supply_chain_3.py"}
     ],
+    "Solar Analytics": [
+    {"name": "Solar Power Generation Forecasting", "page": "solar_generation_forecasting.py"},
+    {"name": "Inverter Failure Prediction", "page": "solar_inverter_failure.py"},
+    {"name": "PV Panel Performance Degradation Analysis", "page": "solar_panel_degradation.py"},
+    {"name": "Energy Storage Optimization (Battery Analytics)", "page": "solar_battery_optimization.py"}
+    ],
+    "Transportation Analytics": [
+    {"name": "Route Optimization & Fleet Efficiency", "page": "transport_route_optimization.py"},
+    {"name": "Estimated Time of Arrival (ETA) Prediction", "page": "transport_eta_prediction.py"},
+    {"name": "Predictive Maintenance for Vehicles", "page": "transport_predictive_maintenance.py"},
+    {"name": "Driver Behaviour & Safety Analytics", "page": "transport_driver_behavior.py"}
+    ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
         {"name":"EduTech Gen-AI Assistant","page":"https://edutech-sw63app8ga27wxw4wghza3.streamlit.app/"},
@@ -209,6 +231,8 @@ thumb_urls = {
     "Manufacturing Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/manufacturing_thumb.jpeg",
     "HR Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/hr_thumb.jpeg",
     "Supply Chain Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
+    "Solar Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
+    "Transportation Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
     "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
@@ -388,6 +412,49 @@ else:
                 and reduce handling time using operational analytics.""",
              "tools": ["Python","Excel","Process Mining","Clustering","Power BI"]},
         ],
+        "Solar Analytics": [
+            {"overview": """Predict hourly and daily solar power generation using weather-linked time-series models. 
+            Track expected vs actual performance for stable grid planning.""",
+            "tools": ["Python", "Time Series Models", "Weather API", "Forecasting", "Power BI"]
+        },
+        {
+            "overview": """Predict inverter breakdowns using temperature, voltage, current and vibration patterns. 
+            Real-time anomaly detection prevents unexpected outages.""",
+            "tools": ["Python", "Scikit-Learn", "Anomaly Detection", "IoT Sensor Data", "Dashboards"]
+        },
+        {
+            "overview": """Model long-term panel degradation, benchmark PR, and detect underperforming strings 
+            to reduce silent energy losses and improve annual yield.""",
+            "tools": ["Python", "Regression Models", "Historical Data", "Performance Ratio Analytics"]
+        },
+        {
+            "overview": """Optimize battery charge–discharge cycles, predict SOC/SOH, and prevent accelerated 
+            battery aging using ML-driven optimization.""",
+            "tools": ["Python", "R", "Time Series", "Predictive Models", "Battery Analytics"]
+        }
+    ],
+        "Transportation Analytics": [
+        {
+            "overview": "Optimize routes dynamically using live traffic, weather, closures, 
+            and historical trip data to reduce fuel usage and delivery delays.",
+            "tools": ["Python", "GeoPandas", "Routing Algorithms", "Optimization Models", "Power BI"]
+        },
+        {
+            "overview": "Predict accurate ETA by modeling delay patterns, driver behavior, 
+            and real-time route factors to improve SLA and customer satisfaction.",
+            "tools": ["Python", "Time Series Models", "Driver Data", "Traffic API", "ML Forecasting"]
+        },
+        {
+            "overview": "Predict vehicle failures using sensor telemetry such as RPM, vibration, 
+            temperature, and fault codes to reduce breakdowns and emergency repairs.",
+            "tools": ["Python", "Scikit-Learn", "Anomaly Detection", "Telemetry Data", "Predictive Models"]
+        },
+        {
+            "overview": "Analyze driver behavior using telemetry patterns like harsh braking, 
+            overspeeding, idling, and sudden acceleration to improve safety and compliance.",
+            "tools": ["Python", "Pattern Recognition", "GPS Sensor Data", "Dashboards", "Safety Scoring"]
+        }
+    ],
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
