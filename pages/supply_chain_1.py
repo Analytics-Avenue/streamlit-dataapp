@@ -205,45 +205,77 @@ with tabs[1]:
 
     st.markdown("""
     <div class='card left-align'>
-    This section defines all required and optional fields for the Route Optimization dataset.  
-    Use this as a reference when preparing CSV files or mapping uploaded datasets.
+        Below is the complete schema used for Route Optimization.  
+        Required columns must exist in your file or be mapped manually.
     </div>
     """, unsafe_allow_html=True)
 
-    data_dict = [
-        ["Timestamp", "Datetime", "Trip start timestamp, used for time-series trend analysis."],
-        ["Vehicle_ID", "Categorical", "Unique identifier of the vehicle."],
-        ["Vehicle_Type", "Categorical", "Type/category of the vehicle (e.g., Van, Truck, 2W)."],
-        ["Route_ID", "Categorical", "Unique route identifier for grouping trips."],
-        ["Start_City", "Categorical", "Origin city/location of the route."],
-        ["End_City", "Categorical", "Destination city/location of the route."],
-        ["Route_Distance_km", "Numeric", "Total distance of the route in kilometers."],
-        ["Traffic_Level", "Categorical", "Traffic condition (Low, Medium, High)."],
-        ["Weather_Condition", "Categorical", "Weather during trip (Clear, Rain, Fog, Storm)."],
-        
-        ["Predicted_Travel_Hours", "Numeric", "ML-generated expected travel time."],
-        ["Actual_Travel_Hours", "Numeric", "Actual recorded travel time."],
-        
-        ["Predicted_Fuel_Liters", "Numeric", "ML-predicted fuel consumption."],
-        ["Actual_Fuel_Liters", "Numeric", "Actual consumed fuel in liters."],
-        
-        ["Load_Weight_kg", "Numeric", "Cargo weight in kilograms."],
-        ["Vehicle_Capacity_kg", "Numeric", "Maximum load capacity of the vehicle."],
-        
-        ["Delay_Hours", "Numeric", "Difference between expected vs actual arrival time."],
-        
-        ["Efficiency_Score", "Numeric", "Derived metric: travel & fuel efficiency combined."],
-        ["Fuel_L_per_km", "Numeric (derived)", "Fuel burned per km. Auto-computed if missing."],
-        
-        ["_is_anomaly", "Binary (derived)", "IsolationForest flag: 1=anomaly trip, 0=normal."],
+
+    # ================================
+    # REQUIRED COLUMNS TABLE
+    # ================================
+    st.subheader("Required Columns")
+
+    required_cols = [
+        ["Timestamp", "Datetime", "Trip start timestamp"],
+        ["Vehicle_ID", "Categorical", "Unique vehicle identifier"],
+        ["Route_ID", "Categorical", "Unique route identifier"],
+        ["Route_Distance_km", "Numeric", "Distance of the route (km)"],
+        ["Actual_Travel_Hours", "Numeric", "Actual hours taken"],
+        ["Actual_Fuel_Liters", "Numeric", "Actual fuel consumed"],
+        ["Delay_Hours", "Numeric", "Delay in hours (actual - expected)"]
     ]
 
-    df_dict = pd.DataFrame(data_dict, columns=["Column", "Type", "Description"])
-    st.dataframe(df_dict, use_container_width=True)
+    req_df = pd.DataFrame(required_cols, columns=["Column", "Type", "Description"])
+    st.dataframe(req_df, use_container_width=True)
+    # ================================
+    # Independent vs Dependent Variables
+    # ================================
+    st.subheader("Independent vs Dependent Variables")
 
-    st.markdown("#### Download Data Dictionary")
-    csv_dd = df_dict.to_csv(index=False).encode("utf-8")
-    st.download_button("Download Data Dictionary CSV", csv_dd, "route_data_dictionary.csv", "text/csv")
+    colA, colB = st.columns(2)
+
+    with colA:
+        st.markdown("""
+        <div class='card left-align'>
+            <h4 style='margin:0;'>Independent Variables</h4>
+            <ul style='font-size:14px;'>
+                <li>Route_Distance_km</li>
+                <li>Vehicle_Type</li>
+                <li>Vehicle_Capacity_kg</li>
+                <li>Load_Weight_kg</li>
+                <li>Traffic_Level</li>
+                <li>Weather_Condition</li>
+                <li>Start_City</li>
+                <li>End_City</li>
+                <li>Timestamp</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with colB:
+        st.markdown("""
+        <div class='card left-align'>
+            <h4 style='margin:0;'>Dependent Variables</h4>
+            <ul style='font-size:14px;'>
+                <li>Actual_Travel_Hours</li>
+                <li>Actual_Fuel_Liters</li>
+                <li>Delay_Hours</li>
+                <li>Efficiency_Score</li>
+                <li>Fuel_L_per_km</li>
+                <li>_is_anomaly</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ================================
+    # CSV DOWNLOADS
+    # ================================
+    st.markdown("### Downloads")
+    st.download_button("Download Required Columns CSV", req_df.to_csv(index=False), "required_columns.csv", "text/csv")
+
+    
+
 
 # ---------------------------------------------------------
 # APPLICATION TAB
