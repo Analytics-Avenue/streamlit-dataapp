@@ -720,8 +720,6 @@ with tab_dict:
                 f"""
                 <div class='card' style='margin-bottom:10px;'>
                     <b style='font-size:17px;'>{v}</b>
-                    <br>
-                    <span class='small'>Independent variable (input feature)</span>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -745,8 +743,6 @@ with tab_dict:
                 f"""
                 <div class='card' style='margin-bottom:10px;'>
                     <b style='font-size:17px;'>{v}</b>
-                    <br>
-                    <span class='small'>Dependent variable (prediction target)</span>
                 </div>
                 """,
                 unsafe_allow_html=True
