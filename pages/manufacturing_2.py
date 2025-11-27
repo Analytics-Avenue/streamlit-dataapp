@@ -188,23 +188,52 @@ with tab1:
 # TAB 2 — DATA DICTIONARY
 # ---------------------------------------------------------
 with tab2:
-    st.markdown("## Data Dictionary")
+    st.markdown("## Required Columns – Data Dictionary")
 
-    c1, c2 = st.columns(2)
+    # Create tabular data dictionary
+    dd_data = []
+    for col, desc in REQUIRED_COLS.items():
+        dd_data.append({"Column": col, "Description": desc})
 
-    with c1:
+    dd_df = pd.DataFrame(dd_data)
+
+    st.dataframe(dd_df, use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("## Model Variables")
+
+    left, right = st.columns(2)
+
+    # ---------------- LEFT: Independent Variables ----------------
+    with left:
         st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
         for v in INDEPENDENT_VARS:
-            if v in REQUIRED_COLS:
-                st.markdown(f"<div class='var-box'><b>{v}</b><br>{REQUIRED_COLS[v]}</div>", unsafe_allow_html=True)
+            desc = REQUIRED_COLS.get(v, "")
+            st.markdown(
+                f"""
+                <div class='var-box'>
+                    <b>{v}</b><br>
+                    {desc}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-    with c2:
+    # ---------------- RIGHT: Dependent Variable -------------------
+    with right:
         st.markdown("<div class='section-title'>Dependent Variable</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='var-box'><b>{DEPENDENT_VAR}</b><br>{REQUIRED_COLS[DEPENDENT_VAR]}</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>All Required Columns</div>", unsafe_allow_html=True)
-    for col, desc in REQUIRED_COLS.items():
-        st.markdown(f"<div class='var-box'><b>{col}</b><br>{desc}</div>", unsafe_allow_html=True)
+        desc = REQUIRED_COLS.get(DEPENDENT_VAR, "")
+
+        st.markdown(
+            f"""
+            <div class='var-box'>
+                <b>{DEPENDENT_VAR}</b><br>
+                {desc}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # ---------------------------------------------------------
 # TAB 3 — APPLICATION
