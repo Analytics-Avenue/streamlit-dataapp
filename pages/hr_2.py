@@ -144,7 +144,7 @@ st.markdown(
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
-tab_overview, tab_app, tab_dict = st.tabs(["Overview", "Application", "Data Dictionary"])
+tab_overview, tab_app, tab_dict = st.tabs(["Overview",  "Important Attributes", "Application"])
 
 # =========================================================
 # TAB 1: OVERVIEW
@@ -805,86 +805,84 @@ with tab_app:
         )
 
 # =========================================================
-# TAB 3: DATA DICTIONARY
+# TAB 2 — IMPORTANT ATTRIBUTES (Required Columns + Variable Roles)
 # =========================================================
 with tab_dict:
-    st.header("Data Dictionary")
+    st.header("Important Attributes")
 
+    # -----------------------------
+    # Data dictionary table
+    # -----------------------------
     dict_rows = [
-        {
-            "Field": "Date",
-            "Type": "datetime",
-            "Description": "Workday timestamp for the attendance record; used for trend and seasonality analysis.",
-            "Example": "2025-01-10",
-        },
-        {
-            "Field": "Employee_ID",
-            "Type": "string / int",
-            "Description": "Unique identifier for each employee; used to build employee-level absence profiles.",
-            "Example": "EMP_1023",
-        },
-        {
-            "Field": "Department",
-            "Type": "string",
-            "Description": "Functional team or business unit where the employee works.",
-            "Example": "Production",
-        },
-        {
-            "Field": "Role",
-            "Type": "string",
-            "Description": "Job title or role category of the employee.",
-            "Example": "Machine Operator",
-        },
-        {
-            "Field": "Shift",
-            "Type": "string",
-            "Description": "Work shift such as Morning / Evening / Night.",
-            "Example": "Morning",
-        },
-        {
-            "Field": "Workload_Index",
-            "Type": "numeric",
-            "Description": "Workload intensity score (e.g. 0–10 or 0–100) for that day.",
-            "Example": "7.5",
-        },
-        {
-            "Field": "Past_Absence_Count",
-            "Type": "numeric",
-            "Description": "Total number of prior absences for the employee in the tracking period.",
-            "Example": "4",
-        },
-        {
-            "Field": "Absent_Flag",
-            "Type": "binary (0/1)",
-            "Description": "Attendance outcome for the day: 1 = absent, 0 = present. Used as ML target label.",
-            "Example": "1",
-        },
-        {
-            "Field": "Hours_Lost",
-            "Type": "numeric",
-            "Description": "Total productive hours lost due to absence for that record.",
-            "Example": "8.0",
-        },
-        {
-            "Field": "Absence_Reason",
-            "Type": "string",
-            "Description": "Categorical reason for absence (sickness, emergency, unplanned leave, etc.).",
-            "Example": "Sick Leave",
-        },
-        {
-            "Field": "Seasonal_Factor",
-            "Type": "numeric",
-            "Description": "Seasonality indicator capturing month/season/festive effects on absenteeism.",
-            "Example": "1.2",
-        },
-        {
-            "Field": "Absenteeism_Probability",
-            "Type": "numeric (0–1)",
-            "Description": "Predicted probability of absence; can be ML output or prior score.",
-            "Example": "0.68",
-        },
+        {"Field": "Date", "Type": "datetime", "Description": "Workday timestamp", "Example": "2025-01-10"},
+        {"Field": "Employee_ID", "Type": "string/int", "Description": "Unique employee identifier", "Example": "EMP_1023"},
+        {"Field": "Department", "Type": "string", "Description": "Business unit / department", "Example": "Production"},
+        {"Field": "Role", "Type": "string", "Description": "Job title / role type", "Example": "Machine Operator"},
+        {"Field": "Shift", "Type": "string", "Description": "Shift type (Morning/Night)", "Example": "Morning"},
+        {"Field": "Workload_Index", "Type": "numeric", "Description": "Daily workload intensity score", "Example": "7.5"},
+        {"Field": "Past_Absence_Count", "Type": "numeric", "Description": "Historic absence count", "Example": "4"},
+        {"Field": "Absent_Flag", "Type": "binary", "Description": "Target variable (1=absent, 0=present)", "Example": "1"},
+        {"Field": "Hours_Lost", "Type": "numeric", "Description": "Hours lost due to absence", "Example": "8"},
+        {"Field": "Absence_Reason", "Type": "string", "Description": "Reason for absence", "Example": "Sick Leave"},
+        {"Field": "Seasonal_Factor", "Type": "numeric", "Description": "Seasonality effect factor", "Example": "1.2"},
+        {"Field": "Absenteeism_Probability", "Type": "numeric", "Description": "Predicted absence score", "Example": "0.68"}
     ]
 
-    dict_df = pd.DataFrame(dict_rows, columns=["Field", "Type", "Description", "Example"])
+    dict_df = pd.DataFrame(dict_rows)
+    st.subheader("Required Columns with Data Dictionary")
     st.dataframe(dict_df, use_container_width=True)
-    download_df(dict_df, "absenteeism_data_dictionary.csv", label="Download data dictionary")
+    download_df(dict_df, "absenteeism_data_dictionary.csv", "Download Data Dictionary")
+
+    st.markdown("---")
+
+    # -----------------------------
+    # Independent vs Dependent Variable Cards
+    # -----------------------------
+    st.subheader("Independent & Dependent Variables")
+
+    # Define variable categories
+    independent_vars = [
+        ("Date", "datetime", "Workday timestamp"),
+        ("Employee_ID", "string/int", "Unique identifier"),
+        ("Department", "string", "Department / Unit"),
+        ("Role", "string", "Job title"),
+        ("Shift", "string", "Shift classification"),
+        ("Workload_Index", "numeric", "Daily workload intensity"),
+        ("Past_Absence_Count", "numeric", "Historic absence count"),
+        ("Hours_Lost", "numeric", "Productive hours lost"),
+        ("Absence_Reason", "string", "Reason for absence"),
+        ("Seasonal_Factor", "numeric", "Seasonal effect indicator"),
+    ]
+
+    dependent_vars = [
+        ("Absent_Flag", "Target (binary)", "1 = absent, 0 = present"),
+        ("Absenteeism_Probability", "Target Score", "Predicted probability (0–1)")
+    ]
+
+    col_left, col_right = st.columns(2)
+
+    # ---------------- LEFT COLUMN – Independent ----------------
+    with col_left:
+        st.markdown("### Independent Variables")
+        for name, dtype, desc in independent_vars:
+            st.markdown(
+                f"""
+                <div class='card left-card'>
+                    <b>{name}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # ---------------- RIGHT COLUMN – Dependent ----------------
+    with col_right:
+        st.markdown("### Dependent Variables")
+        for name, dtype, desc in dependent_vars:
+            st.markdown(
+                f"""
+                <div class='card left-card'>
+                    <b>{name}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
