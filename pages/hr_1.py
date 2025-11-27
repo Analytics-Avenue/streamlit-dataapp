@@ -388,22 +388,7 @@ with tab_overview:
 with tab_dict:
     st.markdown("### Required Columns & Data Dictionary")
 
-    st.markdown(
-        """
-        <div class="card card-left">
-        This table shows the recommended column schema for the Hiring Funnel app.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-    # ---- TABLE FORMAT ----
-    dd_df = pd.DataFrame([
-        {"Column": row["Column"], "Type": row["Type"], "Role": row["Role"], "Description": row["Description"]}
-        for row in dict_rows
-    ])
-
-    st.markdown("#### Full Data Dictionary (Tabular)")
     st.dataframe(dd_df, use_container_width=True)
 
     st.markdown("---")
