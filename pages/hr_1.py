@@ -425,8 +425,7 @@ with tab_dict:
             st.markdown(
                 f"""
                 <div class='card card-left'>
-                    <b>{row['Column']}</b>
-                    <br><span style="font-size:12px; opacity:0.8;">{row['Type']} • {row['Description']}</span>
+                    <b>{row['Column']}
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -438,8 +437,7 @@ with tab_dict:
             st.markdown(
                 f"""
                 <div class='card card-left'>
-                    <b>{row['Column']}</b>
-                    <br><span style="font-size:12px; opacity:0.8;">{row['Type']} • {row['Description']}</span>
+                    <b>{row['Column']}
                 </div>
                 """,
                 unsafe_allow_html=True,
