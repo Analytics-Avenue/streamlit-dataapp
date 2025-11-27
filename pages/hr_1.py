@@ -167,7 +167,7 @@ footer {visibility: hidden;}
 
 # ---------------------------------------------------------
 # LOGO + TITLE
-
+st.markdown("")
 # Header & Logo
 # -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
@@ -184,7 +184,7 @@ st.markdown(f"""
 st.markdown("<div class='big-header'>Hiring Funnel Drop-Off Analysis • TA & People Analytics</div>", unsafe_allow_html=True)
 
 
-st.markdown("")
+
 
 # ---------------------------------------------------------
 # HELPERS
