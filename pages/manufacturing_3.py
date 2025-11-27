@@ -367,15 +367,11 @@ with tab1:
 
     st.markdown('<div class="section-title">High-level KPIs (conceptual)</div>', unsafe_allow_html=True)
     k1, k2, k3, k4, k5 = st.columns(5)
-     # Prepare safe display values
-    avg_inv_disp = f"{avg_inv:.1f}" if avg_inv is not None and not np.isnan(avg_inv) else "N/A"
-    service_level_disp = f"{service_level*100:.1f}%" if service_level is not None else "N/A"
-    
-    k1.markdown(f"<div class='kpi'>Active SKUs<span class='kpi-value'>{int(active_skus)}</span></div>", unsafe_allow_html=True)
-    k2.markdown(f"<div class='kpi'>Avg Inventory<span class='kpi-value'>{avg_inv_disp}</span></div>", unsafe_allow_html=True)
-    k3.markdown(f"<div class='kpi'>Shortage Events<span class='kpi-value'>{int(shortage_events)}</span></div>", unsafe_allow_html=True)
-    k4.markdown(f"<div class='kpi'>Pileup Events<span class='kpi-value'>{int(pileup_events)}</span></div>", unsafe_allow_html=True)
-    k5.markdown(f"<div class='kpi'>Service Level<span class='kpi-value'>{service_level_disp}</span></div>", unsafe_allow_html=True)
+    k1.markdown("<div class='kpi'>Active SKUs</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Avg Inventory Level</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Shortage Incidents</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Pileup Incidents</div>", unsafe_allow_html=True)
+    k5.markdown("<div class='kpi'>Service Level</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="section-title">Who Should Use This</div>', unsafe_allow_html=True)
     st.markdown(
@@ -596,12 +592,15 @@ with tab3:
     service_level = 1 - (
         df_f["Backorder_Qty"].gt(0).mean() if "Backorder_Qty" in df_f.columns else 0
     )
-
+    # Prepare safe display values
+    avg_inv_disp = f"{avg_inv:.1f}" if avg_inv is not None and not np.isnan(avg_inv) else "N/A"
+    service_level_disp = f"{service_level*100:.1f}%" if service_level is not None else "N/A"
+    
     k1.markdown(f"<div class='kpi'>Active SKUs<span class='kpi-value'>{int(active_skus)}</span></div>", unsafe_allow_html=True)
-    k2.markdown(f"<div class='kpi'>Avg Inventory<span class='kpi-value'>{avg_inv:.1f if not np.isnan(avg_inv) else 'N/A'}</span></div>", unsafe_allow_html=True)
+    k2.markdown(f"<div class='kpi'>Avg Inventory<span class='kpi-value'>{avg_inv_disp}</span></div>", unsafe_allow_html=True)
     k3.markdown(f"<div class='kpi'>Shortage Events<span class='kpi-value'>{int(shortage_events)}</span></div>", unsafe_allow_html=True)
     k4.markdown(f"<div class='kpi'>Pileup Events<span class='kpi-value'>{int(pileup_events)}</span></div>", unsafe_allow_html=True)
-    k5.markdown(f"<div class='kpi'>Service Level<span class='kpi-value'>{service_level*100:.1f}%</span></div>", unsafe_allow_html=True)
+    k5.markdown(f"<div class='kpi'>Service Level<span class='kpi-value'>{service_level_disp}</span></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
     # CORE EDA CHARTS
