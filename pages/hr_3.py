@@ -253,7 +253,7 @@ with tabs[0]:
 # ---------------------------------------------------------
 # APPLICATION TAB
 # ---------------------------------------------------------
-with tabs[1]:
+with tabs[2]:
     st.header("Application")
     st.markdown("#### Step 1 — Load dataset")
 
