@@ -369,29 +369,24 @@ with tab_overview:
             unsafe_allow_html=True,
         )
 
-    st.markdown("#### KPIs (conceptual)")
+    st.markdown("#### KPIs")
     st.markdown(
         """
         <div class="kpi-row">
             <div class="kpi-card">
                 <div class="kpi-label">Applicants</div>
-                <div class="kpi-value">—</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Screen Pass %</div>
-                <div class="kpi-value">—</div>
-            </div>
+                </div>
             <div class="kpi-card">
                 <div class="kpi-label">Interview Rate</div>
-                <div class="kpi-value">—</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Offer Rate</div>
-                <div class="kpi-value">—</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Time-to-Fill (days)</div>
-                <div class="kpi-value">—</div>
             </div>
         </div>
         """,
