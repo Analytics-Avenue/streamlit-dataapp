@@ -388,9 +388,6 @@ with tab_overview:
 with tab_dict:
     st.markdown("### Required Columns & Data Dictionary")
 
-
-    st.dataframe(dd_df, use_container_width=True)
-
     st.markdown("---")
 
     # ---- SPLIT VIEW: Independent (Left) vs Dependent (Right) ----
