@@ -672,17 +672,19 @@ with tab_dict:
     st.header("Data Dictionary & Variables")
 
     # ------------------------------
-    # Tabular Data Dictionary
-    # ------------------------------
+    # Tabular Data Dictionary (2 columns only)
     st.markdown("<div class='section-title'>Required Columns (Tabular Format)</div>", unsafe_allow_html=True)
-
-    dict_df = pd.DataFrame(DATA_DICTIONARY, columns=["Column Name", "Description"])
+    
+    dict_df = pd.DataFrame(
+        [(col, desc) for col, desc, _cat in DATA_DICTIONARY],   # keep only first 2 values
+        columns=["Column Name", "Description"]
+    )
+    
     dict_df["Mandatory"] = "Yes"
-
+    
     st.dataframe(dict_df, use_container_width=True)
     download_csv(dict_df, "warehouse_data_dictionary.csv", "Download Data Dictionary")
 
-    # ------------------------------
     # Independent vs Dependent Variables (Card Layout)
     # ------------------------------
 
