@@ -167,9 +167,8 @@ footer {visibility: hidden;}
 
 # ---------------------------------------------------------
 # LOGO + TITLE
+# ---------------------------------------------------------
 st.markdown("")
-# Header & Logo
-# -------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 st.markdown(f"""
 <div style="display: flex; align-items: center; margin-bottom:16px;">
@@ -184,8 +183,6 @@ st.markdown(f"""
 st.markdown("<div class='big-header'>Hiring Funnel Drop-Off Analysis • TA & People Analytics</div>", unsafe_allow_html=True)
 
 
-
-
 # ---------------------------------------------------------
 # HELPERS
 # ---------------------------------------------------------
@@ -194,6 +191,7 @@ def download_df(df, filename, button_label="Download CSV", key=None):
     b.write(df.to_csv(index=False).encode("utf-8"))
     b.seek(0)
     st.download_button(button_label, b, file_name=filename, mime="text/csv", key=key)
+
 
 def read_csv_safe(url_or_file):
     """Read CSV and make duplicate columns unique with __dup suffix."""
@@ -213,6 +211,7 @@ def read_csv_safe(url_or_file):
         df.columns = new_cols
     df.columns = [str(c).strip() for c in df.columns]
     return df
+
 
 def canonicalize_columns(df, expected_cols):
     """Rename dup versions back to canonical if matched logically."""
@@ -238,10 +237,12 @@ def canonicalize_columns(df, expected_cols):
     df.columns = [str(c).strip() for c in df.columns]
     return df
 
+
 def safe_to_datetime(df, col):
     if col in df.columns:
         df[col] = pd.to_datetime(df[col], errors="coerce")
     return df
+
 
 # ---------------------------------------------------------
 # EXPECTED / CANONICAL COLUMNS
@@ -265,17 +266,16 @@ EXPECTED_COLS = [
     "Recruiter_ID",
     "JD_Variant",
     "Channel",
-    "Candidate_Response_Time_Hrs"
+    "Candidate_Response_Time_Hrs",
 ]
 
 DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/hr/hiring_funnel_data.csv"
 
-
 dict_rows = [
-    {"Column": "Applicant_ID",  "Description": "Unique candidate identifier"},
-    {"Column": "Apply_Date",  "Description": "Date when candidate applied"},
-    {"Column": "Source",  "Description": "Source of the candidate"},
-    {"Column": "Role",  "Description": "Role / position applied for"},
+    {"Column": "Applicant_ID", "Description": "Unique candidate identifier"},
+    {"Column": "Apply_Date", "Description": "Date when candidate applied"},
+    {"Column": "Source", "Description": "Source of the candidate"},
+    {"Column": "Role", "Description": "Role / position applied for"},
     {"Column": "Stage_Apply", "Description": "Application timestamp/flag"},
     {"Column": "Stage_Screen", "Description": "Screening stage timestamp/flag"},
     {"Column": "Stage_Interview", "Description": "Interview stage timestamp/flag"},
@@ -292,7 +292,6 @@ dict_rows = [
     {"Column": "Channel", "Description": "Channel bucket (direct/agency/etc.)"},
     {"Column": "Candidate_Response_Time_Hrs", "Description": "Candidate response time"},
 ]
-
 
 dict_rows1 = [
     {"Column": "Applicant_ID", "Type": "ID", "Role": "Identifier", "Description": "Unique candidate identifier"},
@@ -415,23 +414,18 @@ with tab_overview:
 with tab_dict:
     st.markdown("### Required Columns & Data Dictionary")
 
-    # Convert dict_rows to DataFrame
     dd_df = pd.DataFrame(dict_rows)
     dd_df1 = pd.DataFrame(dict_rows1)
 
     st.dataframe(dd_df, use_container_width=True)
     download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
 
-
     st.markdown("---")
 
-    
-    # ---- SPLIT VIEW: Independent (Left) vs Dependent (Right) ----
     st.markdown("### Variables by Role (Independent vs Dependent)")
 
     left, right = st.columns(2)
 
-    # -------- LEFT: Independent Variables --------
     with left:
         st.markdown("#### Independent Variables")
         for _, row in dd_df1[dd_df1["Role"] == "Independent"].iterrows():
@@ -444,7 +438,6 @@ with tab_dict:
                 unsafe_allow_html=True,
             )
 
-    # -------- RIGHT: Dependent Variables --------
     with right:
         st.markdown("#### Dependent Variables")
         for _, row in dd_df1[dd_df1["Role"] == "Dependent"].iterrows():
@@ -457,8 +450,6 @@ with tab_dict:
                 unsafe_allow_html=True,
             )
 
-
-    
 # =========================================================
 # TAB 3 — APPLICATION
 # =========================================================
@@ -474,6 +465,7 @@ with tab_app:
 
     df = None
 
+    # ----------------- LOAD DATA -----------------
     if mode == "Default dataset (GitHub URL)":
         try:
             df = read_csv_safe(DEFAULT_URL)
@@ -500,20 +492,28 @@ with tab_app:
                 if c in df.columns:
                     df[c] = pd.to_datetime(df[c], errors="coerce")
 
-            # Fix alternative join column names
-            for alt in ["Joined_Date", "Joining_Date", "Date_Joined", "JoinedOn"]:
-                if alt in df.columns:
-                    df = df.rename(columns={alt: "Stage_Join"})
-
-
             # Offer_Accepted_Flag to 0/1 if text
             if "Offer_Accepted_Flag" in df.columns:
-                df["Offer_Accepted_Flag"] = df["Offer_Accepted_Flag"].astype(str).str.lower().map(
-                    {
-                        "accepted": 1, "yes": 1, "1": 1, "joined": 1, "join": 1,
-                        "declined": 0, "rejected": 0, "no": 0, "0": 0
-                    }
-                ).fillna(0).astype(int)
+                df["Offer_Accepted_Flag"] = (
+                    df["Offer_Accepted_Flag"]
+                    .astype(str)
+                    .str.lower()
+                    .map(
+                        {
+                            "accepted": 1,
+                            "yes": 1,
+                            "1": 1,
+                            "joined": 1,
+                            "join": 1,
+                            "declined": 0,
+                            "rejected": 0,
+                            "no": 0,
+                            "0": 0,
+                        }
+                    )
+                    .fillna(0)
+                    .astype(int)
+                )
 
             # derive Total_Time_to_Hire_Days if join is present
             if "Apply_Date" in df.columns and "Stage_Join" in df.columns:
@@ -522,7 +522,7 @@ with tab_app:
             # derive Current_Stage if missing
             if "Current_Stage" not in df.columns:
                 def get_stage(row):
-                    if pd.notna(row.get("Stage_Join", None)):
+                    if "Stage_Join" in row and pd.notna(row.get("Stage_Join")):
                         return "Join"
                     if "Stage_Offer" in row and pd.notna(row.get("Stage_Offer")):
                         return "Offer"
@@ -533,6 +533,7 @@ with tab_app:
                     if "Apply_Date" in row and pd.notna(row.get("Apply_Date")):
                         return "Apply"
                     return "Apply"
+
                 df["Current_Stage"] = df.apply(get_stage, axis=1)
 
             st.success("Default dataset loaded from GitHub.")
@@ -571,7 +572,7 @@ with tab_app:
             mapping = {}
             cols_list = list(raw.columns)
             for key in EXPECTED_COLS:
-                mapping[key] = st.selectbox(f"Map → {key}", ["-- Skip --"] + cols_list, key=f"map_{key}")
+                mapping[key] = st.selectbox(f"Map → {key}", ["-- Skip --" + ""] + cols_list, key=f"map_{key}")
 
             if st.button("Apply mapping and continue", key="apply_map_btn"):
                 rename_map = {v: k for k, v in mapping.items() if v != "-- Skip --"}
@@ -588,14 +589,12 @@ with tab_app:
     if df is None:
         st.stop()
 
-    # basic cleanup
+    # ----------------- BASIC CLEANUP -----------------
     df.columns = [str(c).strip() for c in df.columns]
 
-    # ensure Apply_Date-like column
     if "Apply_Date" in df.columns:
         df = safe_to_datetime(df, "Apply_Date")
 
-    # numeric conversions
     for c in ["Total_Time_to_Hire_Days", "Screen_Score", "Resume_Score",
               "Days_in_Stage", "Candidate_Response_Time_Hrs"]:
         if c in df.columns:
@@ -619,11 +618,9 @@ with tab_app:
 
     # Date column detection
     date_col = None
-    # prefer Apply_Date
     if "Apply_Date" in df.columns:
         date_col = "Apply_Date"
     else:
-        # fallback: first datetime
         for c in df.columns:
             if np.issubdtype(df[c].dtype, np.datetime64):
                 date_col = c
@@ -650,7 +647,6 @@ with tab_app:
         date_range = None
 
     # filter columns
-    # guess role, source, JD, channel columns
     role_col = None
     source_col = None
     jd_col = None
@@ -714,14 +710,10 @@ with tab_app:
     # =====================================================
     st.markdown("### Funnel Metrics")
 
-    # compute stage counts
     def infer_stage_counts(df_):
-        # if Current_Stage present
         if "Current_Stage" in df_.columns:
             return df_["Current_Stage"].value_counts().to_dict()
-        counts = {}
-        # fallback: presence of stage timestamps
-        counts["Apply"] = len(df_)
+        counts = {"Apply": len(df_)}
         for stage, col in [
             ("Screen", "Stage_Screen"),
             ("Interview", "Stage_Interview"),
@@ -741,7 +733,6 @@ with tab_app:
         "Count": [stage_counts.get(s, 0) for s in funnel_order]
     })
 
-    # funnel chart
     fig_funnel = px.bar(
         funnel_df, x="Stage", y="Count", text="Count",
         title="Applicants by Funnel Stage"
@@ -750,7 +741,6 @@ with tab_app:
     fig_funnel.update_layout(title_x=0.02)
     st.plotly_chart(fig_funnel, use_container_width=True)
 
-    # conversions
     st.markdown("#### Stage-to-Stage Conversion")
     conv_rows = []
     prev_stage = None
@@ -786,7 +776,6 @@ with tab_app:
     else:
         st.info("Not enough data to compute conversion rates.")
 
-    # high-level KPIs from filtered data
     st.markdown("#### KPI Snapshot (Filtered)")
     total_apps = len(filt)
     screen_cnt = stage_counts.get("Screen", 0)
@@ -837,14 +826,12 @@ with tab_app:
     # =====================================================
     st.markdown("### Visualisations")
 
-    # Applications over time
     if date_col and date_col in filt.columns:
         apps_ts = filt.set_index(date_col).resample("D").size().reset_index(name="Applications")
         if not apps_ts.empty:
             fig_apps = px.line(apps_ts, x=date_col, y="Applications", title="Daily Applications (filtered)", markers=True)
             st.plotly_chart(fig_apps, use_container_width=True)
 
-    # Source vs current stage
     st.markdown("#### Source vs Current Stage")
     if source_col and "Current_Stage" in filt.columns:
         src_stage = filt.groupby([source_col, "Current_Stage"]).size().reset_index(name="count")
@@ -860,7 +847,6 @@ with tab_app:
     else:
         st.info("Source or Current_Stage column missing for this view.")
 
-    # Time-to-hire distribution
     st.markdown("#### Time-to-Hire Distribution")
     if "Total_Time_to_Hire_Days" in filt.columns:
         fig_hist = px.histogram(filt, x="Total_Time_to_Hire_Days", nbins=30, title="Total Time-to-Hire (days)")
@@ -869,7 +855,6 @@ with tab_app:
             fig_box = px.box(filt, x=role_col, y="Total_Time_to_Hire_Days", title="Time-to-Hire by Role")
             st.plotly_chart(fig_box, use_container_width=True)
 
-    # Cohort overview
     st.markdown("#### Cohort Overview (Monthly)")
     if date_col:
         cohort = filt.copy()
@@ -896,13 +881,11 @@ with tab_app:
     st.markdown("---")
     st.markdown("### Step 3 — AutoML: Drop-off Risk Prediction")
 
-    # Build binary target: Dropped (1) vs Joined (0)
     target = None
     if "Stage_Join" in filt.columns:
         dropped_flag = filt["Stage_Join"].isna().astype(int)
         target = dropped_flag
     elif "Offer_Accepted_Flag" in filt.columns:
-        # treat non-accepted as drop
         target = (1 - filt["Offer_Accepted_Flag"].astype(int)).clip(0, 1)
     else:
         target = None
@@ -910,7 +893,6 @@ with tab_app:
     if target is None or target.nunique() < 2 or len(filt) < 80:
         st.info("Not enough labelled data for drop-off prediction (need Stage_Join or Offer_Accepted_Flag with 0/1 and ≥80 rows).")
     else:
-        # Features
         feature_candidates = [
             "Screen_Score",
             "Resume_Score",
@@ -943,12 +925,10 @@ with tab_app:
             X = base_X.fillna(0)
             y = target.values
 
-            # Train/test split
             X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
                 X, y, X.index, test_size=0.25, random_state=42, stratify=y if y.sum() > 0 else None
             )
 
-            # Preprocess: impute + scale
             imputer = SimpleImputer(strategy="median")
             scaler = StandardScaler()
 
@@ -966,7 +946,6 @@ with tab_app:
 
             results = []
 
-            # Logistic Regression
             if model_choice in ["Logistic Regression", "Both (compare)"]:
                 log_reg = LogisticRegression(max_iter=1000)
                 log_reg.fit(X_train_scaled, y_train)
@@ -976,7 +955,6 @@ with tab_app:
                 auc_lr = roc_auc_score(y_test, prob_lr) if len(np.unique(y_test)) == 2 else np.nan
                 results.append(("Logistic Regression", acc_lr, auc_lr, prob_lr, log_reg))
 
-            # RandomForest
             if model_choice in ["Random Forest", "Both (compare)"]:
                 rf = RandomForestClassifier(
                     n_estimators=200,
@@ -985,14 +963,13 @@ with tab_app:
                     min_samples_split=4,
                     min_samples_leaf=2,
                 )
-                rf.fit(X_train_imp, y_train)  # RF can work on unscaled
+                rf.fit(X_train_imp, y_train)
                 prob_rf = rf.predict_proba(X_test_imp)[:, 1]
                 pred_rf = (prob_rf >= 0.5).astype(int)
                 acc_rf = accuracy_score(y_test, pred_rf)
                 auc_rf = roc_auc_score(y_test, prob_rf) if len(np.unique(y_test)) == 2 else np.nan
                 results.append(("Random Forest", acc_rf, auc_rf, prob_rf, rf))
 
-            # Show comparison
             st.markdown("#### Model performance (test set)")
             perf_rows = []
             for name, acc_, auc_, _, _ in results:
@@ -1004,7 +981,6 @@ with tab_app:
             if perf_rows:
                 st.dataframe(pd.DataFrame(perf_rows), use_container_width=True)
 
-            # choose best model by AUC then accuracy
             best_name, best_model, best_probs = None, None, None
             if results:
                 best = sorted(
@@ -1015,7 +991,6 @@ with tab_app:
                 best_name, best_acc, best_auc, best_probs, best_model = best
                 st.success(f"Best model (by AUC then Accuracy): {best_name} | Acc: {best_acc:.3f}, AUC: {best_auc:.3f}")
 
-            # Build risk table
             if best_model is not None:
                 full_imp = imputer.transform(X)
                 if isinstance(best_model, LogisticRegression):
@@ -1046,7 +1021,6 @@ with tab_app:
                 st.dataframe(top_risk, use_container_width=True)
                 download_df(risk_df, "candidate_dropoff_risk_scores.csv", "Download full risk scores", key="dl_risk")
 
-                # Feature importance for RF
                 if isinstance(best_model, RandomForestClassifier):
                     feat_imp = pd.DataFrame({
                         "Feature": X.columns,
@@ -1077,8 +1051,7 @@ with tab_app:
     eff_conv = base_conv * conv_factor if base_conv else 0
 
     if eff_conv <= 0:
-    st.warning("No joins in filtered data. Using placeholder conversion rate of 5%.")
-    eff_conv = 0.05   # default assumed conversion
+        st.info("Base apply→join conversion could not be computed (no data). Simulator will skip.")
     else:
         expected_days = target_joins / (daily_apps * eff_conv)
         expected_weeks = expected_days / 7
@@ -1107,11 +1080,10 @@ with tab_app:
         base_anom = filt[numeric_for_anomaly].copy()
         base_anom = base_anom.replace([np.inf, -np.inf], np.nan).fillna(base_anom.median())
 
-        # Isolation Forest
         iso = IsolationForest(contamination=0.05, random_state=42)
         iso.fit(base_anom.values)
         scores = iso.decision_function(base_anom.values)
-        preds = iso.predict(base_anom.values)  # -1 anomaly, 1 normal
+        preds = iso.predict(base_anom.values)
 
         filt["_Anomaly_Score"] = scores
         filt["_Is_Anomaly"] = np.where(preds == -1, 1, 0)
@@ -1126,7 +1098,6 @@ with tab_app:
         st.dataframe(anom_df[cols_show], use_container_width=True)
         download_df(anom_df[cols_show], "hiring_anomalies.csv", "Download anomalies", key="dl_anom")
 
-        # Clustering
         st.markdown("#### Behavioural Clusters (KMeans)")
         k = st.slider("Number of clusters (K)", 2, 6, 3, 1)
         scaler_cl = StandardScaler()
@@ -1145,8 +1116,6 @@ with tab_app:
         st.dataframe(cluster_summary, use_container_width=True)
         download_df(cluster_summary, "hiring_cluster_summary.csv", "Download cluster summary", key="dl_cluster")
 
-    # Final statement
-    # Final statement
     st.markdown(
         """
         <div class="card card-left">
@@ -1156,4 +1125,3 @@ with tab_app:
         """,
         unsafe_allow_html=True,
     )
-
