@@ -545,11 +545,19 @@ with tab3:
 
     k1.markdown(f"<div class='kpi'>Machines<div class='kpi-value'>{machines_count}</div></div>", unsafe_allow_html=True)
     k2.markdown(
-        f"<div class='kpi'>Avg Temperature<div class='kpi-value'>{avg_temp:.2f if avg_temp is not None else '--'}</div></div>",
+        avg_temp_display = f"{avg_temp:.2f}" if avg_temp is not None else "--"
+        k2.markdown(
+            f"<div class='kpi'>Avg Temperature<div class='kpi-value'>{avg_temp_display}</div></div>",
+            unsafe_allow_html=True
+        )
         unsafe_allow_html=True
     )
     k3.markdown(
-        f"<div class='kpi'>Avg Vibration<div class='kpi-value'>{avg_vib:.2f if avg_vib is not None else '--'}</div></div>",
+    avg_vib_display = f"{avg_vib:.2f}" if avg_vib is not None else "--"
+    k3.markdown(
+        f"<div class='kpi'>Avg Vibration<div class='kpi-value'>{avg_vib_display}</div></div>",
+        unsafe_allow_html=True
+    )
         unsafe_allow_html=True
     )
     k4.markdown(f"<div class='kpi'>Failure Events<div class='kpi-value'>{failures}</div></div>", unsafe_allow_html=True)
