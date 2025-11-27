@@ -145,7 +145,7 @@ def download_df(df, filename, label="Download CSV"):
 # ---------------------------------------------------------
 # Tabs
 # ---------------------------------------------------------
-tabs = st.tabs(["Overview", "Application", "Action Playbooks"])
+tabs = st.tabs(["Overview", "Data Dictionary", "Application", "Action Playbooks"])
 
 # ---------------------------------------------------------
 # OVERVIEW TAB
@@ -197,11 +197,58 @@ with tabs[0]:
       <b>How</b>: 1) Load dataset (default / upload). 2) Filter by vehicle / route / period. 3) Review top-delay & low-efficiency routes. 4) Export cost simulations, ML predictions & playbooks to drive execution.
     </div>
     """, unsafe_allow_html=True)
+# ---------------------------------------------------------
+# DATA DICTIONARY TAB
+# ---------------------------------------------------------
+with tabs[1]:
+    st.header("Data Dictionary")
+
+    st.markdown("""
+    <div class='card left-align'>
+    This section defines all required and optional fields for the Route Optimization dataset.  
+    Use this as a reference when preparing CSV files or mapping uploaded datasets.
+    </div>
+    """, unsafe_allow_html=True)
+
+    data_dict = [
+        ["Timestamp", "Datetime", "Trip start timestamp, used for time-series trend analysis."],
+        ["Vehicle_ID", "Categorical", "Unique identifier of the vehicle."],
+        ["Vehicle_Type", "Categorical", "Type/category of the vehicle (e.g., Van, Truck, 2W)."],
+        ["Route_ID", "Categorical", "Unique route identifier for grouping trips."],
+        ["Start_City", "Categorical", "Origin city/location of the route."],
+        ["End_City", "Categorical", "Destination city/location of the route."],
+        ["Route_Distance_km", "Numeric", "Total distance of the route in kilometers."],
+        ["Traffic_Level", "Categorical", "Traffic condition (Low, Medium, High)."],
+        ["Weather_Condition", "Categorical", "Weather during trip (Clear, Rain, Fog, Storm)."],
+        
+        ["Predicted_Travel_Hours", "Numeric", "ML-generated expected travel time."],
+        ["Actual_Travel_Hours", "Numeric", "Actual recorded travel time."],
+        
+        ["Predicted_Fuel_Liters", "Numeric", "ML-predicted fuel consumption."],
+        ["Actual_Fuel_Liters", "Numeric", "Actual consumed fuel in liters."],
+        
+        ["Load_Weight_kg", "Numeric", "Cargo weight in kilograms."],
+        ["Vehicle_Capacity_kg", "Numeric", "Maximum load capacity of the vehicle."],
+        
+        ["Delay_Hours", "Numeric", "Difference between expected vs actual arrival time."],
+        
+        ["Efficiency_Score", "Numeric", "Derived metric: travel & fuel efficiency combined."],
+        ["Fuel_L_per_km", "Numeric (derived)", "Fuel burned per km. Auto-computed if missing."],
+        
+        ["_is_anomaly", "Binary (derived)", "IsolationForest flag: 1=anomaly trip, 0=normal."],
+    ]
+
+    df_dict = pd.DataFrame(data_dict, columns=["Column", "Type", "Description"])
+    st.dataframe(df_dict, use_container_width=True)
+
+    st.markdown("#### Download Data Dictionary")
+    csv_dd = df_dict.to_csv(index=False).encode("utf-8")
+    st.download_button("Download Data Dictionary CSV", csv_dd, "route_data_dictionary.csv", "text/csv")
 
 # ---------------------------------------------------------
 # APPLICATION TAB
 # ---------------------------------------------------------
-with tabs[1]:
+with tabs[2]:
     st.header("Application")
     st.markdown("### Step 1 — Load dataset")
 
@@ -751,7 +798,7 @@ with tabs[1]:
 # ---------------------------------------------------------
 # ACTION PLAYBOOKS TAB
 # ---------------------------------------------------------
-with tabs[2]:
+with tabs[3]:
     st.header("Action Playbooks")
 
     if "filt" not in locals() or filt is None or len(filt) == 0:
