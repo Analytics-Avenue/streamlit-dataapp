@@ -1,5 +1,3 @@
-# inventory_pileup_shortage_analytics_lab.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -317,7 +315,7 @@ if "base_df" not in st.session_state:
 # -------------------------
 # TABS
 # -------------------------
-tab1, tab2, tab3 = st.tabs(["Overview", "Data Dictionary", "Application"])
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # =======================================================
 # TAB 1: OVERVIEW
