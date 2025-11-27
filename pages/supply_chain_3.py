@@ -685,14 +685,14 @@ with tab_dict:
     st.dataframe(dict_df, use_container_width=True)
     download_csv(dict_df, "warehouse_data_dictionary.csv", "Download Data Dictionary")
 
-    # Independent vs Dependent Variables (Card Layout)
-    # ------------------------------
-
+    # ---------------------------------------
+    # Independent vs Dependent Variables
+    # ---------------------------------------
     st.markdown("<div class='section-title'>Independent vs Dependent Variables</div>", unsafe_allow_html=True)
-
+    
     c_ind, c_dep = st.columns(2)
-
-    # Independent variables card
+    
+    # LEFT: Independent Variables
     with c_ind:
         st.markdown("""
         <div class='card'>
@@ -700,13 +700,36 @@ with tab_dict:
             <div class='small'>These variables act as features or drivers in ML and analytics models.</div>
             <hr style="margin:8px 0;">
         """, unsafe_allow_html=True)
-
-        for col in INDEPENDENT_VARS:
-            st.markdown(f"<div class='small'>• {col}</div>", unsafe_allow_html=True)
-
+    
+        independent_vars = [
+            "Warehouse",
+            "Zone",
+            "Aisle",
+            "Bin",
+            "Order_Timestamp",
+            "Shift",
+            "Picker_ID",
+            "SKU",
+            "SKU_Weight_KG",
+            "SKU_Cube_M3",
+            "SKU_Class",
+            "Pick_Qty",
+            "Travel_Distance_M",
+            "Travel_Time_Sec",
+            "Heatmap_Level",
+            "Slotting_Score",
+            "Equipment_Type",
+            "Congestion_Factor",
+            "Delay_Reason"
+        ]
+    
+        for col in independent_vars:
+            st.markdown(f"<div class='variable-box'>{col}</div>", unsafe_allow_html=True)
+    
         st.markdown("</div>", unsafe_allow_html=True)
-
-    # Dependent variables card
+    
+    
+    # RIGHT: Dependent Variables
     with c_dep:
         st.markdown("""
         <div class='card'>
@@ -714,14 +737,21 @@ with tab_dict:
             <div class='small'>These variables represent the output or values being predicted.</div>
             <hr style="margin:8px 0;">
         """, unsafe_allow_html=True)
-
-        for col in DEPENDENT_VARS:
-            st.markdown(f"<div class='small'>• {col}</div>", unsafe_allow_html=True)
-
+    
+        dependent_vars = [
+            "Pick_Time_Sec",
+            "Delay_Minutes",
+            "Picker_Productivity_Items_Hour",
+            "Pack_Time_Sec"
+        ]
+    
+        for col in dependent_vars:
+            st.markdown(f"<div class='variable-box'>{col}</div>", unsafe_allow_html=True)
+    
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='subtle'>This section helps you map custom datasets correctly and understand model inputs/outputs.</div>", unsafe_allow_html=True)
 
+    
 # ---------------------------------------------------------
 # ACTIONABLE PLAYBOOKS TAB
 # ---------------------------------------------------------
