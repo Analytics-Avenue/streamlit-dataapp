@@ -189,7 +189,7 @@ DEPENDENT_VARS = [
 # TABS
 # ---------------------------------------------------------
 tab_overview, tab_dict, tab_app, tab_play = st.tabs(
-    ["Overview", "Data Dictionary", "Application", "Actionable Playbooks"]
+    ["Overview", "Important Attributes", "Application", "Actionable Playbooks"]
 )
 
 # ---------------------------------------------------------
@@ -673,7 +673,7 @@ with tab_dict:
 
     # ------------------------------
     # Tabular Data Dictionary (2 columns only)
-    st.markdown("<div class='section-title'>Required Columns (Tabular Format)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Required Columns</div>", unsafe_allow_html=True)
     
     dict_df = pd.DataFrame(
         [(col, desc) for col, desc, _cat in DATA_DICTIONARY],   # keep only first 2 values
@@ -688,14 +688,8 @@ with tab_dict:
     # ---------------------------------------
     # ---------------------------------------
     # Independent vs Dependent Variables
-    # ---------------------------------------
-    st.markdown("<div class='section-title'>Independent vs Dependent Variables</div>", unsafe_allow_html=True)
     
     left_col, right_col = st.columns(2)
-    
-    # ---------------------------------------
-    # Independent Variables (each in a separate card)
-    # ---------------------------------------
     with left_col:
         st.markdown("<h4 style='margin-bottom:6px;'>Independent Variables</h4>", unsafe_allow_html=True)
     
