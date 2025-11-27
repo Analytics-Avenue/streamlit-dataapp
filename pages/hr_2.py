@@ -144,7 +144,7 @@ st.markdown(
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
-tab_overview, tab_app, tab_dict = st.tabs(["Overview",  "Important Attributes", "Application"])
+tab_overview, tab_dict, tab_app = st.tabs(["Overview",  "Important Attributes", "Application"])
 
 # =========================================================
 # TAB 1: OVERVIEW
