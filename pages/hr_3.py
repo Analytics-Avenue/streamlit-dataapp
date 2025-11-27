@@ -20,8 +20,7 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Skill Gap & Training Needs — Analytics",
-    layout="wide",
-    page_icon="📊"
+    layout="wide"
 )
 
 # ---------------------------------------------------------
@@ -174,7 +173,7 @@ EXPECTED_COLS = [
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
-tabs = st.tabs(["Overview", "Application", "Data Dictionary"])
+tabs = st.tabs(["Overview",  "Data Dictionary", "Application"])
 
 # ---------------------------------------------------------
 # OVERVIEW TAB
@@ -793,7 +792,7 @@ with tabs[1]:
 # ---------------------------------------------------------
 # DATA DICTIONARY TAB
 # ---------------------------------------------------------
-with tabs[2]:
+with tabs[1]:
     st.markdown("### Data Dictionary")
     base_df = st.session_state.get("skillgap_df", None)
 
@@ -801,9 +800,7 @@ with tabs[2]:
         st.info("No dataset loaded yet. Load a dataset from the Application tab first.")
     else:
         dd = pd.DataFrame({
-            "Column": base_df.columns,
-            "Dtype": [str(base_df[c].dtype) for c in base_df.columns],
-            "Non-null Count": [int(base_df[c].notna().sum()) for c in base_df.columns]
+            "Column": base_df.columns
         })
 
         # simple guessed descriptions for known fields
