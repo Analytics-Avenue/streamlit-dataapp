@@ -115,7 +115,7 @@ st.markdown("""
 }
 .kpi-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(6,75,134,0.22);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
     border-color: rgba(6,75,134,0.35);
 }
 .kpi-label {
@@ -182,7 +182,6 @@ st.markdown(f"""
 
 st.markdown("<div class='big-header'>Hiring Funnel Drop-Off Analysis • TA & People Analytics</div>", unsafe_allow_html=True)
 
-
 # ---------------------------------------------------------
 # HELPERS
 # ---------------------------------------------------------
@@ -191,7 +190,6 @@ def download_df(df, filename, button_label="Download CSV", key=None):
     b.write(df.to_csv(index=False).encode("utf-8"))
     b.seek(0)
     st.download_button(button_label, b, file_name=filename, mime="text/csv", key=key)
-
 
 def read_csv_safe(url_or_file):
     """Read CSV and make duplicate columns unique with __dup suffix."""
@@ -211,7 +209,6 @@ def read_csv_safe(url_or_file):
         df.columns = new_cols
     df.columns = [str(c).strip() for c in df.columns]
     return df
-
 
 def canonicalize_columns(df, expected_cols):
     """Rename dup versions back to canonical if matched logically."""
@@ -237,12 +234,10 @@ def canonicalize_columns(df, expected_cols):
     df.columns = [str(c).strip() for c in df.columns]
     return df
 
-
 def safe_to_datetime(df, col):
     if col in df.columns:
         df[col] = pd.to_datetime(df[col], errors="coerce")
     return df
-
 
 # ---------------------------------------------------------
 # EXPECTED / CANONICAL COLUMNS
@@ -266,16 +261,16 @@ EXPECTED_COLS = [
     "Recruiter_ID",
     "JD_Variant",
     "Channel",
-    "Candidate_Response_Time_Hrs",
+    "Candidate_Response_Time_Hrs"
 ]
 
 DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/hr/hiring_funnel_data.csv"
 
 dict_rows = [
-    {"Column": "Applicant_ID", "Description": "Unique candidate identifier"},
-    {"Column": "Apply_Date", "Description": "Date when candidate applied"},
-    {"Column": "Source", "Description": "Source of the candidate"},
-    {"Column": "Role", "Description": "Role / position applied for"},
+    {"Column": "Applicant_ID",  "Description": "Unique candidate identifier"},
+    {"Column": "Apply_Date",  "Description": "Date when candidate applied"},
+    {"Column": "Source",  "Description": "Source of the candidate"},
+    {"Column": "Role",  "Description": "Role / position applied for"},
     {"Column": "Stage_Apply", "Description": "Application timestamp/flag"},
     {"Column": "Stage_Screen", "Description": "Screening stage timestamp/flag"},
     {"Column": "Stage_Interview", "Description": "Interview stage timestamp/flag"},
@@ -421,11 +416,9 @@ with tab_dict:
     download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
 
     st.markdown("---")
-
     st.markdown("### Variables by Role (Independent vs Dependent)")
 
     left, right = st.columns(2)
-
     with left:
         st.markdown("#### Independent Variables")
         for _, row in dd_df1[dd_df1["Role"] == "Independent"].iterrows():
@@ -433,6 +426,7 @@ with tab_dict:
                 f"""
                 <div class='card card-left'>
                     <b>{row['Column']}</b>
+                    <br><span style="font-size:12px; opacity:0.8;">{row['Type']} • {row['Description']}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -445,6 +439,7 @@ with tab_dict:
                 f"""
                 <div class='card card-left'>
                     <b>{row['Column']}</b>
+                    <br><span style="font-size:12px; opacity:0.8;">{row['Type']} • {row['Description']}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -465,13 +460,11 @@ with tab_app:
 
     df = None
 
-    # ----------------- LOAD DATA -----------------
     if mode == "Default dataset (GitHub URL)":
         try:
             df = read_csv_safe(DEFAULT_URL)
             df = canonicalize_columns(df, EXPECTED_COLS)
 
-            # simple auto-mapping for some common column names
             auto_map = {
                 "Job_Role": "Role",
                 "Applied_Date": "Apply_Date",
@@ -487,39 +480,21 @@ with tab_app:
             if rename_dict:
                 df = df.rename(columns=rename_dict)
 
-            # parse dates
             for c in ["Apply_Date", "Stage_Screen", "Stage_Interview", "Stage_Offer", "Stage_Join"]:
                 if c in df.columns:
                     df[c] = pd.to_datetime(df[c], errors="coerce")
 
-            # Offer_Accepted_Flag to 0/1 if text
             if "Offer_Accepted_Flag" in df.columns:
-                df["Offer_Accepted_Flag"] = (
-                    df["Offer_Accepted_Flag"]
-                    .astype(str)
-                    .str.lower()
-                    .map(
-                        {
-                            "accepted": 1,
-                            "yes": 1,
-                            "1": 1,
-                            "joined": 1,
-                            "join": 1,
-                            "declined": 0,
-                            "rejected": 0,
-                            "no": 0,
-                            "0": 0,
-                        }
-                    )
-                    .fillna(0)
-                    .astype(int)
-                )
+                df["Offer_Accepted_Flag"] = df["Offer_Accepted_Flag"].astype(str).str.lower().map(
+                    {
+                        "accepted": 1, "yes": 1, "1": 1, "joined": 1, "join": 1,
+                        "declined": 0, "rejected": 0, "no": 0, "0": 0
+                    }
+                ).fillna(0).astype(int)
 
-            # derive Total_Time_to_Hire_Days if join is present
             if "Apply_Date" in df.columns and "Stage_Join" in df.columns:
                 df["Total_Time_to_Hire_Days"] = (df["Stage_Join"] - df["Apply_Date"]).dt.days
 
-            # derive Current_Stage if missing
             if "Current_Stage" not in df.columns:
                 def get_stage(row):
                     if "Stage_Join" in row and pd.notna(row.get("Stage_Join")):
@@ -533,7 +508,6 @@ with tab_app:
                     if "Apply_Date" in row and pd.notna(row.get("Apply_Date")):
                         return "Apply"
                     return "Apply"
-
                 df["Current_Stage"] = df.apply(get_stage, axis=1)
 
             st.success("Default dataset loaded from GitHub.")
@@ -572,7 +546,7 @@ with tab_app:
             mapping = {}
             cols_list = list(raw.columns)
             for key in EXPECTED_COLS:
-                mapping[key] = st.selectbox(f"Map → {key}", ["-- Skip --" + ""] + cols_list, key=f"map_{key}")
+                mapping[key] = st.selectbox(f"Map → {key}", ["-- Skip --"] + cols_list, key=f"map_{key}")
 
             if st.button("Apply mapping and continue", key="apply_map_btn"):
                 rename_map = {v: k for k, v in mapping.items() if v != "-- Skip --"}
@@ -589,7 +563,6 @@ with tab_app:
     if df is None:
         st.stop()
 
-    # ----------------- BASIC CLEANUP -----------------
     df.columns = [str(c).strip() for c in df.columns]
 
     if "Apply_Date" in df.columns:
@@ -616,7 +589,6 @@ with tab_app:
     st.markdown("---")
     st.markdown("### Step 2 — Filters & EDA")
 
-    # Date column detection
     date_col = None
     if "Apply_Date" in df.columns:
         date_col = "Apply_Date"
@@ -646,7 +618,6 @@ with tab_app:
     else:
         date_range = None
 
-    # filter columns
     role_col = None
     source_col = None
     jd_col = None
@@ -685,7 +656,6 @@ with tab_app:
     else:
         sel_chs = []
 
-    # apply filters
     filt = df.copy()
     if date_col and date_range is not None:
         start_dt = pd.to_datetime(date_range[0])
@@ -713,7 +683,8 @@ with tab_app:
     def infer_stage_counts(df_):
         if "Current_Stage" in df_.columns:
             return df_["Current_Stage"].value_counts().to_dict()
-        counts = {"Apply": len(df_)}
+        counts = {}
+        counts["Apply"] = len(df_)
         for stage, col in [
             ("Screen", "Stage_Screen"),
             ("Interview", "Stage_Interview"),
@@ -723,7 +694,7 @@ with tab_app:
             if col in df_.columns:
                 counts[stage] = int(df_[col].notna().sum())
             else:
-                counts[stage] = 0
+                counts[stage] = counts.get(stage, 0)
         return counts
 
     stage_counts = infer_stage_counts(filt)
@@ -773,8 +744,6 @@ with tab_app:
         )
         fig_conv.update_layout(yaxis_tickformat=".0%")
         st.plotly_chart(fig_conv, use_container_width=True)
-    else:
-        st.info("Not enough data to compute conversion rates.")
 
     st.markdown("#### KPI Snapshot (Filtered)")
     total_apps = len(filt)
@@ -791,7 +760,7 @@ with tab_app:
     k_screen = pct(screen_cnt, total_apps)
     k_intr = pct(intr_cnt, total_apps)
     k_offer = pct(offer_cnt, total_apps)
-    k_tth = ttH if ttH is not None and not math.isnan(ttH) else None
+    k_tth = ttH if ttH is not None and not math.isnan(ttH) else 0.0
 
     st.markdown(
         f"""
@@ -844,8 +813,6 @@ with tab_app:
             text="count"
         )
         st.plotly_chart(fig_src, use_container_width=True)
-    else:
-        st.info("Source or Current_Stage column missing for this view.")
 
     st.markdown("#### Time-to-Hire Distribution")
     if "Total_Time_to_Hire_Days" in filt.columns:
@@ -872,8 +839,6 @@ with tab_app:
             grp["Join_Rate_%"] = grp.apply(lambda r: (r["Joins"] / r["Applicants"] * 100.0) if r["Applicants"] else 0.0, axis=1)
             st.dataframe(grp, use_container_width=True)
             download_df(grp, "hiring_cohort_summary.csv", "Download cohort summary", key="dl_cohort")
-        else:
-            st.info("Not enough data for cohort summary.")
 
     # =====================================================
     # STEP 3 — AUTO ML & DROP-OFF PREDICTION
@@ -890,9 +855,7 @@ with tab_app:
     else:
         target = None
 
-    if target is None or target.nunique() < 2 or len(filt) < 80:
-        st.info("Not enough labelled data for drop-off prediction (need Stage_Join or Offer_Accepted_Flag with 0/1 and ≥80 rows).")
-    else:
+    if target is not None and target.nunique() >= 2 and len(filt) >= 20:
         feature_candidates = [
             "Screen_Score",
             "Resume_Score",
@@ -911,7 +874,7 @@ with tab_app:
         used_cats = [c for c in cat_candidates if c in filt.columns]
 
         if len(used_numeric) == 0 and len(used_cats) == 0:
-            st.info("No suitable feature columns found for ML.")
+            st.info("ML section: no suitable features available. Showing rest of analysis.")
         else:
             base_X = pd.DataFrame(index=filt.index)
 
@@ -925,9 +888,14 @@ with tab_app:
             X = base_X.fillna(0)
             y = target.values
 
-            X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
-                X, y, X.index, test_size=0.25, random_state=42, stratify=y if y.sum() > 0 else None
-            )
+            try:
+                X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
+                    X, y, X.index, test_size=0.25, random_state=42, stratify=y if y.sum() > 0 else None
+                )
+            except Exception:
+                X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
+                    X, y, X.index, test_size=0.25, random_state=42
+                )
 
             imputer = SimpleImputer(strategy="median")
             scaler = StandardScaler()
@@ -952,7 +920,10 @@ with tab_app:
                 prob_lr = log_reg.predict_proba(X_test_scaled)[:, 1]
                 pred_lr = (prob_lr >= 0.5).astype(int)
                 acc_lr = accuracy_score(y_test, pred_lr)
-                auc_lr = roc_auc_score(y_test, prob_lr) if len(np.unique(y_test)) == 2 else np.nan
+                try:
+                    auc_lr = roc_auc_score(y_test, prob_lr)
+                except Exception:
+                    auc_lr = float("nan")
                 results.append(("Logistic Regression", acc_lr, auc_lr, prob_lr, log_reg))
 
             if model_choice in ["Random Forest", "Both (compare)"]:
@@ -967,22 +938,23 @@ with tab_app:
                 prob_rf = rf.predict_proba(X_test_imp)[:, 1]
                 pred_rf = (prob_rf >= 0.5).astype(int)
                 acc_rf = accuracy_score(y_test, pred_rf)
-                auc_rf = roc_auc_score(y_test, prob_rf) if len(np.unique(y_test)) == 2 else np.nan
+                try:
+                    auc_rf = roc_auc_score(y_test, prob_rf)
+                except Exception:
+                    auc_rf = float("nan")
                 results.append(("Random Forest", acc_rf, auc_rf, prob_rf, rf))
 
-            st.markdown("#### Model performance (test set)")
-            perf_rows = []
-            for name, acc_, auc_, _, _ in results:
-                perf_rows.append({
-                    "Model": name,
-                    "Accuracy": round(acc_, 3),
-                    "ROC AUC": round(auc_, 3) if not math.isnan(auc_) else np.nan
-                })
-            if perf_rows:
+            if results:
+                st.markdown("#### Model performance (test set)")
+                perf_rows = []
+                for name, acc_, auc_, _, _ in results:
+                    perf_rows.append({
+                        "Model": name,
+                        "Accuracy": round(acc_, 3),
+                        "ROC AUC": round(auc_, 3) if not math.isnan(auc_) else np.nan
+                    })
                 st.dataframe(pd.DataFrame(perf_rows), use_container_width=True)
 
-            best_name, best_model, best_probs = None, None, None
-            if results:
                 best = sorted(
                     results,
                     key=lambda r: (0 if math.isnan(r[2]) else r[2], r[1]),
@@ -991,7 +963,6 @@ with tab_app:
                 best_name, best_acc, best_auc, best_probs, best_model = best
                 st.success(f"Best model (by AUC then Accuracy): {best_name} | Acc: {best_acc:.3f}, AUC: {best_auc:.3f}")
 
-            if best_model is not None:
                 full_imp = imputer.transform(X)
                 if isinstance(best_model, LogisticRegression):
                     full_scale = scaler.transform(full_imp)
@@ -1029,6 +1000,8 @@ with tab_app:
                     st.markdown("#### Top features (Random Forest importance)")
                     fig_imp = px.bar(feat_imp, x="Importance", y="Feature", orientation="h")
                     st.plotly_chart(fig_imp, use_container_width=True)
+    else:
+        st.info("Drop-off prediction model not trained (insufficient labelled target). Rest of the app still works.")
 
     # =====================================================
     # STEP 4 — SCHEDULING SIMULATOR
@@ -1036,9 +1009,17 @@ with tab_app:
     st.markdown("---")
     st.markdown("### Step 4 — Scheduling Simulator (Time-to-Fill)")
 
-    apply_cnt = funnel_df.loc[funnel_df["Stage"] == "Apply", "Count"].iloc[0] if not funnel_df.empty else 0
-    join_cnt = funnel_df.loc[funnel_df["Stage"] == "Join", "Count"].iloc[0] if not funnel_df.empty else 0
-    base_conv = join_cnt / apply_cnt if apply_cnt else 0
+    if not funnel_df.empty:
+        apply_cnt = funnel_df.loc[funnel_df["Stage"] == "Apply", "Count"].iloc[0]
+        join_cnt = funnel_df.loc[funnel_df["Stage"] == "Join", "Count"].iloc[0]
+    else:
+        apply_cnt = len(filt)
+        join_cnt = 0
+
+    if apply_cnt > 0 and join_cnt > 0:
+        base_conv = join_cnt / apply_cnt
+    else:
+        base_conv = 0.10  # default fallback conversion 10%
 
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -1048,46 +1029,23 @@ with tab_app:
     with c3:
         conv_factor = st.slider("Conversion uplift factor", 0.5, 1.5, 1.0, 0.05)
 
-    eff_conv = base_conv * conv_factor if base_conv else 0
-    # --- Fallback handling for missing join data ---
-    if base_conv == 0:
-        # If no join data, assume a default conversion rate (industry avg ~10–12%)
-        base_conv = 0.12
-    
     eff_conv = base_conv * conv_factor
-    
-    # Safety clamp
-    if eff_conv <= 0:
-        eff_conv = 0.10  # minimum viable conversion
-    
+    eff_conv = max(eff_conv, 0.001)
+
     expected_days = target_joins / (daily_apps * eff_conv)
     expected_weeks = expected_days / 7
-    
+
     st.markdown(
         f"""
         <div class="card card-left">
-        <b>Time-to-Fill Simulator (with fallback mode)</b><br>
-        Effective conversion used: <b>{eff_conv*100:.1f}%</b><br>
-        Expected time to close <b>{target_joins}</b> hires:<br>
-        <b>{expected_days:.1f} days</b> (~<b>{expected_weeks:.1f} weeks</b>)
+        Based on an effective apply→join conversion of 
+        <b>{eff_conv*100:.1f}%</b> and <b>{daily_apps}</b> applicants/day,
+        the estimated time-to-fill for <b>{target_joins}</b> hires is 
+        <b>{expected_days:.1f} days</b> (~<b>{expected_weeks:.1f} weeks</b>).
         </div>
         """,
         unsafe_allow_html=True,
     )
-    else:
-        expected_days = target_joins / (daily_apps * eff_conv)
-        expected_weeks = expected_days / 7
-        st.markdown(
-            f"""
-            <div class="card card-left">
-            With <b>{daily_apps}</b> applicants/day and an effective apply→join conversion of 
-            <b>{eff_conv*100:.1f}%</b>, you need approximately 
-            <b>{expected_days:.1f} days</b> (~<b>{expected_weeks:.1f} weeks</b>) to close 
-            <b>{target_joins}</b> hires for the current funnel behaviour.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
     # =====================================================
     # STEP 5 — ANOMALY DETECTION & CLUSTERING
@@ -1095,53 +1053,92 @@ with tab_app:
     st.markdown("---")
     st.markdown("### Step 5 — Anomaly Detection & Clustering")
 
-    numeric_for_anomaly = [c for c in ["Days_in_Stage", "Total_Time_to_Hire_Days", "Screen_Score", "Resume_Score", "Candidate_Response_Time_Hrs"] if c in filt.columns]
-    if len(numeric_for_anomaly) < 2 or len(filt) < 50:
-        st.info("Not enough numeric fields or rows for anomaly detection / clustering (need ≥2 numeric features and ≥50 rows).")
-    else:
-        base_anom = filt[numeric_for_anomaly].copy()
-        base_anom = base_anom.replace([np.inf, -np.inf], np.nan).fillna(base_anom.median())
+    base_numeric_cols = ["Days_in_Stage", "Total_Time_to_Hire_Days", "Screen_Score", "Resume_Score", "Candidate_Response_Time_Hrs"]
+    numeric_for_anomaly = [c for c in base_numeric_cols if c in filt.columns]
 
-        iso = IsolationForest(contamination=0.05, random_state=42)
-        iso.fit(base_anom.values)
-        scores = iso.decision_function(base_anom.values)
-        preds = iso.predict(base_anom.values)
+    if len(numeric_for_anomaly) == 0:
+        filt["_fallback_numeric"] = range(1, len(filt) + 1)
+        numeric_for_anomaly = ["_fallback_numeric"]
+    elif len(numeric_for_anomaly) == 1:
+        col = numeric_for_anomaly[0]
+        new_col = col + "_scaled"
+        vals = pd.to_numeric(filt[col], errors="coerce").fillna(filt[col].median())
+        filt[new_col] = vals.rank(method="average")
+        numeric_for_anomaly.append(new_col)
+
+    if len(filt) > 0:
+        base_anom = filt[numeric_for_anomaly].copy()
+        base_anom = base_anom.replace([np.inf, -np.inf], np.nan)
+        base_anom = base_anom.fillna(base_anom.median())
+
+        contamination = 0.05
+        if len(filt) < 20:
+            contamination = 0.15
+
+        try:
+            iso = IsolationForest(contamination=contamination, random_state=42)
+            iso.fit(base_anom.values)
+            scores = iso.decision_function(base_anom.values)
+            preds = iso.predict(base_anom.values)
+        except Exception:
+            scores = np.zeros(len(base_anom))
+            preds = np.ones(len(base_anom))
 
         filt["_Anomaly_Score"] = scores
         filt["_Is_Anomaly"] = np.where(preds == -1, 1, 0)
 
-        anom_df = filt[filt["_Is_Anomaly"] == 1].copy()
-        st.markdown("#### Anomalous candidates (top 50 by severity)")
+        anom_df = filt.copy()
         if "Applicant_ID" not in anom_df.columns:
             anom_df["Applicant_ID"] = range(1, len(anom_df) + 1)
-        anom_df = anom_df.sort_values("_Anomaly_Score").head(50)
+        anom_df = anom_df.sort_values("_Anomaly_Score").head(min(50, len(anom_df)))
         cols_show = ["Applicant_ID", "_Anomaly_Score"] + numeric_for_anomaly
         cols_show = [c for c in cols_show if c in anom_df.columns]
+
+        st.markdown("#### Anomalous candidates (top 50 by severity / score ranking)")
         st.dataframe(anom_df[cols_show], use_container_width=True)
         download_df(anom_df[cols_show], "hiring_anomalies.csv", "Download anomalies", key="dl_anom")
 
         st.markdown("#### Behavioural Clusters (KMeans)")
-        k = st.slider("Number of clusters (K)", 2, 6, 3, 1)
+        max_k = min(6, len(filt)) if len(filt) >= 2 else 2
+        if max_k < 2:
+            max_k = 2
+        k_default = min(3, max_k)
+        k = st.slider("Number of clusters (K)", 2, max_k, k_default, 1)
+
         scaler_cl = StandardScaler()
         X_cl = scaler_cl.fit_transform(base_anom.values)
-        km = KMeans(n_clusters=k, random_state=42, n_init=10)
-        labels = km.fit_predict(X_cl)
+
+        try:
+            km = KMeans(n_clusters=k, random_state=42, n_init=10)
+            labels = km.fit_predict(X_cl)
+        except Exception:
+            labels = np.zeros(len(base_anom), dtype=int)
+
         filt["_Cluster"] = labels
 
-        cluster_summary = filt.groupby("_Cluster").agg(
-            Applicants=("Applicant_ID" if "Applicant_ID" in filt.columns else filt.columns[0], "count"),
-            Avg_Days_in_Stage=("Days_in_Stage", "mean") if "Days_in_Stage" in filt.columns else ("_Cluster", "size"),
-            Avg_Time_to_Hire=("Total_Time_to_Hire_Days", "mean") if "Total_Time_to_Hire_Days" in filt.columns else ("_Cluster", "size"),
-            Avg_Screen_Score=("Screen_Score", "mean") if "Screen_Score" in filt.columns else ("_Cluster", "size"),
-            Drop_Rate=("Stage_Join", lambda x: x.isna().mean()) if "Stage_Join" in filt.columns else ("_Cluster", lambda x: 0.0)
-        ).reset_index()
+        if "Applicant_ID" not in filt.columns:
+            filt["Applicant_ID"] = range(1, len(filt) + 1)
+
+        agg_dict = {
+            "Applicants": ("Applicant_ID", "count")
+        }
+        if "Days_in_Stage" in filt.columns:
+            agg_dict["Avg_Days_in_Stage"] = ("Days_in_Stage", "mean")
+        if "Total_Time_to_Hire_Days" in filt.columns:
+            agg_dict["Avg_Time_to_Hire"] = ("Total_Time_to_Hire_Days", "mean")
+        if "Screen_Score" in filt.columns:
+            agg_dict["Avg_Screen_Score"] = ("Screen_Score", "mean")
+        if "Stage_Join" in filt.columns:
+            agg_dict["Drop_Rate"] = ("Stage_Join", lambda x: x.isna().mean())
+
+        cluster_summary = filt.groupby("_Cluster").agg(**agg_dict).reset_index()
         st.dataframe(cluster_summary, use_container_width=True)
         download_df(cluster_summary, "hiring_cluster_summary.csv", "Download cluster summary", key="dl_cluster")
 
     st.markdown(
         """
         <div class="card card-left">
-        Done. Use funnel metrics, ML-based risk scores, anomalies, and behavioural clusters
+        Done. Use funnel metrics, ML-based risk scores, anomalies, clusters, and the simulator
         to focus recruiter effort where it actually moves the needle.
         </div>
         """,
