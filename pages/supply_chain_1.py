@@ -368,39 +368,37 @@ with tabs[1]:
     # -----------------------------------------------------
     st.markdown("### KPIs (Dynamic)")
     dk1, dk2, dk3, dk4, dk5 = st.columns(5)
-
-    total_routes = filt["Route_ID"].nunique() if "Route_ID" in filt.columns else len(filt)
-    avg_eff = float(filt["Efficiency_Score"].mean()) if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any() else None
-    avg_delay = float(filt["Delay_Hours"].mean()) if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any() else None
-    avg_fuel = float(filt["Actual_Fuel_Liters"].mean()) if "Actual_Fuel_Liters" in filt.columns and filt["Actual_Fuel_Liters"].notna().any() else None
-
-    # Define on-time as delay <= 0.25 hours (~15 min)
-    if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any():
-        ontime_rate = (filt["Delay_Hours"] <= 0.25).mean() * 100
-    else:
-        ontime_rate = None
-
+    
+    # numeric safe conversions
+    routes_val = f"{total_routes:,}"
+    avg_eff_val = f"{avg_eff:.3f}" if avg_eff is not None else "N/A"
+    avg_delay_val = f"{avg_delay:.2f}" if avg_delay is not None else "N/A"
+    avg_fuel_val = f"{avg_fuel:.2f}" if avg_fuel is not None else "N/A"
+    ontime_val = f"{ontime_rate:.1f}%" if ontime_rate is not None else "N/A"
+    
     dk1.markdown(
-        f"<div class='kpi'>{total_routes:,}<div class='small'>Routes in selection</div></div>",
+        f"<div class='kpi'>{routes_val}<div class='small'>Routes in selection</div></div>",
         unsafe_allow_html=True
     )
     dk2.markdown(
-        f"<div class='kpi'>{avg_eff:.3f if avg_eff is not None else 'N/A'}<div class='small'>Avg Efficiency Score</div></div>",
+        f"<div class='kpi'>{avg_eff_val}<div class='small'>Avg Efficiency Score</div></div>",
         unsafe_allow_html=True
     )
     dk3.markdown(
-        f"<div class='kpi'>{avg_delay:.2f if avg_delay is not None else 'N/A'}<div class='small'>Avg Delay (hrs)</div></div>",
+        f"<div class='kpi'>{avg_delay_val}<div class='small'>Avg Delay (hrs)</div></div>",
         unsafe_allow_html=True
     )
     dk4.markdown(
-        f"<div class='kpi'>{avg_fuel:.2f if avg_fuel is not None else 'N/A'}<div class='small'>Avg Fuel / Route (L)</div></div>",
+        f"<div class='kpi'>{avg_fuel_val}<div class='small'>Avg Fuel / Route (L)</div></div>",
         unsafe_allow_html=True
     )
     dk5.markdown(
-        f"<div class='kpi'>{ontime_rate:.1f if ontime_rate is not None else 'N/A'}%<div class='small'>On-Time Deliveries</div></div>",
+        f"<div class='kpi'>{ontime_val}<div class='small'>On-Time Deliveries</div></div>",
         unsafe_allow_html=True
     )
 
+
+    
     # -----------------------------------------------------
     # Exploratory Data Analysis
     # -----------------------------------------------------
