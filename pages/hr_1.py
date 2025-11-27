@@ -500,6 +500,12 @@ with tab_app:
                 if c in df.columns:
                     df[c] = pd.to_datetime(df[c], errors="coerce")
 
+            # Fix alternative join column names
+            for alt in ["Joined_Date", "Joining_Date", "Date_Joined", "JoinedOn"]:
+                if alt in df.columns:
+                    df = df.rename(columns={alt: "Stage_Join"})
+
+
             # Offer_Accepted_Flag to 0/1 if text
             if "Offer_Accepted_Flag" in df.columns:
                 df["Offer_Accepted_Flag"] = df["Offer_Accepted_Flag"].astype(str).str.lower().map(
@@ -516,7 +522,7 @@ with tab_app:
             # derive Current_Stage if missing
             if "Current_Stage" not in df.columns:
                 def get_stage(row):
-                    if "Stage_Join" in row and pd.notna(row.get("Stage_Join")):
+                    if pd.notna(row.get("Stage_Join", None)):
                         return "Join"
                     if "Stage_Offer" in row and pd.notna(row.get("Stage_Offer")):
                         return "Offer"
@@ -1071,7 +1077,8 @@ with tab_app:
     eff_conv = base_conv * conv_factor if base_conv else 0
 
     if eff_conv <= 0:
-        st.info("Base apply→join conversion could not be computed (no data). Simulator will skip.")
+    st.warning("No joins in filtered data. Using placeholder conversion rate of 5%.")
+    eff_conv = 0.05   # default assumed conversion
     else:
         expected_days = target_joins / (daily_apps * eff_conv)
         expected_weeks = expected_days / 7
