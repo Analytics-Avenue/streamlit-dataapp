@@ -401,7 +401,8 @@ with tab3:
         for name, mdl in models.items():
             mdl.fit(X_train, y_train)
             preds = mdl.predict(X_test)
-            rmse = mean_squared_error(y_test, preds, squared=False)
+            mse = mean_squared_error(y_test, preds)
+            rmse = mse ** 0.5
             r2 = r2_score(y_test, preds)
             metrics_rows.append({"Model": name, "RMSE": rmse, "R2": r2})
             if r2 > best_r2:
