@@ -550,7 +550,7 @@ with tab3:
             f"<div class='kpi'>Avg Temperature<div class='kpi-value'>{avg_temp_display}</div></div>",
             unsafe_allow_html=True
         )
-        unsafe_allow_html=True
+            unsafe_allow_html=True
     )
     k3.markdown(
     avg_vib_display = f"{avg_vib:.2f}" if avg_vib is not None else "--"
