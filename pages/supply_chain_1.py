@@ -614,7 +614,7 @@ with tabs[2]:
         return model, X_test, y_test, preds, rmse, r2
 
     # 1) RandomForestRegressor — predict Actual_Travel_Hours
-    if "Actual_Travel_Hours" in df_model.columns and len(df_model) >= 80:
+    if "Actual_Travel_Hours" in df_model.columns:
         target = "Actual_Travel_Hours"
         features = [
             c for c in df_model.columns
@@ -640,7 +640,7 @@ with tabs[2]:
         st.info("RandomForest: need column Actual_Travel_Hours and at least 80 rows.")
 
     # 2) GradientBoostingRegressor — predict Actual_Fuel_Liters
-    if "Actual_Fuel_Liters" in df_model.columns and len(df_model) >= 80:
+    if "Actual_Fuel_Liters" in df_model.columns:
         target2 = "Actual_Fuel_Liters"
         features2 = [
             c for c in df_model.columns
@@ -666,7 +666,7 @@ with tabs[2]:
         st.info("GradientBoosting: need column Actual_Fuel_Liters and at least 80 rows.")
 
     # 3) KNeighborsRegressor — predict Delay_Hours
-    if "Delay_Hours" in df_model.columns and len(df_model) >= 80:
+    if "Delay_Hours" in df_model.columns:
         target3 = "Delay_Hours"
         features3 = [
             c for c in df_model.columns
