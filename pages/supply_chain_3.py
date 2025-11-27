@@ -686,22 +686,20 @@ with tab_dict:
     download_csv(dict_df, "warehouse_data_dictionary.csv", "Download Data Dictionary")
 
     # ---------------------------------------
+    # ---------------------------------------
     # Independent vs Dependent Variables
     # ---------------------------------------
     st.markdown("<div class='section-title'>Independent vs Dependent Variables</div>", unsafe_allow_html=True)
     
-    c_ind, c_dep = st.columns(2)
+    left_col, right_col = st.columns(2)
     
-    # LEFT: Independent Variables
-    with c_ind:
-        st.markdown("""
-        <div class='card'>
-            <b style='font-size:18px;'>Independent Variables</b>
-            <div class='small'>These variables act as features or drivers in ML and analytics models.</div>
-            <hr style="margin:8px 0;">
-        """, unsafe_allow_html=True)
+    # ---------------------------------------
+    # Independent Variables (each in a separate card)
+    # ---------------------------------------
+    with left_col:
+        st.markdown("<h4 style='margin-bottom:6px;'>Independent Variables</h4>", unsafe_allow_html=True)
     
-        independent_vars = [
+        independents = [
             "Warehouse",
             "Zone",
             "Aisle",
@@ -723,32 +721,43 @@ with tab_dict:
             "Delay_Reason"
         ]
     
-        for col in independent_vars:
-            st.markdown(f"<div class='variable-box'>{col}</div>", unsafe_allow_html=True)
+        for v in independents:
+            st.markdown(
+                f"""
+                <div class='card' style='margin-bottom:10px;'>
+                    <b style='font-size:17px;'>{v}</b>
+                    <br>
+                    <span class='small'>Independent variable (input feature)</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
     
-        st.markdown("</div>", unsafe_allow_html=True)
+    # ---------------------------------------
+    # Dependent Variables (each in a separate card)
+    # ---------------------------------------
+    with right_col:
+        st.markdown("<h4 style='margin-bottom:6px;'>Dependent Variables</h4>", unsafe_allow_html=True)
     
-    
-    # RIGHT: Dependent Variables
-    with c_dep:
-        st.markdown("""
-        <div class='card'>
-            <b style='font-size:18px;'>Dependent Variables</b>
-            <div class='small'>These variables represent the output or values being predicted.</div>
-            <hr style="margin:8px 0;">
-        """, unsafe_allow_html=True)
-    
-        dependent_vars = [
+        dependents = [
             "Pick_Time_Sec",
             "Delay_Minutes",
             "Picker_Productivity_Items_Hour",
             "Pack_Time_Sec"
         ]
     
-        for col in dependent_vars:
-            st.markdown(f"<div class='variable-box'>{col}</div>", unsafe_allow_html=True)
-    
-        st.markdown("</div>", unsafe_allow_html=True)
+        for v in dependents:
+            st.markdown(
+                f"""
+                <div class='card' style='margin-bottom:10px;'>
+                    <b style='font-size:17px;'>{v}</b>
+                    <br>
+                    <span class='small'>Dependent variable (prediction target)</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
 
 
     
