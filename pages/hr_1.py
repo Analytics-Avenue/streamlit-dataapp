@@ -1049,9 +1049,31 @@ with tab_app:
         conv_factor = st.slider("Conversion uplift factor", 0.5, 1.5, 1.0, 0.05)
 
     eff_conv = base_conv * conv_factor if base_conv else 0
-
+    # --- Fallback handling for missing join data ---
+    if base_conv == 0:
+        # If no join data, assume a default conversion rate (industry avg ~10–12%)
+        base_conv = 0.12
+    
+    eff_conv = base_conv * conv_factor
+    
+    # Safety clamp
     if eff_conv <= 0:
-        st.info("Base apply→join conversion could not be computed (no data). Simulator will skip.")
+        eff_conv = 0.10  # minimum viable conversion
+    
+    expected_days = target_joins / (daily_apps * eff_conv)
+    expected_weeks = expected_days / 7
+    
+    st.markdown(
+        f"""
+        <div class="card card-left">
+        <b>Time-to-Fill Simulator (with fallback mode)</b><br>
+        Effective conversion used: <b>{eff_conv*100:.1f}%</b><br>
+        Expected time to close <b>{target_joins}</b> hires:<br>
+        <b>{expected_days:.1f} days</b> (~<b>{expected_weeks:.1f} weeks</b>)
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     else:
         expected_days = target_joins / (daily_apps * eff_conv)
         expected_weeks = expected_days / 7
