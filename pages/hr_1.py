@@ -284,6 +284,29 @@ dict_rows = [
     {"Column": "Candidate_Response_Time_Hrs", "Description": "Candidate response time"},
 ]
 
+
+dict_rows1 = [
+    {"Column": "Applicant_ID", "Type": "ID", "Role": "Identifier", "Description": "Unique candidate identifier"},
+    {"Column": "Apply_Date", "Type": "DateTime", "Role": "Independent", "Description": "Date when candidate applied"},
+    {"Column": "Source", "Type": "Categorical", "Role": "Independent", "Description": "Source of the candidate"},
+    {"Column": "Role", "Type": "Categorical", "Role": "Independent", "Description": "Role / position applied for"},
+    {"Column": "Stage_Apply", "Type": "Date/Flag", "Role": "Meta", "Description": "Application timestamp/flag"},
+    {"Column": "Stage_Screen", "Type": "Date/Flag", "Role": "Meta", "Description": "Screening stage timestamp/flag"},
+    {"Column": "Stage_Interview", "Type": "Date/Flag", "Role": "Meta", "Description": "Interview stage timestamp/flag"},
+    {"Column": "Stage_Offer", "Type": "Date/Flag", "Role": "Meta", "Description": "Offer stage timestamp/flag"},
+    {"Column": "Stage_Join", "Type": "Date/Flag", "Role": "Meta", "Description": "Joining stage timestamp/flag"},
+    {"Column": "Current_Stage", "Type": "Categorical", "Role": "Independent", "Description": "Latest stage reached"},
+    {"Column": "Days_in_Stage", "Type": "Numeric", "Role": "Independent", "Description": "Days spent in current stage"},
+    {"Column": "Total_Time_to_Hire_Days", "Type": "Numeric", "Role": "Dependent", "Description": "Days from apply to join"},
+    {"Column": "Offer_Accepted_Flag", "Type": "Binary", "Role": "Dependent", "Description": "1 if offer accepted"},
+    {"Column": "Screen_Score", "Type": "Numeric", "Role": "Independent", "Description": "Screening score"},
+    {"Column": "Resume_Score", "Type": "Numeric", "Role": "Independent", "Description": "Resume match score"},
+    {"Column": "Recruiter_ID", "Type": "Categorical", "Role": "Independent", "Description": "Recruiter handling the case"},
+    {"Column": "JD_Variant", "Type": "Categorical", "Role": "Independent", "Description": "Job description variant"},
+    {"Column": "Channel", "Type": "Categorical", "Role": "Independent", "Description": "Channel bucket (direct/agency/etc.)"},
+    {"Column": "Candidate_Response_Time_Hrs", "Type": "Numeric", "Role": "Independent", "Description": "Candidate response time"},
+]
+
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
@@ -390,6 +413,7 @@ with tab_dict:
 
     # Convert dict_rows to DataFrame
     dd_df = pd.DataFrame(dict_rows)
+    dd_df1 = pd.DataFrame(dict_rows1)
 
     st.dataframe(dd_df, use_container_width=True)
     download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
@@ -406,7 +430,7 @@ with tab_dict:
     # -------- LEFT: Independent Variables --------
     with left:
         st.markdown("#### Independent Variables")
-        for _, row in dd_df[dd_df["Role"] == "Independent"].iterrows():
+        for _, row in dd_df1[dd_df1["Role"] == "Independent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
@@ -419,7 +443,7 @@ with tab_dict:
     # -------- RIGHT: Dependent Variables --------
     with right:
         st.markdown("#### Dependent Variables")
-        for _, row in dd_df[dd_df["Role"] == "Dependent"].iterrows():
+        for _, row in dd_df1[dd_df1["Role"] == "Dependent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
