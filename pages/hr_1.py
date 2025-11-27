@@ -1146,6 +1146,7 @@ with tab_app:
         download_df(cluster_summary, "hiring_cluster_summary.csv", "Download cluster summary", key="dl_cluster")
 
     # Final statement
+    # Final statement
     st.markdown(
         """
         <div class="card card-left">
@@ -1155,3 +1156,4 @@ with tab_app:
         """,
         unsafe_allow_html=True,
     )
+
