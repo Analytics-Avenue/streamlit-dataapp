@@ -389,7 +389,9 @@ with tab_dict:
     st.markdown("### Required Columns & Data Dictionary")
 
     st.markdown("---")
-
+    # Convert dict_rows to DataFrame
+    dd_df = pd.DataFrame(dict_rows)
+    
     # ---- SPLIT VIEW: Independent (Left) vs Dependent (Right) ----
     st.markdown("### Variables by Role (Independent vs Dependent)")
 
@@ -398,11 +400,13 @@ with tab_dict:
     # -------- LEFT: Independent Variables --------
     with left:
         st.markdown("#### Independent Variables")
+        for _, row in dd_df[dd_df["Role"] == "Independent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
-                    <b>{row['Column']}</b>
-                    </div>
+                    <b>{row['Column']}</b><br>
+                    <span style='font-size:12px; opacity:0.7;'>{row['Description']}</span>
+                </div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -410,17 +414,23 @@ with tab_dict:
     # -------- RIGHT: Dependent Variables --------
     with right:
         st.markdown("#### Dependent Variables")
+        for _, row in dd_df[dd_df["Role"] == "Dependent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
-                    <b>{row['Column']}</b>
+                    <b>{row['Column']}</b><br>
+                    <span style='font-size:12px; opacity:0.7;'>{row['Description']}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
+    st.markdown("---")
+    st.markdown("### Full Data Dictionary Table")
+    st.dataframe(dd_df, use_container_width=True)
     download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
 
+    
 # =========================================================
 # TAB 3 — APPLICATION
 # =========================================================
