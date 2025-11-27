@@ -398,7 +398,6 @@ with tab_dict:
     # -------- LEFT: Independent Variables --------
     with left:
         st.markdown("#### Independent Variables")
-        for _, row in dd_df[dd_df["Role"] == "Independent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
@@ -411,7 +410,6 @@ with tab_dict:
     # -------- RIGHT: Dependent Variables --------
     with right:
         st.markdown("#### Dependent Variables")
-        for _, row in dd_df[dd_df["Role"] == "Dependent"].iterrows():
             st.markdown(
                 f"""
                 <div class='card card-left'>
