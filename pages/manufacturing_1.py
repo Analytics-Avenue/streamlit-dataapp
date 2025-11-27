@@ -1,108 +1,238 @@
-# app_predictive_maintenance_fixed.py
 import streamlit as st
 import pandas as pd
 import numpy as np
+from io import BytesIO
 import plotly.express as px
 import plotly.graph_objects as go
-from io import BytesIO
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
+import math
 import warnings
+
 warnings.filterwarnings("ignore")
 
-# -------------------------
+# ---------------------------------------------------------
+# PAGE CONFIG
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="Machine Failure & Predictive Maintenance Lab",
+    layout="wide"
+)
 
-hide_sidebar = """
+# ---------------------------------------------------------
+# HIDE SIDEBAR
+# ---------------------------------------------------------
+st.markdown("""
 <style>
 [data-testid="stSidebarNav"] {display: none;}
 section[data-testid="stSidebar"] {display: none;}
 </style>
-"""
-st.markdown(hide_sidebar, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Page Config
-# ---------------------------------------------------------
-st.set_page_config(page_title="Production Downtime & Machine Failure Analytics", layout="wide")
-
-# Hide sidebar
-st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# Card Glow CSS
+# GLOBAL CSS – MASTER UI
 # ---------------------------------------------------------
 st.markdown("""
 <style>
+* { font-family: 'Inter', sans-serif; }
+
+/* MAIN HEADER */
+.big-header {
+    font-size: 36px !important;
+    font-weight: 700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}
+
+/* SECTION TITLE */
+.section-title {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    margin-top:26px;
+    margin-bottom:12px;
+    color:#000 !important;
+    position:relative;
+}
+.section-title:after {
+    content:"";
+    position:absolute;
+    bottom:-5px;
+    left:0;
+    height:2px;
+    width:0%;
+    background:#064b86;
+    transition: width 0.35s ease;
+}
+.section-title:hover:after { width:40%; }
+
+/* CARD */
 .card {
-    padding: 20px;
-    border-radius: 12px;
-    background: white;
-    border: 1px solid #d9d9d9;
-    transition: 0.3s;
-    box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+    background:#ffffff;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #e6e6e6;
+    font-size:16.5px;
+    color:#000 !important;
+    font-weight:500;
+    box-shadow:0 3px 14px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
 }
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 4px 18px rgba(6,75,134,0.35);
-    border-color: #064b86;
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(6,75,134,0.18);
+    border-color:#064b86;
 }
+
+/* KPI CARDS */
 .kpi {
-    padding: 30px;
-    border-radius: 14px;
-    background: white;
-    border: 1px solid #ccc;
-    font-size: 26px;
-    font-weight: bold;
-    color: #064b86;
-    text-align: center;
-    transition: 0.3s;
+    background:#ffffff;
+    padding:22px;
+    border-radius:14px;
+    border:1px solid #e2e2e2;
+    font-size:18px !important;
+    font-weight:600 !important;
+    text-align:center;
+    color:#064b86 !important;
+    box-shadow:0 3px 14px rgba(0,0,0,0.07);
+    transition:0.25s ease;
 }
 .kpi:hover {
-    transform: translateY(-4px);
-    box-shadow: 0px 4px 15px rgba(6,75,134,0.30);
+    transform:translateY(-4px);
+    box-shadow:0 13px 26px rgba(6,75,134,0.20);
+    border-color:#064b86;
 }
-.small { font-size:13px; color:#666; }
+.kpi-value {
+    display:block;
+    font-size:22px;
+    font-weight:700;
+    margin-top:8px;
+}
+
+/* VARIABLE BOXES */
+.variable-box {
+    padding:16px;
+    border-radius:14px;
+    background:white;
+    border:1px solid #e5e5e5;
+    box-shadow:0 2px 10px rgba(0,0,0,0.10);
+    transition:0.25s ease;
+    text-align:center;
+    font-size:16.5px !important;
+    font-weight:500 !important;
+    color:#064b86 !important;
+    margin-bottom:10px;
+}
+.variable-box:hover {
+    transform:translateY(-5px);
+    box-shadow:0 12px 22px rgba(6,75,134,0.18);
+    border-color:#064b86;
+}
+
+/* BUTTONS */
+.stButton>button,
+.stDownloadButton>button {
+    background:#064b86 !important;
+    color:white !important;
+    border:none;
+    padding:10px 22px;
+    border-radius:8px !important;
+    font-size:15.5px !important;
+    font-weight:600 !important;
+    transition:0.25s ease;
+}
+.stButton>button:hover,
+.stDownloadButton>button:hover {
+    transform:translateY(-3px);
+    background:#0a6eb3 !important;
+}
+
+/* TABLE OVERRIDE */
+.required-table th {
+    background:#ffffff !important;
+    color:#000 !important;
+    font-size:17px !important;
+    border-bottom:2px solid #000 !important;
+}
+.required-table td {
+    color:#000 !important;
+    font-size:15.5px !important;
+    padding:6px 8px !important;
+    border-bottom:1px solid #dcdcdc !important;
+}
+.required-table tr:hover td {
+    background:#f8f8f8 !important;
+}
+
+/* PAGE FADE */
+.block-container { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Header + Logo
+# HEADER + LOGO
 # ---------------------------------------------------------
 logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
 st.markdown(f"""
-<div style="display:flex; align-items:center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
+<div style="display:flex; align-items:center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
     <div style="line-height:1;">
-        <div style="color:#064b86; font-size:34px; font-weight:bold;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:34px; font-weight:bold;">Advanced Analytics</div>
+        <div style="color:#064b86; font-size:32px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:32px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Helper for CSV download
-# ---------------------------------------------------------
-def download_df(df, filename):
-    b = BytesIO()
-    b.write(df.to_csv(index=False).encode())
-    b.seek(0)
-    st.download_button("Download CSV", b, file_name=filename, mime="text/csv")
+st.markdown("<div class='big-header'>Machine Failure & Predictive Maintenance Lab</div>", unsafe_allow_html=True)
+st.write("Monitor machine health, detect failures early, and use ML to predict breakdown risk at scale.")
 
 # ---------------------------------------------------------
-# Safe CSV loader (handles duplicate column names)
+# CONSTANTS / REQUIRED COLS + DICTIONARY
 # ---------------------------------------------------------
+REQUIRED_COLS = [
+    "Timestamp", "Machine_ID", "Machine_Type", "Temperature", "Vibration",
+    "RPM", "Load", "Run_Hours", "Temp_Anomaly", "Vib_Anomaly",
+    "Load_Anomaly", "RPM_Anomaly", "Failure_Flag"
+]
+
+DATA_DICTIONARY = {
+    "Timestamp": "Exact date-time when machine sensor readings were captured.",
+    "Machine_ID": "Unique identifier for each machine or asset in the plant.",
+    "Machine_Type": "Category of machine (e.g., CNC, Press, Motor, Conveyor).",
+    "Temperature": "Real-time machine temperature in °C captured from internal sensors.",
+    "Vibration": "Vibration level (e.g., mm/s) indicating mechanical balance and wear.",
+    "RPM": "Rotational speed of shafts or motors, measured in rotations per minute.",
+    "Load": "Machine load as a % of rated capacity at the time of reading.",
+    "Run_Hours": "Cumulative operating hours since last overhaul / reset / maintenance.",
+    "Temp_Anomaly": "Binary flag (0/1) indicating abnormal temperature patterns vs baseline.",
+    "Vib_Anomaly": "Binary flag indicating abnormal vibration beyond safe thresholds.",
+    "Load_Anomaly": "Binary anomaly indicator for unusual load behavior.",
+    "RPM_Anomaly": "Binary anomaly indicator for RPM spikes/drops or unstable rotation.",
+    "Failure_Flag": "Target variable: 1 if machine experienced a failure event, else 0."
+}
+
+# ---------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------
+def download_df(df: pd.DataFrame, filename: str, label: str = "Download CSV"):
+    b = BytesIO()
+    b.write(df.to_csv(index=False).encode("utf-8"))
+    b.seek(0)
+    st.download_button(label, b, file_name=filename, mime="text/csv")
+
+
 def read_csv_safe(url_or_file):
     """
-    Read CSV from URL or file-like. If duplicate columns exist, make them unique
-    by appending suffixes: col, col__dup1, col__dup2...
+    Read CSV safely and handle duplicate column names by appending suffixes.
     """
-    # read without modifying columns first
     df = pd.read_csv(url_or_file)
     cols = list(df.columns)
     if len(cols) != len(set(cols)):
-        # make unique
         new_cols = []
         seen = {}
         for c in cols:
@@ -114,118 +244,183 @@ def read_csv_safe(url_or_file):
                 seen[base] += 1
                 new_cols.append(f"{base}__dup{seen[base]}")
         df.columns = new_cols
-    # strip whitespace in column names
     df.columns = [str(c).strip() for c in df.columns]
     return df
 
-# ---------------------------------------------------------
-# Tabs
-# ---------------------------------------------------------
-tabs = st.tabs(["Overview", "Application"])
+
+def prefer_column(df, base):
+    """
+    Prefer canonical column name if exists, else first duplicate variant.
+    """
+    for c in df.columns:
+        if c == base:
+            return c
+    for c in df.columns:
+        if c.startswith(base + "__dup"):
+            return c
+    return None
+
 
 # ---------------------------------------------------------
-# Overview Tab
+# TABS
 # ---------------------------------------------------------
-with tabs[0]:
-    st.markdown("## Overview")
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
+# =========================================================
+# TAB 1 – OVERVIEW
+# =========================================================
+with tab1:
+    st.markdown("<div class='section-title'>Overview</div>", unsafe_allow_html=True)
     st.markdown("""
-    <div class='card'>
-        This application monitors machine behavior, detects early failure patterns,
-        predicts breakdown likelihood, and provides actionable insights to reduce downtime.
+    <div class="card">
+    This lab brings together machine sensor telemetry (temperature, vibration, RPM, load) and
+    maintenance events to identify early failure signals, quantify breakdown risk, and support
+    preventive maintenance schedules.
     </div>
     """, unsafe_allow_html=True)
 
-    # Capabilities / Impact
     c1, c2 = st.columns(2)
 
-    c1.markdown("### Capabilities")
-    c1.markdown("""
-    <div class='card'>
-        • Sensor anomaly detection (Temperature, Vibration, RPM, Load)<br>
-        • Predictive maintenance using ML<br>
-        • Failure probability scoring per machine<br>
-        • Trend visualizations of machine health<br>
-        • Multi-filter exploration by Machine Type, ID, Date Range
-    </div>
-    """, unsafe_allow_html=True)
+    with c1:
+        st.markdown("<div class='section-title'>What This Lab Does</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card">
+        • Tracks <b>sensor signals</b> per machine over time<br>
+        • Monitors <b>Temperature, Vibration, RPM, Load</b> and anomaly flags<br>
+        • Calculates <b>failure incidence</b> across machines & machine types<br>
+        • Trains ML models to predict <b>Failure_Flag</b> from sensor features<br>
+        • Identifies high-risk machines for <b>targeted preventive maintenance</b>
+        </div>
+        """, unsafe_allow_html=True)
 
-    c2.markdown("### Business Impact")
-    c2.markdown("""
-    <div class='card'>
-        • Reduced unplanned downtime<br>
-        • Increased machine lifespan<br>
-        • Optimized preventive maintenance<br>
-        • Avoid costly breakdowns<br>
-        • Real-time monitoring
-    </div>
-    """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("<div class='section-title'>Business Impact</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card">
+        • Reduced <b>unplanned downtime</b> & production loss<br>
+        • Extended <b>machine lifespan</b> through targeted interventions<br>
+        • Lower maintenance cost via <b>data-driven scheduling</b><br>
+        • Prioritized attention to <b>high-risk assets</b><br>
+        • Stronger <b>OEE (Overall Equipment Effectiveness)</b> story for management
+        </div>
+        """, unsafe_allow_html=True)
 
-    # KPI CARDS (label-only, big)
-    st.markdown("## KPIs")
-    k1,k2,k3,k4 = st.columns(4)
+    st.markdown("<div class='section-title'>Key KPIs Tracked</div>", unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
     k1.markdown("<div class='kpi'>Machines Tracked</div>", unsafe_allow_html=True)
-    k2.markdown("<div class='kpi'>Avg Temperature</div>", unsafe_allow_html=True)
-    k3.markdown("<div class='kpi'>Avg Vibration</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Average Temperature</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Average Vibration</div>", unsafe_allow_html=True)
     k4.markdown("<div class='kpi'>Failure Events</div>", unsafe_allow_html=True)
 
-    st.markdown("### Who Should Use This App?")
+    st.markdown("<div class='section-title'>Who Should Use This</div>", unsafe_allow_html=True)
     st.markdown("""
-    <div class='card'>
-        • Plant Managers<br>
-        • Maintenance Engineers<br>
-        • Operations Teams<br>
-        • Data Analysts
+    <div class="card">
+    Plant heads, maintenance engineers, reliability teams, data engineers and analysts who want a
+    single workspace for <b>machine health monitoring, failure prediction, and downtime analytics</b>.
     </div>
     """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Application Tab
-# ---------------------------------------------------------
-with tabs[1]:
-    st.header("Application")
-    st.markdown("### Choose Dataset Option")
+# =========================================================
+# TAB 2 – IMPORTANT ATTRIBUTES (DATA DICTIONARY)
+# =========================================================
+with tab2:
+    st.markdown("<div class='section-title'>Required Columns – Data Dictionary</div>", unsafe_allow_html=True)
 
-    mode = st.radio("Select:", [
-        "Default dataset (GitHub URL)",
-        "Upload CSV",
-        "Upload CSV + Manual Column Mapping"
-    ])
+    dd_df = pd.DataFrame(
+        [{"Attribute": k, "Description": v} for k, v in DATA_DICTIONARY.items()]
+    )
+
+    st.markdown("""
+        <style>
+            .required-table th {
+                background:#ffffff !important;
+                color:#000 !important;
+                font-size:17px !important;
+                border-bottom:2px solid #000 !important;
+            }
+            .required-table td {
+                color:#000 !important;
+                font-size:15.5px !important;
+                padding:6px 8px !important;
+                border-bottom:1px solid #dcdcdc !important;
+            }
+            .required-table tr:hover td {
+                background:#f8f8f8 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.dataframe(
+        dd_df.style.set_table_attributes('class="required-table"'),
+        use_container_width=True
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.markdown("<div class='section-title'>Independent Variables</div>", unsafe_allow_html=True)
+        independents = [
+            "Machine_ID",
+            "Machine_Type",
+            "Temperature",
+            "Vibration",
+            "RPM",
+            "Load",
+            "Run_Hours",
+            "Temp_Anomaly",
+            "Vib_Anomaly",
+            "Load_Anomaly",
+            "RPM_Anomaly"
+        ]
+        for v in independents:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("<div class='section-title'>Dependent Variables</div>", unsafe_allow_html=True)
+        dependents = ["Failure_Flag"]
+        for v in dependents:
+            st.markdown(f"<div class='variable-box'>{v}</div>", unsafe_allow_html=True)
+
+# =========================================================
+# TAB 3 – APPLICATION
+# =========================================================
+with tab3:
+    st.markdown("<div class='section-title'>Step 1: Load Dataset</div>", unsafe_allow_html=True)
+
+    mode = st.radio(
+        "Dataset option:",
+        ["Default dataset (GitHub)", "Upload CSV", "Upload CSV + Manual Column Mapping"],
+        horizontal=True
+    )
 
     df = None
-
-    REQUIRED_COLS = [
-        "Timestamp","Machine_ID","Machine_Type","Temperature","Vibration",
-        "RPM","Load","Run_Hours","Temp_Anomaly","Vib_Anomaly",
-        "Load_Anomaly","RPM_Anomaly","Failure_Flag"
-    ]
+    DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/machine_failure_data.csv"
 
     # ---------------------- DEFAULT DATASET ----------------------
-    if mode == "Default dataset (GitHub URL)":
-        DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/manufacturing/machine_failure_data.csv"
+    if mode == "Default dataset (GitHub)":
         try:
             df = read_csv_safe(DEFAULT_URL)
-            st.success("Default dataset loaded successfully.")
-            st.dataframe(df.head())
+            st.success("Default dataset loaded successfully from GitHub.")
+            st.dataframe(df.head(10), use_container_width=True)
         except Exception as e:
-            st.error("Failed to load default dataset. Check DEFAULT_URL or network. Error: " + str(e))
+            st.error("Failed to load default dataset: " + str(e))
             st.stop()
 
-    # ---------------------- UPLOAD CSV ----------------------
+    # ---------------------- UPLOAD CSV ---------------------------
     elif mode == "Upload CSV":
-        file = st.file_uploader("Upload CSV", type=["csv"], key="upload_simple")
+        file = st.file_uploader("Upload CSV file", type=["csv"], key="upload_simple")
         if file:
             try:
                 df = read_csv_safe(file)
                 st.success("File uploaded.")
-                st.dataframe(df.head())
+                st.dataframe(df.head(10), use_container_width=True)
             except Exception as e:
                 st.error("Failed to read uploaded CSV: " + str(e))
                 st.stop()
         else:
             st.stop()
 
-    # ---------------------- UPLOAD + MAP ----------------------
+    # ---------------------- UPLOAD + MAPPING ---------------------
     else:
         file = st.file_uploader("Upload CSV for mapping", type=["csv"], key="upload_map")
         if file:
@@ -235,8 +430,8 @@ with tabs[1]:
                 st.error("Failed to read uploaded CSV: " + str(e))
                 st.stop()
 
-            st.write("Preview:")
-            st.dataframe(raw.head())
+            st.markdown("Preview (first 10 rows):")
+            st.dataframe(raw.head(10), use_container_width=True)
 
             mapping = {}
             cols_list = list(raw.columns)
@@ -244,40 +439,29 @@ with tabs[1]:
                 mapping[col] = st.selectbox(f"Map → {col}", ["-- Select --"] + cols_list, key=f"map_{col}")
 
             if st.button("Apply Mapping", key="apply_map"):
-                miss = [m for m in mapping if mapping[m] == "-- Select --"]
-                if miss:
-                    st.error("Map all columns: " + ", ".join(miss))
+                missing = [m for m in mapping if mapping[m] == "-- Select --"]
+                if missing:
+                    st.error("Please map all required columns: " + ", ".join(missing))
                 else:
-                    # rename selected columns (only those mapped)
                     rename_map = {mapping[k]: k for k in mapping}
                     df = raw.rename(columns=rename_map)
-                    st.success("Mapping applied.")
-                    st.dataframe(df.head())
+                    st.success("Mapping applied successfully.")
+                    st.dataframe(df.head(10), use_container_width=True)
         else:
             st.stop()
 
     if df is None:
         st.stop()
 
-    # ---------- Basic cleanup & safety ----------
-    # trim column whitespace
+    # ---------------------------------------------------------
+    # CLEANUP & CANONICAL COLUMN ALIGNMENT
+    # ---------------------------------------------------------
     df.columns = [str(c).strip() for c in df.columns]
 
-    # If there are duplicate logical columns (e.g., Temperature and Temperature__dup1),
-    # prefer the first occurrence and drop exact duplicates after merging similar names.
-    def prefer_column(df, base):
-        # returns first matching column name for base (exact or starting with base)
-        for c in df.columns:
-            if c == base:
-                return c
-        for c in df.columns:
-            if c.startswith(base + "__dup"):
-                return c
-        return None
-
-    # Try to align common columns to canonical names where possible
+    # Align common duplicate logical columns to canonical names where possible
     canonical_map = {}
-    for base in ["Timestamp","Machine_ID","Machine_Type","Temperature","Vibration","RPM","Load","Run_Hours","Failure_Flag"]:
+    for base in ["Timestamp", "Machine_ID", "Machine_Type", "Temperature",
+                 "Vibration", "RPM", "Load", "Run_Hours", "Failure_Flag"]:
         col_found = prefer_column(df, base)
         if col_found and col_found != base:
             canonical_map[col_found] = base
@@ -286,15 +470,11 @@ with tabs[1]:
 
     # Ensure Timestamp is datetime if present
     if "Timestamp" in df.columns:
-        try:
-            df["Timestamp"] = pd.to_datetime(df["Timestamp"])
-        except:
-            # fallback: try common formats
-            df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+        df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
     # Ensure numeric columns exist and are numeric
-    numeric_cols = ["Temperature","Vibration","RPM","Load","Run_Hours","Failure_Flag"]
-    for c in numeric_cols:
+    numeric_cols_base = ["Temperature", "Vibration", "RPM", "Load", "Run_Hours", "Failure_Flag"]
+    for c in numeric_cols_base:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
@@ -302,69 +482,130 @@ with tabs[1]:
     if "Failure_Flag" not in df.columns:
         df["Failure_Flag"] = 0
 
-    # Replace NaNs in numeric cols with sensible defaults (median or 0)
-    for c in ["Temperature","Vibration","RPM","Load","Run_Hours"]:
+    # Replace NaNs in numeric sensor cols with median or 0
+    for c in ["Temperature", "Vibration", "RPM", "Load", "Run_Hours"]:
         if c in df.columns:
             if df[c].notna().any():
                 df[c] = df[c].fillna(df[c].median())
             else:
                 df[c] = df[c].fillna(0)
 
-    # ---------------------- Filters ----------------------
-    st.markdown("### Filters")
+    # ---------------------------------------------------------
+    # STEP 2 – FILTERS & PREVIEW
+    # ---------------------------------------------------------
+    st.markdown("<div class='section-title'>Step 2: Filters & Preview</div>", unsafe_allow_html=True)
 
-    # safe guards for missing columns
-    machine_ids = df["Machine_ID"].unique().tolist() if "Machine_ID" in df.columns else []
-    machine_types = df["Machine_Type"].unique().tolist() if "Machine_Type" in df.columns else []
+    m1, m2 = st.columns(2)
+    machine_ids = df["Machine_ID"].dropna().unique().tolist() if "Machine_ID" in df.columns else []
+    machine_types = df["Machine_Type"].dropna().unique().tolist() if "Machine_Type" in df.columns else []
 
-    m1, m2, m3 = st.columns(3)
-    sel_id = m1.multiselect("Machine ID", machine_ids, default=machine_ids if machine_ids else [])
-    sel_type = m2.multiselect("Machine Type", machine_types, default=machine_types if machine_types else [])
+    with m1:
+        sel_id = st.multiselect(
+            "Machine ID",
+            options=machine_ids,
+            default=machine_ids[:5] if machine_ids else []
+        )
+    with m2:
+        sel_type = st.multiselect(
+            "Machine Type",
+            options=machine_types,
+            default=machine_types if machine_types else []
+        )
 
     df_f = df.copy()
-    if sel_id:
-        if "Machine_ID" in df_f.columns:
-            df_f = df_f[df_f["Machine_ID"].isin(sel_id)]
-    if sel_type:
-        if "Machine_Type" in df_f.columns:
-            df_f = df_f[df_f["Machine_Type"].isin(sel_type)]
+    if sel_id and "Machine_ID" in df_f.columns:
+        df_f = df_f[df_f["Machine_ID"].isin(sel_id)]
+    if sel_type and "Machine_Type" in df_f.columns:
+        df_f = df_f[df_f["Machine_Type"].isin(sel_type)]
 
-    st.dataframe(df_f.head(5), use_container_width=True)
-    download_df(df_f, "filtered_machines.csv")
+    st.markdown(f"""
+    <div style='padding:8px; background:#eef4ff; border-radius:8px; font-weight:600; margin-bottom:8px;'>
+    Filtered Rows: {len(df_f)} of {len(df)}
+    </div>
+    """, unsafe_allow_html=True)
 
-    # ---------------------- Dynamic KPIs ----------------------
-    st.markdown("### Key Metrics (Dynamic)")
-    k1,k2,k3,k4 = st.columns(4)
-    # Use safe computations (if column missing, show N/A)
+    st.markdown("### Filtered Data Preview (first 10 rows)")
+    st.dataframe(df_f.head(10), use_container_width=True)
+    download_df(df_f.head(500), "filtered_machines.csv", "Download filtered preview (first 500 rows)")
+
+    if df_f.empty:
+        st.warning("Filtered dataset is empty. Adjust filters above.")
+        st.stop()
+
+    # ---------------------------------------------------------
+    # KPIs (DYNAMIC)
+    # ---------------------------------------------------------
+    st.markdown("<div class='section-title'>KPIs (Dynamic)</div>", unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
+
     machines_count = int(df_f["Machine_ID"].nunique()) if "Machine_ID" in df_f.columns else 0
-    avg_temp = f"{df_f['Temperature'].mean():.2f}" if "Temperature" in df_f.columns and df_f['Temperature'].notna().any() else "N/A"
-    avg_vib = f"{df_f['Vibration'].mean():.2f}" if "Vibration" in df_f.columns and df_f['Vibration'].notna().any() else "N/A"
+    avg_temp = df_f["Temperature"].mean() if "Temperature" in df_f.columns and df_f["Temperature"].notna().any() else None
+    avg_vib = df_f["Vibration"].mean() if "Vibration" in df_f.columns and df_f["Vibration"].notna().any() else None
     failures = int(df_f["Failure_Flag"].sum()) if "Failure_Flag" in df_f.columns else 0
 
-    k1.metric("Machines", machines_count)
-    k2.metric("Avg Temp", avg_temp)
-    k3.metric("Avg Vibration", avg_vib)
-    k4.metric("Failures", failures)
+    k1.markdown(f"<div class='kpi'>Machines<div class='kpi-value'>{machines_count}</div></div>", unsafe_allow_html=True)
+    k2.markdown(
+        f"<div class='kpi'>Avg Temperature<div class='kpi-value'>{avg_temp:.2f if avg_temp is not None else '--'}</div></div>",
+        unsafe_allow_html=True
+    )
+    k3.markdown(
+        f"<div class='kpi'>Avg Vibration<div class='kpi-value'>{avg_vib:.2f if avg_vib is not None else '--'}</div></div>",
+        unsafe_allow_html=True
+    )
+    k4.markdown(f"<div class='kpi'>Failure Events<div class='kpi-value'>{failures}</div></div>", unsafe_allow_html=True)
 
-    # ---------------------- Charts ----------------------
-    st.markdown("### Charts")
-    # Safe plotting: check required columns
+    # ---------------------------------------------------------
+    # CHARTS
+    # ---------------------------------------------------------
+    st.markdown("<div class='section-title'>Charts & Diagnostics</div>", unsafe_allow_html=True)
+
+    # Temperature trend
     if "Timestamp" in df_f.columns and "Temperature" in df_f.columns:
-        fig1 = px.line(df_f.sort_values("Timestamp"), x="Timestamp", y="Temperature", color="Machine_ID", title="Temperature Trend")
-        st.plotly_chart(fig1, use_container_width=True)
+        temp_ts = df_f.dropna(subset=["Timestamp"]).sort_values("Timestamp")
+        if not temp_ts.empty:
+            fig1 = px.line(
+                temp_ts,
+                x="Timestamp",
+                y="Temperature",
+                color="Machine_ID",
+                title="Temperature Trend by Machine"
+            )
+            st.plotly_chart(fig1, use_container_width=True)
     else:
-        st.info("Timestamp or Temperature column missing — skipping time-series chart.")
+        st.info("Timestamp or Temperature missing – skipping time-series chart.")
 
+    # Vibration distribution by Machine_Type
     if "Machine_Type" in df_f.columns and "Vibration" in df_f.columns:
-        fig2 = px.box(df_f, x="Machine_Type", y="Vibration", title="Vibration Distribution by Machine Type")
-        st.plotly_chart(fig2, use_container_width=True)
-    else:
-        st.info("Machine_Type or Vibration column missing — skipping box chart.")
+        vib_box = df_f.dropna(subset=["Machine_Type", "Vibration"])
+        if not vib_box.empty:
+            fig2 = px.box(
+                vib_box,
+                x="Machine_Type",
+                y="Vibration",
+                title="Vibration Distribution by Machine Type"
+            )
+            st.plotly_chart(fig2, use_container_width=True)
 
-    # ---------------------- ML: Failure Prediction ----------------------
-    st.markdown("### Machine Learning: Failure Prediction")
-    # Require a minimum number of rows and columns
-    ML_COLS = [c for c in ["Temperature","Vibration","RPM","Load","Run_Hours"] if c in df_f.columns]
+    # Load vs Temperature scatter
+    if "Load" in df_f.columns and "Temperature" in df_f.columns:
+        scat = df_f.dropna(subset=["Load", "Temperature"])
+        if not scat.empty:
+            fig3 = px.scatter(
+                scat,
+                x="Load",
+                y="Temperature",
+                color="Failure_Flag" if "Failure_Flag" in scat.columns else None,
+                title="Temperature vs Load (colored by Failure_Flag)"
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+
+    # ---------------------------------------------------------
+    # ML – FAILURE PREDICTION
+    # ---------------------------------------------------------
+    st.markdown("<div class='section-title'>ML – Failure Prediction (RandomForest)</div>", unsafe_allow_html=True)
+
+    ML_COLS = [c for c in ["Temperature", "Vibration", "RPM", "Load", "Run_Hours"] if c in df_f.columns]
+
     if len(df_f) >= 50 and len(ML_COLS) >= 2 and "Failure_Flag" in df_f.columns:
         X = df_f[ML_COLS].fillna(0)
         y = df_f["Failure_Flag"].astype(int).fillna(0)
@@ -372,45 +613,110 @@ with tabs[1]:
         scaler = StandardScaler()
         Xs = scaler.fit_transform(X.values)
 
-        Xtr, Xte, ytr, yte = train_test_split(Xs, y.values, test_size=0.2, random_state=42, stratify=y.values if len(np.unique(y.values))>1 else None)
+        strat = y.values if len(np.unique(y.values)) > 1 else None
+        Xtr, Xte, ytr, yte = train_test_split(
+            Xs, y.values,
+            test_size=0.2,
+            random_state=42,
+            stratify=strat
+        )
 
         model = RandomForestClassifier(n_estimators=150, random_state=42)
-        model.fit(Xtr, ytr)
 
-        preds = model.predict_proba(Xte)[:, 1]
+        with st.spinner("Training RandomForest failure prediction model..."):
+            model.fit(Xtr, ytr)
+
+        preds_prob = model.predict_proba(Xte)[:, 1]
+        preds_class = model.predict(Xte)
 
         results = pd.DataFrame({
-            "Actual": yte,
-            "Predicted_Prob": preds
+            "Actual_Failure": yte,
+            "Predicted_Prob": preds_prob,
+            "Predicted_Class": preds_class
         })
 
-        st.dataframe(results.head(10))
-        download_df(results, "ml_predictions.csv")
+        st.success(f"Model trained on {len(Xtr)} rows, tested on {len(Xte)} rows.")
+        st.dataframe(results.head(15), use_container_width=True)
+        download_df(results, "machine_failure_predictions.csv", "Download ML prediction sample")
+
+        # Feature importances
+        fi_df = pd.DataFrame({
+            "Feature": ML_COLS,
+            "Importance": model.feature_importances_
+        }).sort_values("Importance", ascending=False)
+
+        fig_fi = px.bar(
+            fi_df,
+            x="Feature",
+            y="Importance",
+            title="Feature Importance – Failure Prediction Model",
+            text="Importance"
+        )
+        fig_fi.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+        st.plotly_chart(fig_fi, use_container_width=True)
+
     else:
-        st.info("Not enough data or features for ML model. Need >=50 rows, at least 2 numeric features among Temperature/Vibration/RPM/Load/Run_Hours, and Failure_Flag column.")
+        st.info("Not enough data or features for ML model. Need ≥ 50 rows, at least 2 features among [Temperature, Vibration, RPM, Load, Run_Hours], and Failure_Flag column.")
 
-    # ---------------------- Automated Insights ----------------------
-    st.markdown("### Automated Insights")
-    insights = []
+    # ---------------------------------------------------------
+    # AUTOMATED INSIGHTS
+    # ---------------------------------------------------------
+    st.markdown("<div class='section-title'>Automated Insights</div>", unsafe_allow_html=True)
 
+    insights_rows = []
+
+    # 1) Highest failure-prone machine
     if "Machine_ID" in df_f.columns and "Failure_Flag" in df_f.columns:
         risk_series = df_f.groupby("Machine_ID")["Failure_Flag"].mean().sort_values(ascending=False)
         if not risk_series.empty:
-            highest = risk_series.index[0]
-            insights.append({
-                "Insight":"Highest Failure-Prone Machine",
-                "Machine_ID": highest,
-                "Failure Rate": round(float(risk_series.iloc[0]),4)
+            top_machine = risk_series.index[0]
+            top_rate = risk_series.iloc[0]
+            insights_rows.append({
+                "Insight": "Highest failure-prone machine",
+                "Entity": top_machine,
+                "Metric": f"{top_rate*100:.2f}% failure rate",
+                "Action": "Prioritize detailed inspection and preventive maintenance plan."
             })
-    # Add basic sensor summary
-    if "Temperature" in df_f.columns:
-        insights.append({"Insight":"Avg Temperature", "Value": round(float(df_f["Temperature"].mean()),2)})
-    if "Vibration" in df_f.columns:
-        insights.append({"Insight":"Avg Vibration", "Value": round(float(df_f["Vibration"].mean()),2)})
 
-    ins_df = pd.DataFrame(insights)
-    if ins_df.empty:
-        st.info("No automated insights could be generated for the current filter.")
+    # 2) Machine type with highest average failure rate
+    if "Machine_Type" in df_f.columns and "Failure_Flag" in df_f.columns:
+        mt = df_f.groupby("Machine_Type")["Failure_Flag"].mean().sort_values(ascending=False)
+        if not mt.empty:
+            mt_top = mt.index[0]
+            mt_val = mt.iloc[0]
+            insights_rows.append({
+                "Insight": "Most failure-prone machine type",
+                "Entity": mt_top,
+                "Metric": f"{mt_val*100:.2f}% failure rate",
+                "Action": "Review design, duty cycles and maintenance regime for this machine type."
+            })
+
+    # 3) Highest average temperature machine
+    if "Machine_ID" in df_f.columns and "Temperature" in df_f.columns:
+        avg_temp_id = df_f.groupby("Machine_ID")["Temperature"].mean().sort_values(ascending=False)
+        if not avg_temp_id.empty:
+            mt_id = avg_temp_id.index[0]
+            mt_val = avg_temp_id.iloc[0]
+            insights_rows.append({
+                "Insight": "Machine running at highest temperatures",
+                "Entity": mt_id,
+                "Metric": f"{mt_val:.2f} °C average",
+                "Action": "Check cooling, lubrication and load profiles."
+            })
+
+    # 4) Overall failure rate
+    if "Failure_Flag" in df_f.columns:
+        overall_fail_rate = df_f["Failure_Flag"].mean()
+        insights_rows.append({
+            "Insight": "Overall failure rate in filtered view",
+            "Entity": "All machines (filtered)",
+            "Metric": f"{overall_fail_rate*100:.2f}%",
+            "Action": "Use this as a baseline to track improvements after interventions."
+        })
+
+    if not insights_rows:
+        st.info("No insights generated for the current filter selection.")
     else:
-        st.dataframe(ins_df, use_container_width=True)
-        download_df(ins_df, "automated_insights.csv")
+        insights_df = pd.DataFrame(insights_rows)
+        st.dataframe(insights_df, use_container_width=True)
+        download_df(insights_df, "predictive_maintenance_insights.csv", "Download insights CSV")
