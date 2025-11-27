@@ -364,18 +364,50 @@ with tabs[1]:
     download_df(filt.head(500), "filtered_route_preview.csv", label="Download filtered preview (up to 500 rows)")
 
     # -----------------------------------------------------
-    # Dynamic KPIs
+    # -----------------------------------------------------
+    # Dynamic KPIs (FULL FIXED BLOCK)
     # -----------------------------------------------------
     st.markdown("### KPIs (Dynamic)")
     dk1, dk2, dk3, dk4, dk5 = st.columns(5)
     
-    # numeric safe conversions
+    # Compute KPI raw values safely
+    total_routes = (
+        filt["Route_ID"].nunique()
+        if "Route_ID" in filt.columns
+        else len(filt)
+    )
+    
+    avg_eff = (
+        float(filt["Efficiency_Score"].mean())
+        if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any()
+        else None
+    )
+    
+    avg_delay = (
+        float(filt["Delay_Hours"].mean())
+        if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any()
+        else None
+    )
+    
+    avg_fuel = (
+        float(filt["Actual_Fuel_Liters"].mean())
+        if "Actual_Fuel_Liters" in filt.columns and filt["Actual_Fuel_Liters"].notna().any()
+        else None
+    )
+    
+    if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any():
+        ontime_rate = (filt["Delay_Hours"] <= 0.25).mean() * 100
+    else:
+        ontime_rate = None
+    
+    # Convert numbers → safe display text  
     routes_val = f"{total_routes:,}"
     avg_eff_val = f"{avg_eff:.3f}" if avg_eff is not None else "N/A"
     avg_delay_val = f"{avg_delay:.2f}" if avg_delay is not None else "N/A"
     avg_fuel_val = f"{avg_fuel:.2f}" if avg_fuel is not None else "N/A"
     ontime_val = f"{ontime_rate:.1f}%" if ontime_rate is not None else "N/A"
     
+    # Render KPI cards
     dk1.markdown(
         f"<div class='kpi'>{routes_val}<div class='small'>Routes in selection</div></div>",
         unsafe_allow_html=True
@@ -396,8 +428,6 @@ with tabs[1]:
         f"<div class='kpi'>{ontime_val}<div class='small'>On-Time Deliveries</div></div>",
         unsafe_allow_html=True
     )
-
-
     
     # -----------------------------------------------------
     # Exploratory Data Analysis
