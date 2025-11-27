@@ -363,69 +363,64 @@ with tab_overview:
 # TAB 2 — DATA DICTIONARY
 # =========================================================
 with tab_dict:
-    st.markdown("### Data Dictionary")
+    st.markdown("### Required Columns & Data Dictionary")
 
     st.markdown(
         """
         <div class="card card-left">
-        Below is the recommended schema for the Hiring Funnel Drop-Off app. 
-        The application is flexible and will work even if some columns are missing, 
-        but ML & simulator quality improves with more fields present.
+        This table shows the recommended column schema for the Hiring Funnel app.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    dict_rows = [
-        {"Column": "Applicant_ID", "Type": "ID", "Role": "Identifier", "Description": "Unique candidate identifier"},
-        {"Column": "Apply_Date", "Type": "DateTime", "Role": "Independent", "Description": "Date when candidate applied"},
-        {"Column": "Source", "Type": "Categorical", "Role": "Independent", "Description": "Source of the candidate (job board, referral, etc.)"},
-        {"Column": "Role", "Type": "Categorical", "Role": "Independent", "Description": "Role / position applied for"},
-        {"Column": "Stage_Apply", "Type": "Date/Flag", "Role": "Meta", "Description": "Application stage timestamp/flag"},
-        {"Column": "Stage_Screen", "Type": "Date/Flag", "Role": "Meta", "Description": "Screening stage timestamp/flag"},
-        {"Column": "Stage_Interview", "Type": "Date/Flag", "Role": "Meta", "Description": "Interview stage timestamp/flag"},
-        {"Column": "Stage_Offer", "Type": "Date/Flag", "Role": "Meta", "Description": "Offer stage timestamp/flag"},
-        {"Column": "Stage_Join", "Type": "Date/Flag", "Role": "Meta", "Description": "Joining stage timestamp/flag"},
-        {"Column": "Current_Stage", "Type": "Categorical", "Role": "Independent", "Description": "Latest stage reached by candidate"},
-        {"Column": "Days_in_Stage", "Type": "Numeric", "Role": "Independent", "Description": "Number of days candidate spent in current stage"},
-        {"Column": "Total_Time_to_Hire_Days", "Type": "Numeric", "Role": "Dependent", "Description": "Total days from Apply_Date to Stage_Join"},
-        {"Column": "Offer_Accepted_Flag", "Type": "Binary", "Role": "Dependent", "Description": "1 if offer accepted, else 0"},
-        {"Column": "Screen_Score", "Type": "Numeric", "Role": "Independent", "Description": "Screening score / rating"},
-        {"Column": "Resume_Score", "Type": "Numeric", "Role": "Independent", "Description": "Resume match score"},
-        {"Column": "Recruiter_ID", "Type": "Categorical", "Role": "Independent", "Description": "Recruiter handling the candidate"},
-        {"Column": "JD_Variant", "Type": "Categorical", "Role": "Independent", "Description": "Version / variant of the Job Description"},
-        {"Column": "Channel", "Type": "Categorical", "Role": "Independent", "Description": "Channel bucket (direct, agency, campus, etc.)"},
-        {"Column": "Candidate_Response_Time_Hrs", "Type": "Numeric", "Role": "Independent", "Description": "Avg candidate response time in hours"},
-    ]
-    dd_df = pd.DataFrame(dict_rows)
+    # ---- TABLE FORMAT ----
+    dd_df = pd.DataFrame([
+        {"Column": row["Column"], "Type": row["Type"], "Role": row["Role"], "Description": row["Description"]}
+        for row in dict_rows
+    ])
 
-    col_l, col_r = st.columns([1.2, 1.8])
-    with col_l:
-        st.markdown("#### Variable chips")
-        st.markdown("<div class='card card-left'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-subtitle'>Independent variables</div>", unsafe_allow_html=True)
-        indep_cols = dd_df[dd_df["Role"].isin(["Independent"])]
+    st.markdown("#### Full Data Dictionary (Tabular)")
+    st.dataframe(dd_df, use_container_width=True)
 
-        for _, row in indep_cols.iterrows():
+    st.markdown("---")
+
+    # ---- SPLIT VIEW: Independent (Left) vs Dependent (Right) ----
+    st.markdown("### Variables by Role (Independent vs Dependent)")
+
+    left, right = st.columns(2)
+
+    # -------- LEFT: Independent Variables --------
+    with left:
+        st.markdown("#### Independent Variables")
+        for _, row in dd_df[dd_df["Role"] == "Independent"].iterrows():
             st.markdown(
-                f"<div class='var-chip var-indep'><span class='name'>{row['Column']}</span> · <span class='role'>{row['Type']}</span></div>",
+                f"""
+                <div class='card card-left'>
+                    <b>{row['Column']}</b><br>
+                    <span style='font-size:13px;opacity:0.75;'>{row['Description']}</span><br>
+                    <span style='font-size:12px;color:#064b86;'>Type: {row['Type']}</span>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
 
-        st.markdown("<br><div class='section-subtitle'>Dependent variables</div>", unsafe_allow_html=True)
-        dep_cols = dd_df[dd_df["Role"].isin(["Dependent"])]
-        for _, row in dep_cols.iterrows():
+    # -------- RIGHT: Dependent Variables --------
+    with right:
+        st.markdown("#### Dependent Variables")
+        for _, row in dd_df[dd_df["Role"] == "Dependent"].iterrows():
             st.markdown(
-                f"<div class='var-chip'><span class='name'>{row['Column']}</span> · <span class='role'>{row['Type']}</span></div>",
+                f"""
+                <div class='card card-left'>
+                    <b>{row['Column']}</b><br>
+                    <span style='font-size:13px;opacity:0.75;'>{row['Description']}</span><br>
+                    <span style='font-size:12px;color:#064b86;'>Type: {row['Type']}</span>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with col_r:
-        st.markdown("#### Full data dictionary")
-        st.dataframe(dd_df, use_container_width=True)
-        download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download data dictionary")
+    download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
 
 # =========================================================
 # TAB 3 — APPLICATION
