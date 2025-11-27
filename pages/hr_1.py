@@ -378,7 +378,7 @@ with tab_overview:
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Screen Pass %</div>
-                </div>
+            </div>
             <div class="kpi-card">
                 <div class="kpi-label">Interview Rate</div>
             </div>
