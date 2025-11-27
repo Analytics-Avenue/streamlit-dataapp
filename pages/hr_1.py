@@ -388,6 +388,8 @@ with tab_overview:
 with tab_dict:
     st.markdown("### Required Columns & Data Dictionary")
 
+    # Convert dict_rows to DataFrame
+    dd_df = pd.DataFrame(dict_rows)
     st.markdown("---")
     st.markdown("### Full Data Dictionary Table")
     st.dataframe(dd_df, use_container_width=True)
@@ -395,8 +397,7 @@ with tab_dict:
 
 
     st.markdown("---")
-    # Convert dict_rows to DataFrame
-    dd_df = pd.DataFrame(dict_rows)
+
     
     # ---- SPLIT VIEW: Independent (Left) vs Dependent (Right) ----
     st.markdown("### Variables by Role (Independent vs Dependent)")
