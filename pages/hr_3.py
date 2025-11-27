@@ -376,6 +376,8 @@ with tabs[1]:
     if "Role" not in df.columns:
         df["Role"] = "Unknown"
 
+
+
     # --------------- DIAGNOSTICS ---------------
     st.markdown("#### Dataset diagnostics")
     st.dataframe(
@@ -832,3 +834,57 @@ with tabs[2]:
         dd["Description"] = dd["Column"].map(desc_map).fillna("")
         st.dataframe(dd, use_container_width=True)
         download_df(dd, "skill_gap_data_dictionary.csv", "Download data dictionary")
+
+        
+        st.markdown("#### Independent & Dependent Variables")
+        
+        # Var groups
+        independent_vars = [
+            ("Employee_ID", "string/int", "Identity level variable"),
+            ("Department", "string", "Functional group"),
+            ("Role", "string", "Job designation"),
+            ("Tenure_Years", "numeric", "Years of experience"),
+            ("Annual_Salary", "numeric", "Cost variable"),
+            ("Skill", "string", "Competency type"),
+            ("Required_Level", "numeric", "Expected proficiency"),
+            ("Current_Level", "numeric", "Actual proficiency"),
+            ("Skill_Gap", "numeric", "Gap to close"),
+            ("Training_Count", "numeric", "No. of trainings taken"),
+            ("Last_Training_Type", "string", "Type of last training"),
+        ]
+        
+        dependent_vars = [
+            ("Recommend_Training_Flag", "Binary Target", "Model predicts training need"),
+            ("Predicted_Improvement_pts", "Regression Output", "ML predicted improvement"),
+            ("Predicted_Level", "Regression Output", "Expected level after training"),
+            ("Estimated_ROI_USD", "Regression Output", "Expected ROI"),
+            ("Predicted_Performance_Score", "Regression Output", "Predicted employee score"),
+        ]
+        
+        left, right = st.columns(2)
+        
+        with left:
+            st.markdown("### Independent Variables")
+            for name, dtype, desc in independent_vars:
+                st.markdown(
+                    f"""
+                    <div class='card'>
+                        <b>{name}</b><br>
+                        <span class='small'>{dtype} • {desc}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        
+        with right:
+            st.markdown("### Dependent Variables")
+            for name, dtype, desc in dependent_vars:
+                st.markdown(
+                    f"""
+                    <div class='card'>
+                        <b>{name}</b><br>
+                        <span class='small'>{dtype} • {desc}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
