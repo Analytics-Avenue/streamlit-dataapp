@@ -212,8 +212,7 @@ with tab2:
             st.markdown(
                 f"""
                 <div class='var-box'>
-                    <b>{v}</b><br>
-                    {desc}
+                    <b>{v}</b>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -228,8 +227,7 @@ with tab2:
         st.markdown(
             f"""
             <div class='var-box'>
-                <b>{DEPENDENT_VAR}</b><br>
-                {desc}
+                <b>{DEPENDENT_VAR}</b>
             </div>
             """,
             unsafe_allow_html=True
