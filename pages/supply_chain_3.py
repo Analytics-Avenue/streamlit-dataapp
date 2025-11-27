@@ -665,42 +665,60 @@ with tab_app:
 
 
 # ---------------------------------------------------------
+# ---------------------------------------------------------
 # DATA DICTIONARY TAB
 # ---------------------------------------------------------
 with tab_dict:
     st.header("Data Dictionary & Variables")
 
-    st.markdown("<div class='section-title'>Required Columns & Definitions</div>", unsafe_allow_html=True)
-    dict_df = pd.DataFrame(DATA_DICTIONARY, columns=["Column Name", "Description", "Variable Role"])
+    # ------------------------------
+    # Tabular Data Dictionary
+    # ------------------------------
+    st.markdown("<div class='section-title'>Required Columns (Tabular Format)</div>", unsafe_allow_html=True)
+
+    dict_df = pd.DataFrame(DATA_DICTIONARY, columns=["Column Name", "Description"])
+    dict_df["Mandatory"] = "Yes"
+
     st.dataframe(dict_df, use_container_width=True)
+    download_csv(dict_df, "warehouse_data_dictionary.csv", "Download Data Dictionary")
+
+    # ------------------------------
+    # Independent vs Dependent Variables (Card Layout)
+    # ------------------------------
 
     st.markdown("<div class='section-title'>Independent vs Dependent Variables</div>", unsafe_allow_html=True)
+
     c_ind, c_dep = st.columns(2)
 
+    # Independent variables card
     with c_ind:
         st.markdown("""
         <div class='card'>
-          <b>Independent / Feature Variables</b>
-          <div class='small'>Drivers, conditions, and attributes used to explain or predict performance.</div>
-          <hr style="margin:6px 0;">
+            <b style='font-size:18px;'>Independent Variables</b>
+            <div class='small'>These variables act as features or drivers in ML and analytics models.</div>
+            <hr style="margin:8px 0;">
         """, unsafe_allow_html=True)
+
         for col in INDEPENDENT_VARS:
             st.markdown(f"<div class='small'>• {col}</div>", unsafe_allow_html=True)
+
         st.markdown("</div>", unsafe_allow_html=True)
 
+    # Dependent variables card
     with c_dep:
         st.markdown("""
         <div class='card'>
-          <b>Dependent / Target Variables</b>
-          <div class='small'>Outcomes you want to predict, optimise, or explain.</div>
-          <hr style="margin:6px 0;">
+            <b style='font-size:18px;'>Dependent Variables</b>
+            <div class='small'>These variables represent the output or values being predicted.</div>
+            <hr style="margin:8px 0;">
         """, unsafe_allow_html=True)
+
         for col in DEPENDENT_VARS:
             st.markdown(f"<div class='small'>• {col}</div>", unsafe_allow_html=True)
+
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='subtle'>Use this tab when mapping external datasets into the app or documenting the model schema.</div>", unsafe_allow_html=True)
-
+    st.markdown("<div class='subtle'>This section helps you map custom datasets correctly and understand model inputs/outputs.</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # ACTIONABLE PLAYBOOKS TAB
