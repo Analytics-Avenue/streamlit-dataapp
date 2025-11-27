@@ -390,8 +390,7 @@ with tab_dict:
 
     # Convert dict_rows to DataFrame
     dd_df = pd.DataFrame(dict_rows)
-    st.markdown("---")
-    st.markdown("### Full Data Dictionary Table")
+
     st.dataframe(dd_df, use_container_width=True)
     download_df(dd_df, "hiring_funnel_data_dictionary.csv", "Download Data Dictionary")
 
