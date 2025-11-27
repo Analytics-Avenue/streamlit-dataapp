@@ -261,6 +261,29 @@ EXPECTED_COLS = [
 
 DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/hr/hiring_funnel_data.csv"
 
+
+dict_rows = [
+    {"Column": "Applicant_ID", "Type": "ID", "Role": "Identifier", "Description": "Unique candidate identifier"},
+    {"Column": "Apply_Date", "Type": "DateTime", "Role": "Independent", "Description": "Date when candidate applied"},
+    {"Column": "Source", "Type": "Categorical", "Role": "Independent", "Description": "Source of the candidate"},
+    {"Column": "Role", "Type": "Categorical", "Role": "Independent", "Description": "Role / position applied for"},
+    {"Column": "Stage_Apply", "Type": "Date/Flag", "Role": "Meta", "Description": "Application timestamp/flag"},
+    {"Column": "Stage_Screen", "Type": "Date/Flag", "Role": "Meta", "Description": "Screening stage timestamp/flag"},
+    {"Column": "Stage_Interview", "Type": "Date/Flag", "Role": "Meta", "Description": "Interview stage timestamp/flag"},
+    {"Column": "Stage_Offer", "Type": "Date/Flag", "Role": "Meta", "Description": "Offer stage timestamp/flag"},
+    {"Column": "Stage_Join", "Type": "Date/Flag", "Role": "Meta", "Description": "Joining stage timestamp/flag"},
+    {"Column": "Current_Stage", "Type": "Categorical", "Role": "Independent", "Description": "Latest stage reached"},
+    {"Column": "Days_in_Stage", "Type": "Numeric", "Role": "Independent", "Description": "Days spent in current stage"},
+    {"Column": "Total_Time_to_Hire_Days", "Type": "Numeric", "Role": "Dependent", "Description": "Days from apply to join"},
+    {"Column": "Offer_Accepted_Flag", "Type": "Binary", "Role": "Dependent", "Description": "1 if offer accepted"},
+    {"Column": "Screen_Score", "Type": "Numeric", "Role": "Independent", "Description": "Screening score"},
+    {"Column": "Resume_Score", "Type": "Numeric", "Role": "Independent", "Description": "Resume match score"},
+    {"Column": "Recruiter_ID", "Type": "Categorical", "Role": "Independent", "Description": "Recruiter handling the case"},
+    {"Column": "JD_Variant", "Type": "Categorical", "Role": "Independent", "Description": "Job description variant"},
+    {"Column": "Channel", "Type": "Categorical", "Role": "Independent", "Description": "Channel bucket (direct/agency/etc.)"},
+    {"Column": "Candidate_Response_Time_Hrs", "Type": "Numeric", "Role": "Independent", "Description": "Candidate response time"},
+]
+
 # ---------------------------------------------------------
 # TABS
 # ---------------------------------------------------------
