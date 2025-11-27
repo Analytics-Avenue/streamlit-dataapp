@@ -68,6 +68,14 @@ st.markdown("""
     color: #444;
 }
 
+/* MAIN HEADER */
+.big-header {
+    font-size:36px !important;
+    font-weight:700 !important;
+    color:#000 !important;
+    margin-bottom:12px;
+}
+
 /* Generic glow card */
 .card {
     padding: 16px 18px;
@@ -159,21 +167,22 @@ footer {visibility: hidden;}
 
 # ---------------------------------------------------------
 # LOGO + TITLE
-# ---------------------------------------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
 
-st.markdown(
-    f"""
-<div class="app-header">
-    <img src="{logo_url}" width="56">
-    <div>
-        <p class="app-title-main">Analytics Avenue & Advanced Analytics</p>
-        <p class="app-title-sub">Hiring Funnel Drop-Off Analysis • TA & People Analytics</p>
+# Header & Logo
+# -------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+st.markdown(f"""
+<div style="display: flex; align-items: center; margin-bottom:16px;">
+    <img src="{logo_url}" width="60" style="margin-right:12px;">
+    <div style="line-height:1;">
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Analytics Avenue &</div>
+        <div style="color:#064b86; font-size:36px; font-weight:700;">Advanced Analytics</div>
     </div>
 </div>
-""",
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
+
+st.markdown("<div class='big-header'>Hiring Funnel Drop-Off Analysis • TA & People Analytics</div>", unsafe_allow_html=True)
+
 
 st.markdown("")
 
