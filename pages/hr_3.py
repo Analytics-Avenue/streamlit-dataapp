@@ -840,37 +840,36 @@ with tabs[2]:
         
         # Var groups
         independent_vars = [
-            ("Employee_ID", "string/int", "Identity level variable"),
-            ("Department", "string", "Functional group"),
-            ("Role", "string", "Job designation"),
-            ("Tenure_Years", "numeric", "Years of experience"),
-            ("Annual_Salary", "numeric", "Cost variable"),
-            ("Skill", "string", "Competency type"),
-            ("Required_Level", "numeric", "Expected proficiency"),
-            ("Current_Level", "numeric", "Actual proficiency"),
-            ("Skill_Gap", "numeric", "Gap to close"),
-            ("Training_Count", "numeric", "No. of trainings taken"),
-            ("Last_Training_Type", "string", "Type of last training"),
+            ("Employee_ID"),
+            ("Department"),
+            ("Role"),
+            ("Tenure_Years"),
+            ("Annual_Salary"),
+            ("Skill"),
+            ("Required_Level"),
+            ("Current_Level"),
+            ("Skill_Gap"),
+            ("Training_Count"),
+            ("Last_Training_Type"),
         ]
         
         dependent_vars = [
-            ("Recommend_Training_Flag", "Binary Target", "Model predicts training need"),
-            ("Predicted_Improvement_pts", "Regression Output", "ML predicted improvement"),
-            ("Predicted_Level", "Regression Output", "Expected level after training"),
-            ("Estimated_ROI_USD", "Regression Output", "Expected ROI"),
-            ("Predicted_Performance_Score", "Regression Output", "Predicted employee score"),
+            ("Recommend_Training_Flag"),
+            ("Predicted_Improvement_pts"),
+            ("Predicted_Level"),
+            ("Estimated_ROI_USD"),
+            ("Predicted_Performance_Score"),
         ]
         
         left, right = st.columns(2)
         
         with left:
             st.markdown("### Independent Variables")
-            for name, dtype, desc in independent_vars:
+            for name in independent_vars:
                 st.markdown(
                     f"""
                     <div class='card'>
-                        <b>{name}</b><br>
-                        <span class='small'>{dtype} • {desc}</span>
+                        <b>{name}
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -878,12 +877,11 @@ with tabs[2]:
         
         with right:
             st.markdown("### Dependent Variables")
-            for name, dtype, desc in dependent_vars:
+            for name in dependent_vars:
                 st.markdown(
                     f"""
                     <div class='card'>
-                        <b>{name}</b><br>
-                        <span class='small'>{dtype} • {desc}</span>
+                        <b>{name}
                     </div>
                     """,
                     unsafe_allow_html=True,
