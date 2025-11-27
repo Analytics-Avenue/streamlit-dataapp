@@ -137,7 +137,7 @@ def download_df(df, filename, label="Download CSV"):
 # ---------------------------------------------------------
 # 3 TABS
 # ---------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["Overview", "Data Dictionary", "Application"])
+tab1, tab2, tab3 = st.tabs(["Overview", "Important Attributes", "Application"])
 
 # ---------------------------------------------------------
 # TAB 1 — OVERVIEW
