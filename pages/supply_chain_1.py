@@ -1,8 +1,9 @@
-# app_route_optimization.py
+# app_route_optimization_standardized.py
+
 import streamlit as st
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
@@ -14,14 +15,21 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import math
 import warnings
-import folium
-from folium.plugins import MarkerCluster
-from streamlit_folium import st_folium
 
 warnings.filterwarnings("ignore")
 
-# -------------------------
+# ---------------------------------------------------------
+# Page config (must be first Streamlit call)
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="Route Optimization & Logistics Efficiency",
+    layout="wide",
+    page_icon="🚚"
+)
 
+# ---------------------------------------------------------
+# Hide sidebar
+# ---------------------------------------------------------
 hide_sidebar = """
 <style>
 [data-testid="stSidebarNav"] {display: none;}
@@ -30,74 +38,87 @@ section[data-testid="stSidebar"] {display: none;}
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
-
-# -------------------------
-# Company Logo + Name
-# -------------------------
-logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
-st.markdown(f"""
-<div style="display: flex; align-items: center;">
-    <img src="{logo_url}" width="60" style="margin-right:10px;">
-    <div style="line-height:1;">
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Analytics Avenue &</div>
-        <div style="color:#064b86; font-size:36px; font-weight:bold; margin:0; padding:0;">Advanced Analytics</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ------------------------
-# Page config & title
-# ------------------------
-st.set_page_config(page_title="Route Optimization & Logistics Efficiency", layout="wide")
-# Left-aligned big header
-st.markdown("""
-<div style="text-align: left;">
-  <h1 style="margin:0; padding:0;">Route Optimization & Logistics Efficiency</h1>
-  <p style="margin-top:4px; color:#555">Reduce miles, cut fuel, speed deliveries — with data.</p>
-</div>
-""", unsafe_allow_html=True)
-
-# ------------------------
-# Card CSS (hover glow)
-# ------------------------
+# ---------------------------------------------------------
+# Global CSS: cards, KPIs, basic typography
+# ---------------------------------------------------------
 st.markdown("""
 <style>
 .card {
-    padding:20px;
-    border-radius:12px;
-    background:#ffffff;
-    border:1px solid #e6e6e6;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    padding: 18px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    text-align: left;
 }
 .card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
-    border-color:#064b86;
+    box-shadow: 0 12px 36px rgba(6,75,134,0.18);
+    border-color: #064b86;
 }
+
 .kpi {
-    padding:28px;
-    border-radius:12px;
-    background:#ffffff;
-    border:1px solid #e6e6e6;
-    text-align:center;
-    font-weight:700;
-    color:#064b86;
-    font-size:20px;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    padding: 24px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e6e6e6;
+    text-align: center;
+    font-weight: 700;
+    color: #064b86;
+    font-size: 20px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .kpi:hover {
     transform: translateY(-6px);
-    box-shadow: 0 8px 30px rgba(6,75,134,0.18);
-    border-color:#064b86;
+    box-shadow: 0 10px 30px rgba(6,75,134,0.18);
+    border-color: #064b86;
 }
+
 .small { color:#666; font-size:13px; }
-.left-align { text-align: left; }
+.left-align { text-align:left; }
+
+.title-main {
+    font-size: 30px;
+    font-weight: 800;
+    color:#064b86;
+    margin:0;
+    padding:0;
+    text-align:left;
+}
+.subtitle-main {
+    font-size:14px;
+    color:#555;
+    margin-top:4px;
+    margin-bottom:0;
+    text-align:left;
+}
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# Company Logo + Name
+# ---------------------------------------------------------
+logo_url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/logo.png"
+col_logo, col_head = st.columns([0.18, 3])
+with col_logo:
+    st.image(logo_url, width=60)
+with col_head:
+    st.markdown(
+        """
+        <div>
+            <p class="title-main">Route Optimization & Logistics Efficiency</p>
+            <p class="subtitle-main">Reduce miles, cut fuel, speed deliveries with data-driven routing.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
+# ---------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------
 def read_csv_safe(src):
-    # handles duplicate column names by making them unique
+    """Read CSV and make duplicate column names unique."""
     df = pd.read_csv(src)
     cols = list(df.columns)
     if len(cols) != len(set(cols)):
@@ -121,20 +142,19 @@ def download_df(df, filename, label="Download CSV"):
     b.seek(0)
     st.download_button(label, b, file_name=filename, mime="text/csv")
 
-# ------------------------
+# ---------------------------------------------------------
 # Tabs
-# ------------------------
+# ---------------------------------------------------------
 tabs = st.tabs(["Overview", "Application", "Action Playbooks"])
 
-# ------------------------
-# Overview Tab
-# ------------------------
+# ---------------------------------------------------------
+# OVERVIEW TAB
+# ---------------------------------------------------------
 with tabs[0]:
-    # Left column: Capabilities (left-aligned cards)
-    st.markdown("### Overview", unsafe_allow_html=True)
+    st.markdown("### Overview")
     st.markdown("""
     <div class='card left-align'>
-      <b>Purpose</b>: Cut route costs and delivery time by optimizing routes, predicting delays and fuel usage, and prioritizing high-impact improvement opportunities.
+      <b>Purpose</b>: Cut route costs and delivery time by optimizing routes, predicting delays & fuel usage, and prioritising high-impact fleet actions.
     </div>
     """, unsafe_allow_html=True)
 
@@ -145,87 +165,89 @@ with tabs[0]:
         <div class='card left-align'>
         • Route efficiency scoring and anomaly detection<br>
         • Predictive travel time and fuel consumption models<br>
-        • Cluster similar routes and vehicles for capacity planning<br>
-        • Multi-dimensional filters (vehicle, route, traffic, weather)<br>
-        • Exportable prioritized actions for operations
+        • Clustering of routes/vehicles for capacity planning<br>
+        • Multi-filter exploration (vehicle / route / traffic / weather)<br>
+        • Exportable prioritized actions for operations teams
         </div>
         """, unsafe_allow_html=True)
     with right:
         st.markdown("#### Business impact")
         st.markdown("""
         <div class='card left-align'>
-        • Lower fuel & operational cost<br>
-        • Faster deliveries & higher on-time rate<br>
-        • Reduced CO2 emissions per unit shipped<br>
-        • Better fleet utilisation and scheduling<br>
+        • Lower fuel & operational cost per km<br>
+        • Faster deliveries & higher on-time %<br>
+        • Reduced CO₂ per shipment<br>
+        • Better fleet utilisation & scheduling<br>
         • Data-driven procurement of vehicles & drivers
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("#### KPIs")
-    # 5 KPI cards in one row
-    kpicol1, kpicol2, kpicol3, kpicol4, kpicol5 = st.columns(5)
-    kpicol1.markdown("<div class='kpi'>Total Routes Tracked</div>", unsafe_allow_html=True)
-    kpicol2.markdown("<div class='kpi'>Avg Efficiency Score</div>", unsafe_allow_html=True)
-    kpicol3.markdown("<div class='kpi'>Avg Delay (hrs)</div>", unsafe_allow_html=True)
-    kpicol4.markdown("<div class='kpi'>Avg Fuel L (per route)</div>", unsafe_allow_html=True)
-    kpicol5.markdown("<div class='kpi'>On-Time %</div>", unsafe_allow_html=True)
+    k1, k2, k3, k4, k5 = st.columns(5)
+    k1.markdown("<div class='kpi'>Total Routes Tracked</div>", unsafe_allow_html=True)
+    k2.markdown("<div class='kpi'>Avg Efficiency Score</div>", unsafe_allow_html=True)
+    k3.markdown("<div class='kpi'>Avg Delay (hrs)</div>", unsafe_allow_html=True)
+    k4.markdown("<div class='kpi'>Avg Fuel / Route (L)</div>", unsafe_allow_html=True)
+    k5.markdown("<div class='kpi'>On-Time %</div>", unsafe_allow_html=True)
 
-    st.markdown("### Who should use this app & How")
+    st.markdown("### Who should use & How")
     st.markdown("""
     <div class='card left-align'>
-      <b>Who</b>: Fleet managers, logistics planners, operations leads, sustainability teams.<br><br>
-      <b>How</b>: 1) Load dataset (default/generate or upload). 2) Use filters to focus on routes/vehicles. 3) Review top-risk/inefficient routes. 4) Export prioritized fixes and retrain models periodically.
+      <b>Who</b>: Fleet managers, logistics planners, operations heads, sustainability teams.<br><br>
+      <b>How</b>: 1) Load dataset (default / upload). 2) Filter by vehicle / route / period. 3) Review top-delay & low-efficiency routes. 4) Export cost simulations, ML predictions & playbooks to drive execution.
     </div>
     """, unsafe_allow_html=True)
 
-# ------------------------
-# Application Tab
-# ------------------------
+# ---------------------------------------------------------
+# APPLICATION TAB
+# ---------------------------------------------------------
 with tabs[1]:
     st.header("Application")
-    st.markdown("### Step 1 — Load dataset (choose one)")
+    st.markdown("### Step 1 — Load dataset")
 
-    load_mode = st.radio("Dataset option:", ["Default Data", "Upload CSV", "Upload + Map Columns"], horizontal=True)
+    load_mode = st.radio(
+        "Dataset option:",
+        ["Default Data", "Upload CSV", "Upload + Map Columns"],
+        horizontal=True
+    )
+
     df = None
 
     if load_mode == "Default Data":
-      url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/route_optimization_dataset.csv"
-      try:
-          df = pd.read_csv(url)
-          df.columns = df.columns.str.strip()
-          st.success("Default dataset loaded")
-          st.dataframe(df.head())
-      except Exception as e:
-          st.error("Failed to load default dataset: " + str(e))
-          st.stop()
+        url = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/route_optimization_dataset.csv"
+        try:
+            df = read_csv_safe(url)
+            st.success("Default dataset loaded.")
+            st.dataframe(df.head(), use_container_width=True)
+        except Exception as e:
+            st.error("Failed to load default dataset: " + str(e))
+            st.stop()
 
     elif load_mode == "Upload CSV":
-        st.markdown("#### Download Sample CSV for Reference")
+        st.markdown("#### Download Sample CSV for reference")
         URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/supply_chain/route_optimization_dataset.csv"
         try:
-            # Load default dataset
-            sample_df = pd.read_csv(URL).head(5)  # Take first 5 rows
+            sample_df = read_csv_safe(URL).head(5)
             sample_csv = sample_df.to_csv(index=False)
-            st.download_button("Download Sample CSV", sample_csv, "sample_dataset.csv", "text/csv")
+            st.download_button("Download Sample CSV", sample_csv, "sample_route_dataset.csv", "text/csv")
         except Exception as e:
             st.info(f"Sample CSV unavailable: {e}")
-    
-        # Upload actual CSV
+
         file = st.file_uploader("Upload your dataset", type=["csv"])
         if file:
-            df = pd.read_csv(file)
+            df = read_csv_safe(file)
+            st.success("Dataset uploaded.")
+            st.dataframe(df.head(), use_container_width=True)
 
     else:  # Upload + Map
         uploaded = st.file_uploader("Upload CSV to map", type=["csv"], key="upload_map")
         if uploaded:
             raw = read_csv_safe(uploaded)
             st.write("Preview (first 5 rows):")
-            st.dataframe(raw.head())
-            st.markdown("Map columns (map at least the key columns you have).")
-            # suggest likely names
+            st.dataframe(raw.head(), use_container_width=True)
+            st.markdown("Map columns (map at least Timestamp, Vehicle_ID, Route_ID, distance & fuel if available).")
+
             cols = list(raw.columns)
-            mapping = {}
             expected = [
                 "Timestamp","Vehicle_ID","Vehicle_Type","Route_ID","Start_City","End_City",
                 "Route_Distance_km","Traffic_Level","Weather_Condition",
@@ -233,84 +255,90 @@ with tabs[1]:
                 "Predicted_Fuel_Liters","Actual_Fuel_Liters","Vehicle_Capacity_kg",
                 "Load_Weight_kg","Delay_Hours","Efficiency_Score"
             ]
+            mapping = {}
             for e in expected:
-                mapping[e] = st.selectbox(f"Map → {e}", ["-- Skip --"] + cols, index=0)
+                mapping[e] = st.selectbox(f"Map → {e}", ["-- Skip --"] + cols, index=0, key=f"map_{e}")
+
             if st.button("Apply mapping"):
-                rename = {}
-                for k,v in mapping.items():
-                    if v != "-- Skip --":
-                        rename[v] = k
+                rename = {v: k for k, v in mapping.items() if v != "-- Skip --"}
                 if not rename:
                     st.error("You must map at least one column.")
                     st.stop()
                 df = raw.rename(columns=rename)
                 st.success("Mapping applied.")
-                st.dataframe(df.head())
-        else:
-            st.stop()
+                st.dataframe(df.head(), use_container_width=True)
 
-    # ensure df exists
     if df is None:
         st.stop()
 
-    # Basic cleaning: trim column names
+    # -----------------------------------------------------
+    # Cleaning & type handling
+    # -----------------------------------------------------
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Ensure Timestamp column exists or try to infer common names
+    # Timestamp handling
     if "Timestamp" not in df.columns:
         possible_ts = [c for c in df.columns if "date" in c.lower() or "time" in c.lower()]
         if possible_ts:
             st.info(f"Using `{possible_ts[0]}` as Timestamp column.")
-            df = df.rename(columns={possible_ts[0]:"Timestamp"})
-    # coerce Timestamp
-    if "Timestamp" in df.columns:
-        try:
-            df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
-        except:
-            df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+            df = df.rename(columns={possible_ts[0]: "Timestamp"})
 
-    # Fill / coerce numeric columns
-    numeric_candidates = ["Route_Distance_km","Predicted_Travel_Hours","Actual_Travel_Hours",
-                          "Predicted_Fuel_Liters","Actual_Fuel_Liters","Vehicle_Capacity_kg",
-                          "Load_Weight_kg","Delay_Hours","Efficiency_Score"]
+    if "Timestamp" in df.columns:
+        df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+
+    numeric_candidates = [
+        "Route_Distance_km","Predicted_Travel_Hours","Actual_Travel_Hours",
+        "Predicted_Fuel_Liters","Actual_Fuel_Liters","Vehicle_Capacity_kg",
+        "Load_Weight_kg","Delay_Hours","Efficiency_Score"
+    ]
     for c in numeric_candidates:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # If Efficiency_Score not present, compute approx from predictions if possible
+    # Derive Efficiency_Score if missing
     if "Efficiency_Score" not in df.columns and all(x in df.columns for x in ["Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters"]):
-        df["Efficiency_Score"] = (df["Predicted_Travel_Hours"]/df["Actual_Travel_Hours"]) * (df["Predicted_Fuel_Liters"]/df["Actual_Fuel_Liters"])
+        df["Efficiency_Score"] = (
+            (df["Predicted_Travel_Hours"] / df["Actual_Travel_Hours"].replace(0, np.nan)) *
+            (df["Predicted_Fuel_Liters"] / df["Actual_Fuel_Liters"].replace(0, np.nan))
+        )
+
     if "Efficiency_Score" not in df.columns:
         df["Efficiency_Score"] = np.nan
 
-    # Safe defaults for missing numeric columns
     for c in numeric_candidates:
         if c not in df.columns:
             df[c] = np.nan
 
-    # ------------------------
-    # Step 2 — Filters (date range slider + other filters)
-    # ------------------------
+    # -----------------------------------------------------
+    # Filters
+    # -----------------------------------------------------
     st.markdown("### Step 2 — Filters & Preview")
-    col_a, col_b, col_c = st.columns([2,2,2])
+    col_a, col_b, col_c = st.columns([2, 2, 2])
 
-    # date slider: create min_ts and max_ts datetime objects of same type
-    if df["Timestamp"].notna().any():
+    # Date filter
+    if "Timestamp" in df.columns and df["Timestamp"].notna().any():
         min_ts = df["Timestamp"].min()
         max_ts = df["Timestamp"].max()
-        # slider requires values not None and same types; provide fallback
         try:
-            date_range = st.slider("Select date range", min_value=min_ts, max_value=max_ts, value=(min_ts, max_ts), format="YYYY-MM-DD HH:mm")
+            date_range = st.slider(
+                "Select date range",
+                min_value=min_ts,
+                max_value=max_ts,
+                value=(min_ts, max_ts),
+                format="YYYY-MM-DD HH:mm"
+            )
             start_sel, end_sel = date_range
         except Exception:
-            # fallback to date_input if slider complains (consistent types)
-            dates = st.date_input("Select date range (date only)", value=(min_ts.date(), max_ts.date()))
+            dates = st.date_input(
+                "Select date range (date only)",
+                value=(min_ts.date(), max_ts.date())
+            )
             start_sel = datetime.combine(dates[0], datetime.min.time())
             end_sel = datetime.combine(dates[1], datetime.max.time())
     else:
         start_sel = None
         end_sel = None
-        st.info("No Timestamp column or all null timestamps; skipping date filter.")
+        st.info("No usable Timestamp column; skipping date filter.")
 
     vehicles = df["Vehicle_ID"].dropna().unique().tolist() if "Vehicle_ID" in df.columns else []
     vtypes = df["Vehicle_Type"].dropna().unique().tolist() if "Vehicle_Type" in df.columns else []
@@ -320,130 +348,188 @@ with tabs[1]:
     sel_vtypes = col_b.multiselect("Vehicle_Type", options=vtypes, default=vtypes[:3] if vtypes else [])
     sel_routes = col_c.multiselect("Route_ID", options=routes, default=routes[:5] if routes else [])
 
-    # filter
+    # Apply filters
     filt = df.copy()
     if start_sel is not None and end_sel is not None and "Timestamp" in filt.columns:
         filt = filt[(filt["Timestamp"] >= pd.to_datetime(start_sel)) & (filt["Timestamp"] <= pd.to_datetime(end_sel))]
-    if sel_vehicles:
-        if "Vehicle_ID" in filt.columns:
-            filt = filt[filt["Vehicle_ID"].isin(sel_vehicles)]
-    if sel_vtypes:
-        if "Vehicle_Type" in filt.columns:
-            filt = filt[filt["Vehicle_Type"].isin(sel_vtypes)]
-    if sel_routes:
-        if "Route_ID" in filt.columns:
-            filt = filt[filt["Route_ID"].isin(sel_routes)]
+    if sel_vehicles and "Vehicle_ID" in filt.columns:
+        filt = filt[filt["Vehicle_ID"].isin(sel_vehicles)]
+    if sel_vtypes and "Vehicle_Type" in filt.columns:
+        filt = filt[filt["Vehicle_Type"].isin(sel_vtypes)]
+    if sel_routes and "Route_ID" in filt.columns:
+        filt = filt[filt["Route_ID"].isin(sel_routes)]
 
-    st.markdown("Preview (first 10 rows):")
+    st.markdown("#### Filtered Data Preview (first 10 rows)")
     st.dataframe(filt.head(10), use_container_width=True)
     download_df(filt.head(500), "filtered_route_preview.csv", label="Download filtered preview (up to 500 rows)")
 
-    # ------------------------
-    # Step 3 — EDA Charts (lots, but not duplicates)
-    # ------------------------
+    # -----------------------------------------------------
+    # Dynamic KPIs
+    # -----------------------------------------------------
+    st.markdown("### KPIs (Dynamic)")
+    dk1, dk2, dk3, dk4, dk5 = st.columns(5)
+
+    total_routes = filt["Route_ID"].nunique() if "Route_ID" in filt.columns else len(filt)
+    avg_eff = float(filt["Efficiency_Score"].mean()) if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any() else None
+    avg_delay = float(filt["Delay_Hours"].mean()) if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any() else None
+    avg_fuel = float(filt["Actual_Fuel_Liters"].mean()) if "Actual_Fuel_Liters" in filt.columns and filt["Actual_Fuel_Liters"].notna().any() else None
+
+    # Define on-time as delay <= 0.25 hours (~15 min)
+    if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any():
+        ontime_rate = (filt["Delay_Hours"] <= 0.25).mean() * 100
+    else:
+        ontime_rate = None
+
+    dk1.markdown(
+        f"<div class='kpi'>{total_routes:,}<div class='small'>Routes in selection</div></div>",
+        unsafe_allow_html=True
+    )
+    dk2.markdown(
+        f"<div class='kpi'>{avg_eff:.3f if avg_eff is not None else 'N/A'}<div class='small'>Avg Efficiency Score</div></div>",
+        unsafe_allow_html=True
+    )
+    dk3.markdown(
+        f"<div class='kpi'>{avg_delay:.2f if avg_delay is not None else 'N/A'}<div class='small'>Avg Delay (hrs)</div></div>",
+        unsafe_allow_html=True
+    )
+    dk4.markdown(
+        f"<div class='kpi'>{avg_fuel:.2f if avg_fuel is not None else 'N/A'}<div class='small'>Avg Fuel / Route (L)</div></div>",
+        unsafe_allow_html=True
+    )
+    dk5.markdown(
+        f"<div class='kpi'>{ontime_rate:.1f if ontime_rate is not None else 'N/A'}%<div class='small'>On-Time Deliveries</div></div>",
+        unsafe_allow_html=True
+    )
+
+    # -----------------------------------------------------
+    # Exploratory Data Analysis
+    # -----------------------------------------------------
     st.markdown("## Exploratory Data Analysis")
 
     # 1) Route distance histogram
-    if filt["Route_Distance_km"].notna().any():
+    if "Route_Distance_km" in filt.columns and filt["Route_Distance_km"].notna().any():
         fig_dist = px.histogram(filt, x="Route_Distance_km", nbins=30, title="Route distance distribution (km)")
         st.plotly_chart(fig_dist, use_container_width=True)
-    # 2) Efficiency score by vehicle type (box)
-    if "Vehicle_Type" in filt.columns and filt["Efficiency_Score"].notna().any():
+
+    # 2) Efficiency score by vehicle type
+    if "Vehicle_Type" in filt.columns and "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any():
         fig_eff = px.box(filt, x="Vehicle_Type", y="Efficiency_Score", title="Efficiency Score by Vehicle Type")
         st.plotly_chart(fig_eff, use_container_width=True)
-    # 3) Delay vs Distance scatter with color by traffic
-    if filt["Delay_Hours"].notna().any() and filt["Route_Distance_km"].notna().any():
-        fig_sc = px.scatter(filt, x="Route_Distance_km", y="Delay_Hours", color="Traffic_Level", 
-                            size="Load_Weight_kg" if "Load_Weight_kg" in filt.columns else None,
-                            title="Delay vs Distance (bubble size = load)")
-        st.plotly_chart(fig_sc, use_container_width=True)
-    # 4) Fuel efficiency: Actual_Fuel_Liters per km distribution
-    if filt["Actual_Fuel_Liters"].notna().any() and filt["Route_Distance_km"].notna().any():
-        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"]==0, np.nan, filt["Route_Distance_km"])
-        fig_fuel = px.violin(filt, y="Fuel_L_per_km", box=True, title="Fuel consumption (L per km) distribution")
-        st.plotly_chart(fig_fuel, use_container_width=True)
-    # 5) Time-series of avg efficiency over time
-    if "Timestamp" in filt.columns and filt["Efficiency_Score"].notna().any():
-        ts = filt.set_index("Timestamp").resample("D").agg({"Efficiency_Score":"mean"}).reset_index()
-        fig_ts = px.line(ts, x="Timestamp", y="Efficiency_Score", title="Daily avg Efficiency Score")
-        st.plotly_chart(fig_ts, use_container_width=True)
-    # 6) Route clusters (kmeans) visualized by 2 components (distance, delay)
-    if filt["Route_Distance_km"].notna().any() and filt["Delay_Hours"].notna().any() and len(filt)>=10:
-        kdf = filt[["Route_Distance_km","Delay_Hours"]].dropna().sample(n=min(800,len(filt)), random_state=42)
-        try:
-            kmeans = KMeans(n_clusters=4, random_state=42)
-            klabels = kmeans.fit_predict(kdf)
-            kdf_plot = kdf.copy()
-            kdf_plot["cluster"] = klabels.astype(str)
-            fig_k = px.scatter(kdf_plot, x="Route_Distance_km", y="Delay_Hours", color="cluster", title="KMeans clusters by distance and delay")
-            st.plotly_chart(fig_k, use_container_width=True)
-        except Exception:
-            st.info("KMeans cluster failed (not enough data or other issue).")
 
-    # 7) Pairwise correlations heatmap for numeric columns
-    numcols = ["Route_Distance_km","Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters","Load_Weight_kg","Delay_Hours","Efficiency_Score"]
+    # 3) Delay vs Distance scatter
+    if "Delay_Hours" in filt.columns and "Route_Distance_km" in filt.columns and filt["Delay_Hours"].notna().any():
+        fig_sc = px.scatter(
+            filt,
+            x="Route_Distance_km",
+            y="Delay_Hours",
+            color="Traffic_Level" if "Traffic_Level" in filt.columns else None,
+            size="Load_Weight_kg" if "Load_Weight_kg" in filt.columns else None,
+            title="Delay vs Distance (bubble size = load)"
+        )
+        st.plotly_chart(fig_sc, use_container_width=True)
+
+    # 4) Fuel efficiency (L/km)
+    if "Actual_Fuel_Liters" in filt.columns and "Route_Distance_km" in filt.columns:
+        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"] == 0, np.nan, filt["Route_Distance_km"])
+        if filt["Fuel_L_per_km"].notna().any():
+            fig_fuel = px.violin(filt, y="Fuel_L_per_km", box=True, title="Fuel consumption (L per km) distribution")
+            st.plotly_chart(fig_fuel, use_container_width=True)
+
+    # 5) Efficiency over time (daily)
+    if "Timestamp" in filt.columns and "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any():
+        ts = filt.set_index("Timestamp").resample("D")["Efficiency_Score"].mean().reset_index()
+        if not ts.empty:
+            fig_ts = px.line(ts, x="Timestamp", y="Efficiency_Score", title="Daily average Efficiency Score")
+            st.plotly_chart(fig_ts, use_container_width=True)
+
+    # 6) KMeans clusters (distance vs delay)
+    if all(c in filt.columns for c in ["Route_Distance_km", "Delay_Hours"]) and len(filt) >= 10:
+        kdf = filt[["Route_Distance_km","Delay_Hours"]].dropna()
+        if len(kdf) >= 10:
+            kdf = kdf.sample(n=min(800, len(kdf)), random_state=42)
+            try:
+                kmeans = KMeans(n_clusters=4, random_state=42)
+                klabels = kmeans.fit_predict(kdf)
+                kdf_plot = kdf.copy()
+                kdf_plot["cluster"] = klabels.astype(str)
+                fig_k = px.scatter(
+                    kdf_plot,
+                    x="Route_Distance_km",
+                    y="Delay_Hours",
+                    color="cluster",
+                    title="KMeans clusters by distance & delay"
+                )
+                st.plotly_chart(fig_k, use_container_width=True)
+            except Exception:
+                st.info("KMeans clustering failed (insufficient or problematic data).")
+
+    # 7) Correlation matrix
+    numcols = [
+        "Route_Distance_km","Predicted_Travel_Hours","Actual_Travel_Hours",
+        "Predicted_Fuel_Liters","Actual_Fuel_Liters","Load_Weight_kg",
+        "Delay_Hours","Efficiency_Score"
+    ]
     existing_numcols = [c for c in numcols if c in filt.columns]
     if len(existing_numcols) >= 2:
         corr = filt[existing_numcols].corr()
-        fig_corr = go.Figure(data=go.Heatmap(z=corr.values, x=corr.columns, y=corr.columns, colorscale="Blues"))
-        fig_corr.update_layout(title="Correlation matrix")
+        fig_corr = go.Figure(
+            data=go.Heatmap(
+                z=corr.values,
+                x=corr.columns,
+                y=corr.columns,
+                colorscale="Blues"
+            )
+        )
+        fig_corr.update_layout(title="Correlation matrix (numeric variables)")
         st.plotly_chart(fig_corr, use_container_width=True)
 
-    
-    # ------------------------------------------------------------
-    # ROUTE-LEVEL COST SIMULATION
-    # ------------------------------------------------------------
+    # ---------------------------------------------------------
+    # Route-Level Cost Simulation
+    # ---------------------------------------------------------
     st.markdown("### Route-Level Cost Simulation")
-    
-    if "Actual_Fuel_Liters" in filt.columns and "Delay_Hours" in filt.columns and "Route_Distance_km" in filt.columns:
-        SIM_FUEL_COST = 94.5   # INR per liter
-        SIM_DRIVER_COST_HR = 220  # per hour
-        SIM_VEHICLE_COST_KM = 18  # depreciation + maintenance
-    
+
+    if all(c in filt.columns for c in ["Actual_Fuel_Liters","Delay_Hours","Route_Distance_km"]):
+        SIM_FUEL_COST = 94.5      # INR per liter
+        SIM_DRIVER_COST_HR = 220  # INR per hour
+        SIM_VEHICLE_COST_KM = 18  # INR per km
+
         sim = filt.copy()
         sim["Fuel_Cost_INR"] = sim["Actual_Fuel_Liters"] * SIM_FUEL_COST
         sim["Distance_Cost_INR"] = sim["Route_Distance_km"] * SIM_VEHICLE_COST_KM
         sim["Delay_Penalty_INR"] = sim["Delay_Hours"] * SIM_DRIVER_COST_HR
         sim["Total_Route_Cost_INR"] = sim["Fuel_Cost_INR"] + sim["Distance_Cost_INR"] + sim["Delay_Penalty_INR"]
-    
-        st.dataframe(sim[[
-            "Route_ID", "Vehicle_ID", "Fuel_Cost_INR",
-            "Distance_Cost_INR", "Delay_Penalty_INR",
-            "Total_Route_Cost_INR"
-        ]].head(15), use_container_width=True)
-    
+
+        st.dataframe(
+            sim[["Route_ID","Vehicle_ID","Fuel_Cost_INR","Distance_Cost_INR","Delay_Penalty_INR","Total_Route_Cost_INR"]].head(15),
+            use_container_width=True
+        )
         download_df(sim, "route_cost_simulation.csv", "Download Cost Simulation")
     else:
-        st.info("Required columns missing for cost simulation.")
-    
+        st.info("Required columns missing for cost simulation (need Actual_Fuel_Liters, Delay_Hours, Route_Distance_km).")
 
-    # ------------------------
-    # Step 4 — ML Concepts (4 chosen)
-    #   1) RandomForestRegressor (predict Actual_Travel_Hours)
-    #   2) GradientBoostingRegressor (predict Actual_Fuel_Liters)
-    #   3) KNeighborsRegressor (predict Delay_Hours)
-    #   4) IsolationForest (anomaly detection on fuel/efficiency)
-    # ------------------------
-    st.markdown("## Machine Learning — models & predictions")
-    st.markdown("Note: Models train only if required columns and sufficient rows exist (>= 80 rows).")
+    # ---------------------------------------------------------
+    # Machine Learning — 4 models
+    # ---------------------------------------------------------
+    st.markdown("## Machine Learning — Models & Predictions")
+    st.markdown("Models run only when sufficient rows and required columns exist (recommended: ≥ 80 rows).")
 
-    # Prepare features: do encoding for categorical features (simple)
+    # Build modeling dataframe with simple one-hot encoding
     base_features = []
     if "Route_Distance_km" in filt.columns:
         base_features.append("Route_Distance_km")
     if "Load_Weight_kg" in filt.columns:
         base_features.append("Load_Weight_kg")
-    # one-hot for Vehicle_Type, Traffic_Level, Weather_Condition (use pd.get_dummies)
+
     cat_cols = [c for c in ["Vehicle_Type","Traffic_Level","Weather_Condition","Start_City","End_City"] if c in filt.columns]
+
     df_model = filt.copy().reset_index(drop=True)
     if cat_cols:
         df_model = pd.get_dummies(df_model, columns=cat_cols, dummy_na=False)
-    # fill numeric NAs with median
+
     for c in df_model.columns:
-        if df_model[c].dtype.kind in 'biufc' and df_model[c].isna().any():
+        if df_model[c].dtype.kind in "biufc" and df_model[c].isna().any():
             df_model[c] = df_model[c].fillna(df_model[c].median())
 
-    # Helper to train & evaluate regression
     def train_eval_reg(X, y, model):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         model.fit(X_train, y_train)
@@ -452,14 +538,18 @@ with tabs[1]:
         r2 = r2_score(y_test, preds)
         return model, X_test, y_test, preds, rmse, r2
 
-    # 1) RandomForestRegressor -> predict Actual_Travel_Hours
-    if "Actual_Travel_Hours" in df_model.columns:
+    # 1) RandomForestRegressor — predict Actual_Travel_Hours
+    if "Actual_Travel_Hours" in df_model.columns and len(df_model) >= 80:
         target = "Actual_Travel_Hours"
-        features = [c for c in df_model.columns if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters","Efficiency_Score"]]
+        features = [
+            c for c in df_model.columns
+            if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours",
+                         "Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters",
+                         "Efficiency_Score"]
+        ]
         if features:
             X = df_model[features].select_dtypes(include=[np.number]).fillna(0)
             y = df_model[target].fillna(0)
-            # scale numeric features
             scaler = StandardScaler()
             Xs = scaler.fit_transform(X)
             rf = RandomForestRegressor(n_estimators=150, random_state=42)
@@ -467,17 +557,22 @@ with tabs[1]:
             st.markdown("### RandomForest — Predict Actual Travel Hours")
             st.write(f"RMSE: {rmse:.3f}  |  R²: {r2:.3f}")
             out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
-            st.dataframe(out.head(10))
-            download_df(out, "rf_actual_travel_hours_predictions.csv", label="Download RF predictions")
+            st.dataframe(out.head(10), use_container_width=True)
+            download_df(out, "rf_actual_travel_hours_predictions.csv", "Download RF predictions")
         else:
             st.info("No numeric features available for RandomForest model.")
     else:
-        st.info("Not enough data to train RandomForest for Actual_Travel_Hours (need >=80 rows and the column).")
+        st.info("RandomForest: need column Actual_Travel_Hours and at least 80 rows.")
 
-    # 2) GradientBoostingRegressor -> predict Actual_Fuel_Liters
-    if "Actual_Fuel_Liters" in df_model.columns:
+    # 2) GradientBoostingRegressor — predict Actual_Fuel_Liters
+    if "Actual_Fuel_Liters" in df_model.columns and len(df_model) >= 80:
         target2 = "Actual_Fuel_Liters"
-        features2 = [c for c in df_model.columns if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours","Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters","Efficiency_Score"]]
+        features2 = [
+            c for c in df_model.columns
+            if c not in ["Timestamp","Vehicle_ID","Route_ID","Predicted_Travel_Hours",
+                         "Actual_Travel_Hours","Predicted_Fuel_Liters","Actual_Fuel_Liters",
+                         "Efficiency_Score"]
+        ]
         if features2:
             X2 = df_model[features2].select_dtypes(include=[np.number]).fillna(0)
             y2 = df_model[target2].fillna(0)
@@ -488,17 +583,20 @@ with tabs[1]:
             st.markdown("### GradientBoosting — Predict Actual Fuel Liters")
             st.write(f"RMSE: {rmse2:.3f}  |  R²: {r22:.3f}")
             out2 = pd.DataFrame({"Actual_Fuel": y2_test, "Predicted_Fuel": preds2})
-            st.dataframe(out2.head(10))
-            download_df(out2, "gbr_actual_fuel_predictions.csv", label="Download GBR predictions")
+            st.dataframe(out2.head(10), use_container_width=True)
+            download_df(out2, "gbr_actual_fuel_predictions.csv", "Download GBR predictions")
         else:
             st.info("No numeric features available for GradientBoosting model.")
     else:
-        st.info("Not enough data to train GradientBoosting for Actual_Fuel_Liters (need >=80 rows and the column).")
+        st.info("GradientBoosting: need column Actual_Fuel_Liters and at least 80 rows.")
 
-    # 3) KNeighborsRegressor -> predict Delay_Hours
-    if "Delay_Hours" in df_model.columns:
+    # 3) KNeighborsRegressor — predict Delay_Hours
+    if "Delay_Hours" in df_model.columns and len(df_model) >= 80:
         target3 = "Delay_Hours"
-        features3 = [c for c in df_model.columns if c not in ["Timestamp","Vehicle_ID","Route_ID","Delay_Hours","Efficiency_Score"]]
+        features3 = [
+            c for c in df_model.columns
+            if c not in ["Timestamp","Vehicle_ID","Route_ID","Delay_Hours","Efficiency_Score"]
+        ]
         if features3:
             X3 = df_model[features3].select_dtypes(include=[np.number]).fillna(0)
             y3 = df_model[target3].fillna(0)
@@ -509,221 +607,211 @@ with tabs[1]:
             st.markdown("### KNN Regressor — Predict Delay Hours")
             st.write(f"RMSE: {rmse3:.3f}  |  R²: {r23:.3f}")
             out3 = pd.DataFrame({"Actual_Delay": y3_test, "Predicted_Delay": preds3})
-            st.dataframe(out3.head(10))
-            download_df(out3, "knn_delay_predictions.csv", label="Download KNN predictions")
+            st.dataframe(out3.head(10), use_container_width=True)
+            download_df(out3, "knn_delay_predictions.csv", "Download KNN predictions")
         else:
             st.info("No numeric features available for KNN model.")
     else:
-        st.info("Not enough data to train KNN for Delay_Hours (need >=80 rows and the column).")
+        st.info("KNN: need column Delay_Hours and at least 80 rows.")
 
-    # 4) IsolationForest anomaly detection on efficiency and fuel
-    st.markdown("### Anomaly Detection — IsolationForest (flag unusual fuel/efficiency)")
-    iso_cols = [c for c in ["Efficiency_Score","Actual_Fuel_Liters","Fuel_L_per_km","Delay_Hours"] if c in filt.columns or c=="Fuel_L_per_km"]
-    if "Fuel_L_per_km" not in filt.columns and "Actual_Fuel_Liters" in filt.columns and "Route_Distance_km" in filt.columns:
-        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"]==0, np.nan, filt["Route_Distance_km"])
+    # 4) IsolationForest — anomaly detection
+    st.markdown("### Anomaly Detection — IsolationForest")
+
+    if "Fuel_L_per_km" not in filt.columns and all(c in filt.columns for c in ["Actual_Fuel_Liters","Route_Distance_km"]):
+        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"] == 0, np.nan, filt["Route_Distance_km"])
+
     iso_cols = [c for c in ["Efficiency_Score","Actual_Fuel_Liters","Fuel_L_per_km","Delay_Hours"] if c in filt.columns]
     if len(iso_cols) >= 2 and len(filt) >= 30:
         iso_feats = filt[iso_cols].fillna(0)
         iso = IsolationForest(contamination=0.03, random_state=42)
         try:
             filt["_is_anomaly"] = iso.fit_predict(iso_feats)
-            filt["_is_anomaly"] = np.where(filt["_is_anomaly"]==-1, 1, 0)
+            filt["_is_anomaly"] = np.where(filt["_is_anomaly"] == -1, 1, 0)
             num_anoms = int(filt["_is_anomaly"].sum())
-            st.markdown(f"Detected anomalies: **{num_anoms}** (IsolationForest)")
-            if num_anoms>0:
-                st.dataframe(filt.loc[filt["_is_anomaly"]==1, ["Timestamp","Vehicle_ID","Route_ID","Route_Distance_km","Actual_Fuel_Liters","Fuel_L_per_km","Efficiency_Score","Delay_Hours"]].head(20))
-                download_df(filt.loc[filt["_is_anomaly"]==1, ["Timestamp","Vehicle_ID","Route_ID","Route_Distance_km","Actual_Fuel_Liters","Fuel_L_per_km","Efficiency_Score","Delay_Hours"]], "anomalies_route.csv", label="Download anomalies CSV")
+            st.markdown(f"Detected anomalies: **{num_anoms}**")
+            if num_anoms > 0:
+                anom_cols = [
+                    c for c in ["Timestamp","Vehicle_ID","Route_ID","Route_Distance_km",
+                                "Actual_Fuel_Liters","Fuel_L_per_km","Efficiency_Score",
+                                "Delay_Hours"] if c in filt.columns
+                ]
+                st.dataframe(filt.loc[filt["_is_anomaly"] == 1, anom_cols].head(20), use_container_width=True)
+                download_df(
+                    filt.loc[filt["_is_anomaly"] == 1, anom_cols],
+                    "anomalies_route.csv",
+                    "Download anomalies CSV"
+                )
         except Exception as e:
             st.info("Anomaly detection failed: " + str(e))
     else:
-        st.info("Not enough numeric columns or rows for anomaly detection (need >=30 rows and >=2 numeric features).")
+        st.info("IsolationForest: need ≥ 30 rows and ≥ 2 numeric features (efficiency / fuel / delay).")
 
-    # ------------------------
+    # ---------------------------------------------------------
     # Automated Insights
-    # ------------------------
+    # ---------------------------------------------------------
     st.markdown("## Automated Insights")
     insights = []
 
-    # Top inefficient routes (lowest efficiency score)
-    if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any():
-        grp = filt.groupby("Route_ID").agg(avg_eff=("Efficiency_Score","mean"), cnt=("Route_ID","count")).reset_index()
+    # Low-efficiency routes
+    if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any() and "Route_ID" in filt.columns:
+        grp = filt.groupby("Route_ID").agg(
+            avg_eff=("Efficiency_Score","mean"),
+            cnt=("Route_ID","count")
+        ).reset_index()
         top_bad = grp.sort_values("avg_eff").head(10)
         for _, r in top_bad.iterrows():
             insights.append({
-                "Insight_Type":"Low Efficiency Route",
+                "Insight_Type": "Low Efficiency Route",
                 "Route_ID": r["Route_ID"],
-                "Avg_Efficiency": round(r["avg_eff"],4),
+                "Avg_Efficiency": round(float(r["avg_eff"]), 4),
                 "Sample_Count": int(r["cnt"])
             })
-    # Routes with high average delay
-    if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any():
-        grp2 = filt.groupby("Route_ID").agg(avg_delay=("Delay_Hours","mean"), cnt=("Route_ID","count")).reset_index()
+
+    # High-delay routes
+    if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any() and "Route_ID" in filt.columns:
+        grp2 = filt.groupby("Route_ID").agg(
+            avg_delay=("Delay_Hours","mean"),
+            cnt=("Route_ID","count")
+        ).reset_index()
         top_delay = grp2.sort_values("avg_delay", ascending=False).head(10)
         for _, r in top_delay.iterrows():
             insights.append({
-                "Insight_Type":"High Avg Delay",
+                "Insight_Type": "High Avg Delay",
                 "Route_ID": r["Route_ID"],
-                "Avg_Delay_Hours": round(r["avg_delay"],3),
+                "Avg_Delay_Hours": round(float(r["avg_delay"]), 3),
                 "Sample_Count": int(r["cnt"])
             })
-    # Vehicles with high fuel consumption per km
-    if "Fuel_L_per_km" in filt.columns and filt["Fuel_L_per_km"].notna().any():
-        veh = filt.groupby("Vehicle_ID").agg(avg_fpk=("Fuel_L_per_km","mean"), cnt=("Vehicle_ID","count")).reset_index().sort_values("avg_fpk", ascending=False).head(10)
+
+    # Fuel hog vehicles
+    if "Fuel_L_per_km" in filt.columns and filt["Fuel_L_per_km"].notna().any() and "Vehicle_ID" in filt.columns:
+        veh = filt.groupby("Vehicle_ID").agg(
+            avg_fpk=("Fuel_L_per_km","mean"),
+            cnt=("Vehicle_ID","count")
+        ).reset_index().sort_values("avg_fpk", ascending=False).head(10)
         for _, r in veh.iterrows():
             insights.append({
-                "Insight_Type":"High Fuel per km (Vehicle)",
+                "Insight_Type": "High Fuel per km (Vehicle)",
                 "Vehicle_ID": r["Vehicle_ID"],
-                "Avg_L_per_km": round(r["avg_fpk"],4),
+                "Avg_L_per_km": round(float(r["avg_fpk"]), 4),
                 "Sample_Count": int(r["cnt"])
             })
+
     # Overall stats
     if "Efficiency_Score" in filt.columns and filt["Efficiency_Score"].notna().any():
-        insights.append({"Insight_Type":"Overall Avg Efficiency", "Value": round(float(filt["Efficiency_Score"].mean()),4)})
+        insights.append({
+            "Insight_Type": "Overall Avg Efficiency",
+            "Value": round(float(filt["Efficiency_Score"].mean()), 4)
+        })
     if "Delay_Hours" in filt.columns and filt["Delay_Hours"].notna().any():
-        insights.append({"Insight_Type":"Overall Avg Delay (hrs)", "Value": round(float(filt["Delay_Hours"].mean()),3)})
+        insights.append({
+            "Insight_Type": "Overall Avg Delay (hrs)",
+            "Value": round(float(filt["Delay_Hours"].mean()), 3)
+        })
     if "Actual_Fuel_Liters" in filt.columns and filt["Actual_Fuel_Liters"].notna().any():
-        insights.append({"Insight_Type":"Avg Fuel per Route (L)", "Value": round(float(filt["Actual_Fuel_Liters"].mean()),3)})
+        insights.append({
+            "Insight_Type": "Avg Fuel per Route (L)",
+            "Value": round(float(filt["Actual_Fuel_Liters"].mean()), 3)
+        })
 
     ins_df = pd.DataFrame(insights)
     if ins_df.empty:
         st.info("No insights generated for the current filter.")
     else:
         st.dataframe(ins_df, use_container_width=True)
-        download_df(ins_df, "automated_insights_route.csv", label="Download insights CSV")
+        download_df(ins_df, "automated_insights_route.csv", "Download insights CSV")
 
-
-# --------------------------------------------------------
+# ---------------------------------------------------------
 # ACTION PLAYBOOKS TAB
-# --------------------------------------------------------
+# ---------------------------------------------------------
 with tabs[2]:
-    st.header("Actionable Playbooks")
-    st.markdown("Use these data-driven recommendations to immediately improve logistics performance.")
+    st.header("Action Playbooks")
 
-    # Safety check
-    if df is None or filt is None or len(filt) == 0:
-        st.warning("No data available. Load dataset in Application tab first.")
+    if "filt" not in locals() or filt is None or len(filt) == 0:
+        st.warning("No filtered data found. Load and filter data in the Application tab first.")
         st.stop()
 
-    # --------------------------------------------------------
-    # Playbook 1: Top 10 Routes to Reassign (low efficiency + high fuel)
-    # --------------------------------------------------------
-    st.subheader("1. Top 10 Routes to Reassign")
-
-    if "Efficiency_Score" in filt.columns and "Actual_Fuel_Liters" in filt.columns:
+    # 1) Routes to reassign
+    st.subheader("1. Top Routes to Reassign (low efficiency + high fuel)")
+    if "Efficiency_Score" in filt.columns and "Actual_Fuel_Liters" in filt.columns and "Route_ID" in filt.columns:
         play_route = filt.groupby("Route_ID").agg(
             avg_eff=("Efficiency_Score","mean"),
             avg_fuel=("Actual_Fuel_Liters","mean"),
             cnt=("Route_ID","count")
         ).reset_index()
-
-        # Ranking score = low efficiency + high fuel
-        play_route["rank_score"] = (1 - play_route["avg_eff"]) * play_route["avg_fuel"]
-
+        play_route["rank_score"] = (1 - play_route["avg_eff"].fillna(0)) * play_route["avg_fuel"].fillna(0)
         top_routes = play_route.sort_values("rank_score", ascending=False).head(10)
-
-        st.markdown("These routes have *poor efficiency* and *high fuel burn* — reassign or re-evaluate scheduling.")
+        st.markdown("These routes combine poor efficiency and high fuel burn. Re-evaluate scheduling, consolidation, or reassignment.")
         st.dataframe(top_routes, use_container_width=True)
-
         download_df(top_routes, "top_routes_reassign.csv", "Download playbook CSV")
     else:
         st.info("Missing columns for route reassignment insights.")
 
-    # --------------------------------------------------------
-    # Playbook 2: Vehicles to Audit (high fuel/km or delays)
-    # --------------------------------------------------------
-    st.subheader("2. Vehicles to Audit")
+    # 2) Vehicles to audit
+    st.subheader("2. Vehicles to Audit (fuel/km & delay)")
+    if "Fuel_L_per_km" not in filt.columns and all(c in filt.columns for c in ["Actual_Fuel_Liters","Route_Distance_km"]):
+        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"] == 0, np.nan, filt["Route_Distance_km"])
 
-    if "Fuel_L_per_km" not in filt.columns and "Actual_Fuel_Liters" in filt.columns and "Route_Distance_km" in filt.columns:
-        filt["Fuel_L_per_km"] = filt["Actual_Fuel_Liters"] / np.where(filt["Route_Distance_km"]==0, np.nan, filt["Route_Distance_km"])
-
-    if "Fuel_L_per_km" in filt.columns and "Delay_Hours" in filt.columns:
+    if all(c in filt.columns for c in ["Fuel_L_per_km","Delay_Hours","Vehicle_ID"]):
         veh = filt.groupby("Vehicle_ID").agg(
             avg_fpk=("Fuel_L_per_km","mean"),
             avg_delay=("Delay_Hours","mean"),
             cnt=("Vehicle_ID","count")
         ).reset_index()
-
-        veh["rank_score"] = veh["avg_fpk"] * 0.6 + veh["avg_delay"] * 0.4
-
+        veh["rank_score"] = veh["avg_fpk"].fillna(0) * 0.6 + veh["avg_delay"].fillna(0) * 0.4
         audit_veh = veh.sort_values("rank_score", ascending=False).head(10)
-
-        st.markdown("Vehicles with high delay or fuel waste should be inspected or reassigned.")
+        st.markdown("Vehicles with abnormal fuel per km and chronic delays. Prioritise them for maintenance or reassignment.")
         st.dataframe(audit_veh, use_container_width=True)
-
         download_df(audit_veh, "vehicles_to_audit.csv", "Download playbook CSV")
     else:
         st.info("Missing columns for vehicle audit insights.")
 
-    # --------------------------------------------------------
-    # Playbook 3: Driver Coaching (fallback to Vehicle_ID if no driver column exists)
+    # 3) Drivers / operators to coach
     st.subheader("3. Drivers / Operators to Coach")
-    
-    # detect driver-related columns
     driver_cols = [c for c in filt.columns if "driver" in c.lower() or "operator" in c.lower()]
-    
-    # fallback to Vehicle_ID if driver/operator not found
     if not driver_cols and "Vehicle_ID" in filt.columns:
         driver_cols = ["Vehicle_ID"]
-    
+
     if driver_cols:
         dcol = driver_cols[0]
-    
         driver_df = filt.groupby(dcol).agg(
             avg_delay=("Delay_Hours","mean") if "Delay_Hours" in filt.columns else None,
             avg_eff=("Efficiency_Score","mean") if "Efficiency_Score" in filt.columns else None,
             cnt=(dcol,"count")
         ).reset_index()
-    
-        # score: low efficiency + high delay
         driver_df["score"] = (
-            (1 - driver_df["avg_eff"]).fillna(0) * 0.5 +
+            (1 - driver_df["avg_eff"].fillna(0)) * 0.5 +
             driver_df["avg_delay"].fillna(0) * 0.5
         )
-    
         top_drivers = driver_df.sort_values("score", ascending=False).head(10)
-    
-        st.markdown("These operators/vehicles show inefficiency or repeated delays.")
+        st.markdown("These drivers / vehicles show recurring delays or low efficiency. Use for coaching and route pairing decisions.")
         st.dataframe(top_drivers, use_container_width=True)
-    
         download_df(top_drivers, "drivers_to_coach.csv", "Download playbook CSV")
-    
     else:
-        st.info("No driver/operator or vehicle column found.")
-  
+        st.info("No driver/operator or vehicle identifier found for coaching insights.")
 
-    # --------------------------------------------------------
-    # Playbook 4: High-Risk Traffic × Weather conditions
-    # --------------------------------------------------------
+    # 4) High-risk traffic × weather combos
     st.subheader("4. High-Risk Traffic × Weather Conditions")
-
-    if "Traffic_Level" in filt.columns and "Weather_Condition" in filt.columns and "Delay_Hours" in filt.columns:
+    if all(c in filt.columns for c in ["Traffic_Level","Weather_Condition","Delay_Hours","Route_ID"]):
         risk = filt.groupby(["Traffic_Level","Weather_Condition"]).agg(
             avg_delay=("Delay_Hours","mean"),
             cnt=("Route_ID","count")
         ).reset_index()
-
         high_risk = risk.sort_values("avg_delay", ascending=False).head(10)
-
-        st.markdown("These traffic-weather combinations create the worst delays. Use them for dynamic routing rules.")
+        st.markdown("These traffic–weather combinations produce the worst delays. Use them to drive dynamic routing rules & SLAs.")
         st.dataframe(high_risk, use_container_width=True)
-
         download_df(high_risk, "high_risk_conditions.csv", "Download playbook CSV")
     else:
-        st.info("Missing columns for risk condition insights.")
+        st.info("Missing columns for traffic × weather risk matrix.")
 
-    # --------------------------------------------------------
-    # Final actionable recommendations summary (card layout)
-    # --------------------------------------------------------
+    # 5) Executive summary
     st.subheader("5. Executive Recommendations")
-
     st.markdown("""
     <div class='card left-align'>
-    • Reassign or redesign the top 10 least efficient routes.<br>
-    • Audit vehicles with abnormal fuel/km or chronic delays.<br>
-    • Coach operators showing repeated inefficiency.<br>
-    • Set rule-based routing to avoid high-risk traffic/weather combinations.<br>
-    • Adjust fleet scheduling based on predicted travel times and load capacities.<br>
-    • Prioritize routes with predictable efficiency for time-critical shipments.<br>
+    • Reassign or redesign the 10 least efficient high-fuel routes.<br>
+    • Audit vehicles with the worst fuel/km and highest delay scores.<br>
+    • Coach or re-pair drivers / operators flagged by the inefficiency scorecard.<br>
+    • Avoid high-risk traffic–weather combinations using pre-set routing rules.<br>
+    • Use ML-predicted travel hours for planning time-critical routes.<br>
+    • Feed these insights into monthly fleet reviews and vendor contracts.
     </div>
     """, unsafe_allow_html=True)
-
