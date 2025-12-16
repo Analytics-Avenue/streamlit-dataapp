@@ -278,7 +278,25 @@ with tab3:
     rmse = math.sqrt(mean_squared_error(yte, preds))
     r2 = r2_score(yte, preds)
 
-    st.write(f"RMSE: {rmse:.2f} km | R²: {r2:.3f}")
+    range_metrics_df = pd.DataFrame([
+        {
+            "Model": "RandomForestRegressor",
+            "Target": "Actual Range (km)",
+            "RMSE_km": round(rmse, 3),
+            "R2_Score": round(r2, 4),
+            "Rows_Used": len(yte)
+        }
+    ])
+    
+    st.markdown("### Dynamic Range Prediction – Model Metrics")
+    st.dataframe(range_metrics_df, use_container_width=True)
+    
+    download_df(
+        range_metrics_df,
+        "ev_dynamic_range_model_metrics.csv",
+        "Download Range Model Metrics"
+    )
+
 
     # =====================================================
     # ML MODEL 2 – RANGE ANXIETY CLASSIFICATION
@@ -294,7 +312,24 @@ with tab3:
     probs = clf.predict_proba(Xte)[:,1]
     auc = roc_auc_score(yte, probs)
 
-    st.write(f"ROC-AUC: {auc:.3f}")
+    anxiety_metrics_df = pd.DataFrame([
+        {
+            "Model": "RandomForestClassifier",
+            "Target": "Range Anxiety Flag",
+            "ROC_AUC": round(auc, 4),
+            "Rows_Used": len(yte)
+        }
+    ])
+    
+    st.markdown("### Range Anxiety Prediction – Model Metrics")
+    st.dataframe(anxiety_metrics_df, use_container_width=True)
+    
+    download_df(
+        anxiety_metrics_df,
+        "ev_range_anxiety_model_metrics.csv",
+        "Download Anxiety Model Metrics"
+    )
+
 
     # =====================================================
     # ML MODEL 3 – DRIVER CLUSTERING
