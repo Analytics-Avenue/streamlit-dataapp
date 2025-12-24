@@ -316,18 +316,41 @@ with tab3:
     st.dataframe(metrics_df, use_container_width=True)
     download_df(metrics_df, "fault_model_metrics.csv", "Download Model Metrics")
 
+
     # =====================================================
-    # UNSUPERVISED ANOMALY DETECTION
+    # UNSUPERVISED ANOMALY DETECTION (FIXED)
     # =====================================================
     st.markdown('<div class="section-title">Anomaly Detection</div>', unsafe_allow_html=True)
-
-    iso = IsolationForest(contamination=0.05, random_state=42)
-    df_f["anomaly"] = iso.fit_predict(X).map({1:0,-1:1})
-
+    
+    # Isolation Forest expects only numeric, no NaNs
+    X_anom = df_f[["voltage","current","temperature","power_kw","session_active"]].copy()
+    X_anom = X_anom.dropna()
+    
+    iso = IsolationForest(
+        contamination=0.05,
+        random_state=42
+    )
+    
+    # Fit + predict
+    anom_pred = iso.fit_predict(X_anom)
+    
+    # Convert:  1 → normal (0), -1 → anomaly (1)
+    anom_flag = pd.Series(anom_pred, index=X_anom.index).replace({1:0, -1:1})
+    
+    # Assign back safely
+    df_f.loc[X_anom.index, "anomaly"] = anom_flag
+    
+    df_f["anomaly"] = df_f["anomaly"].fillna(0).astype(int)
+    
     st.plotly_chart(
-        px.scatter(df_f, x="temperature", y="power_kw",
-                   color="anomaly",
-                   title="Isolation Forest – Detected Anomalies"),
+        px.scatter(
+            df_f,
+            x="temperature",
+            y="power_kw",
+            color=df_f["anomaly"].astype(str),
+            title="Isolation Forest – Detected Anomalies",
+            labels={"color":"Anomaly (1 = Yes)"}
+        ),
         use_container_width=True
     )
 
