@@ -103,7 +103,7 @@ st.markdown(f"""
 # =========================================================
 # CONSTANTS
 # =========================================================
-DEFAULT_URL = "PASTE_YOUR_GITHUB_RAW_DATASET_URL_HERE"
+DEFAULT_URL = "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/datasets/ev/charging_station_fault_data.csv"
 
 REQUIRED_COLS = [
     "charger_id","timestamp","voltage","current",
