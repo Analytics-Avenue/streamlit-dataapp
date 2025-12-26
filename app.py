@@ -132,6 +132,9 @@ and optimize battery storage using advanced energy data analytics and ML models.
     "Transportation Analytics": """Optimize routes, predict arrival times, improve vehicle health, 
 and enhance driver safety using advanced mobility analytics and ML-driven fleet intelligence.""",
 
+    "EV & Battery Analytics": """Monitor electric vehicle performance, optimize battery health, 
+predict failures, and improve energy efficiency using advanced analytics and AI-driven insights.""",
+
     "Gen AI": """AI-powered automation, NLP, multimodal intelligence, document processing, and real-time reasoning.
 Use advanced LLMs, RAG, transformers, and generative workflows to solve business problems across domains."""
 }
@@ -153,6 +156,8 @@ sector_tools = {
                         "IoT Sensor Data", "Weather API Integration"],
     "Transportation Analytics": ["Python", "SQL", "Excel", "Power BI", "Tableau", "Routing Algorithms", 
                         "Time Series Models", "GeoSpatial Analytics", "Anomaly Detection", "Predictive Maintenance", "Telemetry Analytics"],
+    "EV & Battery Analytics": ["Python", "SQL", "Power BI", "Tableau", "Time Series Analysis", 
+                        "Battery Analytics", "Predictive Maintenance", "IoT Sensor Data", "Anomaly Detection", "Machine Learning"],
     "Gen AI": ["Python","Transformers","RAG","NLP","LLMs","Vector DB","Streamlit","OpenAI API"]
 }
 
@@ -214,6 +219,10 @@ sectors = {
     {"name": "Estimated Time of Arrival (ETA) Prediction", "page": "Transportation_2.py"},
     {"name": "Predictive Maintenance for Vehicles", "page": "Transportation_3.py"},
     {"name": "Driver Behaviour & Safety Analytics", "page": "Transportation_4.py"}
+    ],
+    "EV & Battery Analytics": [
+    {"name": "EV Dynamic Range Prediction & Anxiety Reduction Lab", "page": "ev_1.py"},
+    {"name": "EV Charging Station Fault Detection Lab", "page": "ev_2.py"},
     ],
     "Gen AI": [
         {"name":"Intelligent Document Processing (IDP)","page":"https://gen-ai-idp-app-demo-master-autwyi4e468j7z5jzgpvyx.streamlit.app/"},
@@ -455,6 +464,18 @@ else:
             "tools": ["Python", "Pattern Recognition", "GPS Sensor Data", "Dashboards", "Safety Scoring"]
         }
     ],
+
+        "EV & Battery Analytics": [{
+        "overview": "Analyze battery health metrics such as SOC, SOH, voltage, and temperature to 
+        detect degradation patterns and extend battery lifespan.",
+        "tools": ["Python", "Battery Analytics", "Time Series", "Predictive Modeling", "Power BI"]},
+        {
+        "overview": "Forecast EV charging demand using usage patterns, peak hours, and grid conditions 
+        to optimize charging infrastructure and reduce load stress.",
+        "tools": ["Python", "Forecasting Models", "Energy Data", "Time Series Analysis"]
+        }
+    ],
+
         "Gen AI": [
             {"overview": "Process documents intelligently using OCR, LLM reasoning, entity extraction, and workflow automation.",
              "tools": ["Python","OCR","Transformers","LLMs","Vector DB"]},
