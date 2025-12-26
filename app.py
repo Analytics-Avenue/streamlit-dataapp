@@ -242,6 +242,7 @@ thumb_urls = {
     "Supply Chain Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/supply_chain_thumb.jpeg",
     "Solar Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/Solar.jpeg",
     "Transportation Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/Transportation.jpeg",
+    "EV & Battery Analytics": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/Transportation.jpeg",
     "Gen AI": "https://raw.githubusercontent.com/Analytics-Avenue/streamlit-dataapp/main/assets/gen_ai_thumb.jpeg",
 }
 
@@ -465,12 +466,13 @@ else:
         }
     ],
 
-        "EV & Battery Analytics": [{
-        """overview": "Analyze battery health metrics such as SOC, SOH, voltage, and temperature to 
+        "EV & Battery Analytics": [
+        {
+        "overview": """Analyze battery health metrics such as SOC, SOH, voltage, and temperature to 
         detect degradation patterns and extend battery lifespan.""",
         "tools": ["Python", "Battery Analytics", "Time Series", "Predictive Modeling", "Power BI"]},
         {
-        """overview": "Forecast EV charging demand using usage patterns, peak hours, and grid conditions 
+        "overview": """Forecast EV charging demand using usage patterns, peak hours, and grid conditions 
         to optimize charging infrastructure and reduce load stress.""",
         "tools": ["Python", "Forecasting Models", "Energy Data", "Time Series Analysis"]
         }
