@@ -8,6 +8,32 @@ st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
 
+def inject_css():
+    st.markdown("""
+    <style>
+    /* Hide Streamlit top-right menu */
+    header [data-testid="stToolbar"] {
+        visibility: hidden;
+        height: 0px;
+    }
+
+    /* Hide hamburger menu */
+    #MainMenu {
+        visibility: hidden;
+    }
+
+    /* Hide footer */
+    footer {
+        visibility: hidden;
+    }
+
+    /* Hide deploy / fork buttons */
+    a[href*="github"],
+    a[href*="streamlit.io"] {
+        display: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Company Logo + Name
