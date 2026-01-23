@@ -7,6 +7,19 @@ import streamlit as st
 st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
 st.markdown("""<style>[data-testid="stSidebarNav"]{display:none;}</style>""", unsafe_allow_html=True)
 
+st.set_page_config(page_title="Data Analytics Solutions", layout="wide")
+
+inject_css()
+
+st.markdown("""
+<style>
+[data-testid="stSidebarNav"],
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 def inject_css():
     st.markdown("""
