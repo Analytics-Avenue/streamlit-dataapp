@@ -24,7 +24,7 @@ section[data-testid="stSidebar"] {display: none;}
 # ---------------------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------------------
-st.set_page_config(page_title="Order-to-Delivery Analytics Lab", layout="wide")
+#st.set_page_config(page_title="Order-to-Delivery Analytics Lab", layout="wide")
 
 # ---------------------------------------------------------
 # LOGO + HEADER
