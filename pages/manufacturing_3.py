@@ -24,10 +24,9 @@ section[data-testid="stSidebar"] {display: none;}
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
-st.set_page_config(
-    page_title="Inventory Pileup & Shortage Analytics Lab",
-    layout="wide"
-)
+#st.set_page_config(
+    #layout="wide"
+#)
 
 # -------------------------
 # LOGO + HEADER
